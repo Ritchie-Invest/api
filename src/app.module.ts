@@ -12,9 +12,7 @@ import { UserRepository } from './core/domain/repository/user.repository';
 
 @Module({
   imports: [JwtModule.register({})],
-  controllers: [
-    UserController
-  ],
+  controllers: [UserController],
   providers: [
     PrismaService,
     JwtService,
