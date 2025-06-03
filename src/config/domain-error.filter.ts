@@ -34,14 +34,10 @@ export class DomainErrorFilter implements ExceptionFilter {
     ) {
       return HttpStatus.BAD_REQUEST;
     }
-    if (
-      exception instanceof UserNotFoundError
-    ) {
+    if (exception instanceof UserNotFoundError) {
       return HttpStatus.NOT_FOUND;
     }
-    if (
-      exception instanceof UserAlreadyExistsError
-    ) {
+    if (exception instanceof UserAlreadyExistsError) {
       return HttpStatus.CONFLICT;
     }
     return HttpStatus.INTERNAL_SERVER_ERROR;
