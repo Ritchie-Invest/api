@@ -4,7 +4,7 @@ import { DomainErrorFilter } from './config/domain-error.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 import { ValidationPipe } from '@nestjs/common';
-import { RolesGuard } from './adapters/api/guards/roles.guard'; // 👈 Importe ton guard
+import { RolesGuard } from './adapters/api/guards/roles.guard';
 import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './adapters/api/guards/jwt-auth.guard';
 
