@@ -9,6 +9,7 @@ import { PrismaUserRepository } from './adapters/prisma/prisma-user.repository';
 import { TokenService } from './core/domain/service/token.service';
 import { UserController } from './adapters/api/controller/auth.controller';
 import { UserRepository } from './core/domain/repository/user.repository';
+import { UpdateUserTypeUseCase } from './core/usecases/update-user-type.use-case';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -30,6 +31,12 @@ import { UserRepository } from './core/domain/repository/user.repository';
       provide: CreateUserUseCase,
       useFactory: (userRepository: UserRepository) =>
         new CreateUserUseCase(userRepository),
+      inject: [UserRepository],
+    },
+    {
+      provide: UpdateUserTypeUseCase,
+      useFactory: (userRepository: UserRepository) =>
+        new UpdateUserTypeUseCase(userRepository),
       inject: [UserRepository],
     },
     {
