@@ -31,6 +31,8 @@ export class PrismaUserMapper implements EntityMapper<User, UserEntity> {
 
   private mapUserTypeToDomain(type: $Enums.UserType): UserType {
     switch (type) {
+      case 'SUPERADMIN':
+        return UserType.SUPERADMIN;
       case 'ADMIN':
         return UserType.ADMIN;
       case 'STUDENT':

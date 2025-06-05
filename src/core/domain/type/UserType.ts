@@ -1,4 +1,5 @@
 export enum UserType {
-  STUDENT = 'STUDENT',
+  SUPERADMIN = 'SUPERADMIN',
   ADMIN = 'ADMIN',
+  STUDENT = 'STUDENT',
 }
