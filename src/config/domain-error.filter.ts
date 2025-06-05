@@ -9,6 +9,7 @@ import { UserNotFoundError } from '../core/domain/error/UserNotFoundError';
 import { UserAlreadyExistsError } from '../core/domain/error/UserAlreadyExistsError';
 import { WrongEmailFormatError } from '../core/domain/error/WrongEmailFormatError';
 import { WrongPasswordFormatError } from '../core/domain/error/WrongPasswordFormatError';
+import { UserNotAllowedError } from '../core/domain/error/UserNotAllowedError';
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
@@ -39,6 +40,9 @@ export class DomainErrorFilter implements ExceptionFilter {
     }
     if (exception instanceof UserAlreadyExistsError) {
       return HttpStatus.CONFLICT;
+    }
+    if (exception instanceof UserNotAllowedError) {
+      return HttpStatus.FORBIDDEN;
     }
     return HttpStatus.INTERNAL_SERVER_ERROR;
   }
