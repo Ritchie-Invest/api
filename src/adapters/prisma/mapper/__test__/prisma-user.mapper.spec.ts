@@ -7,6 +7,7 @@ describe('PrismaUserMapper', () => {
   const mapper = new PrismaUserMapper();
 
   const userTypeMappings: { domain: UserType; prisma: $Enums.UserType }[] = [
+    { domain: UserType.SUPERADMIN, prisma: $Enums.UserType.SUPERADMIN },
     { domain: UserType.ADMIN, prisma: $Enums.UserType.ADMIN },
     { domain: UserType.STUDENT, prisma: $Enums.UserType.STUDENT },
   ];

@@ -14,8 +14,9 @@ datasource db {
 }
 
 enum UserType {
-  STUDENT
+  SUPERADMIN
   ADMIN
+  STUDENT
 }
 
 model User {
