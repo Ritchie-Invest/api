@@ -10,6 +10,11 @@ import { TokenService } from './core/domain/service/token.service';
 import { UserController } from './adapters/api/controller/auth.controller';
 import { UserRepository } from './core/domain/repository/user.repository';
 import { UpdateUserTypeUseCase } from './core/usecases/update-user-type.use-case';
+import { CreateChapterUseCase } from './core/usecases/create-chapter.use-case';
+import { ChapterRepository } from './core/domain/repository/chapter.repository';
+import { PrismaChapterRepository } from './adapters/prisma/prisma-chapter.repository';
+import { UpdateChapterUseCase } from './core/usecases/update-chapter.use-case';
+import { GetChapterByIdUseCase } from './core/usecases/get-chapter-by-id.use-case';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -25,6 +30,12 @@ import { UpdateUserTypeUseCase } from './core/usecases/update-user-type.use-case
     {
       provide: UserRepository,
       useFactory: (prisma: PrismaService) => new PrismaUserRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: ChapterRepository,
+      useFactory: (prisma: PrismaService) =>
+        new PrismaChapterRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -46,6 +57,24 @@ import { UpdateUserTypeUseCase } from './core/usecases/update-user-type.use-case
         tokenService: TokenService,
       ) => new LoginUseCase(userRepository, tokenService),
       inject: [UserRepository, 'TokenService'],
+    },
+    {
+      provide: CreateChapterUseCase,
+      useFactory: (chapterRepository: ChapterRepository) =>
+        new CreateChapterUseCase(chapterRepository),
+      inject: [ChapterRepository],
+    },
+    {
+      provide: UpdateChapterUseCase,
+      useFactory: (chapterRepository: ChapterRepository) =>
+        new UpdateChapterUseCase(chapterRepository),
+      inject: [ChapterRepository],
+    },
+    {
+      provide: GetChapterByIdUseCase,
+      useFactory: (chapterRepository: ChapterRepository) =>
+        new GetChapterByIdUseCase(chapterRepository),
+      inject: [ChapterRepository],
     },
   ],
 })

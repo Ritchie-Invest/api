@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Param, Patch } from '@nestjs/common';
 import { UpdateUserTypeRequest } from '../request/update-user-type.request';
 import { UpdateUserTypeUseCase } from '../../../core/usecases/update-user-type.use-case';
 import { UpdateUserTypeMapper } from '../mapper/update-user-type.mapper';
@@ -17,11 +17,11 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 
-@Controller('/user')
+@Controller('/users')
 export class UserController {
   constructor(private readonly updateUserTypeUseCase: UpdateUserTypeUseCase) {}
 
-  @Post('/update')
+  @Patch('/:userId')
   @Roles(UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Update a user type' })
   @ApiCreatedResponse({
