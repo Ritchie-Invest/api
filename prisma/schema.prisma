@@ -14,12 +14,22 @@ enum UserType {
 }
 
 model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  password       String
+  type           UserType       @default(STUDENT)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  refresh_tokens RefreshToken[]
+}
+
+model RefreshToken {
   id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  type      UserType @default(STUDENT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  token     String   @unique
+  expiresAt DateTime @default(dbgenerated("now() + interval '7 days'"))
+  userId    String
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Chapter {
