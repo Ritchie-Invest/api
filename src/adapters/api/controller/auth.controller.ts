@@ -1,14 +1,16 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { CreateUserUseCase } from '../../../core/usecases/create-user.use-case';
 import { LoginUseCase } from '../../../core/usecases/login.use-case';
+import { LogoutUseCase } from '../../../core/usecases/logout.use-case';
+import { RefreshUseCase } from '../../../core/usecases/refresh.use-case';
 import { CreateUserRequest } from '../request/create-user.request';
-import { User } from '../../../core/domain/model/User';
-import { UserMapper } from '../mapper/user.mapper';
-import { LoginMapper } from '../mapper/login.mapper';
-import { LoginResponse } from '../response/create-user.response';
-import { CurrentUser } from '../decorator/current-user.decorator';
-import { ProfileMapper } from '../mapper/profile.mapper';
 import { ProfileRequest } from '../request/profile.request';
+import { LoginResponse } from '../response/login.response';
+import { UserMapper } from '../mapper/user.mapper';
+import { LogoutMapper } from '../mapper/logout.mapper';
+import { User } from '../../../core/domain/model/User';
+import { CurrentUser } from '../decorator/current-user.decorator';
+import { Public } from '../decorator/public.decorator';
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
@@ -18,13 +20,14 @@ import {
   ApiOkResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Public } from '../decorator/public.decorator';
 
 @Controller('/auth')
 export class UserController {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly loginUseCase: LoginUseCase,
+    private readonly logoutUseCase: LogoutUseCase,
+    private readonly refreshUseCase: RefreshUseCase,
   ) {}
 
   @Public()
@@ -61,13 +64,31 @@ export class UserController {
   })
   async login(@Body() body: CreateUserRequest): Promise<LoginResponse> {
     const command = UserMapper.toDomain(body);
-    const token = await this.loginUseCase.execute(command);
-    return LoginMapper.fromDomain(token);
+    return await this.loginUseCase.execute(command);
   }
 
-  @Get('/me')
+  @Post('/logout')
+  @ApiCreatedResponse({
+    description: 'User successfully logged out',
+    type: LoginResponse,
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found or invalid credentials',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error',
+  })
+  async logout(
+    @CurrentUser() currentUser: ProfileRequest,
+    @Body('refreshToken') refreshToken: string,
+  ): Promise<void> {
+    const command = LogoutMapper.toDomain(currentUser, refreshToken);
+    return this.logoutUseCase.execute(command);
+  }
+
+  @Post('/refresh')
   @ApiOkResponse({
-    description: 'User profile retrieved successfully',
+    description: 'User token refreshed successfully',
   })
   @ApiInternalServerErrorResponse({
     description: 'Internal server error',
@@ -75,7 +96,7 @@ export class UserController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized access',
   })
-  getMe(@CurrentUser() user: ProfileRequest): ProfileRequest {
-    return ProfileMapper.fromDomain(user);
+  async refresh(@Body('refreshToken') token: string): Promise<LoginResponse> {
+    return this.refreshUseCase.execute({ token });
   }
 }

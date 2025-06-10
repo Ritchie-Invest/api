@@ -1,25 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { TokenService } from '../../core/domain/service/token.service';
 import { JwtService } from '@nestjs/jwt';
-import { ProfileRequest } from '../api/request/profile.request';
+import { UserType } from '../../core/domain/type/UserType';
+
+export type TokenPayload = {
+  id: string;
+  email: string;
+  type: UserType;
+};
 
 @Injectable()
-export class JwtServiceAdapter implements TokenService {
-  private readonly secret = process.env.JWT_SECRET || 'default_secret';
-  private readonly expiresIn = '1h';
+export class JwtServiceAdapter {
+  private readonly accessSecret =
+    process.env.JWT_ACCESS_SECRET || 'default_access_secret';
+  private readonly refreshSecret =
+    process.env.JWT_REFRESH_SECRET || 'default_refresh_secret';
+  private readonly accessExpiresIn = '15m';
+  private readonly refreshExpiresIn = '7d';
 
   constructor(private readonly jwtService: JwtService) {}
 
-  generateToken(payload: Record<string, any>): string {
+  generateAccessToken(payload: TokenPayload): string {
     return this.jwtService.sign(payload, {
-      secret: this.secret,
-      expiresIn: this.expiresIn,
+      secret: this.accessSecret,
+      expiresIn: this.accessExpiresIn,
     });
   }
 
-  verifyToken(token: string): ProfileRequest {
+  generateRefreshToken(payload: TokenPayload): string {
+    return this.jwtService.sign(payload, {
+      secret: this.refreshSecret,
+      expiresIn: this.refreshExpiresIn,
+    });
+  }
+
+  verifyAccessToken(token: string): TokenPayload {
     return this.jwtService.verify(token, {
-      secret: this.secret,
+      secret: this.accessSecret,
+    });
+  }
+
+  verifyRefreshToken(token: string): TokenPayload {
+    return this.jwtService.verify(token, {
+      secret: this.refreshSecret,
     });
   }
 }

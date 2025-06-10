@@ -15,6 +15,7 @@ import { ChapterRepository } from './core/domain/repository/chapter.repository';
 import { PrismaChapterRepository } from './adapters/prisma/prisma-chapter.repository';
 import { UpdateChapterUseCase } from './core/usecases/update-chapter.use-case';
 import { GetChapterByIdUseCase } from './core/usecases/get-chapter-by-id.use-case';
+import { RefreshTokenRepository } from './core/domain/repository/refresh-token.repository';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -55,7 +56,9 @@ import { GetChapterByIdUseCase } from './core/usecases/get-chapter-by-id.use-cas
       useFactory: (
         userRepository: UserRepository,
         tokenService: TokenService,
-      ) => new LoginUseCase(userRepository, tokenService),
+        refreshTokenRepository: RefreshTokenRepository,
+      ) =>
+        new LoginUseCase(userRepository, refreshTokenRepository, tokenService),
       inject: [UserRepository, 'TokenService'],
     },
     {
