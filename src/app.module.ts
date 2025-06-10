@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-
 import { CreateUserUseCase } from './core/usecases/create-user.use-case';
 import { JwtServiceAdapter } from './adapters/jwt/jwt.service';
 import { LoginUseCase } from './core/usecases/login.use-case';
@@ -24,6 +23,8 @@ import { GetUnitsByChapterUseCase } from './core/usecases/get-units-by-chapter.u
 import { ChapterController } from './adapters/api/controller/chapter.controller';
 import { UnitController } from './adapters/api/controller/unit.controller';
 import { GetChaptersUseCase } from './core/usecases/get-chapters.use-case';
+import { RefreshTokenRepository } from './core/domain/repository/refresh-token.repository';
+
 @Module({
   imports: [JwtModule.register({})],
   controllers: [UserController, ChapterController, UnitController],
@@ -69,7 +70,9 @@ import { GetChaptersUseCase } from './core/usecases/get-chapters.use-case';
       useFactory: (
         userRepository: UserRepository,
         tokenService: TokenService,
-      ) => new LoginUseCase(userRepository, tokenService),
+        refreshTokenRepository: RefreshTokenRepository,
+      ) =>
+        new LoginUseCase(userRepository, refreshTokenRepository, tokenService),
       inject: [UserRepository, 'TokenService'],
     },
     {

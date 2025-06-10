@@ -10,6 +10,7 @@ import { UserAlreadyExistsError } from '../core/domain/error/UserAlreadyExistsEr
 import { WrongEmailFormatError } from '../core/domain/error/WrongEmailFormatError';
 import { WrongPasswordFormatError } from '../core/domain/error/WrongPasswordFormatError';
 import { UserNotAllowedError } from '../core/domain/error/UserNotAllowedError';
+import { TokenInvalidOrExpiredError } from '../core/domain/error/TokenInvalidOrExpiredError';
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
@@ -43,6 +44,9 @@ export class DomainErrorFilter implements ExceptionFilter {
     }
     if (exception instanceof UserNotAllowedError) {
       return HttpStatus.FORBIDDEN;
+    }
+    if (exception instanceof TokenInvalidOrExpiredError) {
+      return HttpStatus.UNAUTHORIZED;
     }
     return HttpStatus.INTERNAL_SERVER_ERROR;
   }
