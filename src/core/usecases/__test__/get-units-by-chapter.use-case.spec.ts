@@ -1,0 +1,127 @@
+import { UnitRepository } from '../../domain/repository/unit.repository';
+import { InMemoryUnitRepository } from '../../../adapters/in-memory/in-memory-unit.repository';
+import { User } from '../../domain/model/User';
+import { UserType } from '../../domain/type/UserType';
+import { GetUnitsByChapterUseCase, GetUnitsByChapterCommand } from '../get-units-by-chapter.use-case';
+
+describe('GetUnitsByChapterUseCase', () => {
+  let unitRepository: UnitRepository;
+  let getUnitsUseCase: GetUnitsByChapterUseCase;
+
+  beforeEach(async () => {
+    unitRepository = new InMemoryUnitRepository();
+    getUnitsUseCase = new GetUnitsByChapterUseCase(unitRepository);
+
+    await unitRepository.removeAll();
+    await unitRepository.create({
+      id: 'unit-id',
+      title: 'Un super chapitre',
+      description: 'Ceci est un super chapitre',
+      chapterId: 'some-chapter-id',
+    });
+    await unitRepository.create({
+      id: 'another-unit-id',
+      title: 'Un autre super chapitre',
+      description: 'Ceci est un autre super chapitre',
+      chapterId: 'some-chapter-id',
+    });
+    await unitRepository.create({
+      id: 'third-unit-id',
+      title: 'Chapitre différent',
+      description: 'Ceci est un chapitre différent',
+      chapterId: 'other-chapter-id',
+    });
+  });
+
+  it('should return created unit', async () => {
+    const command: GetUnitsByChapterCommand = {
+      currentUser: getCurrentUser(),
+      chapterId: 'some-chapter-id',
+    };
+
+    const units = await getUnitsUseCase.execute(command);
+
+    const storedUnits = await unitRepository.findAll();
+    expect(units.length).toEqual(2);
+    expect(units[0]).toEqual({
+      id: expect.any(String),
+      title: 'Un super chapitre',
+      description: 'Ceci est un super chapitre',
+      chapterId: 'some-chapter-id',
+      is_published: false,
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date),
+    });
+    expect(units[1]).toEqual({
+      id: expect.any(String),
+      title: 'Un autre super chapitre',
+      description: 'Ceci est un autre super chapitre',
+      chapterId: 'some-chapter-id',
+      is_published: false,
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date),
+    });
+    expect(storedUnits[0]).toEqual({
+      id: units[0]?.id,
+      title: 'Un super chapitre',
+      description: 'Ceci est un super chapitre',
+      chapterId: 'some-chapter-id',
+      is_published: false,
+      createdAt: units[0]?.createdAt,
+      updatedAt: units[0]?.updatedAt,
+    });
+    expect(storedUnits[1]).toEqual({
+      id: units[1]?.id,
+      title: 'Un autre super chapitre',
+      description: 'Ceci est un autre super chapitre',
+      chapterId: 'some-chapter-id',
+      is_published: false,
+      createdAt: units[1]?.createdAt,
+      updatedAt: units[1]?.updatedAt,
+    });
+  });
+
+  it('should throw an error if user is not admin', async () => {
+    const command: GetUnitsByChapterCommand = {
+      currentUser: {
+        id: 'user-id',
+        type: UserType.STUDENT,
+      },
+      chapterId: 'some-chapter-id',
+    };
+
+    await expect(getUnitsUseCase.execute(command)).rejects.toThrow(
+      'Unauthorized: Only admins can get units',
+    );
+  });
+
+  it('should return empty array if no units for chapter', async () => {
+    const command: GetUnitsByChapterCommand = {
+      currentUser: getCurrentUser(),
+      chapterId: 'non-existent-chapter',
+    };
+
+    const units = await getUnitsUseCase.execute(command);
+    expect(units).toEqual([]);
+  });
+
+  it('should only return units for the specified chapter', async () => {
+    const command: GetUnitsByChapterCommand = {
+      currentUser: getCurrentUser(),
+      chapterId: 'other-chapter-id',
+    };
+
+    const units = await getUnitsUseCase.execute(command);
+    expect(units.length).toBe(1);
+    expect(units[0]?.title).toBe('Chapitre différent');
+    expect(units[0]?.chapterId).toBe('other-chapter-id');
+  });
+
+  function getCurrentUser(): Pick<User, 'id' | 'type'> {
+    return {
+      id: 'admin-id',
+      type: UserType.ADMIN,
+    };
+  }
+}
+);

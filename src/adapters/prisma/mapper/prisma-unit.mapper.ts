@@ -1,28 +1,30 @@
 import { EntityMapper } from '../../../core/base/entity-mapper';
-import { Chapter } from '../../../core/domain/model/Chapter';
-import { Chapter as ChapterEntity } from '@prisma/client';
+import { Unit } from '../../../core/domain/model/Unit';
+import { Unit as UnitEntity } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class PrismaChapterMapper
-  implements EntityMapper<Chapter, ChapterEntity>
+export class PrismaUnitMapper
+  implements EntityMapper<Unit, UnitEntity>
 {
-  fromDomain(model: Chapter): ChapterEntity {
+  fromDomain(model: Unit): UnitEntity {
     return {
       id: model.id,
       title: model.title,
       description: model.description,
+      chapterId: model.chapterId,
       is_published: model.is_published,
       updatedAt: model.updatedAt,
       createdAt: model.createdAt,
     };
   }
 
-  toDomain(entity: ChapterEntity): Chapter {
+  toDomain(entity: UnitEntity): Unit {
     return {
       id: entity.id,
       title: entity.title,
       description: entity.description,
+      chapterId: entity.chapterId,
       is_published: entity.is_published,
       updatedAt: entity.updatedAt,
       createdAt: entity.createdAt,

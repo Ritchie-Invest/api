@@ -24,7 +24,7 @@ export class CreateChapterMapper {
       id: chapter.id,
       title: chapter.title,
       description: chapter.description,
-      is_published: chapter.isPublished,
+      is_published: chapter.is_published,
       createdAt: chapter.createdAt,
       updatedAt: chapter.updatedAt,
     };

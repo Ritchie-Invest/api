@@ -45,7 +45,7 @@ describe('GetChaptersUseCase', () => {
       id: expect.any(String),
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
-      isPublished: false,
+      is_published: false,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       createdAt: expect.any(Date),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -56,7 +56,7 @@ describe('GetChaptersUseCase', () => {
       id: expect.any(String),
       title: 'Un autre super chapitre',
       description: 'Ceci est un autre super chapitre',
-      isPublished: false,
+      is_published: false,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       createdAt: expect.any(Date),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -66,7 +66,7 @@ describe('GetChaptersUseCase', () => {
       id: chapters[0]?.id,
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
-      isPublished: false,
+      is_published: false,
       createdAt: chapters[0]?.createdAt,
       updatedAt: chapters[0]?.updatedAt,
     });
@@ -74,7 +74,7 @@ describe('GetChaptersUseCase', () => {
       id: chapters[1]?.id,
       title: 'Un autre super chapitre',
       description: 'Ceci est un autre super chapitre',
-      isPublished: false,
+      is_published: false,
       createdAt: chapters[1]?.createdAt,
       updatedAt: chapters[1]?.updatedAt,
     });

@@ -10,8 +10,8 @@ export type UpdateChapterCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
   chapterId: string;
   title?: string;
-  description?: string;
-  isPublished?: boolean;
+  description: string;
+  is_published?: boolean;
 };
 
 export class UpdateChapterUseCase
@@ -37,7 +37,7 @@ export class UpdateChapterUseCase
       currentChapter.id,
       title ?? currentChapter.title,
       description ?? currentChapter.description,
-      command.isPublished ?? currentChapter.isPublished,
+      command.is_published ?? currentChapter.is_published,
     );
 
     const updatedChapter = await this.chapterRepository.update(

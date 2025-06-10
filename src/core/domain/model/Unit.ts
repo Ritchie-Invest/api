@@ -1,8 +1,9 @@
 import { DomainModel } from '../../base/domain-model';
 
-export class Chapter extends DomainModel {
+export class Unit extends DomainModel {
   title: string;
   description: string;
+  chapterId: string;
   is_published: boolean;
   updatedAt: Date;
   createdAt: Date;
@@ -11,6 +12,7 @@ export class Chapter extends DomainModel {
     id: string,
     title: string,
     description: string,
+    chapterId: string,
     is_published: boolean = false,
     updatedAt?: Date,
     createdAt?: Date,
@@ -18,7 +20,7 @@ export class Chapter extends DomainModel {
     super(id);
 
     if (!title) {
-      throw new Error('Title is required');
+      throw new Error('Name is required');
     }
 
     if (!description) {
@@ -27,8 +29,9 @@ export class Chapter extends DomainModel {
 
     this.title = title;
     this.description = description;
+    this.chapterId = chapterId;
     this.is_published = is_published;
-    this.updatedAt = updatedAt || new Date();
-    this.createdAt = createdAt || new Date();
+    this.updatedAt = updatedAt  || new Date();;
+    this.createdAt = createdAt  || new Date();;
   }
 }

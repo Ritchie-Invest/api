@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsString } from 'class-validator';
 
-export class UpdateChapterRequest {
+export class UpdateUnitRequest {
   @ApiProperty()
   @IsString()
   title: string;
