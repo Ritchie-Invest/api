@@ -17,9 +17,7 @@ export class GetUnitsByChapterUseCase
 
   async execute(command: GetUnitsByChapterCommand): Promise<Unit[]> {
     if (!this.canExecute(command.currentUser)) {
-      throw new UserNotAllowedError(
-        'Unauthorized: Only admins can get units',
-      );
+      throw new UserNotAllowedError('Unauthorized: Only admins can get units');
     }
 
     return this.unitRepository.findByChapter(command.chapterId);

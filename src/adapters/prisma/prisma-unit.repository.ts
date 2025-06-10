@@ -52,8 +52,8 @@ export class PrismaUnitRepository implements UnitRepository {
   removeAll(): Promise<void> | void {
     throw new Error('Method not implemented.');
   }
-  
-  async findAll(filter?: Partial<Unit>): Promise<Unit[]> {
+
+  findAll(): Promise<Unit[]> {
     throw new Error('Method not implemented.');
   }
 }

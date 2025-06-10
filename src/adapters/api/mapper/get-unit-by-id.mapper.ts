@@ -22,7 +22,7 @@ export class GetUnitByIdMapper {
       id: unit.id,
       title: unit.title,
       description: unit.description,
-      chapterId	: unit.chapterId,
+      chapterId: unit.chapterId,
       is_published: unit.is_published,
       createdAt: unit.createdAt,
       updatedAt: unit.updatedAt,

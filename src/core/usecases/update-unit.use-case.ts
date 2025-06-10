@@ -14,9 +14,7 @@ export type UpdateUnitCommand = {
   is_published?: boolean;
 };
 
-export class UpdateUnitUseCase
-  implements UseCase<UpdateUnitCommand, Unit>
-{
+export class UpdateUnitUseCase implements UseCase<UpdateUnitCommand, Unit> {
   constructor(private readonly unitRepository: UnitRepository) {}
 
   async execute(command: UpdateUnitCommand): Promise<Unit> {
@@ -40,10 +38,7 @@ export class UpdateUnitUseCase
       String(command.is_published ?? currentUnit.is_published),
     );
 
-    const updatedUnit = await this.unitRepository.update(
-      unitId,
-      unit,
-    );
+    const updatedUnit = await this.unitRepository.update(unitId, unit);
     if (!updatedUnit) {
       throw new UnitNotFoundError(unitId);
     }

@@ -7,7 +7,12 @@ export class InMemoryUnitRepository implements UnitRepository {
   private units: Map<string, Unit> = new Map();
 
   create(data: Pick<Unit, 'id' | 'title' | 'description' | 'chapterId'>): Unit {
-    const unit = new Unit(data.id, data.title, data.description, data.chapterId);
+    const unit = new Unit(
+      data.id,
+      data.title,
+      data.description,
+      data.chapterId,
+    );
     this.units.set(unit.id, unit);
     return unit;
   }
@@ -37,7 +42,10 @@ export class InMemoryUnitRepository implements UnitRepository {
   }
 
   findByChapter(chapterId: string): Promise<Unit[]> {
-    return Promise.resolve(Array.from(this.units.values()).filter(unit => unit.chapterId === chapterId));
+    return Promise.resolve(
+      Array.from(this.units.values()).filter(
+        (unit) => unit.chapterId === chapterId,
+      ),
+    );
   }
- 
 }

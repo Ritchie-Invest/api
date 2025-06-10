@@ -3,7 +3,7 @@ import { CreateUnitCommand } from '../create-unit';
 import { UnitRepository } from '../../domain/repository/unit.repository';
 import { UserType } from '../../domain/type/UserType';
 import { UserNotAllowedError } from '../../domain/error/UserNotAllowedError';
-import {Unit} from '../../domain/model/Unit';
+import { Unit } from '../../domain/model/Unit';
 
 describe('CreateUnitUseCase', () => {
   let useCase: CreateUnitUseCase;
@@ -12,7 +12,13 @@ describe('CreateUnitUseCase', () => {
   beforeEach(() => {
     unitRepository = {
       create: jest.fn(),
-    } as any;
+      findByChapter: jest.fn(),
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      update: jest.fn(),
+      remove: jest.fn(),
+      removeAll: jest.fn(),
+    } as jest.Mocked<UnitRepository>;
     useCase = new CreateUnitUseCase(unitRepository);
   });
 
@@ -23,7 +29,7 @@ describe('CreateUnitUseCase', () => {
       description: 'Description',
       chapterId: 'chapter-1',
     };
-    unitRepository.create.mockImplementation(async (data: Partial<Unit>) => {
+    unitRepository.create.mockImplementation((data: Partial<Unit>) => {
       return {
         id: 'unit-id',
         title: data.title ?? '',
@@ -40,6 +46,7 @@ describe('CreateUnitUseCase', () => {
     expect(result.title).toBe(command.title);
     expect(result.description).toBe(command.description);
     expect(result.chapterId).toBe(command.chapterId);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(unitRepository.create).toHaveBeenCalledWith(expect.any(Unit));
   });
 
@@ -52,6 +59,7 @@ describe('CreateUnitUseCase', () => {
     };
 
     await expect(useCase.execute(command)).rejects.toThrow(UserNotAllowedError);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(unitRepository.create).not.toHaveBeenCalled();
   });
 });

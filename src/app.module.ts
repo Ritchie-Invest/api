@@ -48,9 +48,8 @@ import { RefreshTokenRepository } from './core/domain/repository/refresh-token.r
       inject: [PrismaService],
     },
     {
-      provide : UnitRepository,
-      useFactory: (prisma: PrismaService) => 
-        new PrismaUnitRepository(prisma),
+      provide: UnitRepository,
+      useFactory: (prisma: PrismaService) => new PrismaUnitRepository(prisma),
       inject: [PrismaService],
     },
     {

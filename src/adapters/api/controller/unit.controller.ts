@@ -28,40 +28,40 @@ import { GetUnitsByChapterMapper } from '../mapper/get-units-by-chapter.mapper';
 
 @Controller('/units')
 export class UnitController {
-constructor(
+  constructor(
     private readonly getUnitsByChapterUseCase: GetUnitsByChapterUseCase,
     private readonly createUnitUseCase: CreateUnitUseCase,
     private readonly getUnitByIdUseCase: GetUnitByIdUseCase,
     private readonly updateUnitUseCase: UpdateUnitUseCase,
-) {}
+  ) {}
 
-@Get('/chapter/:chapterId')
-@Roles(UserType.ADMIN)
-@ApiOperation({ summary: 'Get all units by chapter ID' })
-@ApiCreatedResponse({
+  @Get('/chapter/:chapterId')
+  @Roles(UserType.ADMIN)
+  @ApiOperation({ summary: 'Get all units by chapter ID' })
+  @ApiCreatedResponse({
     description: 'Units successfully retrieved',
     type: [GetUnitsByChapterResponse],
-})
-@ApiBadRequestResponse({
+  })
+  @ApiBadRequestResponse({
     description: 'Invalid request or parameters',
-})
-@ApiUnauthorizedResponse({
+  })
+  @ApiUnauthorizedResponse({
     description: 'Unauthorized access',
-})
-@ApiForbiddenResponse({
+  })
+  @ApiForbiddenResponse({
     description: 'User not allowed to get units',
-})
-@ApiInternalServerErrorResponse({
+  })
+  @ApiInternalServerErrorResponse({
     description: 'Internal server error',
-})
-async getUnitsByChapter(
+  })
+  async getUnitsByChapter(
     @CurrentUser() currentUser: ProfileRequest,
     @Param('chapterId') chapterId: string,
-): Promise<GetUnitsByChapterResponse> {
+  ): Promise<GetUnitsByChapterResponse> {
     const command = GetUnitsByChapterMapper.toDomain(currentUser, chapterId);
     const units = await this.getUnitsByChapterUseCase.execute(command);
     return GetUnitsByChapterMapper.fromDomain(units);
-}
+  }
 
   @Post('/')
   @Roles(UserType.ADMIN)
@@ -90,7 +90,6 @@ async getUnitsByChapter(
     const unit = await this.createUnitUseCase.execute(command);
     return CreateUnitMapper.fromDomain(unit);
   }
-
 
   @Get('/:unitId')
   @Roles(UserType.ADMIN)

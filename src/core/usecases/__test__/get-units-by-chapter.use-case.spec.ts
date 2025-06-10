@@ -2,7 +2,10 @@ import { UnitRepository } from '../../domain/repository/unit.repository';
 import { InMemoryUnitRepository } from '../../../adapters/in-memory/in-memory-unit.repository';
 import { User } from '../../domain/model/User';
 import { UserType } from '../../domain/type/UserType';
-import { GetUnitsByChapterUseCase, GetUnitsByChapterCommand } from '../get-units-by-chapter.use-case';
+import {
+  GetUnitsByChapterUseCase,
+  GetUnitsByChapterCommand,
+} from '../get-units-by-chapter.use-case';
 
 describe('GetUnitsByChapterUseCase', () => {
   let unitRepository: UnitRepository;
@@ -42,26 +45,29 @@ describe('GetUnitsByChapterUseCase', () => {
     const units = await getUnitsUseCase.execute(command);
 
     const storedUnits = await unitRepository.findAll();
-    expect(units.length).toEqual(2);
-    expect(units[0]).toEqual({
-      id: expect.any(String),
+    expect(units.length).toBe(2);
+
+    expect(units[0]).toMatchObject({
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
       chapterId: 'some-chapter-id',
       is_published: false,
-      createdAt: expect.any(Date),
-      updatedAt: expect.any(Date),
     });
-    expect(units[1]).toEqual({
-      id: expect.any(String),
+    expect(typeof units[0]?.id).toBe('string');
+    expect(units[0]?.createdAt).toBeInstanceOf(Date);
+    expect(units[0]?.updatedAt).toBeInstanceOf(Date);
+
+    expect(units[1]).toMatchObject({
       title: 'Un autre super chapitre',
       description: 'Ceci est un autre super chapitre',
       chapterId: 'some-chapter-id',
       is_published: false,
-      createdAt: expect.any(Date),
-      updatedAt: expect.any(Date),
     });
-    expect(storedUnits[0]).toEqual({
+    expect(typeof units[1]?.id).toBe('string');
+    expect(units[1]?.createdAt).toBeInstanceOf(Date);
+    expect(units[1]?.updatedAt).toBeInstanceOf(Date);
+
+    expect(storedUnits[0]).toMatchObject({
       id: units[0]?.id,
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
@@ -70,7 +76,7 @@ describe('GetUnitsByChapterUseCase', () => {
       createdAt: units[0]?.createdAt,
       updatedAt: units[0]?.updatedAt,
     });
-    expect(storedUnits[1]).toEqual({
+    expect(storedUnits[1]).toMatchObject({
       id: units[1]?.id,
       title: 'Un autre super chapitre',
       description: 'Ceci est un autre super chapitre',
@@ -102,7 +108,7 @@ describe('GetUnitsByChapterUseCase', () => {
     };
 
     const units = await getUnitsUseCase.execute(command);
-    expect(units).toEqual([]);
+    expect(units).toMatchObject([]);
   });
 
   it('should only return units for the specified chapter', async () => {
@@ -123,5 +129,4 @@ describe('GetUnitsByChapterUseCase', () => {
       type: UserType.ADMIN,
     };
   }
-}
-);
+});

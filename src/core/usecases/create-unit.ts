@@ -12,36 +12,26 @@ export type CreateUnitCommand = {
   chapterId: string;
 };
 
-export class CreateUnitUseCase
-  implements UseCase<CreateUnitCommand, Unit> {
-    constructor(private readonly unitRepository: UnitRepository) {}
+export class CreateUnitUseCase implements UseCase<CreateUnitCommand, Unit> {
+  constructor(private readonly unitRepository: UnitRepository) {}
 
-    async execute(command: CreateUnitCommand): Promise<Unit> {
-      if (!this.canExecute(command.currentUser)) {
-        throw new UserNotAllowedError(
-          'Unauthorized: Only admins can create units',
-        );
-    }
-      const { title, description, chapterId} = command;
-      const unit = new Unit(
-        this.generateId(),
-        title,
-        description,
-        chapterId
-       
+  async execute(command: CreateUnitCommand): Promise<Unit> {
+    if (!this.canExecute(command.currentUser)) {
+      throw new UserNotAllowedError(
+        'Unauthorized: Only admins can create units',
       );
-
-      return this.unitRepository.create(unit);
-
     }
+    const { title, description, chapterId } = command;
+    const unit = new Unit(this.generateId(), title, description, chapterId);
 
-    private canExecute(currentUser: Pick<User, 'id' | 'type'>): boolean {
-      return currentUser.type === UserType.ADMIN;
-    }
-
-    private generateId(): string {
-      return crypto.randomUUID();
-    }
-
-
+    return this.unitRepository.create(unit);
   }
+
+  private canExecute(currentUser: Pick<User, 'id' | 'type'>): boolean {
+    return currentUser.type === UserType.ADMIN;
+  }
+
+  private generateId(): string {
+    return crypto.randomUUID();
+  }
+}

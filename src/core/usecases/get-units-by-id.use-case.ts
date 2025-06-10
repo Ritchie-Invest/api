@@ -11,16 +11,12 @@ export type GetUnitByIdCommand = {
   unitId: string;
 };
 
-export class GetUnitByIdUseCase
-  implements UseCase<GetUnitByIdCommand, Unit>
-{
+export class GetUnitByIdUseCase implements UseCase<GetUnitByIdCommand, Unit> {
   constructor(private readonly unitRepository: UnitRepository) {}
 
   async execute(command: GetUnitByIdCommand): Promise<Unit> {
     if (!this.canExecute(command.currentUser)) {
-      throw new UserNotAllowedError(
-        'Unauthorized: Only admins can get units',
-      );
+      throw new UserNotAllowedError('Unauthorized: Only admins can get units');
     }
 
     const unit = await this.unitRepository.findById(command.unitId);

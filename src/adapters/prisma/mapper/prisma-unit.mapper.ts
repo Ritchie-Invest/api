@@ -4,9 +4,7 @@ import { Unit as UnitEntity } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class PrismaUnitMapper
-  implements EntityMapper<Unit, UnitEntity>
-{
+export class PrismaUnitMapper implements EntityMapper<Unit, UnitEntity> {
   fromDomain(model: Unit): UnitEntity {
     return {
       id: model.id,

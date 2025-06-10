@@ -22,8 +22,6 @@ export class CreateUnitResponse {
   @ApiProperty()
   createdAt: Date;
 
-  
-
   constructor(
     id: string,
     title: string,

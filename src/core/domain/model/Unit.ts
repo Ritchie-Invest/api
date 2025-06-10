@@ -31,7 +31,7 @@ export class Unit extends DomainModel {
     this.description = description;
     this.chapterId = chapterId;
     this.is_published = is_published;
-    this.updatedAt = updatedAt  || new Date();;
-    this.createdAt = createdAt  || new Date();;
+    this.updatedAt = updatedAt || new Date();
+    this.createdAt = createdAt || new Date();
   }
 }

@@ -4,7 +4,10 @@ import { GetUnitsByChapterCommand } from '../../../core/usecases/get-units-by-ch
 import { GetUnitsByChapterResponse } from '../response/get-units-by-chapter.response';
 
 export class GetUnitsByChapterMapper {
-  static toDomain(currentUser: ProfileRequest, chapterId: string): GetUnitsByChapterCommand {
+  static toDomain(
+    currentUser: ProfileRequest,
+    chapterId: string,
+  ): GetUnitsByChapterCommand {
     return {
       currentUser: {
         id: currentUser.id,
@@ -24,7 +27,7 @@ export class GetUnitsByChapterMapper {
         createdAt: unit.createdAt,
         updatedAt: unit.updatedAt,
         chapterId: unit.chapterId,
-      }))
+      })),
     );
   }
 }
