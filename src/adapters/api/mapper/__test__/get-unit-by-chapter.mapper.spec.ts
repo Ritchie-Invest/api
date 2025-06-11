@@ -36,17 +36,9 @@ describe('getUnitsByChapterIdMapper', () => {
     it('should map Unit[] to getUnitsByChapterIdResponse', () => {
       // Given
       const now = new Date();
-      const units = [
-        Object.assign(new Unit('unit-1', 'Unit 1', 'Desc 1', 'chapter-1'), {
-          isPublished: true,
-          createdAt: now,
-          updatedAt: now,
-        }),
-        Object.assign(new Unit('unit-2', 'Unit 2', 'Desc 2', 'chapter-1'), {
-          isPublished: false,
-          createdAt: now,
-          updatedAt: now,
-        }),
+      const units: Unit[] = [
+        new Unit('unit-1', 'Unit 1', 'Desc 1', 'chapter-1', true, now, now),
+        new Unit('unit-2', 'Unit 2', 'Desc 2', 'chapter-1', false, now, now),
       ];
 
       // When
