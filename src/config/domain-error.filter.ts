@@ -11,6 +11,8 @@ import { WrongEmailFormatError } from '../core/domain/error/WrongEmailFormatErro
 import { WrongPasswordFormatError } from '../core/domain/error/WrongPasswordFormatError';
 import { UserNotAllowedError } from '../core/domain/error/UserNotAllowedError';
 import { TokenInvalidOrExpiredError } from '../core/domain/error/TokenInvalidOrExpiredError';
+import { ChapterNotFoundError } from '../core/domain/error/ChapterNotFoundError';
+import { ChapterInvalidDataError } from '../core/domain/error/ChapterInvalidDataError';
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
@@ -32,11 +34,15 @@ export class DomainErrorFilter implements ExceptionFilter {
   private mapErrorTypeToStatusCode(exception: DomainError): number {
     if (
       exception instanceof WrongEmailFormatError ||
-      exception instanceof WrongPasswordFormatError
+      exception instanceof WrongPasswordFormatError ||
+      exception instanceof ChapterInvalidDataError
     ) {
       return HttpStatus.BAD_REQUEST;
     }
-    if (exception instanceof UserNotFoundError) {
+    if (
+      exception instanceof UserNotFoundError ||
+      exception instanceof ChapterNotFoundError
+    ) {
       return HttpStatus.NOT_FOUND;
     }
     if (exception instanceof UserAlreadyExistsError) {

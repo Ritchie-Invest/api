@@ -6,7 +6,7 @@ import { LoginUseCase } from './core/usecases/login.use-case';
 import { PrismaService } from './adapters/prisma/prisma.service';
 import { PrismaUserRepository } from './adapters/prisma/prisma-user.repository';
 import { TokenService } from './core/domain/service/token.service';
-import { UserController } from './adapters/api/controller/auth.controller';
+import { AuthController } from './adapters/api/controller/auth.controller';
 import { UserRepository } from './core/domain/repository/user.repository';
 import { UpdateUserTypeUseCase } from './core/usecases/update-user-type.use-case';
 import { CreateChapterUseCase } from './core/usecases/create-chapter.use-case';
@@ -20,14 +20,23 @@ import { CreateUnitUseCase } from './core/usecases/create-unit';
 import { UpdateUnitUseCase } from './core/usecases/update-unit.use-case';
 import { GetUnitByIdUseCase } from './core/usecases/get-units-by-id.use-case';
 import { getUnitsByChapterIdUseCase } from './core/usecases/get-units-by-chapter.use-case';
-import { ChapterController } from './adapters/api/controller/chapter.controller';
 import { UnitController } from './adapters/api/controller/unit.controller';
-import { GetChaptersUseCase } from './core/usecases/get-chapters.use-case';
 import { RefreshTokenRepository } from './core/domain/repository/refresh-token.repository';
+import { ChapterController } from './adapters/api/controller/chapter.controller';
+import { UserController } from './adapters/api/controller/user.controller';
+import { GetChaptersUseCase } from './core/usecases/get-chapters.use-case';
+import { LogoutUseCase } from './core/usecases/logout.use-case';
+import { RefreshUseCase } from './core/usecases/refresh.use-case';
+import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-token.repository';
 
 @Module({
   imports: [JwtModule.register({})],
-  controllers: [UserController, ChapterController, UnitController],
+  controllers: [
+    AuthController,
+    UserController,
+    ChapterController,
+    UnitController,
+  ],
   providers: [
     PrismaService,
     JwtService,
@@ -39,6 +48,12 @@ import { RefreshTokenRepository } from './core/domain/repository/refresh-token.r
     {
       provide: UserRepository,
       useFactory: (prisma: PrismaService) => new PrismaUserRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: RefreshTokenRepository,
+      useFactory: (prisma: PrismaService) =>
+        new PrismaRefreshTokenRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -72,7 +87,23 @@ import { RefreshTokenRepository } from './core/domain/repository/refresh-token.r
         refreshTokenRepository: RefreshTokenRepository,
       ) =>
         new LoginUseCase(userRepository, refreshTokenRepository, tokenService),
-      inject: [UserRepository, 'TokenService'],
+      inject: [UserRepository, RefreshTokenRepository, 'TokenService'],
+    },
+    {
+      provide: LogoutUseCase,
+      useFactory: (
+        userRepository: UserRepository,
+        refreshTokenRepository: RefreshTokenRepository,
+      ) => new LogoutUseCase(userRepository, refreshTokenRepository),
+      inject: [UserRepository, RefreshTokenRepository],
+    },
+    {
+      provide: RefreshUseCase,
+      useFactory: (
+        tokenService: TokenService,
+        refreshTokenRepository: RefreshTokenRepository,
+      ) => new RefreshUseCase(refreshTokenRepository, tokenService),
+      inject: [RefreshTokenRepository, 'TokenService'],
     },
     {
       provide: CreateChapterUseCase,

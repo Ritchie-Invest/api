@@ -22,7 +22,7 @@ import {
 } from '@nestjs/swagger';
 
 @Controller('/auth')
-export class UserController {
+export class AuthController {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly loginUseCase: LoginUseCase,

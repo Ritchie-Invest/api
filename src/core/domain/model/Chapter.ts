@@ -1,4 +1,5 @@
 import { DomainModel } from '../../base/domain-model';
+import { ChapterInvalidDataError } from '../error/ChapterInvalidDataError';
 
 export class Chapter extends DomainModel {
   title: string;
@@ -18,11 +19,11 @@ export class Chapter extends DomainModel {
     super(id);
 
     if (!title) {
-      throw new Error('Title is required');
+      throw new ChapterInvalidDataError('Title is required');
     }
 
     if (!description) {
-      throw new Error('Description is required');
+      throw new ChapterInvalidDataError('Description is required');
     }
 
     this.title = title;
