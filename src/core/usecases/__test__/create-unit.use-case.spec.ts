@@ -14,7 +14,7 @@ describe('CreateUnitUseCase', () => {
   });
 
   it('should create a unit when user is admin', async () => {
-    // GIVEN 
+    // GIVEN
     const command: CreateUnitCommand = {
       currentUser: { id: 'admin-id', type: UserType.ADMIN },
       title: 'Unit 1',
@@ -25,7 +25,7 @@ describe('CreateUnitUseCase', () => {
     // WHEN
     const result = await useCase.execute(command);
 
-    // THEN 
+    // THEN
     expect(result.title).toBe(command.title);
     expect(result.description).toBe(command.description);
     expect(result.chapterId).toBe(command.chapterId);
@@ -33,7 +33,7 @@ describe('CreateUnitUseCase', () => {
   });
 
   it('should throw UserNotAllowedError if user is not admin', async () => {
-    // GIVEN 
+    // GIVEN
     const command: CreateUnitCommand = {
       currentUser: { id: 'user-id', type: UserType.STUDENT },
       title: 'Unit 1',

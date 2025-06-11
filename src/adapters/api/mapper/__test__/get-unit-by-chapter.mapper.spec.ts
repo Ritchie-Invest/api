@@ -16,7 +16,10 @@ describe('getUnitsByChapterIdMapper', () => {
       const chapterId = 'chapter-1';
 
       // When
-      const command = getUnitsByChapterIdMapper.toDomain(currentUser, chapterId);
+      const command = getUnitsByChapterIdMapper.toDomain(
+        currentUser,
+        chapterId,
+      );
 
       // Then
       expect(command).toEqual({
@@ -34,22 +37,16 @@ describe('getUnitsByChapterIdMapper', () => {
       // Given
       const now = new Date();
       const units = [
-        Object.assign(
-          new Unit('unit-1', 'Unit 1', 'Desc 1', 'chapter-1'),
-          {
-            isPublished: true,
-            createdAt: now,
-            updatedAt: now,
-          }
-        ),
-        Object.assign(
-          new Unit('unit-2', 'Unit 2', 'Desc 2', 'chapter-1'),
-          {
-            isPublished: false,
-            createdAt: now,
-            updatedAt: now,
-          }
-        ),
+        Object.assign(new Unit('unit-1', 'Unit 1', 'Desc 1', 'chapter-1'), {
+          isPublished: true,
+          createdAt: now,
+          updatedAt: now,
+        }),
+        Object.assign(new Unit('unit-2', 'Unit 2', 'Desc 2', 'chapter-1'), {
+          isPublished: false,
+          createdAt: now,
+          updatedAt: now,
+        }),
       ];
 
       // When

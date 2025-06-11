@@ -31,20 +31,20 @@ describe('UpdateUnitUseCase', () => {
       isPublished: true,
     };
 
-    // WHEN 
+    // WHEN
     const unit = await updateUnitUseCase.execute(command);
 
-    // THEN 
+    // THEN
     const units = await unitRepository.findAll();
     expect(units.length).toEqual(1);
     expect(unit).toEqual({
-      id: expect.any(String),
+      id: 'unit-id',
       title: 'Une super unité',
       description: 'Ceci est une super unité',
       chapterId: 'chapter-1',
       isPublished: true,
-      createdAt: expect.any(Date),
-      updatedAt: expect.any(Date),
+      createdAt: unit.createdAt,
+      updatedAt: unit.updatedAt,
     });
     const storedUnit = units[0];
     expect(storedUnit).toEqual({
@@ -59,7 +59,7 @@ describe('UpdateUnitUseCase', () => {
   });
 
   it('should throw if title is empty', async () => {
-    // GIVEN 
+    // GIVEN
     const command: UpdateUnitCommand = {
       currentUser: getCurrentUser(),
       unitId: 'unit-id',
@@ -73,7 +73,7 @@ describe('UpdateUnitUseCase', () => {
   });
 
   it('should throw if description is empty', async () => {
-    // GIVEN 
+    // GIVEN
     const command: UpdateUnitCommand = {
       currentUser: getCurrentUser(),
       unitId: 'unit-id',
@@ -82,12 +82,12 @@ describe('UpdateUnitUseCase', () => {
       isPublished: true,
     };
 
-    // WHEN & THEN 
+    // WHEN & THEN
     await expect(updateUnitUseCase.execute(command)).rejects.toThrow();
   });
 
   it('should throw an error if user is not admin', async () => {
-    // GIVEN 
+    // GIVEN
     const command: UpdateUnitCommand = {
       currentUser: {
         id: 'user-id',
@@ -99,14 +99,14 @@ describe('UpdateUnitUseCase', () => {
       isPublished: true,
     };
 
-    // WHEN & THEN 
+    // WHEN & THEN
     await expect(updateUnitUseCase.execute(command)).rejects.toThrow(
       'Unauthorized: Only admins can update units',
     );
   });
 
   it('should throw an error if unit does not exist', async () => {
-    // GIVEN 
+    // GIVEN
     const command: UpdateUnitCommand = {
       currentUser: getCurrentUser(),
       unitId: 'non-existing-unit-id',

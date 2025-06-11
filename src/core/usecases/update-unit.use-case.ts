@@ -36,8 +36,8 @@ export class UpdateUnitUseCase implements UseCase<UpdateUnitCommand, Unit> {
       currentUnit.id,
       title ?? currentUnit.title,
       description ?? currentUnit.description,
-      currentUnit.chapterId, 
-      command.isPublished ?? currentUnit.isPublished 
+      currentUnit.chapterId,
+      command.isPublished ?? currentUnit.isPublished,
     );
 
     const updatedUnit = await this.unitRepository.update(unitId, unit);
