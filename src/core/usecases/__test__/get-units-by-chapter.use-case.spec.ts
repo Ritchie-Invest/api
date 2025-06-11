@@ -3,17 +3,17 @@ import { InMemoryUnitRepository } from '../../../adapters/in-memory/in-memory-un
 import { User } from '../../domain/model/User';
 import { UserType } from '../../domain/type/UserType';
 import {
-  GetUnitsByChapterUseCase,
-  GetUnitsByChapterCommand,
+  getUnitsByChapterIdUseCase,
+  getUnitsByChapterIdCommand,
 } from '../get-units-by-chapter.use-case';
 
-describe('GetUnitsByChapterUseCase', () => {
+describe('getUnitsByChapterIdUseCase', () => {
   let unitRepository: UnitRepository;
-  let getUnitsUseCase: GetUnitsByChapterUseCase;
+  let getUnitsUseCase: getUnitsByChapterIdUseCase;
 
   beforeEach(async () => {
     unitRepository = new InMemoryUnitRepository();
-    getUnitsUseCase = new GetUnitsByChapterUseCase(unitRepository);
+    getUnitsUseCase = new getUnitsByChapterIdUseCase(unitRepository);
 
     await unitRepository.removeAll();
     await unitRepository.create({
@@ -37,13 +37,16 @@ describe('GetUnitsByChapterUseCase', () => {
   });
 
   it('should return created unit', async () => {
-    const command: GetUnitsByChapterCommand = {
+    // Given
+    const command: getUnitsByChapterIdCommand = {
       currentUser: getCurrentUser(),
       chapterId: 'some-chapter-id',
     };
 
+    // When
     const units = await getUnitsUseCase.execute(command);
 
+    // Then
     const storedUnits = await unitRepository.findAll();
     expect(units.length).toBe(2);
 
@@ -51,7 +54,7 @@ describe('GetUnitsByChapterUseCase', () => {
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
       chapterId: 'some-chapter-id',
-      is_published: false,
+      isPublished: false,
     });
     expect(typeof units[0]?.id).toBe('string');
     expect(units[0]?.createdAt).toBeInstanceOf(Date);
@@ -61,7 +64,7 @@ describe('GetUnitsByChapterUseCase', () => {
       title: 'Un autre super chapitre',
       description: 'Ceci est un autre super chapitre',
       chapterId: 'some-chapter-id',
-      is_published: false,
+      isPublished: false,
     });
     expect(typeof units[1]?.id).toBe('string');
     expect(units[1]?.createdAt).toBeInstanceOf(Date);
@@ -72,7 +75,7 @@ describe('GetUnitsByChapterUseCase', () => {
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
       chapterId: 'some-chapter-id',
-      is_published: false,
+      isPublished: false,
       createdAt: units[0]?.createdAt,
       updatedAt: units[0]?.updatedAt,
     });
@@ -81,14 +84,15 @@ describe('GetUnitsByChapterUseCase', () => {
       title: 'Un autre super chapitre',
       description: 'Ceci est un autre super chapitre',
       chapterId: 'some-chapter-id',
-      is_published: false,
+      isPublished: false,
       createdAt: units[1]?.createdAt,
       updatedAt: units[1]?.updatedAt,
     });
   });
 
   it('should throw an error if user is not admin', async () => {
-    const command: GetUnitsByChapterCommand = {
+    // Given
+    const command: getUnitsByChapterIdCommand = {
       currentUser: {
         id: 'user-id',
         type: UserType.STUDENT,
@@ -96,28 +100,37 @@ describe('GetUnitsByChapterUseCase', () => {
       chapterId: 'some-chapter-id',
     };
 
+    // When / Then
     await expect(getUnitsUseCase.execute(command)).rejects.toThrow(
       'Unauthorized: Only admins can get units',
     );
   });
 
   it('should return empty array if no units for chapter', async () => {
-    const command: GetUnitsByChapterCommand = {
+    // Given
+    const command: getUnitsByChapterIdCommand = {
       currentUser: getCurrentUser(),
       chapterId: 'non-existent-chapter',
     };
 
+    // When
     const units = await getUnitsUseCase.execute(command);
+
+    // Then
     expect(units).toMatchObject([]);
   });
 
   it('should only return units for the specified chapter', async () => {
-    const command: GetUnitsByChapterCommand = {
+    // Given
+    const command: getUnitsByChapterIdCommand = {
       currentUser: getCurrentUser(),
       chapterId: 'other-chapter-id',
     };
 
+    // When
     const units = await getUnitsUseCase.execute(command);
+
+    // Then
     expect(units.length).toBe(1);
     expect(units[0]?.title).toBe('Chapitre différent');
     expect(units[0]?.chapterId).toBe('other-chapter-id');

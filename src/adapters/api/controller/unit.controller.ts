@@ -22,14 +22,14 @@ import { UpdateUnitRequest } from '../request/update-unit.request';
 import { GetUnitByIdResponse } from '../response/get-unit-by-id.response';
 import { GetUnitByIdUseCase } from '../../../core/usecases/get-units-by-id.use-case';
 import { GetUnitByIdMapper } from '../mapper/get-unit-by-id.mapper';
-import { GetUnitsByChapterResponse } from '../response/get-units-by-chapter.response';
-import { GetUnitsByChapterUseCase } from '../../../core/usecases/get-units-by-chapter.use-case';
-import { GetUnitsByChapterMapper } from '../mapper/get-units-by-chapter.mapper';
+import { getUnitsByChapterIdResponse } from '../response/get-units-by-chapter.response';
+import { getUnitsByChapterIdUseCase } from '../../../core/usecases/get-units-by-chapter.use-case';
+import { getUnitsByChapterIdMapper } from '../mapper/get-units-by-chapter.mapper';
 
 @Controller('/units')
 export class UnitController {
   constructor(
-    private readonly getUnitsByChapterUseCase: GetUnitsByChapterUseCase,
+    private readonly getUnitsByChapterIdUseCase: getUnitsByChapterIdUseCase,
     private readonly createUnitUseCase: CreateUnitUseCase,
     private readonly getUnitByIdUseCase: GetUnitByIdUseCase,
     private readonly updateUnitUseCase: UpdateUnitUseCase,
@@ -40,7 +40,7 @@ export class UnitController {
   @ApiOperation({ summary: 'Get all units by chapter ID' })
   @ApiCreatedResponse({
     description: 'Units successfully retrieved',
-    type: [GetUnitsByChapterResponse],
+    type: [getUnitsByChapterIdResponse],
   })
   @ApiBadRequestResponse({
     description: 'Invalid request or parameters',
@@ -54,13 +54,13 @@ export class UnitController {
   @ApiInternalServerErrorResponse({
     description: 'Internal server error',
   })
-  async getUnitsByChapter(
+  async getUnitsByChapterId(
     @CurrentUser() currentUser: ProfileRequest,
     @Param('chapterId') chapterId: string,
-  ): Promise<GetUnitsByChapterResponse> {
-    const command = GetUnitsByChapterMapper.toDomain(currentUser, chapterId);
-    const units = await this.getUnitsByChapterUseCase.execute(command);
-    return GetUnitsByChapterMapper.fromDomain(units);
+  ): Promise<getUnitsByChapterIdResponse> {
+    const command = getUnitsByChapterIdMapper.toDomain(currentUser, chapterId);
+    const units = await this.getUnitsByChapterIdUseCase.execute(command);
+    return getUnitsByChapterIdMapper.fromDomain(units);
   }
 
   @Post('/')

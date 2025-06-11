@@ -12,11 +12,11 @@ export class UpdateUnitRequest {
 
   @ApiProperty()
   @IsBoolean()
-  is_published: boolean;
+  isPublished: boolean;
 
-  constructor(title: string, description: string, is_published: boolean) {
+  constructor(title: string, description: string, isPublished: boolean) {
     this.title = title;
     this.description = description;
-    this.is_published = is_published;
+    this.isPublished = isPublished;
   }
 }

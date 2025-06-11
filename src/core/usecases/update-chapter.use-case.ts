@@ -10,7 +10,7 @@ export type UpdateChapterCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
   chapterId: string;
   title?: string;
-  description: string;
+  description?: string;
   is_published?: boolean;
 };
 

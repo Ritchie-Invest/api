@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { GetUnitByIdResponse } from './get-unit-by-id.response';
 
-export class GetUnitsByChapterResponse {
+export class getUnitsByChapterIdResponse {
   @ApiProperty({ type: [GetUnitByIdResponse] })
   units: GetUnitByIdResponse[];
 

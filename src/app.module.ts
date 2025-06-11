@@ -19,7 +19,7 @@ import { PrismaUnitRepository } from './adapters/prisma/prisma-unit.repository';
 import { CreateUnitUseCase } from './core/usecases/create-unit';
 import { UpdateUnitUseCase } from './core/usecases/update-unit.use-case';
 import { GetUnitByIdUseCase } from './core/usecases/get-units-by-id.use-case';
-import { GetUnitsByChapterUseCase } from './core/usecases/get-units-by-chapter.use-case';
+import { getUnitsByChapterIdUseCase } from './core/usecases/get-units-by-chapter.use-case';
 import { ChapterController } from './adapters/api/controller/chapter.controller';
 import { UnitController } from './adapters/api/controller/unit.controller';
 import { GetChaptersUseCase } from './core/usecases/get-chapters.use-case';
@@ -117,9 +117,9 @@ import { RefreshTokenRepository } from './core/domain/repository/refresh-token.r
       inject: [UnitRepository],
     },
     {
-      provide: GetUnitsByChapterUseCase,
+      provide: getUnitsByChapterIdUseCase,
       useFactory: (unitRepository: UnitRepository) =>
-        new GetUnitsByChapterUseCase(unitRepository),
+        new getUnitsByChapterIdUseCase(unitRepository),
       inject: [UnitRepository],
     },
   ],

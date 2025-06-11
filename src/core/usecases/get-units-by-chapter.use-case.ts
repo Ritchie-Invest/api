@@ -5,17 +5,17 @@ import { User } from '../domain/model/User';
 import { UserType } from '../domain/type/UserType';
 import { UserNotAllowedError } from '../domain/error/UserNotAllowedError';
 
-export type GetUnitsByChapterCommand = {
+export type getUnitsByChapterIdCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
   chapterId: string;
 };
 
-export class GetUnitsByChapterUseCase
-  implements UseCase<GetUnitsByChapterCommand, Unit[]>
+export class getUnitsByChapterIdUseCase
+  implements UseCase<getUnitsByChapterIdCommand, Unit[]>
 {
   constructor(private readonly unitRepository: UnitRepository) {}
 
-  async execute(command: GetUnitsByChapterCommand): Promise<Unit[]> {
+  async execute(command: getUnitsByChapterIdCommand): Promise<Unit[]> {
     if (!this.canExecute(command.currentUser)) {
       throw new UserNotAllowedError('Unauthorized: Only admins can get units');
     }

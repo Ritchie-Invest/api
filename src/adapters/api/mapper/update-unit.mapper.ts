@@ -18,7 +18,7 @@ export class UpdateUnitMapper {
       unitId: unitId,
       title: request.title,
       description: request.description,
-      is_published: request.is_published,
+      isPublished: request.isPublished,
     };
   }
 
@@ -28,7 +28,7 @@ export class UpdateUnitMapper {
       chapterId: unit.chapterId,
       title: unit.title,
       description: unit.description,
-      is_published: unit.is_published,
+      isPublished: unit.isPublished,
       createdAt: unit.createdAt,
       updatedAt: unit.updatedAt,
     };

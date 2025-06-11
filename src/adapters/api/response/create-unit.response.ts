@@ -14,7 +14,7 @@ export class CreateUnitResponse {
   chapterId: string;
 
   @ApiProperty()
-  is_published: boolean;
+  isPublished: boolean;
 
   @ApiProperty()
   updatedAt: Date;
@@ -27,7 +27,7 @@ export class CreateUnitResponse {
     title: string,
     description: string,
     chapterId: string,
-    is_published: boolean,
+    isPublished: boolean,
     updatedAt: Date,
     createdAt: Date,
   ) {
@@ -35,7 +35,7 @@ export class CreateUnitResponse {
     this.title = title;
     this.description = description;
     this.chapterId = chapterId;
-    this.is_published = is_published;
+    this.isPublished = isPublished;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
   }

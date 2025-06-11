@@ -22,13 +22,16 @@ describe('GetUnitByIdUseCase', () => {
   });
 
   it('should return created unit', async () => {
+    // Given
     const command: GetUnitByIdCommand = {
       currentUser: getCurrentUser(),
       unitId: 'unit-id',
     };
 
+    // When
     const unit = await getUnitByIdUseCase.execute(command);
 
+    // Then
     const units = await unitRepository.findAll();
     expect(units.length).toEqual(1);
     expect(unit).toEqual({
@@ -36,7 +39,7 @@ describe('GetUnitByIdUseCase', () => {
       id: expect.any(String),
       title: 'Une super unité',
       description: 'Ceci est une super unité',
-      is_published: false,
+      isPublished: false,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       createdAt: expect.any(Date),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -47,7 +50,7 @@ describe('GetUnitByIdUseCase', () => {
       id: unit.id,
       title: 'Une super unité',
       description: 'Ceci est une super unité',
-      is_published: false,
+      isPublished: false,
       createdAt: unit.createdAt,
       updatedAt: unit.updatedAt,
     });

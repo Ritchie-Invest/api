@@ -9,9 +9,10 @@ import { UnitNotFoundError } from '../domain/error/UnitNotFoundError';
 export type UpdateUnitCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
   unitId: string;
-  title?: string;
+  title: string;
   description: string;
-  is_published?: boolean;
+  isPublished: boolean;
+  UpdateUnitCommand?: boolean;
 };
 
 export class UpdateUnitUseCase implements UseCase<UpdateUnitCommand, Unit> {
@@ -35,7 +36,8 @@ export class UpdateUnitUseCase implements UseCase<UpdateUnitCommand, Unit> {
       currentUnit.id,
       title ?? currentUnit.title,
       description ?? currentUnit.description,
-      String(command.is_published ?? currentUnit.is_published),
+      currentUnit.chapterId, 
+      command.isPublished ?? currentUnit.isPublished 
     );
 
     const updatedUnit = await this.unitRepository.update(unitId, unit);

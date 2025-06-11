@@ -1,13 +1,13 @@
 import { Unit } from '../../../core/domain/model/Unit';
 import { ProfileRequest } from '../request/profile.request';
-import { GetUnitsByChapterCommand } from '../../../core/usecases/get-units-by-chapter.use-case';
-import { GetUnitsByChapterResponse } from '../response/get-units-by-chapter.response';
+import { getUnitsByChapterIdCommand } from '../../../core/usecases/get-units-by-chapter.use-case';
+import { getUnitsByChapterIdResponse } from '../response/get-units-by-chapter.response';
 
-export class GetUnitsByChapterMapper {
+export class getUnitsByChapterIdMapper {
   static toDomain(
     currentUser: ProfileRequest,
     chapterId: string,
-  ): GetUnitsByChapterCommand {
+  ): getUnitsByChapterIdCommand {
     return {
       currentUser: {
         id: currentUser.id,
@@ -17,13 +17,13 @@ export class GetUnitsByChapterMapper {
     };
   }
 
-  static fromDomain(units: Unit[]): GetUnitsByChapterResponse {
-    return new GetUnitsByChapterResponse(
+  static fromDomain(units: Unit[]): getUnitsByChapterIdResponse {
+    return new getUnitsByChapterIdResponse(
       units.map((unit) => ({
         id: unit.id,
         title: unit.title,
         description: unit.description,
-        is_published: unit.is_published,
+        isPublished: unit.isPublished,
         createdAt: unit.createdAt,
         updatedAt: unit.updatedAt,
         chapterId: unit.chapterId,

@@ -47,7 +47,7 @@ model Unit {
   title        String
   description  String
   chapterId   String
-  is_published Boolean
+  isPublished Boolean
   updatedAt    DateTime @updatedAt
   createdAt    DateTime @default(now())
   chapter     Chapter @relation(fields: [chapterId], references: [id])

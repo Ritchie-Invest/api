@@ -4,7 +4,7 @@ export class Unit extends DomainModel {
   title: string;
   description: string;
   chapterId: string;
-  is_published: boolean;
+  isPublished: boolean;
   updatedAt: Date;
   createdAt: Date;
 
@@ -13,7 +13,7 @@ export class Unit extends DomainModel {
     title: string,
     description: string,
     chapterId: string,
-    is_published: boolean = false,
+    isPublished: boolean = false,
     updatedAt?: Date,
     createdAt?: Date,
   ) {
@@ -30,7 +30,7 @@ export class Unit extends DomainModel {
     this.title = title;
     this.description = description;
     this.chapterId = chapterId;
-    this.is_published = is_published;
+    this.isPublished = isPublished;
     this.updatedAt = updatedAt || new Date();
     this.createdAt = createdAt || new Date();
   }

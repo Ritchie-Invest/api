@@ -11,7 +11,7 @@ export class PrismaUnitMapper implements EntityMapper<Unit, UnitEntity> {
       title: model.title,
       description: model.description,
       chapterId: model.chapterId,
-      is_published: model.is_published,
+      isPublished: model.isPublished,
       updatedAt: model.updatedAt,
       createdAt: model.createdAt,
     };
@@ -23,7 +23,7 @@ export class PrismaUnitMapper implements EntityMapper<Unit, UnitEntity> {
       title: entity.title,
       description: entity.description,
       chapterId: entity.chapterId,
-      is_published: entity.is_published,
+      isPublished: entity.isPublished,
       updatedAt: entity.updatedAt,
       createdAt: entity.createdAt,
     };
