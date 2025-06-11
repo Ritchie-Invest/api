@@ -3,7 +3,7 @@ import { UnitRepository } from '../../core/domain/repository/unit.repository';
 import { Unit } from '../../core/domain/model/Unit';
 
 @Injectable()
-export class InMemoryUnitRepository extends UnitRepository {
+export class InMemoryUnitRepository implements UnitRepository {
   private units: Map<string, Unit> = new Map();
 
   create(data: Pick<Unit, 'id' | 'title' | 'description' | 'chapterId'>): Unit {
@@ -26,10 +26,8 @@ export class InMemoryUnitRepository extends UnitRepository {
   }
 
   findByChapter(chapterId: string): Unit[] {
-    return Array.from(
-      Array.from(this.units.values()).filter(
-        (unit) => unit.chapterId === chapterId,
-      ),
+    return Array.from(this.units.values()).filter(
+      (unit) => unit.chapterId === chapterId,
     );
   }
 
