@@ -6,7 +6,7 @@ import { Unit } from '../../core/domain/model/Unit';
 export class InMemoryUnitRepository implements UnitRepository {
   private units: Map<string, Unit> = new Map();
 
-  create(data: Pick<Unit, 'id' | 'title' | 'description' | 'chapterId'>): Unit {
+  async create(data: Pick<Unit, 'id' | 'title' | 'description' | 'chapterId'>): Promise<Unit> {
     const unit = new Unit(
       data.id,
       data.title,
@@ -17,15 +17,15 @@ export class InMemoryUnitRepository implements UnitRepository {
     return unit;
   }
 
-  findById(id: string): Unit | null {
+  async findById(id: string): Promise<Unit | null> {
     return this.units.get(id) || null;
   }
 
-  findAll(): Unit[] {
+  async findAll(): Promise<Unit[]> {
     return Array.from(this.units.values());
   }
 
-  update(id: string, unit: Unit): Unit | null {
+  async update(id: string, unit: Unit): Promise<Unit | null> {
     if (!this.units.has(id)) {
       return null;
     }
@@ -33,19 +33,17 @@ export class InMemoryUnitRepository implements UnitRepository {
     return unit;
   }
 
-  remove(id: string): void {
+  async remove(id: string): Promise<void> {
     this.units.delete(id);
   }
 
-  removeAll(): void {
+  async removeAll(): Promise<void> {
     this.units.clear();
   }
 
-  findByChapter(chapterId: string): Promise<Unit[]> {
-    return Promise.resolve(
-      Array.from(this.units.values()).filter(
-        (unit) => unit.chapterId === chapterId,
-      ),
+  async findByChapter(chapterId: string): Promise<Unit[]> {
+    return Array.from(this.units.values()).filter(
+      (unit) => unit.chapterId === chapterId,
     );
   }
 }

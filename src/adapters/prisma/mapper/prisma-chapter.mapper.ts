@@ -12,7 +12,7 @@ export class PrismaChapterMapper
       id: model.id,
       title: model.title,
       description: model.description,
-      is_published: model.is_published,
+      isPublished: model.isPublished,
       updatedAt: model.updatedAt,
       createdAt: model.createdAt,
     };
@@ -23,7 +23,7 @@ export class PrismaChapterMapper
       id: entity.id,
       title: entity.title,
       description: entity.description,
-      is_published: entity.is_published,
+      isPublished: entity.isPublished,
       updatedAt: entity.updatedAt,
       createdAt: entity.createdAt,
     };
