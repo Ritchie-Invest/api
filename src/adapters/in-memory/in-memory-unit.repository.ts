@@ -3,10 +3,10 @@ import { UnitRepository } from '../../core/domain/repository/unit.repository';
 import { Unit } from '../../core/domain/model/Unit';
 
 @Injectable()
-export class InMemoryUnitRepository implements UnitRepository {
+export class InMemoryUnitRepository extends UnitRepository {
   private units: Map<string, Unit> = new Map();
 
-  async create(data: Pick<Unit, 'id' | 'title' | 'description' | 'chapterId'>): Promise<Unit> {
+  create(data: Pick<Unit, 'id' | 'title' | 'description' | 'chapterId'>): Unit {
     const unit = new Unit(
       data.id,
       data.title,
@@ -17,15 +17,23 @@ export class InMemoryUnitRepository implements UnitRepository {
     return unit;
   }
 
-  async findById(id: string): Promise<Unit | null> {
+  findById(id: string): Unit | null {
     return this.units.get(id) || null;
   }
 
-  async findAll(): Promise<Unit[]> {
+  findAll(): Unit[] {
     return Array.from(this.units.values());
   }
 
-  async update(id: string, unit: Unit): Promise<Unit | null> {
+  findByChapter(chapterId: string): Unit[] {
+    return Array.from(
+      Array.from(this.units.values()).filter(
+        (unit) => unit.chapterId === chapterId,
+      ),
+    );
+  }
+
+  update(id: string, unit: Unit): Unit | null {
     if (!this.units.has(id)) {
       return null;
     }
@@ -33,17 +41,11 @@ export class InMemoryUnitRepository implements UnitRepository {
     return unit;
   }
 
-  async remove(id: string): Promise<void> {
+  remove(id: string): void {
     this.units.delete(id);
   }
 
-  async removeAll(): Promise<void> {
+  removeAll(): void {
     this.units.clear();
-  }
-
-  async findByChapter(chapterId: string): Promise<Unit[]> {
-    return Array.from(this.units.values()).filter(
-      (unit) => unit.chapterId === chapterId,
-    );
   }
 }

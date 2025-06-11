@@ -29,7 +29,7 @@ describe('CreateUnitUseCase', () => {
     expect(result.title).toBe(command.title);
     expect(result.description).toBe(command.description);
     expect(result.chapterId).toBe(command.chapterId);
-    expect((await unitRepository.findAll()).length).toBe(1);
+    expect(unitRepository.findAll().length).toBe(1);
   });
 
   it('should throw UserNotAllowedError if user is not admin', async () => {
@@ -43,6 +43,6 @@ describe('CreateUnitUseCase', () => {
 
     // THEN
     await expect(useCase.execute(command)).rejects.toThrow(UserNotAllowedError);
-    expect((await unitRepository.findAll()).length).toBe(0);
+    expect(unitRepository.findAll().length).toBe(0);
   });
 });
