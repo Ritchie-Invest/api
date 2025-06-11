@@ -35,7 +35,7 @@ describe('CreateChapterUseCase', () => {
       id: expect.any(String),
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
-      is_published: false,
+      isPublished: false,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       createdAt: expect.any(Date),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -46,7 +46,7 @@ describe('CreateChapterUseCase', () => {
       id: chapter.id,
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
-      is_published: false,
+      isPublished: false,
       createdAt: chapter.createdAt,
       updatedAt: chapter.updatedAt,
     });

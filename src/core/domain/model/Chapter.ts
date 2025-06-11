@@ -3,7 +3,7 @@ import { DomainModel } from '../../base/domain-model';
 export class Chapter extends DomainModel {
   title: string;
   description: string;
-  is_published: boolean;
+  isPublished: boolean;
   updatedAt: Date;
   createdAt: Date;
 
@@ -11,7 +11,7 @@ export class Chapter extends DomainModel {
     id: string,
     title: string,
     description: string,
-    is_published: boolean = false,
+    isPublished: boolean = false,
     updatedAt?: Date,
     createdAt?: Date,
   ) {
@@ -27,7 +27,7 @@ export class Chapter extends DomainModel {
 
     this.title = title;
     this.description = description;
-    this.is_published = is_published;
+    this.isPublished = isPublished;
     this.updatedAt = updatedAt || new Date();
     this.createdAt = createdAt || new Date();
   }

@@ -11,7 +11,7 @@ export class GetChapterByIdResponse {
   description: string;
 
   @ApiProperty()
-  is_published: boolean;
+  isPublished: boolean;
 
   @ApiProperty()
   updatedAt: Date;
@@ -23,14 +23,14 @@ export class GetChapterByIdResponse {
     id: string,
     title: string,
     description: string,
-    is_published: boolean,
+    isPublished: boolean,
     updatedAt: Date,
     createdAt: Date,
   ) {
     this.id = id;
     this.title = title;
     this.description = description;
-    this.is_published = is_published;
+    this.isPublished = isPublished;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
   }

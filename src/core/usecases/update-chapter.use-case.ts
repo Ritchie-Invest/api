@@ -11,7 +11,7 @@ export type UpdateChapterCommand = {
   chapterId: string;
   title?: string;
   description?: string;
-  is_published?: boolean;
+  isPublished?: boolean;
 };
 
 export class UpdateChapterUseCase
@@ -37,7 +37,7 @@ export class UpdateChapterUseCase
       currentChapter.id,
       title ?? currentChapter.title,
       description ?? currentChapter.description,
-      command.is_published ?? currentChapter.is_published,
+      command.isPublished ?? currentChapter.isPublished,
     );
 
     const updatedChapter = await this.chapterRepository.update(

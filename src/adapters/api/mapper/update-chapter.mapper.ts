@@ -18,7 +18,7 @@ export class UpdateChapterMapper {
       chapterId: chapterId,
       title: request.title,
       description: request.description,
-      is_published: request.is_published,
+      isPublished: request.isPublished,
     };
   }
 
@@ -27,7 +27,7 @@ export class UpdateChapterMapper {
       id: chapter.id,
       title: chapter.title,
       description: chapter.description,
-      is_published: chapter.is_published,
+      isPublished: chapter.isPublished,
       createdAt: chapter.createdAt,
       updatedAt: chapter.updatedAt,
     };
