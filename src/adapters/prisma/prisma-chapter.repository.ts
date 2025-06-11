@@ -47,7 +47,7 @@ export class PrismaChapterRepository implements ChapterRepository {
     await this.prisma.chapter.delete({ where: { id } });
   }
 
-  removeAll(): Promise<void> | void {
-    throw new Error('Method not implemented.');
+  async removeAll(): Promise<void> {
+    await this.prisma.chapter.deleteMany();
   }
 }

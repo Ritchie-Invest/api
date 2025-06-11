@@ -74,7 +74,6 @@ export class AuthController {
   @Post('/logout')
   @ApiCreatedResponse({
     description: 'User successfully logged out',
-    type: LoginResponse,
   })
   @ApiNotFoundResponse({
     description: 'User not found or invalid credentials',

@@ -49,8 +49,8 @@ export class PrismaUnitRepository implements UnitRepository {
     await this.prisma.unit.delete({ where: { id } });
   }
 
-  removeAll(): Promise<void> | void {
-    throw new Error('Method not implemented.');
+  async removeAll(): Promise<void> {
+    await this.prisma.unit.deleteMany();
   }
 
   findAll(): Promise<Unit[]> {
