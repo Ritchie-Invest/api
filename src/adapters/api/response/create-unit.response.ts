@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdateChapterResponse {
+export class CreateUnitResponse {
   @ApiProperty()
   id: string;
 
@@ -9,6 +9,9 @@ export class UpdateChapterResponse {
 
   @ApiProperty()
   description: string;
+
+  @ApiProperty()
+  chapterId: string;
 
   @ApiProperty()
   isPublished: boolean;
@@ -23,6 +26,7 @@ export class UpdateChapterResponse {
     id: string,
     title: string,
     description: string,
+    chapterId: string,
     isPublished: boolean,
     updatedAt: Date,
     createdAt: Date,
@@ -30,6 +34,7 @@ export class UpdateChapterResponse {
     this.id = id;
     this.title = title;
     this.description = description;
+    this.chapterId = chapterId;
     this.isPublished = isPublished;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;

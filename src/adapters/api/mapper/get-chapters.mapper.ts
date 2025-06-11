@@ -19,7 +19,7 @@ export class GetChaptersMapper {
         id: chapter.id,
         title: chapter.title,
         description: chapter.description,
-        is_published: chapter.isPublished,
+        isPublished: chapter.isPublished,
         createdAt: chapter.createdAt,
         updatedAt: chapter.updatedAt,
       })),
