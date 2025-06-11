@@ -3,10 +3,10 @@ import { CreateUserUseCase } from '../../../core/usecases/create-user.use-case';
 import { LoginUseCase } from '../../../core/usecases/login.use-case';
 import { LogoutUseCase } from '../../../core/usecases/logout.use-case';
 import { RefreshUseCase } from '../../../core/usecases/refresh.use-case';
-import { CreateUserRequest } from '../request/create-user.request';
+import { RegisterRequest } from '../request/register.request';
 import { ProfileRequest } from '../request/profile.request';
 import { LoginResponse } from '../response/login.response';
-import { UserMapper } from '../mapper/user.mapper';
+import { RegisterMapper } from '../mapper/register.mapper';
 import { LogoutMapper } from '../mapper/logout.mapper';
 import { User } from '../../../core/domain/model/User';
 import { CurrentUser } from '../decorator/current-user.decorator';
@@ -20,6 +20,8 @@ import {
   ApiOkResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { RegisterResponse } from '../response/register.response';
+import { LoginMapper } from '../mapper/login.mapper';
 
 @Controller('/auth')
 export class AuthController {
@@ -45,9 +47,10 @@ export class AuthController {
   @ApiInternalServerErrorResponse({
     description: 'Internal server error',
   })
-  async register(@Body() body: CreateUserRequest): Promise<User> {
-    const command = UserMapper.toDomain(body);
-    return this.createUserUseCase.execute(command);
+  async register(@Body() body: RegisterRequest): Promise<RegisterResponse> {
+    const command = RegisterMapper.toDomain(body);
+    const user = await this.createUserUseCase.execute(command);
+    return RegisterMapper.fromDomain(user);
   }
 
   @Public()
@@ -62,9 +65,10 @@ export class AuthController {
   @ApiInternalServerErrorResponse({
     description: 'Internal server error',
   })
-  async login(@Body() body: CreateUserRequest): Promise<LoginResponse> {
-    const command = UserMapper.toDomain(body);
-    return await this.loginUseCase.execute(command);
+  async login(@Body() body: RegisterRequest): Promise<LoginResponse> {
+    const command = LoginMapper.toDomain(body);
+    const result = await this.loginUseCase.execute(command);
+    return LoginMapper.fromDomain(result);
   }
 
   @Post('/logout')
@@ -83,7 +87,7 @@ export class AuthController {
     @Body('refreshToken') refreshToken: string,
   ): Promise<void> {
     const command = LogoutMapper.toDomain(currentUser, refreshToken);
-    return this.logoutUseCase.execute(command);
+    await this.logoutUseCase.execute(command);
   }
 
   @Post('/refresh')
@@ -97,6 +101,7 @@ export class AuthController {
     description: 'Unauthorized access',
   })
   async refresh(@Body('refreshToken') token: string): Promise<LoginResponse> {
-    return this.refreshUseCase.execute({ token });
+    const result = await this.refreshUseCase.execute({ token });
+    return LoginMapper.fromDomain(result);
   }
 }

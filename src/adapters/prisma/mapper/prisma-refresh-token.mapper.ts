@@ -15,12 +15,13 @@ export class PrismaRefreshTokenMapper
       expiresAt: model.expiresAt,
     };
   }
+
   toDomain(entity: RefreshTokenEntity): RefreshToken {
-    return new RefreshToken(
-      entity.id,
-      entity.userId,
-      entity.token,
-      entity.expiresAt,
-    );
+    return {
+      id: entity.id,
+      userId: entity.userId,
+      token: entity.token,
+      expiresAt: entity.expiresAt,
+    };
   }
 }

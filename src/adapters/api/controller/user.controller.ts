@@ -16,6 +16,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiOperation,
 } from '@nestjs/swagger';
+import { UpdateUserTypeResponse } from '../response/update-user-type.response';
 
 @Controller('/users')
 export class UserController {
@@ -47,8 +48,9 @@ export class UserController {
     @CurrentUser() currentUser: ProfileRequest,
     @Param('userId') userId: string,
     @Body() body: UpdateUserTypeRequest,
-  ): Promise<User> {
+  ): Promise<UpdateUserTypeResponse> {
     const command = UpdateUserTypeMapper.toDomain(currentUser, userId, body);
-    return this.updateUserTypeUseCase.execute(command);
+    const user = await this.updateUserTypeUseCase.execute(command);
+    return UpdateUserTypeMapper.fromDomain(user);
   }
 }

@@ -12,59 +12,78 @@ describe('PrismaUserMapper', () => {
     { domain: UserType.STUDENT, prisma: $Enums.UserType.STUDENT },
   ];
 
-  it.each(userTypeMappings)(
-    'should map User to UserEntity for %s',
-    ({ domain, prisma }) => {
-      // Given
-      const user: User = {
-        id: 'user-1',
-        email: 'user@example.com',
-        password: 'securepassword123',
-        type: domain,
-        updatedAt: new Date('2023-10-01T10:00:00Z'),
-        createdAt: new Date('2023-10-01T11:00:00Z'),
-      };
+  describe('fromDomain', () => {
+    it.each(userTypeMappings)(
+      'should map User to UserEntity for %s',
+      ({ domain, prisma }) => {
+        // Given
+        const user: User = {
+          id: 'user-1',
+          email: 'user@example.com',
+          password: 'securepassword123',
+          type: domain,
+          updatedAt: new Date('2023-10-01T10:00:00Z'),
+          createdAt: new Date('2023-10-01T11:00:00Z'),
+        };
 
-      // When
-      const entity = mapper.fromDomain(user);
+        // When
+        const entity = mapper.fromDomain(user);
 
-      // Then
-      expect(entity).toEqual({
-        id: 'user-1',
-        email: 'user@example.com',
-        password: 'securepassword123',
-        type: prisma,
-        updatedAt: new Date('2023-10-01T10:00:00Z'),
-        createdAt: new Date('2023-10-01T11:00:00Z'),
-      });
-    },
-  );
+        // Then
+        expect(entity).toEqual({
+          id: 'user-1',
+          email: 'user@example.com',
+          password: 'securepassword123',
+          type: prisma,
+          updatedAt: new Date('2023-10-01T10:00:00Z'),
+          createdAt: new Date('2023-10-01T11:00:00Z'),
+        });
+      },
+    );
+  });
 
-  it.each(userTypeMappings)(
-    'should map UserEntity to User for %s',
-    ({ domain, prisma }) => {
+  describe('toDomain', () => {
+    it.each(userTypeMappings)(
+      'should map UserEntity to User for %s',
+      ({ domain, prisma }) => {
+        // Given
+        const entity: UserEntity = {
+          id: 'user-1',
+          email: 'user@example.com',
+          password: 'securepassword123',
+          type: prisma,
+          updatedAt: new Date('2023-10-01T10:00:00Z'),
+          createdAt: new Date('2023-10-01T11:00:00Z'),
+        };
+
+        // When
+        const user = mapper.toDomain(entity);
+
+        // Then
+        expect(user).toEqual({
+          id: 'user-1',
+          email: 'user@example.com',
+          password: 'securepassword123',
+          type: domain,
+          updatedAt: new Date('2023-10-01T10:00:00Z'),
+          createdAt: new Date('2023-10-01T11:00:00Z'),
+        });
+      },
+    );
+
+    it('should throw an error for an invalid user type', () => {
       // Given
       const entity: UserEntity = {
         id: 'user-1',
         email: 'user@example.com',
         password: 'securepassword123',
-        type: prisma,
+        type: 'INVALID_TYPE' as $Enums.UserType,
         updatedAt: new Date('2023-10-01T10:00:00Z'),
         createdAt: new Date('2023-10-01T11:00:00Z'),
       };
 
-      // When
-      const user = mapper.toDomain(entity);
-
-      // Then
-      expect(user).toEqual({
-        id: 'user-1',
-        email: 'user@example.com',
-        password: 'securepassword123',
-        type: domain,
-        updatedAt: new Date('2023-10-01T10:00:00Z'),
-        createdAt: new Date('2023-10-01T11:00:00Z'),
-      });
-    },
-  );
+      // When & Then
+      expect(() => mapper.toDomain(entity)).toThrow('Invalid user type');
+    });
+  });
 });

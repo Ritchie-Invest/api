@@ -3,19 +3,23 @@ import { UseCase } from '../base/use-case';
 import { TokenInvalidOrExpiredError } from '../domain/error/TokenInvalidOrExpiredError';
 import { RefreshTokenRepository } from '../domain/repository/refresh-token.repository';
 import { TokenService } from '../domain/service/token.service';
-import { LoginResult } from './login.use-case';
 
 export type RefreshCommand = {
   token: string;
 };
 
-export class RefreshUseCase implements UseCase<RefreshCommand, LoginResult> {
+export type RefreshResult = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+export class RefreshUseCase implements UseCase<RefreshCommand, RefreshResult> {
   constructor(
     private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly tokenService: TokenService,
   ) {}
 
-  async execute(command: RefreshCommand): Promise<LoginResult> {
+  async execute(command: RefreshCommand): Promise<RefreshResult> {
     const { token } = command;
     const payload: TokenPayload = this.tokenService.verifyRefreshToken(token);
     const dbToken = await this.refreshTokenRepository.findByToken(token);
