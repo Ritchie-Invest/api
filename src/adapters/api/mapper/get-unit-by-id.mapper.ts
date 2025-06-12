@@ -18,14 +18,14 @@ export class GetUnitByIdMapper {
   }
 
   static fromDomain(unit: Unit): GetUnitByIdResponse {
-    return {
-      id: unit.id,
-      title: unit.title,
-      description: unit.description,
-      chapterId: unit.chapterId,
-      isPublished: unit.isPublished,
-      createdAt: unit.createdAt,
-      updatedAt: unit.updatedAt,
-    };
+    return new GetUnitByIdResponse(
+      unit.id,
+      unit.title,
+      unit.description,
+      unit.chapterId,
+      unit.isPublished,
+      unit.updatedAt,
+      unit.createdAt,
+    );
   }
 }

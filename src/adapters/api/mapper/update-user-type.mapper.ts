@@ -6,13 +6,13 @@ import { UpdateUserTypeResponse } from '../response/update-user-type.response';
 
 export class UpdateUserTypeMapper {
   static fromDomain(model: User): UpdateUserTypeResponse {
-    return {
-      id: model.id,
-      email: model.email,
-      type: model.type,
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
-    };
+    return new UpdateUserTypeResponse(
+      model.id,
+      model.email,
+      model.type,
+      model.updatedAt,
+      model.createdAt,
+    );
   }
 
   static toDomain(
