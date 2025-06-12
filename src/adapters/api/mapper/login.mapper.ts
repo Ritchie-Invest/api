@@ -7,10 +7,7 @@ import { LoginRequest } from '../request/login.request';
 
 export class LoginMapper {
   static fromDomain(result: LoginResult): LoginResponse {
-    return {
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
-    };
+    return new LoginResponse(result.accessToken, result.refreshToken);
   }
 
   static toDomain(request: LoginRequest): LoginCommand {

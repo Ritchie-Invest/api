@@ -5,13 +5,13 @@ import { RegisterResponse } from '../response/register.response';
 
 export class RegisterMapper {
   static fromDomain(model: User): RegisterResponse {
-    return {
-      id: model.id,
-      email: model.email,
-      type: model.type,
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
-    };
+    return new RegisterResponse(
+      model.id,
+      model.email,
+      model.type,
+      model.updatedAt,
+      model.createdAt,
+    );
   }
 
   static toDomain(request: RegisterRequest): CreateUserCommand {

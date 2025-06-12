@@ -23,13 +23,13 @@ export class UpdateChapterMapper {
   }
 
   static fromDomain(chapter: Chapter): UpdateChapterResponse {
-    return {
-      id: chapter.id,
-      title: chapter.title,
-      description: chapter.description,
-      isPublished: chapter.isPublished,
-      createdAt: chapter.createdAt,
-      updatedAt: chapter.updatedAt,
-    };
+    return new UpdateChapterResponse(
+      chapter.id,
+      chapter.title,
+      chapter.description,
+      chapter.isPublished,
+      chapter.updatedAt,
+      chapter.createdAt,
+    );
   }
 }

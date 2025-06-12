@@ -23,14 +23,14 @@ export class UpdateUnitMapper {
   }
 
   static fromDomain(unit: Unit): UpdateUnitResponse {
-    return {
-      id: unit.id,
-      chapterId: unit.chapterId,
-      title: unit.title,
-      description: unit.description,
-      isPublished: unit.isPublished,
-      createdAt: unit.createdAt,
-      updatedAt: unit.updatedAt,
-    };
+    return new UpdateUnitResponse(
+      unit.id,
+      unit.title,
+      unit.description,
+      unit.chapterId,
+      unit.isPublished,
+      unit.updatedAt,
+      unit.createdAt,
+    );
   }
 }

@@ -21,14 +21,14 @@ export class CreateUnitMapper {
   }
 
   static fromDomain(unit: Unit): CreateUnitResponse {
-    return {
-      id: unit.id,
-      title: unit.title,
-      description: unit.description,
-      chapterId: unit.chapterId,
-      isPublished: unit.isPublished,
-      createdAt: unit.createdAt,
-      updatedAt: unit.updatedAt,
-    };
+    return new CreateUnitResponse(
+      unit.id,
+      unit.title,
+      unit.description,
+      unit.chapterId,
+      unit.isPublished,
+      unit.updatedAt,
+      unit.createdAt,
+    );
   }
 }
