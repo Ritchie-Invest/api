@@ -2,7 +2,7 @@ import { getUnitsByChapterIdMapper } from '../get-units-by-chapter.mapper';
 import { ProfileRequest } from '../../request/profile.request';
 import { UserType } from '../../../../core/domain/type/UserType';
 import { Unit } from '../../../../core/domain/model/Unit';
-import { getUnitsByChapterIdResponse } from '../../response/get-units-by-chapter.response';
+import { GetUnitsByChapterIdResponse } from '../../response/get-units-by-chapter.response';
 
 describe('getUnitsByChapterIdMapper', () => {
   describe('toDomain', () => {
@@ -45,7 +45,7 @@ describe('getUnitsByChapterIdMapper', () => {
       const response = getUnitsByChapterIdMapper.fromDomain(units);
 
       // Then
-      expect(response).toBeInstanceOf(getUnitsByChapterIdResponse);
+      expect(response).toBeInstanceOf(GetUnitsByChapterIdResponse);
       expect(response.units).toEqual([
         {
           id: 'unit-1',

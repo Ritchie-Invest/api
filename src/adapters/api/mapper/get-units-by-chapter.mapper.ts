@@ -1,7 +1,7 @@
 import { Unit } from '../../../core/domain/model/Unit';
 import { ProfileRequest } from '../request/profile.request';
 import { getUnitsByChapterIdCommand } from '../../../core/usecases/get-units-by-chapter.use-case';
-import { getUnitsByChapterIdResponse } from '../response/get-units-by-chapter.response';
+import { GetUnitsByChapterIdResponse } from '../response/get-units-by-chapter.response';
 
 export class getUnitsByChapterIdMapper {
   static toDomain(
@@ -17,8 +17,8 @@ export class getUnitsByChapterIdMapper {
     };
   }
 
-  static fromDomain(units: Unit[]): getUnitsByChapterIdResponse {
-    return new getUnitsByChapterIdResponse(
+  static fromDomain(units: Unit[]): GetUnitsByChapterIdResponse {
+    return new GetUnitsByChapterIdResponse(
       units.map((unit) => ({
         id: unit.id,
         title: unit.title,

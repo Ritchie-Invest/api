@@ -22,7 +22,7 @@ import { UpdateUnitRequest } from '../request/update-unit.request';
 import { GetUnitByIdResponse } from '../response/get-unit-by-id.response';
 import { GetUnitByIdUseCase } from '../../../core/usecases/get-units-by-id.use-case';
 import { GetUnitByIdMapper } from '../mapper/get-unit-by-id.mapper';
-import { getUnitsByChapterIdResponse } from '../response/get-units-by-chapter.response';
+import { GetUnitsByChapterIdResponse } from '../response/get-units-by-chapter.response';
 import { getUnitsByChapterIdUseCase } from '../../../core/usecases/get-units-by-chapter.use-case';
 import { getUnitsByChapterIdMapper } from '../mapper/get-units-by-chapter.mapper';
 
@@ -40,7 +40,7 @@ export class UnitController {
   @ApiOperation({ summary: 'Get all units by chapter ID' })
   @ApiCreatedResponse({
     description: 'Units successfully retrieved',
-    type: [getUnitsByChapterIdResponse],
+    type: GetUnitsByChapterIdResponse,
   })
   @ApiBadRequestResponse({
     description: 'Invalid request or parameters',
@@ -57,7 +57,7 @@ export class UnitController {
   async getUnitsByChapterId(
     @CurrentUser() currentUser: ProfileRequest,
     @Param('chapterId') chapterId: string,
-  ): Promise<getUnitsByChapterIdResponse> {
+  ): Promise<GetUnitsByChapterIdResponse> {
     const command = getUnitsByChapterIdMapper.toDomain(currentUser, chapterId);
     const units = await this.getUnitsByChapterIdUseCase.execute(command);
     return getUnitsByChapterIdMapper.fromDomain(units);

@@ -83,8 +83,8 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
       provide: LoginUseCase,
       useFactory: (
         userRepository: UserRepository,
-        tokenService: TokenService,
         refreshTokenRepository: RefreshTokenRepository,
+        tokenService: TokenService,
       ) =>
         new LoginUseCase(userRepository, refreshTokenRepository, tokenService),
       inject: [UserRepository, RefreshTokenRepository, 'TokenService'],
@@ -100,8 +100,8 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
     {
       provide: RefreshUseCase,
       useFactory: (
-        tokenService: TokenService,
         refreshTokenRepository: RefreshTokenRepository,
+        tokenService: TokenService,
       ) => new RefreshUseCase(refreshTokenRepository, tokenService),
       inject: [RefreshTokenRepository, 'TokenService'],
     },

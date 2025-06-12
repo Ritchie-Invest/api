@@ -11,10 +11,10 @@ import {
   ApiBadRequestResponse,
   ApiConflictResponse,
   ApiForbiddenResponse,
-  ApiCreatedResponse,
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 import { UpdateUserTypeResponse } from '../response/update-user-type.response';
 
@@ -25,7 +25,7 @@ export class UserController {
   @Patch('/:userId')
   @Roles(UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Update a user type' })
-  @ApiCreatedResponse({
+  @ApiOkResponse({
     description: 'User type successfully updated',
     type: User,
   })
