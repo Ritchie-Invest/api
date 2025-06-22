@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserType } from '../../core/domain/type/UserType';
+import { TokenService } from '../../core/domain/service/token.service';
 
 export type TokenPayload = {
   id: string;
@@ -9,7 +10,7 @@ export type TokenPayload = {
 };
 
 @Injectable()
-export class JwtServiceAdapter {
+export class JwtServiceAdapter implements TokenService {
   private readonly accessSecret =
     process.env.JWT_ACCESS_SECRET || 'default_access_secret';
   private readonly refreshSecret =

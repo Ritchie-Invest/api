@@ -11,11 +11,12 @@ import {
   ApiBadRequestResponse,
   ApiConflictResponse,
   ApiForbiddenResponse,
-  ApiCreatedResponse,
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiOkResponse,
 } from '@nestjs/swagger';
+import { UpdateUserTypeResponse } from '../response/update-user-type.response';
 
 @Controller('/users')
 export class UserController {
@@ -24,7 +25,7 @@ export class UserController {
   @Patch('/:userId')
   @Roles(UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Update a user type' })
-  @ApiCreatedResponse({
+  @ApiOkResponse({
     description: 'User type successfully updated',
     type: User,
   })
@@ -47,8 +48,9 @@ export class UserController {
     @CurrentUser() currentUser: ProfileRequest,
     @Param('userId') userId: string,
     @Body() body: UpdateUserTypeRequest,
-  ): Promise<User> {
+  ): Promise<UpdateUserTypeResponse> {
     const command = UpdateUserTypeMapper.toDomain(currentUser, userId, body);
-    return this.updateUserTypeUseCase.execute(command);
+    const user = await this.updateUserTypeUseCase.execute(command);
+    return UpdateUserTypeMapper.fromDomain(user);
   }
 }

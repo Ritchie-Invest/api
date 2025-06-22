@@ -49,8 +49,8 @@ export class PrismaLessonRepository implements LessonRepository {
     await this.prisma.lesson.delete({ where: { id } });
   }
 
-  removeAll(): Promise<void> | void {
-    throw new Error('Method not implemented.');
+  async removeAll(): Promise<void> {
+    await this.prisma.unit.deleteMany();
   }
 
   findAll(): Promise<Lesson[]> {

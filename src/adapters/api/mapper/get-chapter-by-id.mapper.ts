@@ -18,13 +18,13 @@ export class GetChapterByIdMapper {
   }
 
   static fromDomain(chapter: Chapter): GetChapterByIdResponse {
-    return {
-      id: chapter.id,
-      title: chapter.title,
-      description: chapter.description,
-      isPublished: chapter.isPublished,
-      createdAt: chapter.createdAt,
-      updatedAt: chapter.updatedAt,
-    };
+    return new GetChapterByIdResponse(
+      chapter.id,
+      chapter.title,
+      chapter.description,
+      chapter.isPublished,
+      chapter.updatedAt,
+      chapter.createdAt,
+    );
   }
 }
