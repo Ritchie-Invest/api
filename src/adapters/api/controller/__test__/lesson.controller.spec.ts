@@ -9,16 +9,16 @@ import { RolesGuard } from '../../guards/roles.guard';
 import { Reflector } from '@nestjs/core';
 import { TokenService } from '../../../../core/domain/service/token.service';
 import { UserType } from '../../../../core/domain/type/UserType';
-import { UnitRepository } from '../../../../core/domain/repository/unit.repository';
-import { GetUnitsByChapterIdResponse } from '../../response/get-units-by-chapter.response';
-import { CreateUnitRequest } from '../../request/create-unit.request';
+import { LessonRepository } from '../../../../core/domain/repository/lesson.repository';
+import { getLessonsByChapterIdResponse } from '../../response/get-lessons-by-chapter.response';
+import { CreateLessonRequest } from '../../request/create-lesson.request';
 import { ChapterRepository } from '../../../../core/domain/repository/chapter.repository';
-import { UpdateUnitRequest } from '../../request/update-unit.request';
+import { UpdateLessonRequest } from '../../request/update-lesson.request';
 
-describe('UnitControllerIT', () => {
+describe('LessonControllerIT', () => {
   let app: INestApplication<App>;
   let chapterRepository: ChapterRepository;
-  let unitRepository: UnitRepository;
+  let lessonRepository: LessonRepository;
   let tokenService: TokenService;
 
   beforeAll(async () => {
@@ -41,20 +41,20 @@ describe('UnitControllerIT', () => {
 
   beforeEach(async () => {
     chapterRepository = app.get(ChapterRepository);
-    unitRepository = app.get(UnitRepository);
+    lessonRepository = app.get(LessonRepository);
     tokenService = app.get('TokenService');
 
-    await unitRepository.removeAll();
+    await lessonRepository.removeAll();
     await chapterRepository.removeAll();
   });
 
   afterEach(async () => {
-    await unitRepository.removeAll();
+    await lessonRepository.removeAll();
     await chapterRepository.removeAll();
   });
 
-  describe('getUnitsByChapterId', () => {
-    it('should return units', async () => {
+  describe('getLessonsByChapterId', () => {
+    it('should return lessons', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
       const chapter = {
@@ -64,49 +64,53 @@ describe('UnitControllerIT', () => {
         isPublished: true,
       };
       await chapterRepository.create(chapter);
-      const unit1 = {
-        title: 'Unit 1',
-        description: 'Description of Unit 1',
+      const lesson1 = {
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
         isPublished: true,
         chapterId: 'chapter-1',
+        order: 1,
       };
-      await unitRepository.create(unit1);
-      const unit2 = {
-        title: 'Unit 2',
-        description: 'Description of Unit 2',
+      await lessonRepository.create(lesson1);
+      const lesson2 = {
+        title: 'Lesson 2',
+        description: 'Description of Lesson 2',
         isPublished: false,
         chapterId: 'chapter-1',
+        order: 2,
       };
-      await unitRepository.create(unit2);
+      await lessonRepository.create(lesson2);
 
       // When
       const response = await request(app.getHttpServer())
-        .get(`/units/chapter/${chapter.id}`)
+        .get(`/lessons/chapter/${chapter.id}`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       // Then
       expect(response.status).toBe(HttpStatus.OK);
-      const responseBody = response.body as GetUnitsByChapterIdResponse;
-      expect(Array.isArray(responseBody.units)).toBe(true);
-      expect(responseBody.units.length).toBe(2);
-      expect(responseBody.units?.[0]).toMatchObject({
-        title: 'Unit 1',
-        description: 'Description of Unit 1',
+      const responseBody = response.body as getLessonsByChapterIdResponse;
+      expect(Array.isArray(responseBody.lessons)).toBe(true);
+      expect(responseBody.lessons.length).toBe(2);
+      expect(responseBody.lessons?.[0]).toMatchObject({
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
         isPublished: true,
         chapterId: 'chapter-1',
+        order: 1,
       });
-      expect(responseBody.units?.[1]).toMatchObject({
-        title: 'Unit 2',
-        description: 'Description of Unit 2',
+      expect(responseBody.lessons?.[1]).toMatchObject({
+        title: 'Lesson 2',
+        description: 'Description of Lesson 2',
         isPublished: false,
         chapterId: 'chapter-1',
+        order: 2,
       });
     });
 
     it('should return 401 if not authenticated', async () => {
       // When
       const response = await request(app.getHttpServer()).get(
-        '/units/chapter/existing-chapter-id',
+        '/lessons/chapter/existing-chapter-id',
       );
 
       // Then
@@ -121,7 +125,7 @@ describe('UnitControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .get('/units/chapter/existing-chapter-id')
+        .get('/lessons/chapter/existing-chapter-id')
         .set('Authorization', `Bearer ${userToken}`);
 
       // Then
@@ -133,8 +137,8 @@ describe('UnitControllerIT', () => {
     });
   });
 
-  describe('getUnitById', () => {
-    it('should return unit by id', async () => {
+  describe('getLessonById', () => {
+    it('should return lesson by id', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
       const chapter = {
@@ -144,51 +148,53 @@ describe('UnitControllerIT', () => {
         isPublished: true,
       };
       await chapterRepository.create(chapter);
-      const unit = {
-        title: 'Unit 1',
-        description: 'Description of Unit 1',
+      const lesson = {
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
         isPublished: true,
         chapterId: 'chapter-1',
+        order: 1,
       };
-      const createdUnit = await unitRepository.create(unit);
+      const createdLesson = await lessonRepository.create(lesson);
 
       // When
       const response = await request(app.getHttpServer())
-        .get(`/units/${createdUnit.id}`)
+        .get(`/lessons/${createdLesson.id}`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       // Then
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toMatchObject({
-        id: createdUnit.id,
-        title: 'Unit 1',
-        description: 'Description of Unit 1',
+        id: createdLesson.id,
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
         isPublished: true,
         chapterId: 'chapter-1',
+        order: 1,
       });
     });
 
-    it('should return 404 if unit not found', async () => {
+    it('should return 404 if lesson not found', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
 
       // When
       const response = await request(app.getHttpServer())
-        .get('/units/non-existing-id')
+        .get('/lessons/non-existing-id')
         .set('Authorization', `Bearer ${adminToken}`);
 
       // Then
       expect(response.status).toBe(HttpStatus.NOT_FOUND);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBe(
-        'Unit with id non-existing-id not found',
+        'Lesson with id non-existing-id not found',
       );
     });
 
     it('should return 401 if not authenticated', async () => {
       // When
       const response = await request(app.getHttpServer()).get(
-        '/units/existing-id',
+        '/lessons/existing-id',
       );
 
       // Then
@@ -203,7 +209,7 @@ describe('UnitControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .get('/units/existing-id')
+        .get('/lessons/existing-id')
         .set('Authorization', `Bearer ${userToken}`);
 
       // Then
@@ -215,8 +221,8 @@ describe('UnitControllerIT', () => {
     });
   });
 
-  describe('createUnit', () => {
-    it('should create a unit', async () => {
+  describe('createLesson', () => {
+    it('should create a lesson', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
       const chapter = {
@@ -226,42 +232,44 @@ describe('UnitControllerIT', () => {
         isPublished: true,
       };
       await chapterRepository.create(chapter);
-      const unit = new CreateUnitRequest(
-        'New Unit',
-        'Description of New Unit',
+      const lesson = new CreateLessonRequest(
+        'New Lesson',
+        'Description of New Lesson',
         'chapter-1',
+        1
       );
 
       // When
       const response = await request(app.getHttpServer())
-        .post('/units')
+        .post('/lessons')
         .set('Authorization', `Bearer ${adminToken}`)
-        .send(unit);
+        .send(lesson);
 
       // Then
       expect(response.status).toBe(HttpStatus.CREATED);
       expect(response.body).toMatchObject({
-        title: 'New Unit',
-        description: 'Description of New Unit',
+        title: 'New Lesson',
+        description: 'Description of New Lesson',
         isPublished: false,
         chapterId: 'chapter-1',
       });
     });
 
-    it('should return 400 if unit data is invalid', async () => {
+    it('should return 400 if lesson data is invalid', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const createUnitRequest = new CreateUnitRequest(
+      const createLessonRequest = new CreateLessonRequest(
         '',
-        'Description of New Unit',
+        'Description of New Lesson',
         'chapter-1',
+        1
       );
 
       // When
       const response = await request(app.getHttpServer())
-        .post('/units')
+        .post('/lessons')
         .set('Authorization', `Bearer ${adminToken}`)
-        .send(createUnitRequest);
+        .send(createLessonRequest);
 
       // Then
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
@@ -271,16 +279,17 @@ describe('UnitControllerIT', () => {
 
     it('should return 401 if not authenticated', async () => {
       // Given
-      const createUnitRequest = new CreateUnitRequest(
-        'New Unit',
-        'Description of New Unit',
+      const createLessonRequest = new CreateLessonRequest(
+        'New Lesson',
+        'Description of New Lesson',
         'chapter-1',
+        1,
       );
 
       // When
       const response = await request(app.getHttpServer())
-        .post('/units')
-        .send(createUnitRequest);
+        .post('/lessons')
+        .send(createLessonRequest);
 
       // Then
       expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
@@ -291,17 +300,18 @@ describe('UnitControllerIT', () => {
     it('should return 403 if user does not have admin role', async () => {
       // Given
       const userToken = generateAccessToken(UserType.STUDENT);
-      const createUnitRequest = new CreateUnitRequest(
-        'New Unit',
-        'Description of New Unit',
+      const createLessonRequest = new CreateLessonRequest(
+        'New Lesson',
+        'Description of New Lesson',
         'chapter-1',
+        1,
       );
 
       // When
       const response = await request(app.getHttpServer())
-        .post('/units')
+        .post('/lessons')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(createUnitRequest);
+        .send(createLessonRequest);
 
       // Then
       expect(response.status).toBe(HttpStatus.FORBIDDEN);
@@ -323,31 +333,31 @@ describe('UnitControllerIT', () => {
         isPublished: true,
       };
       await chapterRepository.create(chapter);
-      const unit = {
-        title: 'Unit 1',
-        description: 'Description of Unit 1',
+      const lesson = {
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
         isPublished: true,
         chapterId: 'chapter-1',
       };
-      const createdUnit = await unitRepository.create(unit);
-      const updateUnitRequest = new UpdateUnitRequest(
-        'Updated Unit 1',
-        'Updated Description of Unit 1',
+      const createdLesson = await lessonRepository.create(lesson);
+      const updateLessonRequest = new UpdateLessonRequest(
+        'Updated Lesson 1',
+        'Updated Description of Lesson 1',
         false,
       );
 
       // When
       const response = await request(app.getHttpServer())
-        .patch(`/units/${createdUnit.id}`)
+        .patch(`/lessons/${createdLesson.id}`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .send(updateUnitRequest);
+        .send(updateLessonRequest);
 
       // Then
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toMatchObject({
-        id: createdUnit.id,
-        title: 'Updated Unit 1',
-        description: 'Updated Description of Unit 1',
+        id: createdLesson.id,
+        title: 'Updated Lesson 1',
+        description: 'Updated Description of Lesson 1',
         isPublished: false,
         chapterId: 'chapter-1',
       });
@@ -356,23 +366,23 @@ describe('UnitControllerIT', () => {
     it('should return 404 if chapter not found', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const updateUnitRequest = new UpdateUnitRequest(
-        'Updated Unit 1',
-        'Updated Description of Unit 1',
+      const updateLessonRequest = new UpdateLessonRequest(
+        'Updated Lesson 1',
+        'Updated Description of Lesson 1',
         false,
       );
 
       // When
       const response = await request(app.getHttpServer())
-        .patch('/units/non-existing-id')
+        .patch('/lessons/non-existing-id')
         .set('Authorization', `Bearer ${adminToken}`)
-        .send(updateUnitRequest);
+        .send(updateLessonRequest);
 
       // Then
       expect(response.status).toBe(HttpStatus.NOT_FOUND);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBe(
-        'Unit with id non-existing-id not found',
+        'Lesson with id non-existing-id not found',
       );
     });
 
@@ -385,23 +395,24 @@ describe('UnitControllerIT', () => {
         isPublished: true,
       };
       await chapterRepository.create(chapter);
-      const unit = {
-        title: 'Unit 1',
-        description: 'Description of Unit 1',
+      const lesson = {
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
         isPublished: true,
         chapterId: 'chapter-1',
+        order: 1,
       };
-      const createdUnit = await unitRepository.create(unit);
-      const updateUnitRequest = new UpdateUnitRequest(
-        'Updated Unit 1',
-        'Updated Description of Unit 1',
+      const createdLesson = await lessonRepository.create(lesson);
+      const updateLessonRequest = new UpdateLessonRequest(
+        'Updated Lesson 1',
+        'Updated Description of Lesson 1',
         false,
       );
 
       // When
       const response = await request(app.getHttpServer())
-        .patch(`/units/${createdUnit.id}`)
-        .send(updateUnitRequest);
+        .patch(`/lessons/${createdLesson.id}`)
+        .send(updateLessonRequest);
 
       // Then
       expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
@@ -415,7 +426,7 @@ describe('UnitControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .patch('/units/non-existing-id')
+        .patch('/lessons/non-existing-id')
         .set('Authorization', `Bearer ${userToken}`);
 
       // Then

@@ -19,7 +19,7 @@ export class UpdateLessonRequest {
   @IsNumber()
   order?: number;
 
-  constructor(title: string, description: string, isPublished: boolean, order: number) {
+  constructor(title: string, description: string, isPublished: boolean, order?: number) {
     this.title = title;
     this.description = description;
     this.isPublished = isPublished;

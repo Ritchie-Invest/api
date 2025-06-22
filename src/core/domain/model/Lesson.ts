@@ -1,5 +1,5 @@
 import { DomainModel } from '../../base/domain-model';
-import { UnitInvalidDataError } from '../error/UnitInvalidDataError';
+import { LessonInvalidDataError } from '../error/LessonInvalidDataError';
 
 export class Lesson extends DomainModel {
   title: string;
@@ -23,11 +23,11 @@ export class Lesson extends DomainModel {
     super(id);
 
     if (!title) {
-      throw new UnitInvalidDataError('Title is required');
+      throw new LessonInvalidDataError('Title is required');
     }
 
     if (!description) {
-      throw new UnitInvalidDataError('Description is required');
+      throw new LessonInvalidDataError('Description is required');
     }
 
     this.title = title;

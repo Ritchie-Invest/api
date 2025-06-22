@@ -50,7 +50,7 @@ export class PrismaLessonRepository implements LessonRepository {
   }
 
   async removeAll(): Promise<void> {
-    await this.prisma.unit.deleteMany();
+    await this.prisma.lesson.deleteMany();
   }
 
   findAll(): Promise<Lesson[]> {
