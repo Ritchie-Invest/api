@@ -1,27 +1,27 @@
-import { UpdateUnitMapper } from '../update-unit.mapper';
+import { UpdateLessonMapper } from '../update-lesson.mapper';
 import { ProfileRequest } from '../../request/profile.request';
 import { UserType } from '../../../../core/domain/type/UserType';
-import { UpdateUnitRequest } from '../../request/update-unit.request';
-import { Unit } from '../../../../core/domain/model/Unit';
+import { UpdateLessonRequest } from '../../request/update-lesson.request';
+import { Lesson } from '../../../../core/domain/model/Lesson';
 
-describe('UpdateUnitMapper', () => {
+describe('UpdateLessonMapper', () => {
   describe('toDomain', () => {
-    it('should map ProfileRequest, unitId, and UpdateUnitRequest to UpdateUnitCommand', () => {
+    it('should map ProfileRequest, lessonId, and UpdateLessonRequest to UpdateLessonCommand', () => {
       // Given
       const currentUser: ProfileRequest = {
         id: 'user-1',
         email: 'user1@example.com',
         type: UserType.ADMIN,
       };
-      const unitId = 'unit-1';
-      const request: UpdateUnitRequest = {
+      const lessonId = 'lesson-1';
+      const request: UpdateLessonRequest = {
         title: 'Updated Title',
         description: 'Updated Description',
         isPublished: true,
       };
 
       // When
-      const command = UpdateUnitMapper.toDomain(currentUser, unitId, request);
+      const command = UpdateLessonMapper.toDomain(currentUser, lessonId, request);
 
       // Then
       expect(command).toEqual({
@@ -29,7 +29,7 @@ describe('UpdateUnitMapper', () => {
           id: 'user-1',
           type: UserType.ADMIN,
         },
-        unitId: 'unit-1',
+        lessonId: 'lesson-1',
         title: 'Updated Title',
         description: 'Updated Description',
         isPublished: true,
@@ -38,28 +38,30 @@ describe('UpdateUnitMapper', () => {
   });
 
   describe('fromDomain', () => {
-    it('should map Unit to UpdateUnitResponse', () => {
+    it('should map Lesson to UpdateLessonResponse', () => {
       // Given
       const now = new Date();
-      const unit = new Unit(
-        'unit-1',
+      const lesson = new Lesson(
+        'lesson-1',
         'Updated Title',
         'Updated Description',
         'chapter-1',
+        2
       );
-      unit.isPublished = true;
-      unit.createdAt = now;
-      unit.updatedAt = now;
+      lesson.isPublished = true;
+      lesson.createdAt = now;
+      lesson.updatedAt = now;
 
       // When
-      const response = UpdateUnitMapper.fromDomain(unit);
+      const response = UpdateLessonMapper.fromDomain(lesson);
 
       // Then
       expect(response).toEqual({
-        id: 'unit-1',
+        id: 'lesson-1',
         chapterId: 'chapter-1',
         title: 'Updated Title',
         description: 'Updated Description',
+        order: 2,
         isPublished: true,
         createdAt: now,
         updatedAt: now,

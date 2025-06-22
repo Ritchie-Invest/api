@@ -39,14 +39,15 @@ model Chapter {
   isPublished Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  units       Unit[]   
+  lessons       Lesson[]   
 }
 
-model Unit {
+model Lesson {
   id          String  @id @default(cuid())
   title        String
   description  String
   chapterId   String
+  order       Int
   isPublished Boolean
   updatedAt    DateTime @updatedAt
   createdAt    DateTime @default(now())

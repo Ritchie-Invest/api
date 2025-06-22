@@ -1,9 +1,10 @@
 import { DomainModel } from '../../base/domain-model';
 
-export class Unit extends DomainModel {
+export class Lesson extends DomainModel {
   title: string;
   description: string;
   chapterId: string;
+  order?: number ;
   isPublished: boolean;
   updatedAt: Date;
   createdAt: Date;
@@ -13,6 +14,7 @@ export class Unit extends DomainModel {
     title: string,
     description: string,
     chapterId: string,
+    order?: number ,
     isPublished: boolean = false,
     updatedAt?: Date,
     createdAt?: Date,
@@ -30,6 +32,7 @@ export class Unit extends DomainModel {
     this.title = title;
     this.description = description;
     this.chapterId = chapterId;
+    this.order = order;
     this.isPublished = isPublished;
     this.updatedAt = updatedAt || new Date();
     this.createdAt = createdAt || new Date();
