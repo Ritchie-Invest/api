@@ -14,13 +14,13 @@ import { ChapterRepository } from './core/domain/repository/chapter.repository';
 import { PrismaChapterRepository } from './adapters/prisma/prisma-chapter.repository';
 import { UpdateChapterUseCase } from './core/usecases/update-chapter.use-case';
 import { GetChapterByIdUseCase } from './core/usecases/get-chapter-by-id.use-case';
-import { UnitRepository } from './core/domain/repository/unit.repository';
-import { PrismaUnitRepository } from './adapters/prisma/prisma-unit.repository';
-import { CreateUnitUseCase } from './core/usecases/create-unit';
-import { UpdateUnitUseCase } from './core/usecases/update-unit.use-case';
-import { GetUnitByIdUseCase } from './core/usecases/get-units-by-id.use-case';
-import { getUnitsByChapterIdUseCase } from './core/usecases/get-units-by-chapter.use-case';
-import { UnitController } from './adapters/api/controller/unit.controller';
+import { LessonRepository } from './core/domain/repository/lesson.repository';
+import { PrismaLessonRepository } from './adapters/prisma/prisma-lesson.repository';
+import { CreateLessonUseCase } from './core/usecases/create-lesson';
+import { UpdateLessonUseCase } from './core/usecases/update-lesson.use-case';
+import { GetLessonByIdUseCase } from './core/usecases/get-lesson-by-id.use-case';
+import { getLessonsByChapterIdUseCase } from './core/usecases/get-lessons-by-chapter.use-case';
+import { LessonController } from './adapters/api/controller/lesson.controller';
 import { RefreshTokenRepository } from './core/domain/repository/refresh-token.repository';
 import { ChapterController } from './adapters/api/controller/chapter.controller';
 import { UserController } from './adapters/api/controller/user.controller';
@@ -35,7 +35,7 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
     AuthController,
     UserController,
     ChapterController,
-    UnitController,
+    LessonController,
   ],
   providers: [
     PrismaService,
@@ -63,8 +63,8 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
       inject: [PrismaService],
     },
     {
-      provide: UnitRepository,
-      useFactory: (prisma: PrismaService) => new PrismaUnitRepository(prisma),
+      provide: LessonRepository,
+      useFactory: (prisma: PrismaService) => new PrismaLessonRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -105,6 +105,7 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
       ) => new RefreshUseCase(refreshTokenRepository, tokenService),
       inject: [RefreshTokenRepository, 'TokenService'],
     },
+   
     {
       provide: CreateChapterUseCase,
       useFactory: (chapterRepository: ChapterRepository) =>
@@ -130,28 +131,28 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
       inject: [ChapterRepository],
     },
     {
-      provide: CreateUnitUseCase,
-      useFactory: (unitRepository: UnitRepository) =>
-        new CreateUnitUseCase(unitRepository),
-      inject: [UnitRepository],
+      provide: CreateLessonUseCase,
+      useFactory: (lessonRepository: LessonRepository) =>
+        new CreateLessonUseCase(lessonRepository),
+      inject: [LessonRepository],
     },
     {
-      provide: UpdateUnitUseCase,
-      useFactory: (unitRepository: UnitRepository) =>
-        new UpdateUnitUseCase(unitRepository),
-      inject: [UnitRepository],
+      provide: UpdateLessonUseCase,
+      useFactory: (lessonRepository: LessonRepository) =>
+        new UpdateLessonUseCase(lessonRepository),
+      inject: [LessonRepository],
     },
     {
-      provide: GetUnitByIdUseCase,
-      useFactory: (unitRepository: UnitRepository) =>
-        new GetUnitByIdUseCase(unitRepository),
-      inject: [UnitRepository],
+      provide: GetLessonByIdUseCase,
+      useFactory: (lessonRepository: LessonRepository) =>
+        new GetLessonByIdUseCase(lessonRepository),
+      inject: [LessonRepository],
     },
     {
-      provide: getUnitsByChapterIdUseCase,
-      useFactory: (unitRepository: UnitRepository) =>
-        new getUnitsByChapterIdUseCase(unitRepository),
-      inject: [UnitRepository],
+      provide: getLessonsByChapterIdUseCase,
+      useFactory: (lessonRepository: LessonRepository) =>
+        new getLessonsByChapterIdUseCase(lessonRepository),
+      inject: [LessonRepository],
     },
   ],
 })

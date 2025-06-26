@@ -13,8 +13,8 @@ import { UserNotAllowedError } from '../core/domain/error/UserNotAllowedError';
 import { TokenInvalidOrExpiredError } from '../core/domain/error/TokenInvalidOrExpiredError';
 import { ChapterNotFoundError } from '../core/domain/error/ChapterNotFoundError';
 import { ChapterInvalidDataError } from '../core/domain/error/ChapterInvalidDataError';
-import { UnitNotFoundError } from '../core/domain/error/UnitNotFoundError';
-import { UnitInvalidDataError } from '../core/domain/error/UnitInvalidDataError';
+import { LessonNotFoundError } from '../core/domain/error/LessonNotFoundError';
+import { LessonInvalidDataError } from '../core/domain/error/LessonInvalidDataError';
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
@@ -38,14 +38,14 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof WrongEmailFormatError ||
       exception instanceof WrongPasswordFormatError ||
       exception instanceof ChapterInvalidDataError ||
-      exception instanceof UnitInvalidDataError
+      exception instanceof LessonInvalidDataError
     ) {
       return HttpStatus.BAD_REQUEST;
     }
     if (
       exception instanceof UserNotFoundError ||
       exception instanceof ChapterNotFoundError ||
-      exception instanceof UnitNotFoundError
+      exception instanceof LessonNotFoundError
     ) {
       return HttpStatus.NOT_FOUND;
     }
