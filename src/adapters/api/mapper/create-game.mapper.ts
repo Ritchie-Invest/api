@@ -1,4 +1,4 @@
-import { CreateGameCommand } from '../../../core/usecases/create-game';
+import { CreateGameCommand } from '../../../core/usecases/create-game.use-case';
 import { CreateGameRequest } from '../request/create-game.request';
 import { Game } from '../../../core/domain/model/Game';
 import { CreateGameResponse } from '../response/create-game.response';

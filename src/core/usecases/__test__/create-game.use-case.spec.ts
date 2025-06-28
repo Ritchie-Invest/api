@@ -1,5 +1,5 @@
-import { CreateGameUseCase } from '../create-game';
-import { CreateGameCommand } from '../create-game';
+import { CreateGameUseCase } from '../create-game.use-case';
+import { CreateGameCommand } from '../create-game.use-case';
 import { UserType } from '../../domain/type/UserType';
 import { UserNotAllowedError } from '../../domain/error/UserNotAllowedError';
 import { InMemoryGameRepository } from '../../../adapters/in-memory/in-memory-game.repository';

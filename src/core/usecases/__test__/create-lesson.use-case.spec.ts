@@ -1,5 +1,5 @@
-import { CreateLessonUseCase } from '../create-lesson';
-import { CreateLessonCommand } from '../create-lesson';
+import { CreateLessonUseCase } from '../create-lesson.use-case';
+import { CreateLessonCommand } from '../create-lesson.use-case';
 import { UserType } from '../../domain/type/UserType';
 import { UserNotAllowedError } from '../../domain/error/UserNotAllowedError';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';

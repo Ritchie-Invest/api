@@ -1,4 +1,4 @@
-import { CreateLessonCommand } from '../../../core/usecases/create-lesson';
+import { CreateLessonCommand } from '../../../core/usecases/create-lesson.use-case';
 import { CreateLessonRequest } from '../request/create-lesson.request';
 import { Lesson } from '../../../core/domain/model/Lesson';
 import { CreateLessonResponse } from '../response/create-lesson.response';

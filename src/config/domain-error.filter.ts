@@ -15,7 +15,8 @@ import { ChapterNotFoundError } from '../core/domain/error/ChapterNotFoundError'
 import { ChapterInvalidDataError } from '../core/domain/error/ChapterInvalidDataError';
 import { LessonNotFoundError } from '../core/domain/error/LessonNotFoundError';
 import { LessonInvalidDataError } from '../core/domain/error/LessonInvalidDataError';
-
+import { GameInvalidDataError } from '../core/domain/error/GameInvalidDataError';
+import { GameNotFoundError } from '../core/domain/error/GameNotFoundError';
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost) {
@@ -38,14 +39,16 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof WrongEmailFormatError ||
       exception instanceof WrongPasswordFormatError ||
       exception instanceof ChapterInvalidDataError ||
-      exception instanceof LessonInvalidDataError
+      exception instanceof LessonInvalidDataError ||
+      exception instanceof GameInvalidDataError 
     ) {
       return HttpStatus.BAD_REQUEST;
     }
     if (
       exception instanceof UserNotFoundError ||
       exception instanceof ChapterNotFoundError ||
-      exception instanceof LessonNotFoundError
+      exception instanceof LessonNotFoundError ||
+      exception instanceof GameNotFoundError
     ) {
       return HttpStatus.NOT_FOUND;
     }

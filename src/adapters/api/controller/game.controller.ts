@@ -12,7 +12,7 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { CreateGameResponse } from '../response/create-game.response';
-import { CreateGameUseCase } from '../../../core/usecases/create-game';
+import { CreateGameUseCase } from '../../../core/usecases/create-game.use-case';
 import { CreateGameRequest } from '../request/create-game.request';
 import { CreateGameMapper } from '../mapper/create-game.mapper';
 import { UpdateGameUseCase } from '../../../core/usecases/update-game.use-case';

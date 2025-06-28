@@ -12,7 +12,7 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { CreateLessonResponse } from '../response/create-lesson.response';
-import { CreateLessonUseCase } from '../../../core/usecases/create-lesson';
+import { CreateLessonUseCase } from '../../../core/usecases/create-lesson.use-case';
 import { CreateLessonRequest } from '../request/create-lesson.request';
 import { CreateLessonMapper } from '../mapper/create-lesson.mapper';
 import { UpdateLessonUseCase } from '../../../core/usecases/update-lesson.use-case';

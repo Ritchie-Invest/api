@@ -1,5 +1,5 @@
 import { DomainModel } from '../../base/domain-model';
-import { GameInvalidDataError } from '../error/LessonInvalidDataError';
+import { GameInvalidDataError } from '../error/GameInvalidDataError';
 import { GameRules } from '../type/Game/GameRules';
 import { GameType } from '../type/Game/GameType';
 import { Question } from '../type/Game/Question';

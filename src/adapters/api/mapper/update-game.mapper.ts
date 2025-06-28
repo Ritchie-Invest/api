@@ -19,7 +19,6 @@ export class UpdateGameMapper {
       type: request.type,
       rules: request.rules,
       questions: request.questions,
-      lessonId: '', // This will be handled by the use case from existing game
       order: request.order,
       isPublished: request.isPublished,
     };

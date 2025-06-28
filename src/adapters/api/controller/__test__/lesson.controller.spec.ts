@@ -323,7 +323,7 @@ describe('LessonControllerIT', () => {
   });
 
   describe('updateChapter', () => {
-    it('should update a chapter', async () => {
+    it('should update a lesson', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
       const chapter = {
@@ -363,7 +363,7 @@ describe('LessonControllerIT', () => {
       });
     });
 
-    it('should return 404 if chapter not found', async () => {
+    it('should return 404 if lesson not found', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
       const updateLessonRequest = new UpdateLessonRequest(

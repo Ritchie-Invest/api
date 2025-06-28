@@ -16,7 +16,7 @@ import { UpdateChapterUseCase } from './core/usecases/update-chapter.use-case';
 import { GetChapterByIdUseCase } from './core/usecases/get-chapter-by-id.use-case';
 import { LessonRepository } from './core/domain/repository/lesson.repository';
 import { PrismaLessonRepository } from './adapters/prisma/prisma-lesson.repository';
-import { CreateLessonUseCase } from './core/usecases/create-lesson';
+import { CreateLessonUseCase } from './core/usecases/create-lesson.use-case';
 import { UpdateLessonUseCase } from './core/usecases/update-lesson.use-case';
 import { GetLessonByIdUseCase } from './core/usecases/get-lesson-by-id.use-case';
 import { getLessonsByChapterIdUseCase } from './core/usecases/get-lessons-by-chapter.use-case';
@@ -28,6 +28,13 @@ import { GetChaptersUseCase } from './core/usecases/get-chapters.use-case';
 import { LogoutUseCase } from './core/usecases/logout.use-case';
 import { RefreshUseCase } from './core/usecases/refresh.use-case';
 import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-token.repository';
+import { GameController } from './adapters/api/controller/game.controller';
+import { GameRepository } from './core/domain/repository/game.repository';
+import { PrismaGameRepository } from './adapters/prisma/prisma-game.repository';
+import { CreateGameUseCase } from './core/usecases/create-game.use-case';
+import { UpdateGameUseCase } from './core/usecases/update-game.use-case';
+import { GetGameByIdUseCase } from './core/usecases/get-game-by-id.use-case';
+import { getGamesByLessonIdUseCase } from './core/usecases/get-games-by-lesson.use-case';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -36,6 +43,7 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
     UserController,
     ChapterController,
     LessonController,
+    GameController,
   ],
   providers: [
     PrismaService,
@@ -65,6 +73,11 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
     {
       provide: LessonRepository,
       useFactory: (prisma: PrismaService) => new PrismaLessonRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: GameRepository,
+      useFactory: (prisma: PrismaService) => new PrismaGameRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -153,6 +166,30 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
       useFactory: (lessonRepository: LessonRepository) =>
         new getLessonsByChapterIdUseCase(lessonRepository),
       inject: [LessonRepository],
+    },
+    {
+      provide: CreateGameUseCase,
+      useFactory: (gameRepository: GameRepository) =>
+        new CreateGameUseCase(gameRepository),
+      inject: [GameRepository],
+    },
+    {
+      provide: UpdateGameUseCase,
+      useFactory: (gameRepository: GameRepository) =>
+        new UpdateGameUseCase(gameRepository),
+      inject: [GameRepository],
+    },
+    {
+      provide: GetGameByIdUseCase,
+      useFactory: (gameRepository: GameRepository) =>
+        new GetGameByIdUseCase(gameRepository),
+      inject: [GameRepository],
+    },
+    {
+      provide: getGamesByLessonIdUseCase,
+      useFactory: (gameRepository: GameRepository) =>
+        new getGamesByLessonIdUseCase(gameRepository),
+      inject: [GameRepository],
     },
   ],
 })

@@ -70,7 +70,6 @@ describe('UpdateGameUseCase', () => {
       type: GameType.QCM,
       rules: updatedRules,
       questions: updatedQuestions,
-      lessonId: 'lesson-2',
       isPublished: true,
       order: 2,
     };
@@ -86,7 +85,7 @@ describe('UpdateGameUseCase', () => {
       type: GameType.QCM,
       rules: updatedRules,
       questions: updatedQuestions,
-      lessonId: 'lesson-2',
+      lessonId: 'lesson-1', // lessonId should not change - keeps original value
       isPublished: true,
       order: 2,
       createdAt: game.createdAt,
@@ -98,7 +97,7 @@ describe('UpdateGameUseCase', () => {
       type: GameType.QCM,
       rules: updatedRules,
       questions: updatedQuestions,
-      lessonId: 'lesson-2',
+      lessonId: 'lesson-1', // lessonId should not change - keeps original value
       isPublished: true,
       order: 2,
       createdAt: game.createdAt,
@@ -120,7 +119,6 @@ describe('UpdateGameUseCase', () => {
         time_limit_seconds: 30,
       },
       questions: [],
-      lessonId: 'lesson-1',
       order: 1,
       isPublished: true,
     };
@@ -142,7 +140,6 @@ describe('UpdateGameUseCase', () => {
         time_limit_seconds: 30,
       },
       questions: [],
-      lessonId: 'lesson-1',
       order: 1,
       isPublished: true,
     };

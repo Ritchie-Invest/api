@@ -15,10 +15,8 @@ export type UpdateGameCommand = {
   type: GameType;
   rules: GameRules;
   questions: Question[];  
-  lessonId: string;
   order?: number ;
   isPublished: boolean;
-  UpdateGameCommand?: boolean;
 };
 
 export class UpdateGameUseCase implements UseCase<UpdateGameCommand, Game> {
@@ -36,7 +34,6 @@ export class UpdateGameUseCase implements UseCase<UpdateGameCommand, Game> {
       type, 
       rules, 
       questions,
-      lessonId, 
       order, 
       isPublished } = command;
 
@@ -49,7 +46,8 @@ export class UpdateGameUseCase implements UseCase<UpdateGameCommand, Game> {
       type: type ?? currentGame.type,
       rules: rules ?? currentGame.rules,
       questions: questions ?? currentGame.questions,
-      lessonId: lessonId ?? currentGame.lessonId,
+      // lessonId is not modifiable - keep the existing one
+      lessonId: currentGame.lessonId,
       order: order ?? currentGame.order,
       isPublished: isPublished ?? currentGame.isPublished,
       updatedAt: new Date(),

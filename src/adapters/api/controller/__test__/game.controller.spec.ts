@@ -10,6 +10,7 @@ import { Reflector } from '@nestjs/core';
 import { TokenService } from '../../../../core/domain/service/token.service';
 import { UserType } from '../../../../core/domain/type/UserType';
 import { GameRepository } from '../../../../core/domain/repository/game.repository';
+import { ChapterRepository } from '../../../../core/domain/repository/chapter.repository';
 import { GetGamesByLessonIdResponse } from '../../response/get-games-by-lesson.response';
 import { CreateGameRequest } from '../../request/create-game.request';
 import { LessonRepository } from '../../../../core/domain/repository/lesson.repository';
@@ -23,6 +24,7 @@ describe('GameControllerIT', () => {
   let app: INestApplication<App>;
   let lessonRepository: LessonRepository;
   let gameRepository: GameRepository;
+  let chapterRepository: ChapterRepository;
   let tokenService: TokenService;
 
   beforeAll(async () => {
@@ -46,21 +48,32 @@ describe('GameControllerIT', () => {
   beforeEach(async () => {
     lessonRepository = app.get(LessonRepository);
     gameRepository = app.get(GameRepository);
+    chapterRepository = app.get(ChapterRepository);
     tokenService = app.get('TokenService');
 
     await gameRepository.removeAll();
     await lessonRepository.removeAll();
+    await chapterRepository.removeAll();
   });
 
   afterEach(async () => {
     await gameRepository.removeAll();
     await lessonRepository.removeAll();
+    await chapterRepository.removeAll();
   });
 
   describe('getGamesByLessonId', () => {
     it('should return games', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
+      // Create the referenced chapter first to satisfy foreign key constraint
+      await chapterRepository.create({
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: false,
+      });
+
       const lesson = {
         id: 'lesson-1',
         title: 'Lesson 1',
@@ -136,10 +149,20 @@ describe('GameControllerIT', () => {
 
    
 
+  });
+  
   describe('getGameById', () => {
     it('should return game by id', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
+      // Create the referenced chapter first to satisfy foreign key constraint
+      await chapterRepository.create({
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: false,
+      });
+
       const lesson = {
         id: 'lesson-1',
         title: 'Lesson 1',
@@ -234,6 +257,14 @@ describe('GameControllerIT', () => {
     it('should create a game', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
+      // Create the referenced chapter first to satisfy foreign key constraint
+      await chapterRepository.create({
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: false,
+      });
+
       const lesson = {
         id: 'lesson-1',
         title: 'Lesson 1',
@@ -361,6 +392,14 @@ describe('GameControllerIT', () => {
     it('should update a game', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
+      // Create the referenced chapter first to satisfy foreign key constraint
+      await chapterRepository.create({
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: false,
+      });
+
       const lesson = {
         id: 'lesson-1',
         title: 'Lesson 1',
@@ -451,6 +490,14 @@ describe('GameControllerIT', () => {
 
     it('should return 401 if not authenticated', async () => {
       // Given
+      // Create the referenced chapter first to satisfy foreign key constraint
+      await chapterRepository.create({
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: false,
+      });
+
       const lesson = {
         id: 'lesson-1',
         title: 'Lesson 1',
@@ -539,4 +586,4 @@ describe('GameControllerIT', () => {
       feedback: 'The correct answer is 4',
     };
   }
-});
+})
