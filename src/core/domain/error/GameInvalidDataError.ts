@@ -1,6 +1,6 @@
 import { DomainError } from '../../base/domain-error';
 
-export class GameInvalidDataError extends DomainError {
+export class LessonInvalidDataError extends DomainError {
   constructor(message: string) {
     super(message);
   }
