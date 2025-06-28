@@ -236,7 +236,7 @@ describe('LessonControllerIT', () => {
         'New Lesson',
         'Description of New Lesson',
         'chapter-1',
-        1
+        1,
       );
 
       // When
@@ -262,7 +262,7 @@ describe('LessonControllerIT', () => {
         '',
         'Description of New Lesson',
         'chapter-1',
-        1
+        1,
       );
 
       // When

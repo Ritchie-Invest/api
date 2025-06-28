@@ -1,6 +1,10 @@
 import { EntityMapper } from '../../../core/base/entity-mapper';
 import { Game } from '../../../core/domain/model/Game';
-import { Game as GameEntity, GameType as PrismaGameType, Prisma } from '@prisma/client';
+import {
+  Game as GameEntity,
+  GameType as PrismaGameType,
+  Prisma,
+} from '@prisma/client';
 import { GameType } from '../../../core/domain/type/Game/GameType';
 import { GameRules } from '../../../core/domain/type/Game/GameRules';
 import { Question } from '../../../core/domain/type/Game/Question';
@@ -12,8 +16,10 @@ export class PrismaGameMapper implements EntityMapper<Game, GameEntity> {
     return {
       id: model.id,
       type: this.mapDomainTypeToPrismaType(model.type),
-      rules: JSON.parse(JSON.stringify(model.rules)), // Assurer la compatibilité JSON
-      questions: JSON.parse(JSON.stringify(model.questions)), // Assurer la compatibilité JSON
+      rules: JSON.parse(JSON.stringify(model.rules)) as Prisma.JsonValue, // Assurer la compatibilité JSON
+      questions: JSON.parse(
+        JSON.stringify(model.questions),
+      ) as Prisma.JsonValue,
       lessonId: model.lessonId,
       order: model.order ?? 0,
       isPublished: model.isPublished,
@@ -33,8 +39,8 @@ export class PrismaGameMapper implements EntityMapper<Game, GameEntity> {
       updatedAt: model.updatedAt,
       createdAt: model.createdAt,
       lesson: {
-        connect: { id: model.lessonId }
-      }
+        connect: { id: model.lessonId },
+      },
     };
   }
 
@@ -47,8 +53,8 @@ export class PrismaGameMapper implements EntityMapper<Game, GameEntity> {
       isPublished: model.isPublished,
       updatedAt: model.updatedAt,
       lesson: {
-        connect: { id: model.lessonId }
-      }
+        connect: { id: model.lessonId },
+      },
     };
   }
 
@@ -75,20 +81,20 @@ export class PrismaGameMapper implements EntityMapper<Game, GameEntity> {
       [GameType.GAUGE]: 'GAUGE' as PrismaGameType,
       [GameType.CHOOSE_AN_ORDER]: 'CHOOSE_AN_ORDER' as PrismaGameType,
     };
-    
+
     return typeMap[domainType];
   }
 
   private mapPrismaTypeToDomainType(prismaType: PrismaGameType): GameType {
     const typeMap: Record<PrismaGameType, GameType> = {
-      'QCM': GameType.QCM,
-      'PHRASES_A_TROUS': GameType.PHRASES_A_TROUS,
-      'MATCH_THE_WORD': GameType.MATCH_THE_WORD,
-      'TRUE_OR_FALSE': GameType.TRUE_OR_FALSE,
-      'GAUGE': GameType.GAUGE,
-      'CHOOSE_AN_ORDER': GameType.CHOOSE_AN_ORDER,
+      QCM: GameType.QCM,
+      PHRASES_A_TROUS: GameType.PHRASES_A_TROUS,
+      MATCH_THE_WORD: GameType.MATCH_THE_WORD,
+      TRUE_OR_FALSE: GameType.TRUE_OR_FALSE,
+      GAUGE: GameType.GAUGE,
+      CHOOSE_AN_ORDER: GameType.CHOOSE_AN_ORDER,
     };
-    
+
     return typeMap[prismaType];
   }
 }

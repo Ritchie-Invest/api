@@ -17,7 +17,9 @@ export class getLessonsByChapterIdUseCase
 
   async execute(command: getLessonsByChapterIdCommand): Promise<Lesson[]> {
     if (!this.canExecute(command.currentUser)) {
-      throw new UserNotAllowedError('Unauthorized: Only admins can get lessons');
+      throw new UserNotAllowedError(
+        'Unauthorized: Only admins can get lessons',
+      );
     }
 
     return this.lessonRepository.findByChapter(command.chapterId);

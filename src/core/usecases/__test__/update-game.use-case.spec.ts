@@ -19,12 +19,12 @@ describe('UpdateGameUseCase', () => {
     updateGameUseCase = new UpdateGameUseCase(gameRepository);
 
     await gameRepository.removeAll();
-    
+
     const mockRules: GameRules = {
       shuffle_questions: false,
       time_limit_seconds: 60,
     };
-    
+
     const mockQuestions: Question[] = [
       {
         question: 'Original question?',
@@ -52,7 +52,7 @@ describe('UpdateGameUseCase', () => {
       shuffle_questions: true,
       time_limit_seconds: 120,
     };
-    
+
     const updatedQuestions: Question[] = [
       {
         question: 'Updated question?',

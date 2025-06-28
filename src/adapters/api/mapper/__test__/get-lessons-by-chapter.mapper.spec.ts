@@ -37,8 +37,26 @@ describe('getLessonsByChapterIdMapper', () => {
       // Given
       const now = new Date();
       const lessons: Lesson[] = [
-        new Lesson('lesson-1', 'Lesson 1', 'Desc 1', 'chapter-1',1, true, now, now),
-        new Lesson('lesson-2', 'Lesson 2', 'Desc 2', 'chapter-1',2, false, now, now),
+        new Lesson(
+          'lesson-1',
+          'Lesson 1',
+          'Desc 1',
+          'chapter-1',
+          1,
+          true,
+          now,
+          now,
+        ),
+        new Lesson(
+          'lesson-2',
+          'Lesson 2',
+          'Desc 2',
+          'chapter-1',
+          2,
+          false,
+          now,
+          now,
+        ),
       ];
 
       // When

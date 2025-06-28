@@ -11,12 +11,16 @@ export type GetLessonByIdCommand = {
   lessonId: string;
 };
 
-export class GetLessonByIdUseCase implements UseCase<GetLessonByIdCommand, Lesson> {
+export class GetLessonByIdUseCase
+  implements UseCase<GetLessonByIdCommand, Lesson>
+{
   constructor(private readonly lessonRepository: LessonRepository) {}
 
   async execute(command: GetLessonByIdCommand): Promise<Lesson> {
     if (!this.canExecute(command.currentUser)) {
-      throw new UserNotAllowedError('Unauthorized: Only admins can get lessons');
+      throw new UserNotAllowedError(
+        'Unauthorized: Only admins can get lessons',
+      );
     }
 
     const lesson = await this.lessonRepository.findById(command.lessonId);

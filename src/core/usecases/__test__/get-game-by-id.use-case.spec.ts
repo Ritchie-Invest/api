@@ -20,12 +20,12 @@ describe('GetGameByIdUseCase', () => {
     getGameByIdUseCase = new GetGameByIdUseCase(gameRepository);
 
     await gameRepository.removeAll();
-    
+
     const mockRules: GameRules = {
       shuffle_questions: true,
       time_limit_seconds: 30,
     };
-    
+
     const mockQuestions: Question[] = [
       {
         question: 'What is 2+2?',

@@ -58,7 +58,10 @@ export class LessonController {
     @CurrentUser() currentUser: ProfileRequest,
     @Param('chapterId') chapterId: string,
   ): Promise<getLessonsByChapterIdResponse> {
-    const command = getLessonsByChapterIdMapper.toDomain(currentUser, chapterId);
+    const command = getLessonsByChapterIdMapper.toDomain(
+      currentUser,
+      chapterId,
+    );
     const lessons = await this.getLessonsByChapterIdUseCase.execute(command);
     return getLessonsByChapterIdMapper.fromDomain(lessons);
   }

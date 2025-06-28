@@ -28,24 +28,23 @@ export class CreateGameUseCase implements UseCase<CreateGameCommand, Game> {
       );
     }
 
-    const { 
-      type, 
-      rules, 
+    const {
+      type,
+      rules,
       questions,
-      lessonId, 
-      order, 
-      isPublished = false, 
-      
+      lessonId,
+      order,
+      isPublished = false,
     } = command;
 
     const game = new Game(
       this.generateId(),
-      type, 
-      rules, 
+      type,
+      rules,
       questions,
-      lessonId, 
-      order, 
-      isPublished
+      lessonId,
+      order,
+      isPublished,
     );
 
     return this.gameRepository.create(game);

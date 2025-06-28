@@ -118,7 +118,7 @@ import { getGamesByLessonIdUseCase } from './core/usecases/get-games-by-lesson.u
       ) => new RefreshUseCase(refreshTokenRepository, tokenService),
       inject: [RefreshTokenRepository, 'TokenService'],
     },
-   
+
     {
       provide: CreateChapterUseCase,
       useFactory: (chapterRepository: ChapterRepository) =>

@@ -21,7 +21,11 @@ describe('UpdateLessonMapper', () => {
       };
 
       // When
-      const command = UpdateLessonMapper.toDomain(currentUser, lessonId, request);
+      const command = UpdateLessonMapper.toDomain(
+        currentUser,
+        lessonId,
+        request,
+      );
 
       // Then
       expect(command).toEqual({
@@ -46,7 +50,7 @@ describe('UpdateLessonMapper', () => {
         'Updated Title',
         'Updated Description',
         'chapter-1',
-        2
+        2,
       );
       lesson.isPublished = true;
       lesson.createdAt = now;

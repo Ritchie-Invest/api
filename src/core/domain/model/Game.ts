@@ -4,13 +4,12 @@ import { GameRules } from '../type/Game/GameRules';
 import { GameType } from '../type/Game/GameType';
 import { Question } from '../type/Game/Question';
 
-
 export class Game extends DomainModel {
   type: GameType;
   rules: GameRules;
-  questions: Question[];  
+  questions: Question[];
   lessonId: string;
-  order?: number ;
+  order?: number;
   isPublished: boolean;
   updatedAt: Date;
   createdAt: Date;
@@ -21,13 +20,12 @@ export class Game extends DomainModel {
     rules: GameRules,
     questions: Question[],
     lessonId: string,
-    order?: number, 
+    order?: number,
     isPublished: boolean = false,
     updatedAt?: Date,
     createdAt?: Date,
   ) {
     super(id);
-
 
     if (!type) {
       throw new GameInvalidDataError('Game type is required');
@@ -38,14 +36,13 @@ export class Game extends DomainModel {
     if (!questions || questions.length === 0) {
       throw new GameInvalidDataError('At least one question is required');
     }
-    if (!questions.every(q => q)) {
+    if (!questions.every((q) => q)) {
       throw new GameInvalidDataError('All questions must be valid');
     }
-    
+
     if (!lessonId) {
       throw new GameInvalidDataError('Lesson ID is required');
     }
-
 
     this.type = type;
     this.rules = rules;

@@ -23,7 +23,7 @@ describe('CreateGameUseCase', () => {
       shuffle_questions: true,
       time_limit_seconds: 30,
     };
-    
+
     const mockQuestions: Question[] = [
       {
         question: 'What is 2+2?',
@@ -65,7 +65,7 @@ describe('CreateGameUseCase', () => {
       shuffle_questions: false,
       time_limit_seconds: 60,
     };
-    
+
     const mockQuestions: Question[] = [
       {
         question: 'What is the capital of France?',
@@ -103,7 +103,7 @@ describe('CreateGameUseCase', () => {
       shuffle_questions: true,
       time_limit_seconds: 30,
     };
-    
+
     const mockQuestions: Question[] = [
       {
         question: 'Test question?',

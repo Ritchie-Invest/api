@@ -2,7 +2,10 @@ import { LessonRepository } from '../../domain/repository/lesson.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { User } from '../../domain/model/User';
 import { UserType } from '../../domain/type/UserType';
-import { UpdateLessonCommand, UpdateLessonUseCase } from '../update-lesson.use-case';
+import {
+  UpdateLessonCommand,
+  UpdateLessonUseCase,
+} from '../update-lesson.use-case';
 
 describe('UpdateLessonUseCase', () => {
   let lessonRepository: LessonRepository;

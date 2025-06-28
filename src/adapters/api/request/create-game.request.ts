@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsNumber, IsObject, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
 import { GameType } from '../../../core/domain/type/Game/GameType';
 import { GameRules } from '../../../core/domain/type/Game/GameRules';
 import { Question } from '../../../core/domain/type/Game/Question';

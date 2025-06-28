@@ -18,7 +18,12 @@ export class CreateLessonRequest {
   @IsNumber()
   order: number;
 
-  constructor(title: string, description: string, chapterId: string, order: number) {
+  constructor(
+    title: string,
+    description: string,
+    chapterId: string,
+    order: number,
+  ) {
     this.title = title;
     this.description = description;
     this.chapterId = chapterId;

@@ -1,4 +1,8 @@
-import { Game as GameEntity, GameType as PrismaGameType } from '@prisma/client';
+import {
+  Game as GameEntity,
+  GameType as PrismaGameType,
+  Prisma,
+} from '@prisma/client';
 import { Game } from '../../../../core/domain/model/Game';
 import { PrismaGameMapper } from '../prisma-game.mapper';
 import { GameType } from '../../../../core/domain/type/Game/GameType';
@@ -81,7 +85,7 @@ describe('PrismaGameMapper', () => {
         rules: mockRules,
         questions: mockQuestions,
         lessonId: 'lesson-2',
-        order: 0, 
+        order: 0,
         isPublished: false,
         updatedAt: new Date('2023-10-01T12:00:00Z'),
         createdAt: new Date('2023-10-01T12:00:00Z'),
@@ -95,8 +99,10 @@ describe('PrismaGameMapper', () => {
       const entity: GameEntity = {
         id: 'game-1',
         type: 'QCM' as PrismaGameType,
-        rules: mockRules as any,
-        questions: mockQuestions as any,
+        rules: JSON.parse(JSON.stringify(mockRules)) as Prisma.JsonValue,
+        questions: JSON.parse(
+          JSON.stringify(mockQuestions),
+        ) as Prisma.JsonValue,
         lessonId: 'lesson-1',
         order: 1,
         isPublished: true,

@@ -40,7 +40,7 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof WrongPasswordFormatError ||
       exception instanceof ChapterInvalidDataError ||
       exception instanceof LessonInvalidDataError ||
-      exception instanceof GameInvalidDataError 
+      exception instanceof GameInvalidDataError
     ) {
       return HttpStatus.BAD_REQUEST;
     }

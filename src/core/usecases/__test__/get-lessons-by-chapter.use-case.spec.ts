@@ -2,7 +2,10 @@ import { LessonRepository } from '../../domain/repository/lesson.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { User } from '../../domain/model/User';
 import { UserType } from '../../domain/type/UserType';
-import { getLessonsByChapterIdCommand, getLessonsByChapterIdUseCase } from '../get-lessons-by-chapter.use-case';
+import {
+  getLessonsByChapterIdCommand,
+  getLessonsByChapterIdUseCase,
+} from '../get-lessons-by-chapter.use-case';
 
 describe('getLessonsByChapterIdUseCase', () => {
   let lessonRepository: LessonRepository;
@@ -55,7 +58,7 @@ describe('getLessonsByChapterIdUseCase', () => {
       description: 'Ceci est une super leçon',
       chapterId: 'some-chapter-id',
       isPublished: false,
-      order: 1
+      order: 1,
     });
     expect(typeof lessons[0]?.id).toBe('string');
     expect(lessons[0]?.createdAt).toBeInstanceOf(Date);
@@ -66,7 +69,7 @@ describe('getLessonsByChapterIdUseCase', () => {
       description: 'Ceci est une autre super leçon',
       chapterId: 'some-chapter-id',
       isPublished: false,
-      order: 2
+      order: 2,
     });
     expect(typeof lessons[1]?.id).toBe('string');
     expect(lessons[1]?.createdAt).toBeInstanceOf(Date);

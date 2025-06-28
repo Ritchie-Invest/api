@@ -13,7 +13,9 @@ export type CreateLessonCommand = {
   order: number;
 };
 
-export class CreateLessonUseCase implements UseCase<CreateLessonCommand, Lesson> {
+export class CreateLessonUseCase
+  implements UseCase<CreateLessonCommand, Lesson>
+{
   constructor(private readonly lessonRepository: LessonRepository) {}
 
   async execute(command: CreateLessonCommand): Promise<Lesson> {
@@ -23,7 +25,13 @@ export class CreateLessonUseCase implements UseCase<CreateLessonCommand, Lesson>
       );
     }
     const { title, description, chapterId, order } = command;
-    const lesson = new Lesson(this.generateId(), title, description, chapterId, order);
+    const lesson = new Lesson(
+      this.generateId(),
+      title,
+      description,
+      chapterId,
+      order,
+    );
 
     return this.lessonRepository.create(lesson);
   }

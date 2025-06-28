@@ -18,7 +18,10 @@ import { UpdateGameRequest } from '../../request/update-game.request';
 import { GameType } from '../../../../core/domain/type/Game/GameType';
 import { GameRules } from '../../../../core/domain/type/Game/GameRules';
 import { Question } from '../../../../core/domain/type/Game/Question';
-import { QcmQuestion, QcmOption } from '../../../../core/domain/type/Game/Questions/QCM';
+import {
+  QcmQuestion,
+  QcmOption,
+} from '../../../../core/domain/type/Game/Questions/QCM';
 
 describe('GameControllerIT', () => {
   let app: INestApplication<App>;
@@ -83,12 +86,12 @@ describe('GameControllerIT', () => {
         order: 1,
       };
       await lessonRepository.create(lesson);
-      
+
       const mockRules: GameRules = {
         shuffle_questions: true,
         time_limit_seconds: 60,
       };
-      
+
       const mockQuestions: Question[] = [createMockQcmQuestion()];
 
       const game1 = {
@@ -100,7 +103,7 @@ describe('GameControllerIT', () => {
         isPublished: true,
       };
       await gameRepository.create(game1);
-      
+
       const game2 = {
         type: GameType.TRUE_OR_FALSE,
         rules: mockRules,
@@ -146,11 +149,8 @@ describe('GameControllerIT', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBe('No token provided');
     });
-
-   
-
   });
-  
+
   describe('getGameById', () => {
     it('should return game by id', async () => {
       // Given
@@ -172,12 +172,12 @@ describe('GameControllerIT', () => {
         order: 1,
       };
       await lessonRepository.create(lesson);
-      
+
       const mockRules: GameRules = {
         shuffle_questions: true,
         time_limit_seconds: 60,
       };
-      
+
       const mockQuestions: Question[] = [createMockQcmQuestion()];
 
       const game = {
@@ -274,12 +274,12 @@ describe('GameControllerIT', () => {
         order: 1,
       };
       await lessonRepository.create(lesson);
-      
+
       const mockRules: GameRules = {
         shuffle_questions: true,
         time_limit_seconds: 60,
       };
-      
+
       const mockQuestions: Question[] = [createMockQcmQuestion()];
 
       const game = new CreateGameRequest(
@@ -333,7 +333,7 @@ describe('GameControllerIT', () => {
         shuffle_questions: true,
         time_limit_seconds: 60,
       };
-      
+
       const mockQuestions: Question[] = [createMockQcmQuestion()];
 
       const createGameRequest = new CreateGameRequest(
@@ -362,7 +362,7 @@ describe('GameControllerIT', () => {
         shuffle_questions: true,
         time_limit_seconds: 60,
       };
-      
+
       const mockQuestions: Question[] = [createMockQcmQuestion()];
 
       const createGameRequest = new CreateGameRequest(
@@ -409,12 +409,12 @@ describe('GameControllerIT', () => {
         order: 1,
       };
       await lessonRepository.create(lesson);
-      
+
       const mockRules: GameRules = {
         shuffle_questions: true,
         time_limit_seconds: 60,
       };
-      
+
       const mockQuestions: Question[] = [createMockQcmQuestion()];
 
       const game = {
@@ -426,7 +426,7 @@ describe('GameControllerIT', () => {
         isPublished: false,
       };
       const createdGame = await gameRepository.create(game);
-      
+
       const updatedRules: GameRules = {
         shuffle_questions: false,
         time_limit_seconds: 120,
@@ -464,7 +464,7 @@ describe('GameControllerIT', () => {
         shuffle_questions: true,
         time_limit_seconds: 60,
       };
-      
+
       const mockQuestions: Question[] = [createMockQcmQuestion()];
 
       const updateGameRequest = new UpdateGameRequest(
@@ -507,12 +507,12 @@ describe('GameControllerIT', () => {
         order: 1,
       };
       await lessonRepository.create(lesson);
-      
+
       const mockRules: GameRules = {
         shuffle_questions: true,
         time_limit_seconds: 60,
       };
-      
+
       const mockQuestions: Question[] = [createMockQcmQuestion()];
 
       const game = {
@@ -524,7 +524,7 @@ describe('GameControllerIT', () => {
         isPublished: false,
       };
       const createdGame = await gameRepository.create(game);
-      
+
       const updateGameRequest = new UpdateGameRequest(
         GameType.TRUE_OR_FALSE,
         mockRules,
@@ -579,11 +579,11 @@ describe('GameControllerIT', () => {
       { value: '4', is_valid: true },
       { value: '5', is_valid: false },
     ];
-    
+
     return {
       question: 'What is 2+2?',
       options: options,
       feedback: 'The correct answer is 4',
     };
   }
-})
+});

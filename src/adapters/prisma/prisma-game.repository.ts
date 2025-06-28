@@ -56,10 +56,7 @@ export class PrismaGameRepository implements GameRepository {
 
   async findAll(): Promise<Game[]> {
     const entities = await this.prisma.game.findMany({
-      orderBy: [
-        { lessonId: 'asc' },
-        { order: 'asc' }
-      ]
+      orderBy: [{ lessonId: 'asc' }, { order: 'asc' }],
     });
     return entities.map((entity) => this.mapper.toDomain(entity));
   }

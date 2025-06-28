@@ -14,8 +14,8 @@ export type UpdateGameCommand = {
   gameId: string;
   type: GameType;
   rules: GameRules;
-  questions: Question[];  
-  order?: number ;
+  questions: Question[];
+  order?: number;
   isPublished: boolean;
 };
 
@@ -29,13 +29,7 @@ export class UpdateGameUseCase implements UseCase<UpdateGameCommand, Game> {
       );
     }
 
-    const {      
-      gameId,
-      type, 
-      rules, 
-      questions,
-      order, 
-      isPublished } = command;
+    const { gameId, type, rules, questions, order, isPublished } = command;
 
     const currentGame = await this.gameRepository.findById(gameId);
     if (!currentGame) {

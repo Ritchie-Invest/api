@@ -6,7 +6,9 @@ import { Lesson } from '../../core/domain/model/Lesson';
 export class InMemoryLessonRepository implements LessonRepository {
   private lessons: Map<string, Lesson> = new Map();
 
-  create(data: Pick<Lesson, 'id' | 'title' | 'description' | 'chapterId' | 'order'>): Lesson {
+  create(
+    data: Pick<Lesson, 'id' | 'title' | 'description' | 'chapterId' | 'order'>,
+  ): Lesson {
     const lesson = new Lesson(
       data.id,
       data.title,

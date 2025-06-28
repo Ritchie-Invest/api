@@ -5,7 +5,7 @@ export class Lesson extends DomainModel {
   title: string;
   description: string;
   chapterId: string;
-  order?: number ;
+  order?: number;
   isPublished: boolean;
   updatedAt: Date;
   createdAt: Date;
@@ -15,7 +15,7 @@ export class Lesson extends DomainModel {
     title: string,
     description: string,
     chapterId: string,
-    order?: number ,
+    order?: number,
     isPublished: boolean = false,
     updatedAt?: Date,
     createdAt?: Date,
