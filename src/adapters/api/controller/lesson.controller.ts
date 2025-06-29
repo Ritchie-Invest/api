@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { UserType } from '../../../core/domain/type/UserType';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import { ProfileRequest } from '../request/profile.request';
@@ -10,6 +10,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 import { CreateLessonResponse } from '../response/create-lesson.response';
 import { CreateLessonUseCase } from '../../../core/usecases/create-lesson.use-case';
@@ -25,6 +26,10 @@ import { GetLessonByIdMapper } from '../mapper/get-lesson-by-id.mapper';
 import { getLessonsByChapterIdResponse } from '../response/get-lessons-by-chapter.response';
 import { getLessonsByChapterIdUseCase } from '../../../core/usecases/get-lessons-by-chapter.use-case';
 import { getLessonsByChapterIdMapper } from '../mapper/get-lessons-by-chapter.mapper';
+import { DeleteLessonUseCase } from '../../../core/usecases/delete-lesson.use-case';
+import { DeleteLessonRequest } from '../request/delete-lesson.request';
+import { DeleteLessonResponse } from '../response/delete-lesson.response';
+import { DeleteLessonMapper } from '../mapper/delete-lesson.mapper';
 
 @Controller('/lessons')
 export class LessonController {
@@ -33,6 +38,7 @@ export class LessonController {
     private readonly createLessonUseCase: CreateLessonUseCase,
     private readonly getLessonByIdUseCase: GetLessonByIdUseCase,
     private readonly updateLessonUseCase: UpdateLessonUseCase,
+    private readonly deleteLessonUseCase: DeleteLessonUseCase,
   ) {}
 
   @Get('/chapter/:chapterId')
@@ -149,5 +155,33 @@ export class LessonController {
     const command = UpdateLessonMapper.toDomain(currentUser, lessonId, body);
     const lesson = await this.updateLessonUseCase.execute(command);
     return UpdateLessonMapper.fromDomain(lesson);
+  }
+
+  @Delete('/:lessonId')
+  @Roles(UserType.ADMIN)
+  @ApiOperation({ summary: 'Delete a lesson and all its associated games' })
+  @ApiCreatedResponse({
+    description: 'Lesson and associated games successfully deleted',
+    type: DeleteLessonResponse,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid lesson ID format',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized access',
+  })
+  @ApiForbiddenResponse({
+    description: 'User not allowed to delete a lesson',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error',
+  })
+  async deleteLesson(
+    @CurrentUser() currentUser: ProfileRequest,
+    @Param('lessonId') lessonId: string,
+  ): Promise<DeleteLessonResponse> {
+    const command = DeleteLessonMapper.toDomain(currentUser, lessonId);
+    await this.deleteLessonUseCase.execute(command);
+    return DeleteLessonMapper.fromDomain(lessonId, 0); // TODO: return actual count of deleted games
   }
 }

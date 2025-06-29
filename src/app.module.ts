@@ -35,6 +35,8 @@ import { CreateGameUseCase } from './core/usecases/create-game.use-case';
 import { UpdateGameUseCase } from './core/usecases/update-game.use-case';
 import { GetGameByIdUseCase } from './core/usecases/get-game-by-id.use-case';
 import { getGamesByLessonIdUseCase } from './core/usecases/get-games-by-lesson.use-case';
+import { DeleteGameUseCase } from './core/usecases/delete-game.use-case';
+import { DeleteLessonUseCase } from './core/usecases/delete-lesson.use-case';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -190,6 +192,20 @@ import { getGamesByLessonIdUseCase } from './core/usecases/get-games-by-lesson.u
       useFactory: (gameRepository: GameRepository) =>
         new getGamesByLessonIdUseCase(gameRepository),
       inject: [GameRepository],
+    },
+    {
+      provide: DeleteGameUseCase,
+      useFactory: (gameRepository: GameRepository) =>
+        new DeleteGameUseCase(gameRepository),
+      inject: [GameRepository],
+    },
+    {
+      provide: DeleteLessonUseCase,
+      useFactory: (
+        lessonRepository: LessonRepository,
+        gameRepository: GameRepository,
+      ) => new DeleteLessonUseCase(lessonRepository, gameRepository),
+      inject: [LessonRepository, GameRepository],
     },
   ],
 })

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { UserType } from '../../../core/domain/type/UserType';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import { ProfileRequest } from '../request/profile.request';
@@ -10,6 +10,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 import { CreateGameResponse } from '../response/create-game.response';
 import { CreateGameUseCase } from '../../../core/usecases/create-game.use-case';
@@ -25,6 +26,10 @@ import { GetGameByIdMapper } from '../mapper/get-game-by-id.mapper';
 import { GetGamesByLessonIdResponse } from '../response/get-games-by-lesson.response';
 import { getGamesByLessonIdUseCase } from '../../../core/usecases/get-games-by-lesson.use-case';
 import { getGamesByLessonIdMapper } from '../mapper/get-games-by-lesson.mapper';
+import { DeleteGameUseCase } from '../../../core/usecases/delete-game.use-case';
+import { DeleteGameRequest } from '../request/delete-game.request';
+import { DeleteGameResponse } from '../response/delete-game.response';
+import { DeleteGameMapper } from '../mapper/delete-game.mapper';
 
 @Controller('/games')
 export class GameController {
@@ -33,6 +38,7 @@ export class GameController {
     private readonly createGameUseCase: CreateGameUseCase,
     private readonly getGameByIdUseCase: GetGameByIdUseCase,
     private readonly updateGameUseCase: UpdateGameUseCase,
+    private readonly deleteGameUseCase: DeleteGameUseCase,
   ) {}
 
   @Get('/lesson/:lessonId')
@@ -146,5 +152,33 @@ export class GameController {
     const command = UpdateGameMapper.toDomain(currentUser, gameId, body);
     const game = await this.updateGameUseCase.execute(command);
     return UpdateGameMapper.fromDomain(game);
+  }
+
+  @Delete('/:gameId')
+  @Roles(UserType.ADMIN)
+  @ApiOperation({ summary: 'Delete a game' })
+  @ApiCreatedResponse({
+    description: 'Game successfully deleted',
+    type: DeleteGameResponse,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid game ID format',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized access',
+  })
+  @ApiForbiddenResponse({
+    description: 'User not allowed to delete a game',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error',
+  })
+  async deleteGame(
+    @CurrentUser() currentUser: ProfileRequest,
+    @Param('gameId') gameId: string,
+  ): Promise<DeleteGameResponse> {
+    const command = DeleteGameMapper.toDomain(currentUser, gameId);
+    await this.deleteGameUseCase.execute(command);
+    return DeleteGameMapper.fromDomain(gameId);
   }
 }

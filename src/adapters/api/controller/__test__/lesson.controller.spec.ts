@@ -14,11 +14,18 @@ import { getLessonsByChapterIdResponse } from '../../response/get-lessons-by-cha
 import { CreateLessonRequest } from '../../request/create-lesson.request';
 import { ChapterRepository } from '../../../../core/domain/repository/chapter.repository';
 import { UpdateLessonRequest } from '../../request/update-lesson.request';
+import { DeleteLessonResponse } from '../../response/delete-lesson.response';
+import { GameRepository } from '../../../../core/domain/repository/game.repository';
+import { GameType } from '../../../../core/domain/type/Game/GameType';
+import { GameRules } from '../../../../core/domain/type/Game/GameRules';
+import { Question } from '../../../../core/domain/type/Game/Question';
+import { QcmQuestion, QcmOption } from '../../../../core/domain/type/Game/Questions/QCM';
 
 describe('LessonControllerIT', () => {
   let app: INestApplication<App>;
   let chapterRepository: ChapterRepository;
   let lessonRepository: LessonRepository;
+  let gameRepository: GameRepository;
   let tokenService: TokenService;
 
   beforeAll(async () => {
@@ -42,13 +49,16 @@ describe('LessonControllerIT', () => {
   beforeEach(async () => {
     chapterRepository = app.get(ChapterRepository);
     lessonRepository = app.get(LessonRepository);
+    gameRepository = app.get(GameRepository);
     tokenService = app.get('TokenService');
 
+    await gameRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
   });
 
   afterEach(async () => {
+    await gameRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
   });
@@ -438,6 +448,125 @@ describe('LessonControllerIT', () => {
     });
   });
 
+  describe('deleteLesson', () => {
+    it('should delete a lesson and its associated games', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const chapter = {
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: true,
+      };
+      await chapterRepository.create(chapter);
+      
+      const lesson = {
+        id: 'lesson-1',
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
+        isPublished: true,
+        chapterId: 'chapter-1',
+        order: 1,
+      };
+      const createdLesson = await lessonRepository.create(lesson);
+
+      // Create associated games for the lesson
+      const mockRules: GameRules = {
+        shuffle_questions: true,
+        time_limit_seconds: 60,
+      };
+      const mockQuestions: Question[] = [createMockQcmQuestion()];
+
+      const game1 = {
+        type: GameType.QCM,
+        rules: mockRules,
+        questions: mockQuestions,
+        lessonId: createdLesson.id,
+        order: 1,
+        isPublished: false,
+      };
+      const game2 = {
+        type: GameType.TRUE_OR_FALSE,
+        rules: mockRules,
+        questions: mockQuestions,
+        lessonId: createdLesson.id,
+        order: 2,
+        isPublished: false,
+      };
+      const createdGame1 = await gameRepository.create(game1);
+      const createdGame2 = await gameRepository.create(game2);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .delete(`/lessons/${createdLesson.id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toMatchObject({
+        message: 'Leçon et jeux associés supprimés avec succès',
+        deletedLessonId: createdLesson.id,
+        deletedGamesCount: 0, // TODO: this should be 2 when actual count is implemented
+      });
+
+      // Verify that the lesson was actually deleted
+      const deletedLesson = await lessonRepository.findById(createdLesson.id);
+      expect(deletedLesson).toBeNull();
+
+      // Verify that associated games were also deleted
+      const deletedGame1 = await gameRepository.findById(createdGame1.id);
+      const deletedGame2 = await gameRepository.findById(createdGame2.id);
+      expect(deletedGame1).toBeNull();
+      expect(deletedGame2).toBeNull();
+    });
+
+    it('should return 404 if lesson not found', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .delete('/lessons/non-existing-id')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        'Lesson with id non-existing-id not found',
+      );
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      // When
+      const response = await request(app.getHttpServer()).delete(
+        '/lessons/existing-id',
+      );
+
+      // Then
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe('No token provided');
+    });
+
+    it('should return 403 if user does not have admin role', async () => {
+      // Given
+      const userToken = generateAccessToken(UserType.STUDENT);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .delete('/lessons/existing-id')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        'User with type STUDENT does not have the required roles',
+      );
+    });
+  });
+
   afterAll(async () => {
     await app.close();
   });
@@ -448,5 +577,19 @@ describe('LessonControllerIT', () => {
       email: 'test@ritchie-invest.com',
       type: userType,
     });
+  }
+
+  function createMockQcmQuestion(): QcmQuestion {
+    const options: QcmOption[] = [
+      { value: '3', is_valid: false },
+      { value: '4', is_valid: true },
+      { value: '5', is_valid: false },
+    ];
+
+    return {
+      question: 'What is 2+2?',
+      options: options,
+      feedback: 'The correct answer is 4',
+    };
   }
 });

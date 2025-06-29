@@ -22,6 +22,7 @@ import {
   QcmQuestion,
   QcmOption,
 } from '../../../../core/domain/type/Game/Questions/QCM';
+import { DeleteGameResponse } from '../../response/delete-game.response';
 
 describe('GameControllerIT', () => {
   let app: INestApplication<App>;
@@ -550,6 +551,109 @@ describe('GameControllerIT', () => {
       // When
       const response = await request(app.getHttpServer())
         .patch('/games/non-existing-id')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        'User with type STUDENT does not have the required roles',
+      );
+    });
+  });
+
+  describe('deleteGame', () => {
+    it('should delete a game', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      // Create the referenced chapter first to satisfy foreign key constraint
+      await chapterRepository.create({
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: false,
+      });
+
+      const lesson = {
+        id: 'lesson-1',
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
+        isPublished: true,
+        chapterId: 'chapter-1',
+        order: 1,
+      };
+      await lessonRepository.create(lesson);
+
+      const mockRules: GameRules = {
+        shuffle_questions: true,
+        time_limit_seconds: 60,
+      };
+
+      const mockQuestions: Question[] = [createMockQcmQuestion()];
+
+      const game = {
+        type: GameType.QCM,
+        rules: mockRules,
+        questions: mockQuestions,
+        lessonId: 'lesson-1',
+        order: 1,
+        isPublished: false,
+      };
+      const createdGame = await gameRepository.create(game);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .delete(`/games/${createdGame.id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toMatchObject({
+        message: 'Jeu supprimé avec succès',
+        deletedGameId: createdGame.id,
+      });
+
+      // Verify that the game was actually deleted
+      const deletedGame = await gameRepository.findById(createdGame.id);
+      expect(deletedGame).toBeNull();
+    });
+
+    it('should return 404 if game not found', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .delete('/games/non-existing-id')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        'Game with id non-existing-id not found',
+      );
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      // When
+      const response = await request(app.getHttpServer()).delete(
+        '/games/existing-id',
+      );
+
+      // Then
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe('No token provided');
+    });
+
+    it('should return 403 if user does not have admin role', async () => {
+      // Given
+      const userToken = generateAccessToken(UserType.STUDENT);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .delete('/games/existing-id')
         .set('Authorization', `Bearer ${userToken}`);
 
       // Then
