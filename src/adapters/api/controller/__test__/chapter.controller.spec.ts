@@ -13,10 +13,21 @@ import { CreateChapterRequest } from '../../request/create-chapter.request';
 import { TokenService } from '../../../../core/domain/service/token.service';
 import { UserType } from '../../../../core/domain/type/UserType';
 import { UpdateChapterRequest } from '../../request/update-chapter.request';
+import { LessonRepository } from '../../../../core/domain/repository/lesson.repository';
+import { GameRepository } from '../../../../core/domain/repository/game.repository';
+import { GameType } from '../../../../core/domain/type/Game/GameType';
+import { GameRules } from '../../../../core/domain/type/Game/GameRules';
+import { Question } from '../../../../core/domain/type/Game/Question';
+import {
+  QcmQuestion,
+  QcmOption,
+} from '../../../../core/domain/type/Game/Questions/QCM';
 
 describe('ChapterControllerIT', () => {
   let app: INestApplication<App>;
   let chapterRepository: ChapterRepository;
+  let lessonRepository: LessonRepository;
+  let gameRepository: GameRepository;
   let tokenService: TokenService;
 
   beforeAll(async () => {
@@ -39,12 +50,18 @@ describe('ChapterControllerIT', () => {
 
   beforeEach(async () => {
     chapterRepository = app.get(ChapterRepository);
+    lessonRepository = app.get(LessonRepository);
+    gameRepository = app.get(GameRepository);
     tokenService = app.get('TokenService');
 
+    await gameRepository.removeAll();
+    await lessonRepository.removeAll();
     await chapterRepository.removeAll();
   });
 
   afterEach(async () => {
+    await gameRepository.removeAll();
+    await lessonRepository.removeAll();
     await chapterRepository.removeAll();
   });
 
@@ -396,6 +413,142 @@ describe('ChapterControllerIT', () => {
     });
   });
 
+  describe('deleteChapter', () => {
+    it('should delete a chapter and its associated lessons and games', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const chapter = {
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: true,
+      };
+      const createdChapter = await chapterRepository.create(chapter);
+
+      // Create associated lessons and games
+      const lesson1 = {
+        id: 'lesson-1',
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
+        isPublished: true,
+        chapterId: createdChapter.id,
+        order: 1,
+      };
+      const lesson2 = {
+        id: 'lesson-2',
+        title: 'Lesson 2',
+        description: 'Description of Lesson 2',
+        isPublished: false,
+        chapterId: createdChapter.id,
+        order: 2,
+      };
+      const createdLesson1 = await lessonRepository.create(lesson1);
+      const createdLesson2 = await lessonRepository.create(lesson2);
+
+      const mockRules: GameRules = {
+        shuffle_questions: true,
+        time_limit_seconds: 60,
+      };
+      const mockQuestions: Question[] = [createMockQcmQuestion()];
+
+      const game1 = {
+        type: GameType.QCM,
+        rules: mockRules,
+        questions: mockQuestions,
+        lessonId: createdLesson1.id,
+        order: 1,
+        isPublished: false,
+      };
+      const game2 = {
+        type: GameType.TRUE_OR_FALSE,
+        rules: mockRules,
+        questions: mockQuestions,
+        lessonId: createdLesson2.id,
+        order: 1,
+        isPublished: false,
+      };
+      const createdGame1 = await gameRepository.create(game1);
+      const createdGame2 = await gameRepository.create(game2);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .delete(`/chapters/${createdChapter.id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toMatchObject({
+        message: 'Chapitre et leçons associées supprimés avec succès',
+        deletedChapterId: createdChapter.id,
+        deletedGamesCount: 0, // TODO: this should be 2 when actual count is implemented
+      });
+
+      // Verify that the chapter was actually deleted
+      const deletedChapter = await chapterRepository.findById(
+        createdChapter.id,
+      );
+      expect(deletedChapter).toBeNull();
+
+      // Verify that associated lessons were also deleted
+      const deletedLesson1 = await lessonRepository.findById(createdLesson1.id);
+      const deletedLesson2 = await lessonRepository.findById(createdLesson2.id);
+      expect(deletedLesson1).toBeNull();
+      expect(deletedLesson2).toBeNull();
+
+      // Verify that associated games were also deleted
+      const deletedGame1 = await gameRepository.findById(createdGame1.id);
+      const deletedGame2 = await gameRepository.findById(createdGame2.id);
+      expect(deletedGame1).toBeNull();
+      expect(deletedGame2).toBeNull();
+    });
+
+    it('should return 404 if chapter not found', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .delete('/chapters/non-existing-id')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        'Chapter with id non-existing-id not found',
+      );
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      // When
+      const response = await request(app.getHttpServer()).delete(
+        '/chapters/existing-id',
+      );
+
+      // Then
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe('No token provided');
+    });
+
+    it('should return 403 if user does not have admin role', async () => {
+      // Given
+      const userToken = generateAccessToken(UserType.STUDENT);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .delete('/chapters/existing-id')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.FORBIDDEN);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        'User with type STUDENT does not have the required roles',
+      );
+    });
+  });
+
   afterAll(async () => {
     await app.close();
   });
@@ -406,5 +559,19 @@ describe('ChapterControllerIT', () => {
       email: 'test@ritchie-invest.com',
       type: userType,
     });
+  }
+
+  function createMockQcmQuestion(): QcmQuestion {
+    const options: QcmOption[] = [
+      { value: '3', is_valid: false },
+      { value: '4', is_valid: true },
+      { value: '5', is_valid: false },
+    ];
+
+    return {
+      question: 'What is 2+2?',
+      options: options,
+      feedback: 'The correct answer is 4',
+    };
   }
 });

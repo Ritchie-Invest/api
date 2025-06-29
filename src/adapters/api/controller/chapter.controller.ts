@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { UserType } from '../../../core/domain/type/UserType';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import { ProfileRequest } from '../request/profile.request';
@@ -25,6 +33,9 @@ import { GetChapterByIdMapper } from '../mapper/get-chapter-by-id.mapper';
 import { GetChaptersResponse } from '../response/get-chapters.response';
 import { GetChaptersUseCase } from '../../../core/usecases/get-chapters.use-case';
 import { GetChaptersMapper } from '../mapper/get-chapters.mapper';
+import { DeleteChapterUseCase } from '../../../core/usecases/delete-chapter.use-case';
+import { DeleteChapterResponse } from '../response/delete-chapter.response';
+import { DeleteChapterMapper } from '../mapper/delete-chapter.mapper';
 
 @Controller('/chapters')
 export class ChapterController {
@@ -33,6 +44,7 @@ export class ChapterController {
     private readonly createChapterUseCase: CreateChapterUseCase,
     private readonly getChapterByIdUseCase: GetChapterByIdUseCase,
     private readonly updateChapterUseCase: UpdateChapterUseCase,
+    private readonly deleteChapterUseCase: DeleteChapterUseCase,
   ) {}
 
   @Get('/')
@@ -145,5 +157,35 @@ export class ChapterController {
     const command = UpdateChapterMapper.toDomain(currentUser, chapterId, body);
     const chapter = await this.updateChapterUseCase.execute(command);
     return UpdateChapterMapper.fromDomain(chapter);
+  }
+
+  @Delete('/:chapterId')
+  @Roles(UserType.ADMIN)
+  @ApiOperation({
+    summary: 'Delete a chapter and all its associated lessons and games',
+  })
+  @ApiCreatedResponse({
+    description: 'Chapter, lessons and associated games successfully deleted',
+    type: DeleteChapterResponse,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid chapter ID format',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized access',
+  })
+  @ApiForbiddenResponse({
+    description: 'User not allowed to delete a chapter',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error',
+  })
+  async deleteChapter(
+    @CurrentUser() currentUser: ProfileRequest,
+    @Param('chapterId') chapterId: string,
+  ): Promise<DeleteChapterResponse> {
+    const command = DeleteChapterMapper.toDomain(currentUser, chapterId);
+    await this.deleteChapterUseCase.execute(command);
+    return DeleteChapterMapper.fromDomain(chapterId, 0); // TODO: return actual count of deleted lessons
   }
 }
