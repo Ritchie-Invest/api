@@ -59,7 +59,7 @@ describe('DeleteGameUseCase', () => {
     // THEN
     const games = await gameRepository.findAll();
     expect(games.length).toEqual(0);
-    
+
     const deletedGame = await gameRepository.findById('game-id');
     expect(deletedGame).toBeNull();
   });

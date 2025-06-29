@@ -18,7 +18,7 @@ describe('UpdateGameMapper', () => {
         type: UserType.ADMIN,
       };
       const gameId = 'game-1';
-      
+
       const mockRules: GameRules = {
         shuffle_questions: true,
         time_limit_seconds: 120,
@@ -44,11 +44,7 @@ describe('UpdateGameMapper', () => {
       };
 
       // When
-      const command = UpdateGameMapper.toDomain(
-        currentUser,
-        gameId,
-        request,
-      );
+      const command = UpdateGameMapper.toDomain(currentUser, gameId, request);
 
       // Then
       expect(command).toEqual({

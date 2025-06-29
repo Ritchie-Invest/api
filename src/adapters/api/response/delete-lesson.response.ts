@@ -7,7 +7,9 @@ export class DeleteLessonResponse {
   @ApiProperty({ description: 'ID of the deleted lesson' })
   deletedLessonId: string;
 
-  @ApiProperty({ description: 'Number of associated games that were also deleted' })
+  @ApiProperty({
+    description: 'Number of associated games that were also deleted',
+  })
   deletedGamesCount: number;
 
   @ApiProperty({ description: 'Timestamp of deletion' })

@@ -58,7 +58,9 @@ describe('DeleteLessonMapper', () => {
       const response = DeleteLessonMapper.fromDomain(lessonId);
 
       // Then
-      expect(response.message).toEqual('Leçon et jeux associés supprimés avec succès');
+      expect(response.message).toEqual(
+        'Leçon et jeux associés supprimés avec succès',
+      );
       expect(response.deletedLessonId).toEqual('lesson-1');
       expect(response.deletedGamesCount).toEqual(0);
       expect(response.deletedAt).toBeInstanceOf(Date);
@@ -70,10 +72,15 @@ describe('DeleteLessonMapper', () => {
       const deletedGamesCount = 3;
 
       // When
-      const response = DeleteLessonMapper.fromDomain(lessonId, deletedGamesCount);
+      const response = DeleteLessonMapper.fromDomain(
+        lessonId,
+        deletedGamesCount,
+      );
 
       // Then
-      expect(response.message).toEqual('Leçon et jeux associés supprimés avec succès');
+      expect(response.message).toEqual(
+        'Leçon et jeux associés supprimés avec succès',
+      );
       expect(response.deletedLessonId).toEqual('lesson-2');
       expect(response.deletedGamesCount).toEqual(3);
       expect(response.deletedAt).toBeInstanceOf(Date);
@@ -89,8 +96,12 @@ describe('DeleteLessonMapper', () => {
       const afterTime = new Date();
 
       // Then
-      expect(response.deletedAt.getTime()).toBeGreaterThanOrEqual(beforeTime.getTime());
-      expect(response.deletedAt.getTime()).toBeLessThanOrEqual(afterTime.getTime());
+      expect(response.deletedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeTime.getTime(),
+      );
+      expect(response.deletedAt.getTime()).toBeLessThanOrEqual(
+        afterTime.getTime(),
+      );
     });
 
     it('should handle undefined deletedGamesCount', () => {

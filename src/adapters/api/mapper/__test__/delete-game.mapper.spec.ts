@@ -73,8 +73,12 @@ describe('DeleteGameMapper', () => {
       const afterTime = new Date();
 
       // Then
-      expect(response.deletedAt.getTime()).toBeGreaterThanOrEqual(beforeTime.getTime());
-      expect(response.deletedAt.getTime()).toBeLessThanOrEqual(afterTime.getTime());
+      expect(response.deletedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeTime.getTime(),
+      );
+      expect(response.deletedAt.getTime()).toBeLessThanOrEqual(
+        afterTime.getTime(),
+      );
     });
   });
 });

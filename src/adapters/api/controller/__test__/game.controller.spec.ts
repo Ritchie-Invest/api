@@ -22,7 +22,6 @@ import {
   QcmQuestion,
   QcmOption,
 } from '../../../../core/domain/type/Game/Questions/QCM';
-import { DeleteGameResponse } from '../../response/delete-game.response';
 
 describe('GameControllerIT', () => {
   let app: INestApplication<App>;

@@ -23,11 +23,14 @@ describe('DeleteLessonUseCase', () => {
   beforeEach(async () => {
     lessonRepository = new InMemoryLessonRepository();
     gameRepository = new InMemoryGameRepository();
-    deleteLessonUseCase = new DeleteLessonUseCase(lessonRepository, gameRepository);
+    deleteLessonUseCase = new DeleteLessonUseCase(
+      lessonRepository,
+      gameRepository,
+    );
 
     await lessonRepository.removeAll();
     await gameRepository.removeAll();
-    
+
     // Create a lesson
     await lessonRepository.create({
       id: 'lesson-id',
@@ -92,10 +95,10 @@ describe('DeleteLessonUseCase', () => {
     const games = await gameRepository.findAll();
     expect(lessons.length).toEqual(0);
     expect(games.length).toEqual(0);
-    
+
     const deletedLesson = await lessonRepository.findById('lesson-id');
     expect(deletedLesson).toBeNull();
-    
+
     const deletedGame1 = await gameRepository.findById('game-1');
     const deletedGame2 = await gameRepository.findById('game-2');
     expect(deletedGame1).toBeNull();
@@ -197,7 +200,7 @@ describe('DeleteLessonUseCase', () => {
     const games = await gameRepository.findAll();
     expect(lessons.length).toEqual(1);
     expect(games.length).toEqual(1);
-    
+
     // Verify the remaining lesson and game
     expect(lessons[0]).toBeDefined();
     expect(games[0]).toBeDefined();

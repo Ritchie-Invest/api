@@ -14,12 +14,14 @@ import { getLessonsByChapterIdResponse } from '../../response/get-lessons-by-cha
 import { CreateLessonRequest } from '../../request/create-lesson.request';
 import { ChapterRepository } from '../../../../core/domain/repository/chapter.repository';
 import { UpdateLessonRequest } from '../../request/update-lesson.request';
-import { DeleteLessonResponse } from '../../response/delete-lesson.response';
 import { GameRepository } from '../../../../core/domain/repository/game.repository';
 import { GameType } from '../../../../core/domain/type/Game/GameType';
 import { GameRules } from '../../../../core/domain/type/Game/GameRules';
 import { Question } from '../../../../core/domain/type/Game/Question';
-import { QcmQuestion, QcmOption } from '../../../../core/domain/type/Game/Questions/QCM';
+import {
+  QcmQuestion,
+  QcmOption,
+} from '../../../../core/domain/type/Game/Questions/QCM';
 
 describe('LessonControllerIT', () => {
   let app: INestApplication<App>;
@@ -459,7 +461,7 @@ describe('LessonControllerIT', () => {
         isPublished: true,
       };
       await chapterRepository.create(chapter);
-      
+
       const lesson = {
         id: 'lesson-1',
         title: 'Lesson 1',

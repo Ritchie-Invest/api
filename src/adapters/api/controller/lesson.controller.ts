@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { UserType } from '../../../core/domain/type/UserType';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import { ProfileRequest } from '../request/profile.request';
@@ -10,7 +18,6 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
-  ApiOkResponse,
 } from '@nestjs/swagger';
 import { CreateLessonResponse } from '../response/create-lesson.response';
 import { CreateLessonUseCase } from '../../../core/usecases/create-lesson.use-case';
@@ -27,7 +34,6 @@ import { getLessonsByChapterIdResponse } from '../response/get-lessons-by-chapte
 import { getLessonsByChapterIdUseCase } from '../../../core/usecases/get-lessons-by-chapter.use-case';
 import { getLessonsByChapterIdMapper } from '../mapper/get-lessons-by-chapter.mapper';
 import { DeleteLessonUseCase } from '../../../core/usecases/delete-lesson.use-case';
-import { DeleteLessonRequest } from '../request/delete-lesson.request';
 import { DeleteLessonResponse } from '../response/delete-lesson.response';
 import { DeleteLessonMapper } from '../mapper/delete-lesson.mapper';
 

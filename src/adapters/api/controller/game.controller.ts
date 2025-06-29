@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { UserType } from '../../../core/domain/type/UserType';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import { ProfileRequest } from '../request/profile.request';
@@ -10,7 +18,6 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
-  ApiOkResponse,
 } from '@nestjs/swagger';
 import { CreateGameResponse } from '../response/create-game.response';
 import { CreateGameUseCase } from '../../../core/usecases/create-game.use-case';
@@ -27,7 +34,6 @@ import { GetGamesByLessonIdResponse } from '../response/get-games-by-lesson.resp
 import { getGamesByLessonIdUseCase } from '../../../core/usecases/get-games-by-lesson.use-case';
 import { getGamesByLessonIdMapper } from '../mapper/get-games-by-lesson.mapper';
 import { DeleteGameUseCase } from '../../../core/usecases/delete-game.use-case';
-import { DeleteGameRequest } from '../request/delete-game.request';
 import { DeleteGameResponse } from '../response/delete-game.response';
 import { DeleteGameMapper } from '../mapper/delete-game.mapper';
 

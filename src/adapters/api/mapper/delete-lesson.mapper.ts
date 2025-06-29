@@ -16,7 +16,10 @@ export class DeleteLessonMapper {
     };
   }
 
-  static fromDomain(lessonId: string, deletedGamesCount: number = 0): DeleteLessonResponse {
+  static fromDomain(
+    lessonId: string,
+    deletedGamesCount: number = 0,
+  ): DeleteLessonResponse {
     return new DeleteLessonResponse(lessonId, deletedGamesCount);
   }
 }
