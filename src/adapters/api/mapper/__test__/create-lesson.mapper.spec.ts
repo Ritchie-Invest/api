@@ -3,6 +3,7 @@ import { CreateLessonRequest } from '../../request/create-lesson.request';
 import { ProfileRequest } from '../../request/profile.request';
 import { Lesson } from '../../../../core/domain/model/Lesson';
 import { UserType } from '../../../../core/domain/type/UserType';
+import { GameType } from '../../../../core/domain/type/GameType';
 
 describe('CreateLessonMapper', () => {
   describe('toDomain', () => {
@@ -18,6 +19,7 @@ describe('CreateLessonMapper', () => {
         description: 'Lesson Description',
         chapterId: 'chapter-1',
         order: 1,
+        gameType: GameType.MCQ,
       };
 
       // When
@@ -33,6 +35,7 @@ describe('CreateLessonMapper', () => {
         description: 'Lesson Description',
         chapterId: 'chapter-1',
         order: 1,
+        gameType: GameType.MCQ,
       });
     });
   });
@@ -47,6 +50,9 @@ describe('CreateLessonMapper', () => {
         'Lesson Description',
         'chapter-1',
         1,
+        false,
+        GameType.MCQ,
+        [],
       );
       lesson.isPublished = true;
       lesson.createdAt = now;
@@ -63,6 +69,8 @@ describe('CreateLessonMapper', () => {
         chapterId: 'chapter-1',
         order: 1,
         isPublished: true,
+        gameType: GameType.MCQ,
+        modules: [],
         createdAt: now,
         updatedAt: now,
       });

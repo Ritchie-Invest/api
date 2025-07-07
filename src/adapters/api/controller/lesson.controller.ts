@@ -22,17 +22,21 @@ import { UpdateLessonRequest } from '../request/update-lesson.request';
 import { GetLessonByIdResponse } from '../response/get-lesson-by-id.response';
 import { GetLessonByIdUseCase } from '../../../core/usecases/get-lesson-by-id.use-case';
 import { GetLessonByIdMapper } from '../mapper/get-lesson-by-id.mapper';
-import { getLessonsByChapterIdResponse } from '../response/get-lessons-by-chapter.response';
-import { getLessonsByChapterIdUseCase } from '../../../core/usecases/get-lessons-by-chapter.use-case';
-import { getLessonsByChapterIdMapper } from '../mapper/get-lessons-by-chapter.mapper';
+import { GetLessonsByChapterIdResponse } from '../response/get-lessons-by-chapter.response';
+import { GetLessonsByChapterIdUseCase } from '../../../core/usecases/get-lessons-by-chapter.use-case';
+import { GetLessonsByChapterIdMapper } from '../mapper/get-lessons-by-chapter.mapper';
+import { CreateGameModuleUseCase } from '../../../core/usecases/create-game-module.usecase';
+import { CreateGameModuleRequest } from '../request/create-game-module.request';
+import { CreateGameModuleMapper } from '../mapper/create-game-module.mapper';
 
 @Controller('/lessons')
 export class LessonController {
   constructor(
-    private readonly getLessonsByChapterIdUseCase: getLessonsByChapterIdUseCase,
+    private readonly getLessonsByChapterIdUseCase: GetLessonsByChapterIdUseCase,
     private readonly createLessonUseCase: CreateLessonUseCase,
     private readonly getLessonByIdUseCase: GetLessonByIdUseCase,
     private readonly updateLessonUseCase: UpdateLessonUseCase,
+    private readonly createGameModuleUseCase: CreateGameModuleUseCase,
   ) {}
 
   @Get('/chapter/:chapterId')
@@ -40,7 +44,7 @@ export class LessonController {
   @ApiOperation({ summary: 'Get all lessons by chapter ID' })
   @ApiCreatedResponse({
     description: 'Lessons successfully retrieved',
-    type: [getLessonsByChapterIdResponse],
+    type: [GetLessonsByChapterIdResponse],
   })
   @ApiBadRequestResponse({
     description: 'Invalid request or parameters',
@@ -57,10 +61,13 @@ export class LessonController {
   async getLessonsByChapterId(
     @CurrentUser() currentUser: ProfileRequest,
     @Param('chapterId') chapterId: string,
-  ): Promise<getLessonsByChapterIdResponse> {
-    const command = getLessonsByChapterIdMapper.toDomain(currentUser, chapterId);
+  ): Promise<GetLessonsByChapterIdResponse> {
+    const command = GetLessonsByChapterIdMapper.toDomain(
+      currentUser,
+      chapterId,
+    );
     const lessons = await this.getLessonsByChapterIdUseCase.execute(command);
-    return getLessonsByChapterIdMapper.fromDomain(lessons);
+    return GetLessonsByChapterIdMapper.fromDomain(lessons);
   }
 
   @Post('/')
@@ -146,5 +153,30 @@ export class LessonController {
     const command = UpdateLessonMapper.toDomain(currentUser, lessonId, body);
     const lesson = await this.updateLessonUseCase.execute(command);
     return UpdateLessonMapper.fromDomain(lesson);
+  }
+
+  @Post('/:lessonId/modules')
+  @Roles(UserType.ADMIN)
+  @ApiOperation({ summary: 'Create a game module for a lesson' })
+  @ApiCreatedResponse({
+    description: 'Game module successfully created',
+    type: CreateLessonResponse,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid request or parameters',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized access',
+  })
+  @ApiForbiddenResponse({
+    description: 'User not allowed to create game module',
+  })
+  async createGameModule(
+    @Param('lessonId') lessonId: string,
+    @Body() request: CreateGameModuleRequest,
+  ): Promise<CreateLessonResponse> {
+    const command = CreateGameModuleMapper.toDomain(lessonId, request);
+    const result = await this.createGameModuleUseCase.execute(command);
+    return CreateGameModuleMapper.fromDomain(result);
   }
 }

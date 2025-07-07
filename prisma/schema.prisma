@@ -13,6 +13,10 @@ enum UserType {
   STUDENT
 }
 
+enum GameType {
+  MCQ
+}
+
 model User {
   id             String         @id @default(cuid())
   email          String         @unique
@@ -39,17 +43,37 @@ model Chapter {
   isPublished Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  lessons       Lesson[]   
+  lessons     Lesson[]
 }
 
 model Lesson {
-  id          String  @id @default(cuid())
-  title        String
-  description  String
+  id          String       @id @default(cuid())
+  title       String
+  description String
   chapterId   String
   order       Int
   isPublished Boolean
-  updatedAt   DateTime @updatedAt
-  createdAt   DateTime @default(now())
-  chapter     Chapter  @relation(fields: [chapterId], references: [id])
+  gameType    GameType     @default(MCQ)
+  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime     @default(now())
+  chapter     Chapter      @relation(fields: [chapterId], references: [id])
+  modules     GameModule[]
+}
+
+model GameModule {
+  id        String   @id @default(cuid())
+  lessonId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lesson Lesson     @relation(fields: [lessonId], references: [id])
+  mcq    McqModule?
+}
+
+model McqModule {
+  id           String     @id @default(cuid())
+  question     String
+  choices      Json
+  gameModuleId String     @unique
+  gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
 }

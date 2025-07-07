@@ -52,7 +52,7 @@ describe('LoginUseCase', () => {
     expect(loginUseCase).toBeDefined();
   });
 
-  it('should return access and refresh tokens when credentials are valid', async () => {
+  it('should return access and refresh tokens When credentials are valid', async () => {
     // Given
     const command = makeLoginCommand();
     const user = await createUserInRepo(command.email, command.password);
@@ -81,7 +81,7 @@ describe('LoginUseCase', () => {
     );
   });
 
-  it('should throw an error when user is not found', async () => {
+  it('should throw an error When user is not found', async () => {
     const command = makeLoginCommand();
 
     await expect(loginUseCase.execute(command)).rejects.toThrow(
@@ -89,7 +89,7 @@ describe('LoginUseCase', () => {
     );
   });
 
-  it('should throw an error when password is invalid', async () => {
+  it('should throw an error When password is invalid', async () => {
     const command = makeLoginCommand();
     await createUserInRepo(command.email, 'wrongpassword');
 

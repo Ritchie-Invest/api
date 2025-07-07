@@ -10,15 +10,19 @@ import { Reflector } from '@nestjs/core';
 import { TokenService } from '../../../../core/domain/service/token.service';
 import { UserType } from '../../../../core/domain/type/UserType';
 import { LessonRepository } from '../../../../core/domain/repository/lesson.repository';
-import { getLessonsByChapterIdResponse } from '../../response/get-lessons-by-chapter.response';
+import { GetLessonsByChapterIdResponse } from '../../response/get-lessons-by-chapter.response';
 import { CreateLessonRequest } from '../../request/create-lesson.request';
 import { ChapterRepository } from '../../../../core/domain/repository/chapter.repository';
 import { UpdateLessonRequest } from '../../request/update-lesson.request';
+import { GameType } from '../../../../core/domain/type/GameType';
+import { CreateGameModuleRequest } from '../../request/create-game-module.request';
+import { GameModuleRepository } from '../../../../core/domain/repository/game-module.repository';
 
 describe('LessonControllerIT', () => {
   let app: INestApplication<App>;
   let chapterRepository: ChapterRepository;
   let lessonRepository: LessonRepository;
+  let gameModuleRepository: GameModuleRepository;
   let tokenService: TokenService;
 
   beforeAll(async () => {
@@ -42,13 +46,16 @@ describe('LessonControllerIT', () => {
   beforeEach(async () => {
     chapterRepository = app.get(ChapterRepository);
     lessonRepository = app.get(LessonRepository);
+    gameModuleRepository = app.get(GameModuleRepository);
     tokenService = app.get('TokenService');
 
+    await gameModuleRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
   });
 
   afterEach(async () => {
+    await gameModuleRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
   });
@@ -88,7 +95,7 @@ describe('LessonControllerIT', () => {
 
       // Then
       expect(response.status).toBe(HttpStatus.OK);
-      const responseBody = response.body as getLessonsByChapterIdResponse;
+      const responseBody = response.body as GetLessonsByChapterIdResponse;
       expect(Array.isArray(responseBody.lessons)).toBe(true);
       expect(responseBody.lessons.length).toBe(2);
       expect(responseBody.lessons?.[0]).toMatchObject({
@@ -236,7 +243,8 @@ describe('LessonControllerIT', () => {
         'New Lesson',
         'Description of New Lesson',
         'chapter-1',
-        1
+        1,
+        GameType.MCQ,
       );
 
       // When
@@ -262,7 +270,8 @@ describe('LessonControllerIT', () => {
         '',
         'Description of New Lesson',
         'chapter-1',
-        1
+        1,
+        GameType.MCQ,
       );
 
       // When
@@ -284,6 +293,7 @@ describe('LessonControllerIT', () => {
         'Description of New Lesson',
         'chapter-1',
         1,
+        GameType.MCQ,
       );
 
       // When
@@ -305,6 +315,7 @@ describe('LessonControllerIT', () => {
         'Description of New Lesson',
         'chapter-1',
         1,
+        GameType.MCQ,
       );
 
       // When
@@ -435,6 +446,135 @@ describe('LessonControllerIT', () => {
       expect(response.body.message).toBe(
         'User with type STUDENT does not have the required roles',
       );
+    });
+  });
+
+  describe('createGameModule', () => {
+    it('should create a game module for a lesson', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const chapter = {
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: true,
+      };
+      await chapterRepository.create(chapter);
+      const lesson = {
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
+        isPublished: true,
+        chapterId: 'chapter-1',
+        order: 1,
+      };
+      const createdLesson = await lessonRepository.create(lesson);
+      const createGameModuleRequest = new CreateGameModuleRequest(
+        GameType.MCQ,
+        {
+          question: 'What is the capital of France?',
+          choices: [
+            {
+              text: 'Paris',
+              isCorrect: true,
+              correctionMessage: 'Correct! Paris is the capital of France.',
+            },
+            {
+              text: 'London',
+              isCorrect: false,
+              correctionMessage:
+                'Incorrect! London is not the capital of France.',
+            },
+          ],
+        },
+      );
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/lessons/${createdLesson.id}/modules`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(createGameModuleRequest);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.CREATED);
+      expect(response.body).toMatchObject({
+        id: createdLesson.id,
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
+        isPublished: true,
+        chapterId: 'chapter-1',
+        order: 1,
+        gameType: GameType.MCQ,
+        modules: [
+          {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            id: expect.any(String),
+            lessonId: createdLesson.id,
+            question: 'What is the capital of France?',
+            choices: [
+              {
+                text: 'Paris',
+                isCorrect: true,
+                correctionMessage: 'Correct! Paris is the capital of France.',
+              },
+              {
+                text: 'London',
+                isCorrect: false,
+                correctionMessage:
+                  'Incorrect! London is not the capital of France.',
+              },
+            ],
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            updatedAt: expect.any(String),
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            createdAt: expect.any(String),
+          },
+        ],
+      });
+    });
+
+    it('should return 404 if lesson not found', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post('/lessons/non-existing-id/modules')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ gameType: GameType.MCQ });
+
+      // Then
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        'Lesson with id non-existing-id not found',
+      );
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      // Given
+      const chapter = {
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: true,
+      };
+      await chapterRepository.create(chapter);
+      const lesson = {
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
+        isPublished: true,
+        chapterId: 'chapter-1',
+        order: 1,
+      };
+      const createdLesson = await lessonRepository.create(lesson);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/lessons/${createdLesson.id}/modules`)
+        .send({ gameType: GameType.MCQ });
+
+      // Then
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
     });
   });
 

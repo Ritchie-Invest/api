@@ -6,13 +6,20 @@ import { Lesson } from '../../core/domain/model/Lesson';
 export class InMemoryLessonRepository implements LessonRepository {
   private lessons: Map<string, Lesson> = new Map();
 
-  create(data: Pick<Lesson, 'id' | 'title' | 'description' | 'chapterId' | 'order'>): Lesson {
+  create(
+    data: Pick<
+      Lesson,
+      'id' | 'title' | 'description' | 'chapterId' | 'order' | 'gameType'
+    >,
+  ): Lesson {
     const lesson = new Lesson(
       data.id,
       data.title,
       data.description,
       data.chapterId,
       data.order,
+      false,
+      data.gameType,
     );
     this.lessons.set(lesson.id, lesson);
     return lesson;

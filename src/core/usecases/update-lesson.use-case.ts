@@ -16,7 +16,9 @@ export type UpdateLessonCommand = {
   UpdateLessonCommand?: boolean;
 };
 
-export class UpdateLessonUseCase implements UseCase<UpdateLessonCommand, Lesson> {
+export class UpdateLessonUseCase
+  implements UseCase<UpdateLessonCommand, Lesson>
+{
   constructor(private readonly lessonRepository: LessonRepository) {}
 
   async execute(command: UpdateLessonCommand): Promise<Lesson> {
