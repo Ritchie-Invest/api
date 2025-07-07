@@ -14,7 +14,9 @@ export class PrismaProgressionRepository implements ProgressionRepository {
 
   async create(data: Progression): Promise<Progression> {
     const entity = this.mapper.fromDomain(data);
-    const createdEntity = await this.prisma.progression.create({ data: entity });
+    const createdEntity = await this.prisma.progression.create({
+      data: entity,
+    });
     return this.mapper.toDomain(createdEntity);
   }
 
@@ -31,7 +33,10 @@ export class PrismaProgressionRepository implements ProgressionRepository {
     return this.mapper.toDomain(entity);
   }
 
-  async findByUserIdAndEntryId(userId: string, entryId: string): Promise<Progression | null> {
+  async findByUserIdAndEntryId(
+    userId: string,
+    entryId: string,
+  ): Promise<Progression | null> {
     const entity = await this.prisma.progression.findUnique({
       where: {
         userId_entryId: {

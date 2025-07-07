@@ -1,4 +1,7 @@
-import { CompleteQuestionCommand, CompleteQuestionResult } from '../../../core/usecases/complete-question.usecase';
+import {
+  CompleteQuestionCommand,
+  CompleteQuestionResult,
+} from '../../../core/usecases/complete-question.usecase';
 import { CompleteQuestionRequest } from '../request/complete-question.request';
 import { CompleteQuestionResponse } from '../response/complete-question.response';
 
@@ -18,9 +21,6 @@ export class CompleteQuestionMapper {
   }
 
   static fromDomain(result: CompleteQuestionResult): CompleteQuestionResponse {
-    return new CompleteQuestionResponse(
-      result.correctAnswer,
-      result.feedback,
-    );
+    return new CompleteQuestionResponse(result.correctAnswer, result.feedback);
   }
 }

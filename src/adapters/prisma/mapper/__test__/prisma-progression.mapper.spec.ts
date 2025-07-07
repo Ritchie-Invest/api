@@ -1,15 +1,21 @@
 import { PrismaProgressionMapper } from '../prisma-progression.mapper';
-import { Progression, ProgressionType } from '../../../../core/domain/model/Progression';
+import {
+  Progression,
+  ProgressionType,
+} from '../../../../core/domain/model/Progression';
 import { Progression as ProgressionEntity, $Enums } from '@prisma/client';
 
 describe('PrismaProgressionMapper', () => {
   const mapper = new PrismaProgressionMapper();
 
-  const progressionTypeMappings: { 
-    domain: ProgressionType; 
-    prisma: $Enums.ProgressionType 
+  const progressionTypeMappings: {
+    domain: ProgressionType;
+    prisma: $Enums.ProgressionType;
   }[] = [
-    { domain: ProgressionType.QUESTION, prisma: $Enums.ProgressionType.question },
+    {
+      domain: ProgressionType.QUESTION,
+      prisma: $Enums.ProgressionType.question,
+    },
     { domain: ProgressionType.LESSON, prisma: $Enums.ProgressionType.lesson },
   ];
 
@@ -88,7 +94,9 @@ describe('PrismaProgressionMapper', () => {
       );
 
       // When & Then
-      expect(() => mapper.fromDomain(progression)).toThrow('Invalid progression type');
+      expect(() => mapper.fromDomain(progression)).toThrow(
+        'Invalid progression type',
+      );
     });
 
     it('should throw error for invalid progression type in toDomain', () => {

@@ -43,16 +43,25 @@ describe('QuestionController', () => {
       completeQuestionUseCase.execute.mockResolvedValue(useCaseResult);
 
       // When
-      const response = await controller.completeQuestion(userId, questionId, request);
+      const response = await controller.completeQuestion(
+        userId,
+        questionId,
+        request,
+      );
 
       // Then
-      expect(completeQuestionUseCase.execute).toHaveBeenCalledWith({
-        userId: 'user-123',
-        questionId: 'question-456',
-        answer: {
-          selectedChoiceId: 'choice-1',
-        },
-      });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(completeQuestionUseCase.execute).toHaveBeenCalledTimes(1);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(completeQuestionUseCase.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'user-123',
+          questionId: 'question-456',
+          answer: {
+            selectedChoiceId: 'choice-1',
+          },
+        }),
+      );
       expect(response.correctAnswer).toBe(true);
       expect(response.feedback).toBe('Correct! Well done.');
     });
@@ -70,7 +79,11 @@ describe('QuestionController', () => {
       completeQuestionUseCase.execute.mockResolvedValue(useCaseResult);
 
       // When
-      const response = await controller.completeQuestion(userId, questionId, request);
+      const response = await controller.completeQuestion(
+        userId,
+        questionId,
+        request,
+      );
 
       // Then
       expect(response.correctAnswer).toBe(false);

@@ -35,12 +35,13 @@ describe('CompleteQuestionUseCase', () => {
         isCorrect: true,
         correctionMessage: 'Correct! Paris is indeed the capital of France.',
       });
-      
+
       const incorrectChoice = new McqChoice({
         id: 'choice-2',
         text: 'Lyon',
         isCorrect: false,
-        correctionMessage: 'Incorrect. Lyon is a major city but not the capital.',
+        correctionMessage:
+          'Incorrect. Lyon is a major city but not the capital.',
       });
 
       const mcqModule = new McqModule({
@@ -50,7 +51,7 @@ describe('CompleteQuestionUseCase', () => {
         choices: [correctChoice, incorrectChoice],
       });
 
-      await gameModuleRepository.create(mcqModule);
+      gameModuleRepository.create(mcqModule);
 
       const command: CompleteQuestionCommand = {
         userId: 'user-1',
@@ -65,10 +66,12 @@ describe('CompleteQuestionUseCase', () => {
 
       // Then
       expect(result.correctAnswer).toBe(true);
-      expect(result.feedback).toBe('Correct! Paris is indeed the capital of France.');
+      expect(result.feedback).toBe(
+        'Correct! Paris is indeed the capital of France.',
+      );
 
       // Verify progression was saved
-      const progression = await progressionRepository.findByUserIdAndEntryId(
+      const progression = progressionRepository.findByUserIdAndEntryId(
         'user-1',
         'question-1',
       );
@@ -87,12 +90,13 @@ describe('CompleteQuestionUseCase', () => {
         isCorrect: true,
         correctionMessage: 'Correct! Paris is indeed the capital of France.',
       });
-      
+
       const incorrectChoice = new McqChoice({
         id: 'choice-2',
         text: 'Lyon',
         isCorrect: false,
-        correctionMessage: 'Incorrect. Lyon is a major city but not the capital.',
+        correctionMessage:
+          'Incorrect. Lyon is a major city but not the capital.',
       });
 
       const mcqModule = new McqModule({
@@ -102,7 +106,7 @@ describe('CompleteQuestionUseCase', () => {
         choices: [correctChoice, incorrectChoice],
       });
 
-      await gameModuleRepository.create(mcqModule);
+      gameModuleRepository.create(mcqModule);
 
       const command: CompleteQuestionCommand = {
         userId: 'user-1',
@@ -117,10 +121,12 @@ describe('CompleteQuestionUseCase', () => {
 
       // Then
       expect(result.correctAnswer).toBe(false);
-      expect(result.feedback).toBe('Incorrect. Lyon is a major city but not the capital.');
+      expect(result.feedback).toBe(
+        'Incorrect. Lyon is a major city but not the capital.',
+      );
 
       // Verify progression was saved with completed = false
-      const progression = await progressionRepository.findByUserIdAndEntryId(
+      const progression = progressionRepository.findByUserIdAndEntryId(
         'user-1',
         'question-1',
       );
@@ -136,7 +142,7 @@ describe('CompleteQuestionUseCase', () => {
         isCorrect: true,
         correctionMessage: 'Correct!',
       });
-      
+
       const incorrectChoice = new McqChoice({
         id: 'choice-2',
         text: 'Lyon',
@@ -151,7 +157,7 @@ describe('CompleteQuestionUseCase', () => {
         choices: [correctChoice, incorrectChoice],
       });
 
-      await gameModuleRepository.create(mcqModule);
+      gameModuleRepository.create(mcqModule);
 
       // Create existing progression
       const existingProgression = new Progression(
@@ -161,7 +167,7 @@ describe('CompleteQuestionUseCase', () => {
         ProgressionType.QUESTION,
         false,
       );
-      await progressionRepository.create(existingProgression);
+      progressionRepository.create(existingProgression);
 
       const command: CompleteQuestionCommand = {
         userId: 'user-1',
@@ -175,90 +181,98 @@ describe('CompleteQuestionUseCase', () => {
       await useCase.execute(command);
 
       // Then
-      const updatedProgression = await progressionRepository.findByUserIdAndEntryId(
+      const updatedProgression = progressionRepository.findByUserIdAndEntryId(
         'user-1',
         'question-1',
       );
       expect(updatedProgression!.completed).toBe(true);
-      expect(updatedProgression!.id).toBe('progression-1'); 
+      expect(updatedProgression!.id).toBe('progression-1');
     });
   });
 
-describe('Scenario 2: Invalid or empty answer', () => {
+  describe('Scenario 2: Invalid or empty answer', () => {
     it('should throw InvalidAnswerError when selectedChoiceId is empty', async () => {
-        // Given
-        const command: CompleteQuestionCommand = {
-            userId: 'user-1',
-            questionId: 'question-1',
-            answer: {
-                selectedChoiceId: '',
-            },
-        };
+      // Given
+      const command: CompleteQuestionCommand = {
+        userId: 'user-1',
+        questionId: 'question-1',
+        answer: {
+          selectedChoiceId: '',
+        },
+      };
 
-        // When & Then
-        await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      // When & Then
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
 
     it('should throw InvalidAnswerError when selectedChoiceId is missing', async () => {
-        // Given
-        const command = {
-            userId: 'user-1',
-            questionId: 'question-1',
-            answer: {},
-        } as CompleteQuestionCommand;
+      // Given
+      const command = {
+        userId: 'user-1',
+        questionId: 'question-1',
+        answer: {},
+      } as CompleteQuestionCommand;
 
-        // When & Then
-        await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      // When & Then
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
 
     it('should throw InvalidAnswerError when answer is missing', async () => {
-        // Given
-        const command = {
-            userId: 'user-1',
-            questionId: 'question-1',
-        } as CompleteQuestionCommand;
+      // Given
+      const command = {
+        userId: 'user-1',
+        questionId: 'question-1',
+      } as CompleteQuestionCommand;
 
-        // When & Then
-        await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      // When & Then
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
 
     it('should throw InvalidAnswerError when selectedChoiceId does not exist in question', async () => {
-        // Given
-        const correctChoice = new McqChoice({
-            id: 'choice-1',
-            text: 'Paris',
-            isCorrect: true,
-            correctionMessage: 'Correct!',
-        });
+      // Given
+      const correctChoice = new McqChoice({
+        id: 'choice-1',
+        text: 'Paris',
+        isCorrect: true,
+        correctionMessage: 'Correct!',
+      });
 
-        const otherChoice = new McqChoice({
-            id: 'choice-2',
-            text: 'Lyon',
-            isCorrect: false,
-            correctionMessage: 'Incorrect.',
-        });
+      const otherChoice = new McqChoice({
+        id: 'choice-2',
+        text: 'Lyon',
+        isCorrect: false,
+        correctionMessage: 'Incorrect.',
+      });
 
-        const mcqModule = new McqModule({
-            id: 'question-1',
-            lessonId: 'lesson-1',
-            question: 'What is the capital of France?',
-            choices: [correctChoice, otherChoice],
-        });
+      const mcqModule = new McqModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        question: 'What is the capital of France?',
+        choices: [correctChoice, otherChoice],
+      });
 
-        await gameModuleRepository.create(mcqModule);
+      gameModuleRepository.create(mcqModule);
 
-        const command: CompleteQuestionCommand = {
-            userId: 'user-1',
-            questionId: 'question-1',
-            answer: {
-                selectedChoiceId: 'non-existent-choice',
-            },
-        };
+      const command: CompleteQuestionCommand = {
+        userId: 'user-1',
+        questionId: 'question-1',
+        answer: {
+          selectedChoiceId: 'non-existent-choice',
+        },
+      };
 
-        // When & Then
-        await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      // When & Then
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
-});
+  });
 
   describe('Scenario 3: Non-existing question', () => {
     it('should throw QuestionNotFoundError when questionId does not exist', async () => {
@@ -272,7 +286,9 @@ describe('Scenario 2: Invalid or empty answer', () => {
       };
 
       // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(QuestionNotFoundError);
+      await expect(useCase.execute(command)).rejects.toThrow(
+        QuestionNotFoundError,
+      );
     });
   });
 });

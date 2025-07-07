@@ -46,7 +46,11 @@ export class QuestionController {
     @Param('questionId') questionId: string,
     @Body() request: CompleteQuestionRequest,
   ): Promise<CompleteQuestionResponse> {
-    const command = CompleteQuestionMapper.toDomain(userId, questionId, request);
+    const command = CompleteQuestionMapper.toDomain(
+      userId,
+      questionId,
+      request,
+    );
     const result = await this.completeQuestionUseCase.execute(command);
     return CompleteQuestionMapper.fromDomain(result);
   }

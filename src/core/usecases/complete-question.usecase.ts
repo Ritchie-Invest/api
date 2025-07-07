@@ -27,12 +27,16 @@ export class CompleteQuestionUseCase
     private readonly progressionRepository: ProgressionRepository,
   ) {}
 
-  async execute(command: CompleteQuestionCommand): Promise<CompleteQuestionResult> {
+  async execute(
+    command: CompleteQuestionCommand,
+  ): Promise<CompleteQuestionResult> {
     if (!command.answer?.selectedChoiceId?.trim()) {
       throw new InvalidAnswerError();
     }
 
-    const gameModule = await this.gameModuleRepository.findById(command.questionId);
+    const gameModule = await this.gameModuleRepository.findById(
+      command.questionId,
+    );
     if (!gameModule) {
       throw new QuestionNotFoundError(command.questionId);
     }
@@ -41,10 +45,10 @@ export class CompleteQuestionUseCase
       throw new InvalidAnswerError('Question type not supported');
     }
 
-    const mcqModule = gameModule as McqModule;
+    const mcqModule = gameModule;
 
     const selectedChoice = mcqModule.choices.find(
-      (choice) => choice.id === command.answer.selectedChoiceId
+      (choice) => choice.id === command.answer.selectedChoiceId,
     );
 
     if (!selectedChoice) {
@@ -66,15 +70,19 @@ export class CompleteQuestionUseCase
     questionId: string,
     completed: boolean,
   ): Promise<void> {
-    const existingProgression = await this.progressionRepository.findByUserIdAndEntryId(
-      userId,
-      questionId,
-    );
+    const existingProgression =
+      await this.progressionRepository.findByUserIdAndEntryId(
+        userId,
+        questionId,
+      );
 
     if (existingProgression) {
       existingProgression.completed = completed;
       existingProgression.updatedAt = new Date();
-      await this.progressionRepository.update(existingProgression.id, existingProgression);
+      await this.progressionRepository.update(
+        existingProgression.id,
+        existingProgression,
+      );
     } else {
       const progression = new Progression(
         crypto.randomUUID(),

@@ -1,10 +1,15 @@
 import { EntityMapper } from '../../../core/base/entity-mapper';
-import { Progression, ProgressionType } from '../../../core/domain/model/Progression';
+import {
+  Progression,
+  ProgressionType,
+} from '../../../core/domain/model/Progression';
 import { Progression as ProgressionEntity, $Enums } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class PrismaProgressionMapper implements EntityMapper<Progression, ProgressionEntity> {
+export class PrismaProgressionMapper
+  implements EntityMapper<Progression, ProgressionEntity>
+{
   fromDomain(model: Progression): ProgressionEntity {
     return {
       id: model.id,
@@ -29,7 +34,9 @@ export class PrismaProgressionMapper implements EntityMapper<Progression, Progre
     );
   }
 
-  private mapProgressionTypeFromDomain(type: ProgressionType): $Enums.ProgressionType {
+  private mapProgressionTypeFromDomain(
+    type: ProgressionType,
+  ): $Enums.ProgressionType {
     switch (type) {
       case ProgressionType.QUESTION:
         return $Enums.ProgressionType.question;
@@ -40,7 +47,9 @@ export class PrismaProgressionMapper implements EntityMapper<Progression, Progre
     }
   }
 
-  private mapProgressionTypeToDomain(type: $Enums.ProgressionType): ProgressionType {
+  private mapProgressionTypeToDomain(
+    type: $Enums.ProgressionType,
+  ): ProgressionType {
     switch (type) {
       case 'question':
         return ProgressionType.QUESTION;

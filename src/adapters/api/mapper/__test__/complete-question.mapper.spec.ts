@@ -11,7 +11,11 @@ describe('CompleteQuestionMapper', () => {
       const request = new CompleteQuestionRequest('choice-1');
 
       // When
-      const command = CompleteQuestionMapper.toDomain(userId, questionId, request);
+      const command = CompleteQuestionMapper.toDomain(
+        userId,
+        questionId,
+        request,
+      );
 
       // Then
       expect(command).toEqual({
