@@ -1,24 +1,18 @@
 import { McqModule } from '../../domain/model/McqModule';
-import { GameModule } from '../../domain/model/GameModule';
-import { CompleteGameModuleCommand } from '../complete-game-module.usecase';
 import {
-  CompleteGameModuleStrategy,
+  CompleteGameModuleCommand,
   CompleteGameModuleResult,
-} from './complete-game-module-strategy';
+} from '../complete-game-module.usecase';
+import { CompleteGameModuleStrategy } from './complete-game-module-strategy';
 import { InvalidAnswerError } from '../../domain/error/InvalidAnswerError';
-import { GameModuleTypeMismatchError } from '../../domain/error/GameModuleTypeMismatchError';
 
 export class McqCompleteGameModuleStrategy
   implements CompleteGameModuleStrategy
 {
-  validateAndComplete(
-    gameModule: GameModule,
+  validateMcq(
+    gameModule: McqModule,
     command: CompleteGameModuleCommand,
   ): CompleteGameModuleResult {
-    if (!(gameModule instanceof McqModule)) {
-      throw new GameModuleTypeMismatchError();
-    }
-
     if (!command.mcq?.choiceId) {
       throw new InvalidAnswerError('MCQ choice is required');
     }
@@ -28,12 +22,15 @@ export class McqCompleteGameModuleStrategy
     );
 
     if (!selectedChoice) {
-      throw new InvalidAnswerError('Invalid choice selected');
+      throw new InvalidAnswerError('Invalid answer: choice not found');
     }
 
     return {
       correctAnswer: selectedChoice.isCorrect,
       feedback: selectedChoice.correctionMessage,
+      nextGameModuleId: null, // TODO: Implement logic to find next game module
+      currentGameModuleIndex: 0, // TODO: Implement logic to find current index
+      totalGameModules: 1, // TODO: Implement logic to count total modules
     };
   }
 }

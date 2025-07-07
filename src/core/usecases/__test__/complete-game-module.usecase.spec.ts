@@ -3,6 +3,7 @@ import {
   CompleteGameModuleCommand,
 } from '../complete-game-module.usecase';
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
+import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { McqModule } from '../../domain/model/McqModule';
 import { McqChoice } from '../../domain/model/McqChoice';
 import { GameModuleNotFoundError } from '../../domain/error/GameModuleNotFoundError';
@@ -15,11 +16,13 @@ import { McqCompleteGameModuleStrategy } from '../strategies/mcq-complete-game-m
 
 describe('CompleteGameModuleUseCase', () => {
   let gameModuleRepository: InMemoryGameModuleRepository;
+  let lessonRepository: InMemoryLessonRepository;
   let progressionRepository: InMemoryProgressionRepository;
   let useCase: CompleteGameModuleUseCase;
 
   beforeEach(() => {
     gameModuleRepository = new InMemoryGameModuleRepository();
+    lessonRepository = new InMemoryLessonRepository();
     progressionRepository = new InMemoryProgressionRepository();
 
     // Create strategy factory
@@ -33,15 +36,32 @@ describe('CompleteGameModuleUseCase', () => {
     useCase = new CompleteGameModuleUseCase(
       gameModuleRepository,
       progressionRepository,
+      lessonRepository,
       strategyFactory,
     );
     gameModuleRepository.removeAll();
+    lessonRepository.removeAll();
     progressionRepository.removeAll();
   });
+
+  // Helper function to create a test lesson
+  const createTestLesson = () => {
+    const lesson = {
+      id: 'lesson-1',
+      title: 'Test Lesson',
+      description: 'A test lesson',
+      chapterId: 'chapter-1',
+      order: 1,
+      gameType: GameType.MCQ,
+    };
+    lessonRepository.create(lesson);
+  };
 
   describe('Scenario 1: Valid answer submission', () => {
     it('should return correct answer and feedback when answer is correct', async () => {
       // Given
+      createTestLesson();
+
       const correctChoice = new McqChoice({
         id: 'choice-1',
         text: 'Paris',
@@ -97,6 +117,8 @@ describe('CompleteGameModuleUseCase', () => {
 
     it('should return incorrect answer and feedback when answer is wrong', async () => {
       // Given
+      createTestLesson();
+
       const correctChoice = new McqChoice({
         id: 'choice-1',
         text: 'Paris',
@@ -149,6 +171,8 @@ describe('CompleteGameModuleUseCase', () => {
 
     it('should update existing progression when user answers again', async () => {
       // Given
+      createTestLesson();
+
       const correctChoice = new McqChoice({
         id: 'choice-1',
         text: 'Paris',
@@ -207,6 +231,8 @@ describe('CompleteGameModuleUseCase', () => {
   describe('Scenario 2: Invalid or empty answer', () => {
     it('should throw InvalidAnswerError when choiceId is empty', async () => {
       // Given
+      createTestLesson();
+
       const correctChoice = new McqChoice({
         id: 'choice-1',
         text: 'Paris',
@@ -247,6 +273,8 @@ describe('CompleteGameModuleUseCase', () => {
 
     it('should throw InvalidAnswerError when choiceId is missing', async () => {
       // Given
+      createTestLesson();
+
       const correctChoice = new McqChoice({
         id: 'choice-1',
         text: 'Paris',
@@ -285,6 +313,8 @@ describe('CompleteGameModuleUseCase', () => {
 
     it('should throw InvalidAnswerError when mcq is missing', async () => {
       // Given
+      createTestLesson();
+
       const correctChoice = new McqChoice({
         id: 'choice-1',
         text: 'Paris',
@@ -322,6 +352,8 @@ describe('CompleteGameModuleUseCase', () => {
 
     it('should throw InvalidAnswerError when choiceId does not exist in question', async () => {
       // Given
+      createTestLesson();
+
       const correctChoice = new McqChoice({
         id: 'choice-1',
         text: 'Paris',

@@ -1,13 +1,11 @@
 import { GameModule } from '../../domain/model/GameModule';
-import { CompleteGameModuleCommand } from '../complete-game-module.usecase';
-
-export interface CompleteGameModuleResult {
-  correctAnswer: boolean;
-  feedback: string;
-}
+import {
+  CompleteGameModuleCommand,
+  CompleteGameModuleResult,
+} from '../complete-game-module.usecase';
 
 export interface CompleteGameModuleStrategy {
-  validateAndComplete(
+  validateMcq(
     gameModule: GameModule,
     command: CompleteGameModuleCommand,
   ): CompleteGameModuleResult;

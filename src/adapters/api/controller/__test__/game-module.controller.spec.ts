@@ -1,142 +1,108 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { AppModule } from '../../../../app.module';
+import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
+import { App } from 'supertest/types';
+import request from 'supertest';
+import { DomainErrorFilter } from '../../../../config/domain-error.filter';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
+import { RolesGuard } from '../../guards/roles.guard';
 import { Reflector } from '@nestjs/core';
-import { GameModuleController } from '../game-module.controller';
-import { CompleteGameModuleUseCase } from '../../../../core/usecases/complete-game-module.usecase';
+import { TokenService } from '../../../../core/domain/service/token.service';
+import { UserType } from '../../../../core/domain/type/UserType';
+import { GameType } from '../../../../core/domain/type/GameType';
+import { GameModuleRepository } from '../../../../core/domain/repository/game-module.repository';
+import { ProgressionRepository } from '../../../../core/domain/repository/progression.repository';
+import { LessonRepository } from '../../../../core/domain/repository/lesson.repository';
+import { ChapterRepository } from '../../../../core/domain/repository/chapter.repository';
+import { UserRepository } from '../../../../core/domain/repository/user.repository';
 import {
   CompleteGameModuleRequest,
   McqAnswerRequest,
 } from '../../request/complete-game-module.request';
-import { GameModuleNotFoundError } from '../../../../core/domain/error/GameModuleNotFoundError';
-import { InvalidAnswerError } from '../../../../core/domain/error/InvalidAnswerError';
-import { UserType } from '../../../../core/domain/type/UserType';
-import { GameType } from '../../../../core/domain/type/GameType';
-import { InMemoryUserRepository } from '../../../in-memory/in-memory-user.repository';
-import { InMemoryGameModuleRepository } from '../../../in-memory/in-memory-game-module.repository';
-import { InMemoryProgressionRepository } from '../../../in-memory/in-memory-progression.repository';
-import { InMemoryRefreshTokenRepository } from '../../../in-memory/in-memory-refresh-token.repository';
-import { UserRepository } from '../../../../core/domain/repository/user.repository';
-import { GameModuleRepository } from '../../../../core/domain/repository/game-module.repository';
-import { ProgressionRepository } from '../../../../core/domain/repository/progression.repository';
-import { RefreshTokenRepository } from '../../../../core/domain/repository/refresh-token.repository';
-import { User } from '../../../../core/domain/model/User';
 import { McqModule } from '../../../../core/domain/model/McqModule';
 import { McqChoice } from '../../../../core/domain/model/McqChoice';
-import {
-  CompleteGameModuleStrategyFactory,
-  MapCompleteGameModuleStrategyFactory,
-} from '../../../../core/usecases/strategies/complete-game-module-strategy-factory';
-import { McqCompleteGameModuleStrategy } from '../../../../core/usecases/strategies/mcq-complete-game-module-strategy';
 
-describe('GameModuleController', () => {
-  let controller: GameModuleController;
-  let userRepository: InMemoryUserRepository;
-  let gameModuleRepository: InMemoryGameModuleRepository;
-  let progressionRepository: InMemoryProgressionRepository;
-  let refreshTokenRepository: InMemoryRefreshTokenRepository;
+describe('GameModuleControllerIT', () => {
+  let app: INestApplication<App>;
+  let chapterRepository: ChapterRepository;
+  let lessonRepository: LessonRepository;
+  let gameModuleRepository: GameModuleRepository;
+  let progressionRepository: ProgressionRepository;
+  let userRepository: UserRepository;
+  let tokenService: TokenService;
 
-  beforeEach(async () => {
-    // Create in-memory repositories
-    userRepository = new InMemoryUserRepository();
-    gameModuleRepository = new InMemoryGameModuleRepository();
-    progressionRepository = new InMemoryProgressionRepository();
-    refreshTokenRepository = new InMemoryRefreshTokenRepository();
-
-    // Create strategy factory
-    const strategyFactory = new MapCompleteGameModuleStrategyFactory([
-      {
-        type: GameType.MCQ,
-        strategy: new McqCompleteGameModuleStrategy(),
-      },
-    ]);
-
-    const mockTokenService = {
-      verifyAccessToken: jest.fn(),
-      generateAccessToken: jest.fn(),
-      generateRefreshToken: jest.fn(),
-      verifyRefreshToken: jest.fn(),
-    };
-
-    const mockReflector = {
-      getAllAndOverride: jest.fn(),
-    };
-
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [GameModuleController],
-      providers: [
-        {
-          provide: CompleteGameModuleUseCase,
-          useFactory: (
-            gameModuleRepo: GameModuleRepository,
-            progressionRepo: ProgressionRepository,
-            strategyFactory: CompleteGameModuleStrategyFactory,
-          ) =>
-            new CompleteGameModuleUseCase(
-              gameModuleRepo,
-              progressionRepo,
-              strategyFactory,
-            ),
-          inject: [
-            GameModuleRepository,
-            ProgressionRepository,
-            'CompleteGameModuleStrategyFactory',
-          ],
-        },
-        {
-          provide: UserRepository,
-          useValue: userRepository,
-        },
-        {
-          provide: GameModuleRepository,
-          useValue: gameModuleRepository,
-        },
-        {
-          provide: ProgressionRepository,
-          useValue: progressionRepository,
-        },
-        {
-          provide: RefreshTokenRepository,
-          useValue: refreshTokenRepository,
-        },
-        {
-          provide: 'CompleteGameModuleStrategyFactory',
-          useValue: strategyFactory,
-        },
-        {
-          provide: 'TokenService',
-          useValue: mockTokenService,
-        },
-        {
-          provide: Reflector,
-          useValue: mockReflector,
-        },
-      ],
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
     }).compile();
 
-    controller = module.get<GameModuleController>(GameModuleController);
+    app = moduleFixture.createNestApplication();
+    const reflector = moduleFixture.get(Reflector);
+
+    app.useGlobalFilters(new DomainErrorFilter());
+    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalGuards(
+      new JwtAuthGuard(app.get('TokenService'), reflector),
+      new RolesGuard(reflector),
+    );
+
+    await app.init();
   });
 
-  afterEach(() => {
-    // Clean up repositories between tests
-    userRepository.removeAll();
-    gameModuleRepository.removeAll();
-    progressionRepository.removeAll();
-    refreshTokenRepository.removeAll();
+  beforeEach(async () => {
+    chapterRepository = app.get(ChapterRepository);
+    lessonRepository = app.get(LessonRepository);
+    gameModuleRepository = app.get(GameModuleRepository);
+    progressionRepository = app.get(ProgressionRepository);
+    userRepository = app.get(UserRepository);
+    tokenService = app.get('TokenService');
+
+    // Clean up all data
+    await progressionRepository.removeAll();
+    await gameModuleRepository.removeAll();
+    await lessonRepository.removeAll();
+    await chapterRepository.removeAll();
+    await userRepository.removeAll();
+
+    // Create the test user that corresponds to our token
+    await userRepository.create({
+      id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+      email: 'test@ritchie-invest.com',
+      password: 'hashedPassword123',
+      type: UserType.ADMIN,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  });
+
+  afterEach(async () => {
+    await progressionRepository.removeAll();
+    await gameModuleRepository.removeAll();
+    await lessonRepository.removeAll();
+    await chapterRepository.removeAll();
+    await userRepository.removeAll();
   });
 
   describe('completeGameModule', () => {
-    let testUser: User;
-    let testGameModule: McqModule;
-    let correctChoiceId: string;
-    let incorrectChoiceId: string;
+    it('should return correct answer response when answer is correct', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const chapter = {
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: true,
+      };
+      await chapterRepository.create(chapter);
 
-    beforeEach(() => {
-      // Create test data
-      testUser = userRepository.create({
-        id: 'user-123',
-        email: 'test@example.com',
-        password: 'password',
-        type: UserType.STUDENT,
-      });
+      const lesson = {
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
+        isPublished: true,
+        chapterId: 'chapter-1',
+        order: 1,
+      };
+      const createdLesson = await lessonRepository.create(lesson);
 
       const choices = [
         new McqChoice({
@@ -153,136 +119,304 @@ describe('GameModuleController', () => {
         }),
       ];
 
-      testGameModule = new McqModule({
+      const testGameModule = new McqModule({
         id: 'module-456',
-        lessonId: 'lesson-789',
+        lessonId: createdLesson.id,
         question: 'What is 2 + 2?',
         choices: choices,
       });
 
-      gameModuleRepository.create(testGameModule);
+      await gameModuleRepository.create(testGameModule);
 
-      correctChoiceId = 'choice-1';
-      incorrectChoiceId = 'choice-2';
-    });
-
-    it('should return correct answer response when answer is correct', async () => {
-      // Given
-      const moduleId = testGameModule.id;
-      const request = new CompleteGameModuleRequest(
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
         GameType.MCQ,
-        new McqAnswerRequest(correctChoiceId),
+        new McqAnswerRequest('choice-1'),
       );
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const mockReq = {
-        user: {
-          id: testUser.id,
-          email: testUser.email,
-          type: testUser.type,
-        },
-      } as any;
 
       // When
-
-      const response = await controller.completeGameModule(
-        moduleId,
-        request,
-        mockReq,
-      );
+      const response = await request(app.getHttpServer())
+        .post(`/v1/modules/${testGameModule.id}/complete`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(completeGameModuleRequest);
 
       // Then
-      expect(response.correctAnswer).toBe(true);
-      expect(response.feedback).toBe('Well done!');
+      expect(response.status).toBe(HttpStatus.CREATED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.correctAnswer).toBe(true);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.feedback).toBe('Well done!');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.nextGameModuleId).toBeNull(); // Only one module in this test
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.currentGameModuleIndex).toBe(0);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.totalGameModules).toBe(1);
 
       // Verify progression was created
-      const progression = progressionRepository.findByUserIdAndGameModuleId(
-        testUser.id,
-        testGameModule.id,
-      );
+      const progression =
+        await progressionRepository.findByUserIdAndGameModuleId(
+          'be7cbc6d-782b-4939-8cff-e577dfe3e79a', // User ID from token
+          testGameModule.id,
+        );
       expect(progression).toBeDefined();
       expect(progression?.isCompleted).toBe(true);
     });
 
     it('should return incorrect answer response when answer is wrong', async () => {
       // Given
-      const moduleId = testGameModule.id;
-      const request = new CompleteGameModuleRequest(
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const chapter = {
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: true,
+      };
+      await chapterRepository.create(chapter);
+
+      const lesson = {
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
+        isPublished: true,
+        chapterId: 'chapter-1',
+        order: 1,
+      };
+      const createdLesson = await lessonRepository.create(lesson);
+
+      const choices = [
+        new McqChoice({
+          id: 'choice-1',
+          text: 'Correct answer',
+          isCorrect: true,
+          correctionMessage: 'Well done!',
+        }),
+        new McqChoice({
+          id: 'choice-2',
+          text: 'Wrong answer',
+          isCorrect: false,
+          correctionMessage: 'Not quite right.',
+        }),
+      ];
+
+      const testGameModule = new McqModule({
+        id: 'module-456',
+        lessonId: createdLesson.id,
+        question: 'What is 2 + 2?',
+        choices: choices,
+      });
+
+      await gameModuleRepository.create(testGameModule);
+
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
         GameType.MCQ,
-        new McqAnswerRequest(incorrectChoiceId),
+        new McqAnswerRequest('choice-2'),
       );
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const mockReq = {
-        user: {
-          id: testUser.id,
-          email: testUser.email,
-          type: testUser.type,
-        },
-      } as any;
 
       // When
-
-      const response = await controller.completeGameModule(
-        moduleId,
-        request,
-        mockReq,
-      );
+      const response = await request(app.getHttpServer())
+        .post(`/v1/modules/${testGameModule.id}/complete`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(completeGameModuleRequest);
 
       // Then
-      expect(response.correctAnswer).toBe(false);
-      expect(response.feedback).toBe('Not quite right.');
+      expect(response.status).toBe(HttpStatus.CREATED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.correctAnswer).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.feedback).toBe('Not quite right.');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.nextGameModuleId).toBeNull();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.currentGameModuleIndex).toBe(0);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.totalGameModules).toBe(1);
 
       // Verify progression was NOT created for wrong answer
-      const progression = progressionRepository.findByUserIdAndGameModuleId(
-        testUser.id,
-        testGameModule.id,
-      );
+      const progression =
+        await progressionRepository.findByUserIdAndGameModuleId(
+          'be7cbc6d-782b-4939-8cff-e577dfe3e79a', // User ID from token
+          testGameModule.id,
+        );
       expect(progression).toBeNull();
     });
 
-    it('should throw GameModuleNotFoundError when module does not exist', async () => {
+    it('should return 404 when module does not exist', async () => {
       // Given
-      const nonExistentModuleId = 'non-existent-module';
-      const request = new CompleteGameModuleRequest(
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
         GameType.MCQ,
-        new McqAnswerRequest(correctChoiceId),
+        new McqAnswerRequest('choice-1'),
       );
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const mockReq = {
-        user: {
-          id: testUser.id,
-          email: testUser.email,
-          type: testUser.type,
-        },
-      } as any;
 
-      // When & Then
+      // When
+      const response = await request(app.getHttpServer())
+        .post('/v1/modules/non-existent-module/complete')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(completeGameModuleRequest);
 
-      await expect(
-        controller.completeGameModule(nonExistentModuleId, request, mockReq),
-      ).rejects.toThrow(GameModuleNotFoundError);
+      // Then
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        'Game module with id non-existent-module not found',
+      );
     });
 
-    it('should throw InvalidAnswerError when choice does not exist', async () => {
+    it('should return 400 when choice does not exist', async () => {
       // Given
-      const moduleId = testGameModule.id;
-      const request = new CompleteGameModuleRequest(
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const chapter = {
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: true,
+      };
+      await chapterRepository.create(chapter);
+
+      const lesson = {
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
+        isPublished: true,
+        chapterId: 'chapter-1',
+        order: 1,
+      };
+      const createdLesson = await lessonRepository.create(lesson);
+
+      const choices = [
+        new McqChoice({
+          id: 'choice-1',
+          text: 'Correct answer',
+          isCorrect: true,
+          correctionMessage: 'Well done!',
+        }),
+        new McqChoice({
+          id: 'choice-2',
+          text: 'Wrong answer',
+          isCorrect: false,
+          correctionMessage: 'Not quite right.',
+        }),
+      ];
+
+      const testGameModule = new McqModule({
+        id: 'module-456',
+        lessonId: createdLesson.id,
+        question: 'What is 2 + 2?',
+        choices: choices,
+      });
+
+      await gameModuleRepository.create(testGameModule);
+
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
         GameType.MCQ,
         new McqAnswerRequest('non-existent-choice'),
       );
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const mockReq = {
-        user: {
-          id: testUser.id,
-          email: testUser.email,
-          type: testUser.type,
-        },
-      } as any;
 
-      // When & Then
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/v1/modules/${testGameModule.id}/complete`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(completeGameModuleRequest);
 
-      await expect(
-        controller.completeGameModule(moduleId, request, mockReq),
-      ).rejects.toThrow(InvalidAnswerError);
+      // Then
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toContain('Invalid answer');
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      // Given
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
+        GameType.MCQ,
+        new McqAnswerRequest('choice-1'),
+      );
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post('/v1/modules/module-id/complete')
+        .send(completeGameModuleRequest);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe('No token provided');
+    });
+
+    it('should allow student to complete game module', async () => {
+      // Given
+      const studentToken = generateAccessToken(UserType.STUDENT);
+      const chapter = {
+        id: 'chapter-1',
+        title: 'Chapter 1',
+        description: 'Description of Chapter 1',
+        isPublished: true,
+      };
+      await chapterRepository.create(chapter);
+
+      const lesson = {
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
+        isPublished: true,
+        chapterId: 'chapter-1',
+        order: 1,
+      };
+      const createdLesson = await lessonRepository.create(lesson);
+
+      const choices = [
+        new McqChoice({
+          id: 'choice-1',
+          text: 'Correct answer',
+          isCorrect: true,
+          correctionMessage: 'Well done!',
+        }),
+        new McqChoice({
+          id: 'choice-2',
+          text: 'Wrong answer',
+          isCorrect: false,
+          correctionMessage: 'Not quite right.',
+        }),
+      ];
+
+      const testGameModule = new McqModule({
+        id: 'module-456',
+        lessonId: createdLesson.id,
+        question: 'What is 2 + 2?',
+        choices: choices,
+      });
+
+      await gameModuleRepository.create(testGameModule);
+
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
+        GameType.MCQ,
+        new McqAnswerRequest('choice-1'),
+      );
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/v1/modules/${testGameModule.id}/complete`)
+        .set('Authorization', `Bearer ${studentToken}`)
+        .send(completeGameModuleRequest);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.CREATED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.correctAnswer).toBe(true);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.nextGameModuleId).toBeNull();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.currentGameModuleIndex).toBe(0);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.totalGameModules).toBe(1);
     });
   });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  function generateAccessToken(userType: UserType): string {
+    return tokenService.generateAccessToken({
+      id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+      email: 'test@ritchie-invest.com',
+      type: userType,
+    });
+  }
 });

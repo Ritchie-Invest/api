@@ -23,15 +23,13 @@ export class InMemoryProgressionRepository extends ProgressionRepository {
     userId: string,
     gameModuleId: string,
   ): Progression | null {
-    for (const progression of this.progressions.values()) {
-      if (
-        progression.userId === userId &&
-        progression.gameModuleId === gameModuleId
-      ) {
-        return progression;
-      }
-    }
-    return null;
+    return (
+      Array.from(this.progressions.values()).find(
+        (progression) =>
+          progression.userId === userId &&
+          progression.gameModuleId === gameModuleId,
+      ) || null
+    );
   }
 
   update(id: string, data: Progression): Progression | null {

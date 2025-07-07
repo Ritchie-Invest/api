@@ -41,6 +41,11 @@ import { ProgressionRepository } from './core/domain/repository/progression.repo
 import { PrismaProgressionRepository } from './adapters/prisma/prisma-progression.repository';
 import { CompleteGameModuleUseCase } from './core/usecases/complete-game-module.usecase';
 import { GameModuleController } from './adapters/api/controller/game-module.controller';
+import {
+  CompleteGameModuleStrategyFactory,
+  MapCompleteGameModuleStrategyFactory,
+} from './core/usecases/strategies/complete-game-module-strategy-factory';
+import { McqCompleteGameModuleStrategy } from './core/usecases/strategies/mcq-complete-game-module-strategy';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -66,6 +71,16 @@ import { GameModuleController } from './adapters/api/controller/game-module.cont
           {
             type: GameType.MCQ,
             strategy: new McqModuleStrategy(),
+          },
+        ]),
+    },
+    {
+      provide: 'CompleteGameModuleStrategyFactory',
+      useFactory: () =>
+        new MapCompleteGameModuleStrategyFactory([
+          {
+            type: GameType.MCQ,
+            strategy: new McqCompleteGameModuleStrategy(),
           },
         ]),
     },
@@ -213,12 +228,21 @@ import { GameModuleController } from './adapters/api/controller/game-module.cont
       useFactory: (
         gameModuleRepository: GameModuleRepository,
         progressionRepository: ProgressionRepository,
+        lessonRepository: LessonRepository,
+        strategyFactory: CompleteGameModuleStrategyFactory,
       ) =>
         new CompleteGameModuleUseCase(
           gameModuleRepository,
           progressionRepository,
+          lessonRepository,
+          strategyFactory,
         ),
-      inject: [GameModuleRepository, ProgressionRepository],
+      inject: [
+        GameModuleRepository,
+        ProgressionRepository,
+        LessonRepository,
+        'CompleteGameModuleStrategyFactory',
+      ],
     },
   ],
 })

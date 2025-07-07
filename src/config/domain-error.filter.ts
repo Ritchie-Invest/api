@@ -17,6 +17,8 @@ import { LessonNotFoundError } from '../core/domain/error/LessonNotFoundError';
 import { LessonInvalidDataError } from '../core/domain/error/LessonInvalidDataError';
 import { GameModuleTypeMismatchError } from '../core/domain/error/GameModuleTypeMismatchError';
 import { GameModuleStrategyNotFoundError } from '../core/domain/error/GameModuleStrategyNotFoundError';
+import { GameModuleNotFoundError } from '../core/domain/error/GameModuleNotFoundError';
+import { InvalidAnswerError } from '../core/domain/error/InvalidAnswerError';
 import { McqModuleInvalidDataError } from '../core/domain/error/McqModuleInvalidDataError';
 
 @Catch(DomainError)
@@ -44,6 +46,7 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof LessonInvalidDataError ||
       exception instanceof GameModuleTypeMismatchError ||
       exception instanceof GameModuleStrategyNotFoundError ||
+      exception instanceof InvalidAnswerError ||
       exception instanceof McqModuleInvalidDataError
     ) {
       return HttpStatus.BAD_REQUEST;
@@ -51,7 +54,8 @@ export class DomainErrorFilter implements ExceptionFilter {
     if (
       exception instanceof UserNotFoundError ||
       exception instanceof ChapterNotFoundError ||
-      exception instanceof LessonNotFoundError
+      exception instanceof LessonNotFoundError ||
+      exception instanceof GameModuleNotFoundError
     ) {
       return HttpStatus.NOT_FOUND;
     }

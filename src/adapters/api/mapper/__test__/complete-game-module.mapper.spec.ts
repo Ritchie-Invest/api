@@ -42,6 +42,9 @@ describe('CompleteGameModuleMapper', () => {
       const result: CompleteGameModuleResult = {
         correctAnswer: true,
         feedback: 'Correct! Well done.',
+        nextGameModuleId: 'module-next',
+        currentGameModuleIndex: 0,
+        totalGameModules: 3,
       };
 
       // When
@@ -50,6 +53,9 @@ describe('CompleteGameModuleMapper', () => {
       // Then
       expect(response.correctAnswer).toBe(true);
       expect(response.feedback).toBe('Correct! Well done.');
+      expect(response.nextGameModuleId).toBe('module-next');
+      expect(response.currentGameModuleIndex).toBe(0);
+      expect(response.totalGameModules).toBe(3);
     });
 
     it('should map CompleteGameModuleResult to CompleteGameModuleResponse for incorrect answer', () => {
@@ -57,6 +63,9 @@ describe('CompleteGameModuleMapper', () => {
       const result: CompleteGameModuleResult = {
         correctAnswer: false,
         feedback: 'Incorrect. Try again.',
+        nextGameModuleId: null,
+        currentGameModuleIndex: 1,
+        totalGameModules: 3,
       };
 
       // When
@@ -65,6 +74,9 @@ describe('CompleteGameModuleMapper', () => {
       // Then
       expect(response.correctAnswer).toBe(false);
       expect(response.feedback).toBe('Incorrect. Try again.');
+      expect(response.nextGameModuleId).toBe(null);
+      expect(response.currentGameModuleIndex).toBe(1);
+      expect(response.totalGameModules).toBe(3);
     });
   });
 });

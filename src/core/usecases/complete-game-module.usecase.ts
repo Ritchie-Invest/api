@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { UseCase } from '../base/use-case';
+import { GameModule } from '../domain/model/GameModule';
 import { GameModuleRepository } from '../domain/repository/game-module.repository';
 import { ProgressionRepository } from '../domain/repository/progression.repository';
+import { LessonRepository } from '../domain/repository/lesson.repository';
 import { Progression } from '../domain/model/Progression';
 import { GameModuleNotFoundError } from '../domain/error/GameModuleNotFoundError';
 import { GameType } from '../domain/type/GameType';
@@ -22,6 +24,9 @@ export type CompleteGameModuleCommand = {
 export type CompleteGameModuleResult = {
   correctAnswer: boolean;
   feedback: string;
+  nextGameModuleId: string | null;
+  currentGameModuleIndex: number;
+  totalGameModules: number;
 };
 
 @Injectable()
@@ -31,6 +36,7 @@ export class CompleteGameModuleUseCase
   constructor(
     private readonly gameModuleRepository: GameModuleRepository,
     private readonly progressionRepository: ProgressionRepository,
+    private readonly lessonRepository: LessonRepository,
     private readonly strategyFactory: CompleteGameModuleStrategyFactory,
   ) {}
 
@@ -53,14 +59,35 @@ export class CompleteGameModuleUseCase
 
     // Use strategy pattern to handle different game types
     const strategy = this.strategyFactory.getStrategy(command.gameType);
-    const result = strategy.validateAndComplete(gameModule, command);
+    const strategyResult = strategy.validateMcq(gameModule, command);
 
     // Only create progression if answer is correct
-    if (result.correctAnswer) {
+    if (strategyResult.correctAnswer) {
       await this.saveProgression(command.userId, command.moduleId, true);
     }
 
-    return result;
+    // Get lesson information to calculate progression
+    const lesson = await this.lessonRepository.findById(gameModule.lessonId);
+    const allModulesInLesson = lesson
+      ? await this.gameModuleRepository.findByLessonId(gameModule.lessonId)
+      : [];
+
+    // Find current module index and next module
+    const currentIndex = allModulesInLesson.findIndex(
+      (module: GameModule) => module.id === command.moduleId,
+    );
+    const nextModule =
+      currentIndex >= 0 && currentIndex < allModulesInLesson.length - 1
+        ? allModulesInLesson[currentIndex + 1]
+        : null;
+
+    return {
+      correctAnswer: strategyResult.correctAnswer,
+      feedback: strategyResult.feedback,
+      nextGameModuleId: nextModule?.id || null,
+      currentGameModuleIndex: Math.max(0, currentIndex),
+      totalGameModules: allModulesInLesson.length,
+    };
   }
 
   private async saveProgression(

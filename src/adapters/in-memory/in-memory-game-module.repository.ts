@@ -32,4 +32,11 @@ export class InMemoryGameModuleRepository implements GameModuleRepository {
   removeAll(): void {
     this.modules.clear();
   }
+
+  findByLessonId(lessonId: string): Promise<GameModule[]> {
+    const modules = Array.from(this.modules.values()).filter(
+      (module) => module.lessonId === lessonId,
+    );
+    return Promise.resolve(modules);
+  }
 }

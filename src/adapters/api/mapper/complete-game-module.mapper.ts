@@ -29,6 +29,9 @@ export class CompleteGameModuleMapper {
     return new CompleteGameModuleResponse(
       result.correctAnswer,
       result.feedback,
+      result.nextGameModuleId,
+      result.currentGameModuleIndex,
+      result.totalGameModules,
     );
   }
 }
