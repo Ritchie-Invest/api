@@ -37,6 +37,10 @@ import {
 } from './core/usecases/strategies/game-module-strategy-factory';
 import { GameType } from './core/domain/type/GameType';
 import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strategy';
+import { ProgressionRepository } from './core/domain/repository/progression.repository';
+import { PrismaProgressionRepository } from './adapters/prisma/prisma-progression.repository';
+import { CompleteQuestionUseCase } from './core/usecases/complete-question.usecase';
+import { QuestionController } from './adapters/api/controller/question.controller';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -45,6 +49,7 @@ import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strateg
     UserController,
     ChapterController,
     LessonController,
+    QuestionController,
   ],
   providers: [
     PrismaService,
@@ -90,6 +95,12 @@ import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strateg
       provide: GameModuleRepository,
       useFactory: (prisma: PrismaService) =>
         new PrismaGameModuleRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: ProgressionRepository,
+      useFactory: (prisma: PrismaService) =>
+        new PrismaProgressionRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -196,6 +207,18 @@ import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strateg
         GameModuleRepository,
         'GameModuleStrategyFactory',
       ],
+    },
+    {
+      provide: CompleteQuestionUseCase,
+      useFactory: (
+        gameModuleRepository: GameModuleRepository,
+        progressionRepository: ProgressionRepository,
+      ) =>
+        new CompleteQuestionUseCase(
+          gameModuleRepository,
+          progressionRepository,
+        ),
+      inject: [GameModuleRepository, ProgressionRepository],
     },
   ],
 })
