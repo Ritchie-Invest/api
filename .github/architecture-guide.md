@@ -77,7 +77,7 @@ For any questions, refer to this guide or contact the technical team.
 
 - **Never import elements from `adapters` into `core`**.
 - **Business errors** are centralized in `core/domain/error`.
-- **Unit tests** are in `core/usecases/__test__`, e2e tests in `test/`.
+- **Unit tests** are in `core/usecases/__test__`.
 - **Use mappers** for any conversion between business entities and DTO/API.
 
 ## Examples
