@@ -19,7 +19,20 @@ export class PrismaLessonRepository implements LessonRepository {
   }
 
   async findById(id: string): Promise<Lesson | null> {
-    const entity = await this.prisma.lesson.findUnique({ where: { id } });
+    const entity = await this.prisma.lesson.findUnique({
+      where: { id },
+      include: {
+        modules: {
+          select: {
+            id: true,
+            lessonId: true,
+            mcq: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
+    });
     if (!entity) {
       return null;
     }

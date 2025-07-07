@@ -5,19 +5,21 @@ import { User } from '../domain/model/User';
 import { UserType } from '../domain/type/UserType';
 import { UserNotAllowedError } from '../domain/error/UserNotAllowedError';
 
-export type getLessonsByChapterIdCommand = {
+export type GetLessonsByChapterIdCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
   chapterId: string;
 };
 
-export class getLessonsByChapterIdUseCase
-  implements UseCase<getLessonsByChapterIdCommand, Lesson[]>
+export class GetLessonsByChapterIdUseCase
+  implements UseCase<GetLessonsByChapterIdCommand, Lesson[]>
 {
   constructor(private readonly lessonRepository: LessonRepository) {}
 
-  async execute(command: getLessonsByChapterIdCommand): Promise<Lesson[]> {
+  async execute(command: GetLessonsByChapterIdCommand): Promise<Lesson[]> {
     if (!this.canExecute(command.currentUser)) {
-      throw new UserNotAllowedError('Unauthorized: Only admins can get lessons');
+      throw new UserNotAllowedError(
+        'Unauthorized: Only admins can get lessons',
+      );
     }
 
     return this.lessonRepository.findByChapter(command.chapterId);

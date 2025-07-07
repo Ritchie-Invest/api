@@ -4,6 +4,7 @@ import { User } from '../../domain/model/User';
 import { UserType } from '../../domain/type/UserType';
 import { GetLessonByIdUseCase } from '../get-lesson-by-id.use-case';
 import { GetLessonByIdCommand } from '../get-lesson-by-id.use-case';
+import { GameType } from '../../domain/type/GameType';
 
 describe('GetLessonByIdUseCase', () => {
   let lessonRepository: LessonRepository;
@@ -44,6 +45,8 @@ describe('GetLessonByIdUseCase', () => {
       chapterId: 'chapter-id',
       order: 1,
       isPublished: false,
+      gameType: GameType.MCQ,
+      modules: [],
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       createdAt: expect.any(Date),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -57,6 +60,8 @@ describe('GetLessonByIdUseCase', () => {
       chapterId: 'chapter-id',
       order: 1,
       isPublished: false,
+      gameType: GameType.MCQ,
+      modules: [],
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,
     });

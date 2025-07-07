@@ -4,6 +4,7 @@ import { UseCase } from '../base/use-case';
 import { User } from '../domain/model/User';
 import { UserType } from '../domain/type/UserType';
 import { UserNotAllowedError } from '../domain/error/UserNotAllowedError';
+import { GameType } from '../domain/type/GameType';
 
 export type CreateLessonCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
@@ -11,9 +12,12 @@ export type CreateLessonCommand = {
   description: string;
   chapterId: string;
   order: number;
+  gameType: GameType;
 };
 
-export class CreateLessonUseCase implements UseCase<CreateLessonCommand, Lesson> {
+export class CreateLessonUseCase
+  implements UseCase<CreateLessonCommand, Lesson>
+{
   constructor(private readonly lessonRepository: LessonRepository) {}
 
   async execute(command: CreateLessonCommand): Promise<Lesson> {
@@ -22,8 +26,16 @@ export class CreateLessonUseCase implements UseCase<CreateLessonCommand, Lesson>
         'Unauthorized: Only admins can create lessons',
       );
     }
-    const { title, description, chapterId, order } = command;
-    const lesson = new Lesson(this.generateId(), title, description, chapterId, order);
+    const { title, description, chapterId, order, gameType } = command;
+    const lesson = new Lesson(
+      this.generateId(),
+      title,
+      description,
+      chapterId,
+      order,
+      false,
+      gameType,
+    );
 
     return this.lessonRepository.create(lesson);
   }

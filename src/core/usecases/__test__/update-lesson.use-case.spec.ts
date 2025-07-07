@@ -2,7 +2,11 @@ import { LessonRepository } from '../../domain/repository/lesson.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { User } from '../../domain/model/User';
 import { UserType } from '../../domain/type/UserType';
-import { UpdateLessonCommand, UpdateLessonUseCase } from '../update-lesson.use-case';
+import {
+  UpdateLessonCommand,
+  UpdateLessonUseCase,
+} from '../update-lesson.use-case';
+import { GameType } from '../../domain/type/GameType';
 
 describe('UpdateLessonUseCase', () => {
   let lessonRepository: LessonRepository;
@@ -23,7 +27,7 @@ describe('UpdateLessonUseCase', () => {
   });
 
   it('should return updated lesson', async () => {
-    // GIVEN
+    // Given
     const command: UpdateLessonCommand = {
       currentUser: getCurrentUser(),
       lessonId: 'lesson-id',
@@ -33,10 +37,10 @@ describe('UpdateLessonUseCase', () => {
       order: 2,
     };
 
-    // WHEN
+    // When
     const lesson = await updateLessonUseCase.execute(command);
 
-    // THEN
+    // Then
     const lessons = await lessonRepository.findAll();
     expect(lessons.length).toEqual(1);
     expect(lesson).toEqual({
@@ -46,6 +50,8 @@ describe('UpdateLessonUseCase', () => {
       chapterId: 'chapter-1',
       isPublished: true,
       order: 2,
+      gameType: GameType.MCQ,
+      modules: [],
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,
     });
@@ -57,13 +63,15 @@ describe('UpdateLessonUseCase', () => {
       chapterId: 'chapter-1',
       isPublished: true,
       order: 2,
+      gameType: GameType.MCQ,
+      modules: [],
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,
     });
   });
 
   it('should throw if title is empty', async () => {
-    // GIVEN
+    // Given
     const command: UpdateLessonCommand = {
       currentUser: getCurrentUser(),
       lessonId: 'lesson-id',
@@ -73,12 +81,12 @@ describe('UpdateLessonUseCase', () => {
       order: 3,
     };
 
-    // WHEN & THEN une erreur est levée
+    // When & Then
     await expect(updateLessonUseCase.execute(command)).rejects.toThrow();
   });
 
   it('should throw if description is empty', async () => {
-    // GIVEN
+    // Given
     const command: UpdateLessonCommand = {
       currentUser: getCurrentUser(),
       lessonId: 'lesson-id',
@@ -88,12 +96,12 @@ describe('UpdateLessonUseCase', () => {
       order: 4,
     };
 
-    // WHEN & THEN
+    // When & Then
     await expect(updateLessonUseCase.execute(command)).rejects.toThrow();
   });
 
   it('should throw an error if user is not admin', async () => {
-    // GIVEN
+    // Given
     const command: UpdateLessonCommand = {
       currentUser: {
         id: 'user-id',
@@ -106,14 +114,14 @@ describe('UpdateLessonUseCase', () => {
       isPublished: true,
     };
 
-    // WHEN & THEN
+    // When & Then
     await expect(updateLessonUseCase.execute(command)).rejects.toThrow(
       'Unauthorized: Only admins can update lessons',
     );
   });
 
   it('should throw an error if lesson does not exist', async () => {
-    // GIVEN
+    // Given
     const command: UpdateLessonCommand = {
       currentUser: getCurrentUser(),
       lessonId: 'non-existing-lesson-id',
@@ -123,7 +131,7 @@ describe('UpdateLessonUseCase', () => {
       isPublished: true,
     };
 
-    // WHEN & THEN
+    // When & Then
     await expect(updateLessonUseCase.execute(command)).rejects.toThrow(
       'Lesson with id non-existing-lesson-id not found',
     );

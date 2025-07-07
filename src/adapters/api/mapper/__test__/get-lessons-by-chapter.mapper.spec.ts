@@ -1,8 +1,9 @@
-import { getLessonsByChapterIdMapper } from '../get-lessons-by-chapter.mapper';
+import { GetLessonsByChapterIdMapper } from '../get-lessons-by-chapter.mapper';
 import { ProfileRequest } from '../../request/profile.request';
 import { UserType } from '../../../../core/domain/type/UserType';
 import { Lesson } from '../../../../core/domain/model/Lesson';
-import { getLessonsByChapterIdResponse } from '../../response/get-lessons-by-chapter.response';
+import { GetLessonsByChapterIdResponse } from '../../response/get-lessons-by-chapter.response';
+import { GameType } from '../../../../core/domain/type/GameType';
 
 describe('getLessonsByChapterIdMapper', () => {
   describe('toDomain', () => {
@@ -16,7 +17,7 @@ describe('getLessonsByChapterIdMapper', () => {
       const chapterId = 'chapter-1';
 
       // When
-      const command = getLessonsByChapterIdMapper.toDomain(
+      const command = GetLessonsByChapterIdMapper.toDomain(
         currentUser,
         chapterId,
       );
@@ -37,35 +38,61 @@ describe('getLessonsByChapterIdMapper', () => {
       // Given
       const now = new Date();
       const lessons: Lesson[] = [
-        new Lesson('lesson-1', 'Lesson 1', 'Desc 1', 'chapter-1',1, true, now, now),
-        new Lesson('lesson-2', 'Lesson 2', 'Desc 2', 'chapter-1',2, false, now, now),
+        new Lesson(
+          'lesson-1',
+          'Lesson 1',
+          'Desc 1',
+          'chapter-1',
+          1,
+          true,
+          GameType.MCQ,
+          [],
+          now,
+          now,
+        ),
+        new Lesson(
+          'lesson-2',
+          'Lesson 2',
+          'Desc 2',
+          'chapter-1',
+          2,
+          false,
+          GameType.MCQ,
+          [],
+          now,
+          now,
+        ),
       ];
 
       // When
-      const response = getLessonsByChapterIdMapper.fromDomain(lessons);
+      const response = GetLessonsByChapterIdMapper.fromDomain(lessons);
 
       // Then
-      expect(response).toBeInstanceOf(getLessonsByChapterIdResponse);
+      expect(response).toBeInstanceOf(GetLessonsByChapterIdResponse);
       expect(response.lessons).toEqual([
         {
           id: 'lesson-1',
           title: 'Lesson 1',
           description: 'Desc 1',
+          chapterId: 'chapter-1',
           order: 1,
           isPublished: true,
+          gameType: GameType.MCQ,
+          modules: [],
           createdAt: now,
           updatedAt: now,
-          chapterId: 'chapter-1',
         },
         {
           id: 'lesson-2',
           title: 'Lesson 2',
           description: 'Desc 2',
+          chapterId: 'chapter-1',
           order: 2,
           isPublished: false,
+          gameType: GameType.MCQ,
+          modules: [],
           createdAt: now,
           updatedAt: now,
-          chapterId: 'chapter-1',
         },
       ]);
     });

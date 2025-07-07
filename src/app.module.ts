@@ -19,7 +19,7 @@ import { PrismaLessonRepository } from './adapters/prisma/prisma-lesson.reposito
 import { CreateLessonUseCase } from './core/usecases/create-lesson';
 import { UpdateLessonUseCase } from './core/usecases/update-lesson.use-case';
 import { GetLessonByIdUseCase } from './core/usecases/get-lesson-by-id.use-case';
-import { getLessonsByChapterIdUseCase } from './core/usecases/get-lessons-by-chapter.use-case';
+import { GetLessonsByChapterIdUseCase } from './core/usecases/get-lessons-by-chapter.use-case';
 import { LessonController } from './adapters/api/controller/lesson.controller';
 import { RefreshTokenRepository } from './core/domain/repository/refresh-token.repository';
 import { ChapterController } from './adapters/api/controller/chapter.controller';
@@ -28,6 +28,15 @@ import { GetChaptersUseCase } from './core/usecases/get-chapters.use-case';
 import { LogoutUseCase } from './core/usecases/logout.use-case';
 import { RefreshUseCase } from './core/usecases/refresh.use-case';
 import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-token.repository';
+import { GameModuleRepository } from './core/domain/repository/game-module.repository';
+import { PrismaGameModuleRepository } from './adapters/prisma/prisma-game-module.repository';
+import { CreateGameModuleUseCase } from './core/usecases/create-game-module.usecase';
+import {
+  GameModuleStrategyFactory,
+  MapGameModuleStrategyFactory,
+} from './core/usecases/strategies/game-module-strategy-factory';
+import { GameType } from './core/domain/type/GameType';
+import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strategy';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -44,6 +53,16 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
       provide: 'TokenService',
       useFactory: (jwtService: JwtService) => new JwtServiceAdapter(jwtService),
       inject: [JwtService],
+    },
+    {
+      provide: 'GameModuleStrategyFactory',
+      useFactory: () =>
+        new MapGameModuleStrategyFactory([
+          {
+            type: GameType.MCQ,
+            strategy: new McqModuleStrategy(),
+          },
+        ]),
     },
     {
       provide: UserRepository,
@@ -65,6 +84,12 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
     {
       provide: LessonRepository,
       useFactory: (prisma: PrismaService) => new PrismaLessonRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: GameModuleRepository,
+      useFactory: (prisma: PrismaService) =>
+        new PrismaGameModuleRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -105,7 +130,7 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
       ) => new RefreshUseCase(refreshTokenRepository, tokenService),
       inject: [RefreshTokenRepository, 'TokenService'],
     },
-   
+
     {
       provide: CreateChapterUseCase,
       useFactory: (chapterRepository: ChapterRepository) =>
@@ -149,10 +174,28 @@ import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-t
       inject: [LessonRepository],
     },
     {
-      provide: getLessonsByChapterIdUseCase,
+      provide: GetLessonsByChapterIdUseCase,
       useFactory: (lessonRepository: LessonRepository) =>
-        new getLessonsByChapterIdUseCase(lessonRepository),
+        new GetLessonsByChapterIdUseCase(lessonRepository),
       inject: [LessonRepository],
+    },
+    {
+      provide: CreateGameModuleUseCase,
+      useFactory: (
+        lessonRepository: LessonRepository,
+        gameModuleRepository: GameModuleRepository,
+        gameModuleStrategyFactory: GameModuleStrategyFactory,
+      ) =>
+        new CreateGameModuleUseCase(
+          lessonRepository,
+          gameModuleRepository,
+          gameModuleStrategyFactory,
+        ),
+      inject: [
+        LessonRepository,
+        GameModuleRepository,
+        'GameModuleStrategyFactory',
+      ],
     },
   ],
 })

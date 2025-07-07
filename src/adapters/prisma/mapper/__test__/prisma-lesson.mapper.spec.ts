@@ -1,6 +1,7 @@
 import { Lesson as LessonEntity } from '@prisma/client';
 import { Lesson } from '../../../../core/domain/model/Lesson';
 import { PrismaLessonMapper } from '../prisma-lesson.mapper';
+import { GameType } from '../../../../core/domain/type/GameType';
 
 describe('PrismaLessonMapper', () => {
   const mapper = new PrismaLessonMapper();
@@ -15,6 +16,8 @@ describe('PrismaLessonMapper', () => {
         chapterId: 'chapter-1',
         order: 1,
         isPublished: true,
+        gameType: GameType.MCQ,
+        modules: [],
         updatedAt: new Date('2023-10-01T12:00:00Z'),
         createdAt: new Date('2023-10-01T12:00:00Z'),
       };
@@ -30,6 +33,7 @@ describe('PrismaLessonMapper', () => {
         chapterId: 'chapter-1',
         order: 1,
         isPublished: true,
+        gameType: GameType.MCQ,
         updatedAt: new Date('2023-10-01T12:00:00Z'),
         createdAt: new Date('2023-10-01T12:00:00Z'),
       });
@@ -46,6 +50,7 @@ describe('PrismaLessonMapper', () => {
         chapterId: 'chapter-1',
         order: 1,
         isPublished: true,
+        gameType: GameType.MCQ,
         updatedAt: new Date('2023-10-01T12:00:00Z'),
         createdAt: new Date('2023-10-01T12:00:00Z'),
       };
@@ -61,6 +66,8 @@ describe('PrismaLessonMapper', () => {
         chapterId: 'chapter-1',
         order: 1,
         isPublished: true,
+        gameType: GameType.MCQ,
+        modules: [],
         updatedAt: new Date('2023-10-01T12:00:00Z'),
         createdAt: new Date('2023-10-01T12:00:00Z'),
       });

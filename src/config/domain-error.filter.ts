@@ -15,6 +15,9 @@ import { ChapterNotFoundError } from '../core/domain/error/ChapterNotFoundError'
 import { ChapterInvalidDataError } from '../core/domain/error/ChapterInvalidDataError';
 import { LessonNotFoundError } from '../core/domain/error/LessonNotFoundError';
 import { LessonInvalidDataError } from '../core/domain/error/LessonInvalidDataError';
+import { GameModuleTypeMismatchError } from '../core/domain/error/GameModuleTypeMismatchError';
+import { GameModuleStrategyNotFoundError } from '../core/domain/error/GameModuleStrategyNotFoundError';
+import { McqModuleInvalidDataError } from '../core/domain/error/McqModuleInvalidDataError';
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
@@ -38,7 +41,10 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof WrongEmailFormatError ||
       exception instanceof WrongPasswordFormatError ||
       exception instanceof ChapterInvalidDataError ||
-      exception instanceof LessonInvalidDataError
+      exception instanceof LessonInvalidDataError ||
+      exception instanceof GameModuleTypeMismatchError ||
+      exception instanceof GameModuleStrategyNotFoundError ||
+      exception instanceof McqModuleInvalidDataError
     ) {
       return HttpStatus.BAD_REQUEST;
     }
