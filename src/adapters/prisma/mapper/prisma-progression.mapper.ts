@@ -1,9 +1,6 @@
 import { EntityMapper } from '../../../core/base/entity-mapper';
-import {
-  Progression,
-  ProgressionType,
-} from '../../../core/domain/model/Progression';
-import { Progression as ProgressionEntity, $Enums } from '@prisma/client';
+import { Progression } from '../../../core/domain/model/Progression';
+import { Progression as ProgressionEntity } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -14,9 +11,8 @@ export class PrismaProgressionMapper
     return {
       id: model.id,
       userId: model.userId,
-      entryId: model.entryId,
-      type: this.mapProgressionTypeFromDomain(model.type),
-      completed: model.completed,
+      gameModuleId: model.gameModuleId,
+      isCompleted: model.isCompleted,
       updatedAt: model.updatedAt,
       createdAt: model.createdAt,
     };
@@ -26,37 +22,10 @@ export class PrismaProgressionMapper
     return new Progression(
       entity.id,
       entity.userId,
-      entity.entryId,
-      this.mapProgressionTypeToDomain(entity.type),
-      entity.completed,
+      entity.gameModuleId,
+      entity.isCompleted,
       entity.updatedAt,
       entity.createdAt,
     );
-  }
-
-  private mapProgressionTypeFromDomain(
-    type: ProgressionType,
-  ): $Enums.ProgressionType {
-    switch (type) {
-      case ProgressionType.QUESTION:
-        return $Enums.ProgressionType.question;
-      case ProgressionType.LESSON:
-        return $Enums.ProgressionType.lesson;
-      default:
-        throw new Error('Invalid progression type');
-    }
-  }
-
-  private mapProgressionTypeToDomain(
-    type: $Enums.ProgressionType,
-  ): ProgressionType {
-    switch (type) {
-      case 'question':
-        return ProgressionType.QUESTION;
-      case 'lesson':
-        return ProgressionType.LESSON;
-      default:
-        throw new Error('Invalid progression type');
-    }
   }
 }

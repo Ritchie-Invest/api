@@ -17,10 +17,6 @@ enum GameType {
   MCQ
 }
 
-enum ProgressionType {
-  question
-  lesson
-}
 
 model User {
   id             String         @id @default(cuid())
@@ -72,8 +68,9 @@ model GameModule {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  lesson Lesson     @relation(fields: [lessonId], references: [id])
-  mcq    McqModule?
+  lesson      Lesson        @relation(fields: [lessonId], references: [id])
+  mcq         McqModule?
+  Progression Progression[]
 }
 
 model McqModule {
@@ -85,15 +82,15 @@ model McqModule {
 }
 
 model Progression {
-  id        String          @id @default(cuid())
-  userId    String
-  entryId   String
-  type      ProgressionType
-  completed Boolean
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  id           String   @id @default(cuid())
+  userId       String
+  gameModuleId String
+  isCompleted  Boolean
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+  gameModule GameModule @relation(fields: [gameModuleId], references: [id])
 
-  @@unique([userId, entryId])
+  @@unique([userId, gameModuleId])
 }

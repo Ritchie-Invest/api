@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CompleteQuestionResponse {
+export class CompleteGameModuleResponse {
   @ApiProperty({
     description: 'Whether the answer is correct',
     example: true,

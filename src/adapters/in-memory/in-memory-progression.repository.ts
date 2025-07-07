@@ -3,7 +3,7 @@ import { ProgressionRepository } from '../../core/domain/repository/progression.
 import { Progression } from '../../core/domain/model/Progression';
 
 @Injectable()
-export class InMemoryProgressionRepository implements ProgressionRepository {
+export class InMemoryProgressionRepository extends ProgressionRepository {
   private progressions: Map<string, Progression> = new Map();
 
   create(data: Progression): Progression {
@@ -19,9 +19,15 @@ export class InMemoryProgressionRepository implements ProgressionRepository {
     return this.progressions.get(id) || null;
   }
 
-  findByUserIdAndEntryId(userId: string, entryId: string): Progression | null {
+  findByUserIdAndGameModuleId(
+    userId: string,
+    gameModuleId: string,
+  ): Progression | null {
     for (const progression of this.progressions.values()) {
-      if (progression.userId === userId && progression.entryId === entryId) {
+      if (
+        progression.userId === userId &&
+        progression.gameModuleId === gameModuleId
+      ) {
         return progression;
       }
     }

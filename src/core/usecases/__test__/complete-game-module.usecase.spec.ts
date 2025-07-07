@@ -1,26 +1,39 @@
 import {
-  CompleteQuestionUseCase,
-  CompleteQuestionCommand,
-} from '../complete-question.usecase';
+  CompleteGameModuleUseCase,
+  CompleteGameModuleCommand,
+} from '../complete-game-module.usecase';
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { McqModule } from '../../domain/model/McqModule';
 import { McqChoice } from '../../domain/model/McqChoice';
-import { QuestionNotFoundError } from '../../domain/error/QuestionNotFoundError';
+import { GameModuleNotFoundError } from '../../domain/error/GameModuleNotFoundError';
 import { InvalidAnswerError } from '../../domain/error/InvalidAnswerError';
-import { Progression, ProgressionType } from '../../domain/model/Progression';
+import { Progression } from '../../domain/model/Progression';
 import { InMemoryProgressionRepository } from '../../../adapters/in-memory/in-memory-progression.repository';
+import { GameType } from '../../domain/type/GameType';
+import { MapCompleteGameModuleStrategyFactory } from '../strategies/complete-game-module-strategy-factory';
+import { McqCompleteGameModuleStrategy } from '../strategies/mcq-complete-game-module-strategy';
 
-describe('CompleteQuestionUseCase', () => {
+describe('CompleteGameModuleUseCase', () => {
   let gameModuleRepository: InMemoryGameModuleRepository;
   let progressionRepository: InMemoryProgressionRepository;
-  let useCase: CompleteQuestionUseCase;
+  let useCase: CompleteGameModuleUseCase;
 
   beforeEach(() => {
     gameModuleRepository = new InMemoryGameModuleRepository();
     progressionRepository = new InMemoryProgressionRepository();
-    useCase = new CompleteQuestionUseCase(
+
+    // Create strategy factory
+    const strategyFactory = new MapCompleteGameModuleStrategyFactory([
+      {
+        type: GameType.MCQ,
+        strategy: new McqCompleteGameModuleStrategy(),
+      },
+    ]);
+
+    useCase = new CompleteGameModuleUseCase(
       gameModuleRepository,
       progressionRepository,
+      strategyFactory,
     );
     gameModuleRepository.removeAll();
     progressionRepository.removeAll();
@@ -53,11 +66,12 @@ describe('CompleteQuestionUseCase', () => {
 
       gameModuleRepository.create(mcqModule);
 
-      const command: CompleteQuestionCommand = {
+      const command: CompleteGameModuleCommand = {
         userId: 'user-1',
-        questionId: 'question-1',
-        answer: {
-          selectedChoiceId: 'choice-1',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: {
+          choiceId: 'choice-1',
         },
       };
 
@@ -71,15 +85,14 @@ describe('CompleteQuestionUseCase', () => {
       );
 
       // Verify progression was saved
-      const progression = progressionRepository.findByUserIdAndEntryId(
+      const progression = progressionRepository.findByUserIdAndGameModuleId(
         'user-1',
         'question-1',
       );
       expect(progression).toBeDefined();
       expect(progression!.userId).toBe('user-1');
-      expect(progression!.entryId).toBe('question-1');
-      expect(progression!.type).toBe(ProgressionType.QUESTION);
-      expect(progression!.completed).toBe(true);
+      expect(progression!.gameModuleId).toBe('question-1');
+      expect(progression!.isCompleted).toBe(true);
     });
 
     it('should return incorrect answer and feedback when answer is wrong', async () => {
@@ -108,11 +121,12 @@ describe('CompleteQuestionUseCase', () => {
 
       gameModuleRepository.create(mcqModule);
 
-      const command: CompleteQuestionCommand = {
+      const command: CompleteGameModuleCommand = {
         userId: 'user-1',
-        questionId: 'question-1',
-        answer: {
-          selectedChoiceId: 'choice-2',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: {
+          choiceId: 'choice-2',
         },
       };
 
@@ -125,13 +139,12 @@ describe('CompleteQuestionUseCase', () => {
         'Incorrect. Lyon is a major city but not the capital.',
       );
 
-      // Verify progression was saved with completed = false
-      const progression = progressionRepository.findByUserIdAndEntryId(
+      // Verify progression was NOT created for wrong answer
+      const progression = progressionRepository.findByUserIdAndGameModuleId(
         'user-1',
         'question-1',
       );
-      expect(progression).toBeDefined();
-      expect(progression!.completed).toBe(false);
+      expect(progression).toBeNull();
     });
 
     it('should update existing progression when user answers again', async () => {
@@ -164,16 +177,16 @@ describe('CompleteQuestionUseCase', () => {
         'progression-1',
         'user-1',
         'question-1',
-        ProgressionType.QUESTION,
         false,
       );
       progressionRepository.create(existingProgression);
 
-      const command: CompleteQuestionCommand = {
+      const command: CompleteGameModuleCommand = {
         userId: 'user-1',
-        questionId: 'question-1',
-        answer: {
-          selectedChoiceId: 'choice-1',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: {
+          choiceId: 'choice-1',
         },
       };
 
@@ -181,23 +194,48 @@ describe('CompleteQuestionUseCase', () => {
       await useCase.execute(command);
 
       // Then
-      const updatedProgression = progressionRepository.findByUserIdAndEntryId(
-        'user-1',
-        'question-1',
-      );
-      expect(updatedProgression!.completed).toBe(true);
+      const updatedProgression =
+        progressionRepository.findByUserIdAndGameModuleId(
+          'user-1',
+          'question-1',
+        );
+      expect(updatedProgression!.isCompleted).toBe(true);
       expect(updatedProgression!.id).toBe('progression-1');
     });
   });
 
   describe('Scenario 2: Invalid or empty answer', () => {
-    it('should throw InvalidAnswerError when selectedChoiceId is empty', async () => {
+    it('should throw InvalidAnswerError when choiceId is empty', async () => {
       // Given
-      const command: CompleteQuestionCommand = {
+      const correctChoice = new McqChoice({
+        id: 'choice-1',
+        text: 'Paris',
+        isCorrect: true,
+        correctionMessage: 'Correct!',
+      });
+
+      const incorrectChoice = new McqChoice({
+        id: 'choice-2',
+        text: 'Lyon',
+        isCorrect: false,
+        correctionMessage: 'Incorrect.',
+      });
+
+      const mcqModule = new McqModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        question: 'What is the capital of France?',
+        choices: [correctChoice, incorrectChoice],
+      });
+
+      gameModuleRepository.create(mcqModule);
+
+      const command: CompleteGameModuleCommand = {
         userId: 'user-1',
-        questionId: 'question-1',
-        answer: {
-          selectedChoiceId: '',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: {
+          choiceId: '',
         },
       };
 
@@ -207,13 +245,37 @@ describe('CompleteQuestionUseCase', () => {
       );
     });
 
-    it('should throw InvalidAnswerError when selectedChoiceId is missing', async () => {
+    it('should throw InvalidAnswerError when choiceId is missing', async () => {
       // Given
+      const correctChoice = new McqChoice({
+        id: 'choice-1',
+        text: 'Paris',
+        isCorrect: true,
+        correctionMessage: 'Correct!',
+      });
+
+      const incorrectChoice = new McqChoice({
+        id: 'choice-2',
+        text: 'Lyon',
+        isCorrect: false,
+        correctionMessage: 'Incorrect.',
+      });
+
+      const mcqModule = new McqModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        question: 'What is the capital of France?',
+        choices: [correctChoice, incorrectChoice],
+      });
+
+      gameModuleRepository.create(mcqModule);
+
       const command = {
         userId: 'user-1',
-        questionId: 'question-1',
-        answer: {},
-      } as CompleteQuestionCommand;
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: {},
+      } as CompleteGameModuleCommand;
 
       // When & Then
       await expect(useCase.execute(command)).rejects.toThrow(
@@ -221,12 +283,36 @@ describe('CompleteQuestionUseCase', () => {
       );
     });
 
-    it('should throw InvalidAnswerError when answer is missing', async () => {
+    it('should throw InvalidAnswerError when mcq is missing', async () => {
       // Given
+      const correctChoice = new McqChoice({
+        id: 'choice-1',
+        text: 'Paris',
+        isCorrect: true,
+        correctionMessage: 'Correct!',
+      });
+
+      const incorrectChoice = new McqChoice({
+        id: 'choice-2',
+        text: 'Lyon',
+        isCorrect: false,
+        correctionMessage: 'Incorrect.',
+      });
+
+      const mcqModule = new McqModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        question: 'What is the capital of France?',
+        choices: [correctChoice, incorrectChoice],
+      });
+
+      gameModuleRepository.create(mcqModule);
+
       const command = {
         userId: 'user-1',
-        questionId: 'question-1',
-      } as CompleteQuestionCommand;
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+      } as CompleteGameModuleCommand;
 
       // When & Then
       await expect(useCase.execute(command)).rejects.toThrow(
@@ -234,7 +320,7 @@ describe('CompleteQuestionUseCase', () => {
       );
     });
 
-    it('should throw InvalidAnswerError when selectedChoiceId does not exist in question', async () => {
+    it('should throw InvalidAnswerError when choiceId does not exist in question', async () => {
       // Given
       const correctChoice = new McqChoice({
         id: 'choice-1',
@@ -259,11 +345,12 @@ describe('CompleteQuestionUseCase', () => {
 
       gameModuleRepository.create(mcqModule);
 
-      const command: CompleteQuestionCommand = {
+      const command: CompleteGameModuleCommand = {
         userId: 'user-1',
-        questionId: 'question-1',
-        answer: {
-          selectedChoiceId: 'non-existent-choice',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: {
+          choiceId: 'non-existent-choice',
         },
       };
 
@@ -275,19 +362,20 @@ describe('CompleteQuestionUseCase', () => {
   });
 
   describe('Scenario 3: Non-existing question', () => {
-    it('should throw QuestionNotFoundError when questionId does not exist', async () => {
+    it('should throw GameModuleNotFoundError when moduleId does not exist', async () => {
       // Given
-      const command: CompleteQuestionCommand = {
+      const command: CompleteGameModuleCommand = {
         userId: 'user-1',
-        questionId: 'non-existent-question',
-        answer: {
-          selectedChoiceId: 'choice-1',
+        moduleId: 'non-existent-question',
+        gameType: GameType.MCQ,
+        mcq: {
+          choiceId: 'choice-1',
         },
       };
 
       // When & Then
       await expect(useCase.execute(command)).rejects.toThrow(
-        QuestionNotFoundError,
+        GameModuleNotFoundError,
       );
     });
   });

@@ -5,10 +5,11 @@ import { PrismaService } from './prisma.service';
 import { PrismaProgressionMapper } from './mapper/prisma-progression.mapper';
 
 @Injectable()
-export class PrismaProgressionRepository implements ProgressionRepository {
+export class PrismaProgressionRepository extends ProgressionRepository {
   private readonly mapper: PrismaProgressionMapper;
 
   constructor(private readonly prisma: PrismaService) {
+    super();
     this.mapper = new PrismaProgressionMapper();
   }
 
@@ -33,15 +34,15 @@ export class PrismaProgressionRepository implements ProgressionRepository {
     return this.mapper.toDomain(entity);
   }
 
-  async findByUserIdAndEntryId(
+  async findByUserIdAndGameModuleId(
     userId: string,
-    entryId: string,
+    gameModuleId: string,
   ): Promise<Progression | null> {
     const entity = await this.prisma.progression.findUnique({
       where: {
-        userId_entryId: {
+        userId_gameModuleId: {
           userId,
-          entryId,
+          gameModuleId,
         },
       },
     });
