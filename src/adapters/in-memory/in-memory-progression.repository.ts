@@ -47,4 +47,10 @@ export class InMemoryProgressionRepository extends ProgressionRepository {
   removeAll(): void {
     this.progressions.clear();
   }
+
+  findByGameModuleId(gameModuleId: string): Progression[] {
+    return Array.from(this.progressions.values()).filter(
+      (progression) => progression.gameModuleId === gameModuleId,
+    );
+  }
 }

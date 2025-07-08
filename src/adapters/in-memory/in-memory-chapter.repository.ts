@@ -6,8 +6,15 @@ import { Chapter } from '../../core/domain/model/Chapter';
 export class InMemoryChapterRepository implements ChapterRepository {
   private chapters: Map<string, Chapter> = new Map();
 
-  create(data: Pick<Chapter, 'id' | 'title' | 'description'>): Chapter {
-    const chapter = new Chapter(data.id, data.title, data.description);
+  create(
+    data: Pick<Chapter, 'id' | 'title' | 'description' | 'order'>,
+  ): Chapter {
+    const chapter = new Chapter(
+      data.id,
+      data.title,
+      data.description,
+      data.order,
+    );
     this.chapters.set(chapter.id, chapter);
     return chapter;
   }
@@ -34,5 +41,76 @@ export class InMemoryChapterRepository implements ChapterRepository {
 
   removeAll(): void {
     this.chapters.clear();
+  }
+
+  // Pour les tests, nous devons stocker les leçons et les modules manuellement
+  private lessonsRepository: any = null;
+  private gameModuleRepository: any = null;
+  private progressionRepository: any = null;
+
+  setDependencies(
+    lessonsRepository: any,
+    gameModuleRepository: any,
+    progressionRepository: any,
+  ): void {
+    this.lessonsRepository = lessonsRepository;
+    this.gameModuleRepository = gameModuleRepository;
+    this.progressionRepository = progressionRepository;
+  }
+
+  async findAllWithLessonsDetails(userId: string): Promise<any[]> {
+    const chapters = Array.from(this.chapters.values()).sort(
+      (a, b) => a.order - b.order,
+    );
+
+    if (
+      !this.lessonsRepository ||
+      !this.gameModuleRepository ||
+      !this.progressionRepository
+    ) {
+      return chapters.map((chapter) => ({
+        ...chapter,
+        lessons: [],
+      }));
+    }
+
+    const result = [];
+
+    for (const chapter of chapters) {
+      const lessons = await this.lessonsRepository.findByChapter(chapter.id);
+
+      const lessonsWithModules = [];
+      for (const lesson of lessons) {
+        const modules = await this.gameModuleRepository.findByLessonId(
+          lesson.id,
+        );
+
+        const modulesWithProgress = [];
+        for (const module of modules) {
+          const progressions =
+            await this.progressionRepository.findByGameModuleId(module.id);
+          const filteredProgressions = progressions.filter(
+            (prog: any) => prog.userId === userId,
+          );
+
+          modulesWithProgress.push({
+            ...module,
+            Progression: filteredProgressions,
+          });
+        }
+
+        lessonsWithModules.push({
+          ...lesson,
+          modules: modulesWithProgress,
+        });
+      }
+
+      result.push({
+        ...chapter,
+        lessons: lessonsWithModules,
+      });
+    }
+
+    return result;
   }
 }

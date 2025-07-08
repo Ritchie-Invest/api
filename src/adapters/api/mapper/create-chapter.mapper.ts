@@ -16,6 +16,7 @@ export class CreateChapterMapper {
       },
       title: request.title,
       description: request.description,
+      order: request.order,
     };
   }
 
@@ -24,6 +25,7 @@ export class CreateChapterMapper {
       chapter.id,
       chapter.title,
       chapter.description,
+      chapter.order,
       chapter.isPublished,
       chapter.updatedAt,
       chapter.createdAt,

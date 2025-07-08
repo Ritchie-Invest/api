@@ -1,7 +1,7 @@
 import {
   CreateGameModuleUseCase,
   CreateGameModuleCommand,
-} from '../create-game-module.usecase';
+} from '../create-game-module.use-case';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { GameType } from '../../domain/type/GameType';

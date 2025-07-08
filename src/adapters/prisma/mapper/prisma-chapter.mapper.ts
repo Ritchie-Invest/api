@@ -12,6 +12,7 @@ export class PrismaChapterMapper
       id: model.id,
       title: model.title,
       description: model.description,
+      order: model.order,
       isPublished: model.isPublished,
       updatedAt: model.updatedAt,
       createdAt: model.createdAt,
@@ -19,13 +20,14 @@ export class PrismaChapterMapper
   }
 
   toDomain(entity: ChapterEntity): Chapter {
-    return {
-      id: entity.id,
-      title: entity.title,
-      description: entity.description,
-      isPublished: entity.isPublished,
-      updatedAt: entity.updatedAt,
-      createdAt: entity.createdAt,
-    };
+    return new Chapter(
+      entity.id,
+      entity.title,
+      entity.description,
+      entity.order,
+      entity.isPublished,
+      entity.updatedAt,
+      entity.createdAt,
+    );
   }
 }

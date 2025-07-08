@@ -1,7 +1,7 @@
 import {
   CompleteGameModuleUseCase,
   CompleteGameModuleCommand,
-} from '../complete-game-module.usecase';
+} from '../complete-game-module.use-case';
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { McqModule } from '../../domain/model/McqModule';

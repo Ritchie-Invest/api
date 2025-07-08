@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { UserType } from '../../../core/domain/type/UserType';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import { ProfileRequest } from '../request/profile.request';
@@ -10,6 +18,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CreateChapterResponse } from '../response/create-chapter.response';
 import { CreateChapterUseCase } from '../../../core/usecases/create-chapter.use-case';
@@ -25,11 +34,19 @@ import { GetChapterByIdMapper } from '../mapper/get-chapter-by-id.mapper';
 import { GetChaptersResponse } from '../response/get-chapters.response';
 import { GetChaptersUseCase } from '../../../core/usecases/get-chapters.use-case';
 import { GetChaptersMapper } from '../mapper/get-chapters.mapper';
+import { GetUserChaptersUseCase } from '../../../core/usecases/get-user-chapters.usecase';
+import { GetUserChaptersMapper } from '../mapper/get-user-chapters.mapper';
+import { GetUserChaptersResponse } from '../response/get-user-chapters.response';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { RolesGuard } from '../guards/roles.guard';
 
 @Controller('/chapters')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth()
 export class ChapterController {
   constructor(
     private readonly getChaptersUseCase: GetChaptersUseCase,
+    private readonly getUserChaptersUseCase: GetUserChaptersUseCase,
     private readonly createChapterUseCase: CreateChapterUseCase,
     private readonly getChapterByIdUseCase: GetChapterByIdUseCase,
     private readonly updateChapterUseCase: UpdateChapterUseCase,
@@ -145,5 +162,28 @@ export class ChapterController {
     const command = UpdateChapterMapper.toDomain(currentUser, chapterId, body);
     const chapter = await this.updateChapterUseCase.execute(command);
     return UpdateChapterMapper.fromDomain(chapter);
+  }
+
+  @Get('/user/progress')
+  @ApiOperation({ summary: 'Get user chapters with progress' })
+  @ApiCreatedResponse({
+    description: 'User chapters with progress successfully retrieved',
+    type: GetUserChaptersResponse,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid request or parameters',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized access',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error',
+  })
+  async getUserChapters(
+    @CurrentUser() currentUser: ProfileRequest,
+  ): Promise<GetUserChaptersResponse> {
+    const command = GetUserChaptersMapper.toDomain(currentUser);
+    const result = await this.getUserChaptersUseCase.execute(command);
+    return GetUserChaptersMapper.fromDomain(result);
   }
 }

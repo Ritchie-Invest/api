@@ -1,5 +1,5 @@
 import { McqModule } from '../../domain/model/McqModule';
-import { CompleteGameModuleCommand } from '../complete-game-module.usecase';
+import { CompleteGameModuleCommand } from '../complete-game-module.use-case';
 import { CompleteGameModuleStrategy } from './complete-game-module-strategy';
 import { InvalidAnswerError } from '../../domain/error/InvalidAnswerError';
 

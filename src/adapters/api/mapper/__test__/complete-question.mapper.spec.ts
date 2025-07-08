@@ -3,7 +3,7 @@ import {
   CompleteGameModuleRequest,
   McqAnswerRequest,
 } from '../../request/complete-game-module.request';
-import { CompleteGameModuleResult } from '../../../../core/usecases/complete-game-module.usecase';
+import { CompleteGameModuleResult } from '../../../../core/usecases/complete-game-module.use-case';
 import { GameType } from '../../../../core/domain/type/GameType';
 
 describe('CompleteGameModuleMapper', () => {

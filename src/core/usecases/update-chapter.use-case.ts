@@ -5,19 +5,24 @@ import { User } from '../domain/model/User';
 import { UserType } from '../domain/type/UserType';
 import { UserNotAllowedError } from '../domain/error/UserNotAllowedError';
 import { ChapterNotFoundError } from '../domain/error/ChapterNotFoundError';
+import { OrderValidationService } from '../domain/service/order-validation.service';
 
 export type UpdateChapterCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
   chapterId: string;
   title?: string;
   description?: string;
+  order?: number;
   isPublished?: boolean;
 };
 
 export class UpdateChapterUseCase
   implements UseCase<UpdateChapterCommand, Chapter>
 {
-  constructor(private readonly chapterRepository: ChapterRepository) {}
+  constructor(
+    private readonly chapterRepository: ChapterRepository,
+    private readonly orderValidationService: OrderValidationService,
+  ) {}
 
   async execute(command: UpdateChapterCommand): Promise<Chapter> {
     if (!this.canExecute(command.currentUser)) {
@@ -26,18 +31,29 @@ export class UpdateChapterUseCase
       );
     }
 
-    const { chapterId, title, description } = command;
+    const { chapterId, title, description, order } = command;
 
     const currentChapter = await this.chapterRepository.findById(chapterId);
     if (!currentChapter) {
       throw new ChapterNotFoundError(chapterId);
     }
 
+    if (order !== undefined && order !== currentChapter.order) {
+      await this.orderValidationService.validateChapterOrder(
+        this.chapterRepository,
+        order,
+        chapterId,
+      );
+    }
+
     const chapter = new Chapter(
       currentChapter.id,
       title ?? currentChapter.title,
       description ?? currentChapter.description,
+      order ?? currentChapter.order,
       command.isPublished ?? currentChapter.isPublished,
+      currentChapter.updatedAt,
+      currentChapter.createdAt,
     );
 
     const updatedChapter = await this.chapterRepository.update(

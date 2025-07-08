@@ -4,17 +4,22 @@ import { ChapterRepository } from '../domain/repository/chapter.repository';
 import { User } from '../domain/model/User';
 import { UserType } from '../domain/type/UserType';
 import { UserNotAllowedError } from '../domain/error/UserNotAllowedError';
+import { OrderValidationService } from '../domain/service/order-validation.service';
 
 export type CreateChapterCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
   title: string;
   description: string;
+  order: number;
 };
 
 export class CreateChapterUseCase
   implements UseCase<CreateChapterCommand, Chapter>
 {
-  constructor(private readonly chapterRepository: ChapterRepository) {}
+  constructor(
+    private readonly chapterRepository: ChapterRepository,
+    private readonly orderValidationService: OrderValidationService,
+  ) {}
 
   async execute(command: CreateChapterCommand): Promise<Chapter> {
     if (!this.canExecute(command.currentUser)) {
@@ -23,8 +28,21 @@ export class CreateChapterUseCase
       );
     }
 
-    const { title, description } = command;
-    const chapter = new Chapter(this.generateId(), title, description, false);
+    const { title, description, order } = command;
+
+    // Validate that the order is not already taken
+    await this.orderValidationService.validateChapterOrder(
+      this.chapterRepository,
+      order,
+    );
+
+    const chapter = new Chapter(
+      this.generateId(),
+      title,
+      description,
+      order,
+      false,
+    );
 
     return this.chapterRepository.create(chapter);
   }

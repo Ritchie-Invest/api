@@ -1,6 +1,6 @@
 import { GameModuleStrategy } from './game-module-strategy';
 import { McqChoice } from '../../domain/model/McqChoice';
-import { CreateGameModuleCommand } from '../create-game-module.usecase';
+import { CreateGameModuleCommand } from '../create-game-module.use-case';
 import { McqModule } from '../../domain/model/McqModule';
 import { McqModuleInvalidDataError } from '../../domain/error/McqModuleInvalidDataError';
 

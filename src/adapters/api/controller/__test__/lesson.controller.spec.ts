@@ -13,6 +13,8 @@ import { LessonRepository } from '../../../../core/domain/repository/lesson.repo
 import { GetLessonsByChapterIdResponse } from '../../response/get-lessons-by-chapter.response';
 import { CreateLessonRequest } from '../../request/create-lesson.request';
 import { ChapterRepository } from '../../../../core/domain/repository/chapter.repository';
+import { Chapter } from '../../../../core/domain/model/Chapter';
+import { Lesson } from '../../../../core/domain/model/Lesson';
 import { UpdateLessonRequest } from '../../request/update-lesson.request';
 import { GameType } from '../../../../core/domain/type/GameType';
 import { CreateGameModuleRequest } from '../../request/create-game-module.request';
@@ -64,28 +66,33 @@ describe('LessonControllerIT', () => {
     it('should return lessons', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = {
-        id: 'chapter-1',
-        title: 'Chapter 1',
-        description: 'Description of Chapter 1',
-        isPublished: true,
-      };
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        0,
+        true,
+      );
       await chapterRepository.create(chapter);
-      const lesson1 = {
-        title: 'Lesson 1',
-        description: 'Description of Lesson 1',
-        isPublished: true,
-        chapterId: 'chapter-1',
-        order: 1,
-      };
+      const lesson1 = new Lesson(
+        'lesson-1',
+        'Lesson 1',
+        'Description of Lesson 1',
+        'chapter-1',
+        1,
+        true,
+        GameType.MCQ,
+      );
       await lessonRepository.create(lesson1);
-      const lesson2 = {
-        title: 'Lesson 2',
-        description: 'Description of Lesson 2',
-        isPublished: false,
-        chapterId: 'chapter-1',
-        order: 2,
-      };
+      const lesson2 = new Lesson(
+        'lesson-2',
+        'Lesson 2',
+        'Description of Lesson 2',
+        'chapter-1',
+        2,
+        false,
+        GameType.MCQ,
+      );
       await lessonRepository.create(lesson2);
 
       // When
@@ -148,20 +155,23 @@ describe('LessonControllerIT', () => {
     it('should return lesson by id', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = {
-        id: 'chapter-1',
-        title: 'Chapter 1',
-        description: 'Description of Chapter 1',
-        isPublished: true,
-      };
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        0,
+        true,
+      );
       await chapterRepository.create(chapter);
-      const lesson = {
-        title: 'Lesson 1',
-        description: 'Description of Lesson 1',
-        isPublished: true,
-        chapterId: 'chapter-1',
-        order: 1,
-      };
+      const lesson = new Lesson(
+        'lesson-1',
+        'Lesson 1',
+        'Description of Lesson 1',
+        'chapter-1',
+        1,
+        true,
+        GameType.MCQ,
+      );
       const createdLesson = await lessonRepository.create(lesson);
 
       // When
@@ -232,12 +242,13 @@ describe('LessonControllerIT', () => {
     it('should create a lesson', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = {
-        id: 'chapter-1',
-        title: 'Chapter 1',
-        description: 'Description of Chapter 1',
-        isPublished: true,
-      };
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        0,
+        true,
+      );
       await chapterRepository.create(chapter);
       const lesson = new CreateLessonRequest(
         'New Lesson',
@@ -337,19 +348,23 @@ describe('LessonControllerIT', () => {
     it('should update a chapter', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = {
-        id: 'chapter-1',
-        title: 'Chapter 1',
-        description: 'Description of Chapter 1',
-        isPublished: true,
-      };
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        0,
+        true,
+      );
       await chapterRepository.create(chapter);
-      const lesson = {
-        title: 'Lesson 1',
-        description: 'Description of Lesson 1',
-        isPublished: true,
-        chapterId: 'chapter-1',
-      };
+      const lesson = new Lesson(
+        'lesson-1',
+        'Lesson 1',
+        'Description of Lesson 1',
+        'chapter-1',
+        1,
+        true,
+        GameType.MCQ,
+      );
       const createdLesson = await lessonRepository.create(lesson);
       const updateLessonRequest = new UpdateLessonRequest(
         'Updated Lesson 1',
@@ -399,20 +414,23 @@ describe('LessonControllerIT', () => {
 
     it('should return 401 if not authenticated', async () => {
       // Given
-      const chapter = {
-        id: 'chapter-1',
-        title: 'Chapter 1',
-        description: 'Description of Chapter 1',
-        isPublished: true,
-      };
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        0,
+        true,
+      );
       await chapterRepository.create(chapter);
-      const lesson = {
-        title: 'Lesson 1',
-        description: 'Description of Lesson 1',
-        isPublished: true,
-        chapterId: 'chapter-1',
-        order: 1,
-      };
+      const lesson = new Lesson(
+        'lesson-1',
+        'Lesson 1',
+        'Description of Lesson 1',
+        'chapter-1',
+        1,
+        true,
+        GameType.MCQ,
+      );
       const createdLesson = await lessonRepository.create(lesson);
       const updateLessonRequest = new UpdateLessonRequest(
         'Updated Lesson 1',
@@ -453,20 +471,23 @@ describe('LessonControllerIT', () => {
     it('should create a game module for a lesson', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = {
-        id: 'chapter-1',
-        title: 'Chapter 1',
-        description: 'Description of Chapter 1',
-        isPublished: true,
-      };
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        0,
+        true,
+      );
       await chapterRepository.create(chapter);
-      const lesson = {
-        title: 'Lesson 1',
-        description: 'Description of Lesson 1',
-        isPublished: true,
-        chapterId: 'chapter-1',
-        order: 1,
-      };
+      const lesson = new Lesson(
+        'lesson-1',
+        'Lesson 1',
+        'Description of Lesson 1',
+        'chapter-1',
+        1,
+        true,
+        GameType.MCQ,
+      );
       const createdLesson = await lessonRepository.create(lesson);
       const createGameModuleRequest = new CreateGameModuleRequest(
         GameType.MCQ,
@@ -552,20 +573,23 @@ describe('LessonControllerIT', () => {
 
     it('should return 401 if not authenticated', async () => {
       // Given
-      const chapter = {
-        id: 'chapter-1',
-        title: 'Chapter 1',
-        description: 'Description of Chapter 1',
-        isPublished: true,
-      };
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        0,
+        true,
+      );
       await chapterRepository.create(chapter);
-      const lesson = {
-        title: 'Lesson 1',
-        description: 'Description of Lesson 1',
-        isPublished: true,
-        chapterId: 'chapter-1',
-        order: 1,
-      };
+      const lesson = new Lesson(
+        'lesson-1',
+        'Lesson 1',
+        'Description of Lesson 1',
+        'chapter-1',
+        1,
+        true,
+        GameType.MCQ,
+      );
       const createdLesson = await lessonRepository.create(lesson);
 
       // When

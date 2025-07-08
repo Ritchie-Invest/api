@@ -6,20 +6,29 @@ import {
   UpdateChapterCommand,
   UpdateChapterUseCase,
 } from '../update-chapter.use-case';
+import { OrderValidationInterface } from '../../domain/service/order-validation.service';
+import { InMemoryOrderValidationService } from '../../../adapters/in-memory/in-memory-order-validation.service';
+import { OrderConflictError } from '../../domain/error/OrderConflictError';
 
 describe('UpdateChapterUseCase', () => {
   let chapterRepository: ChapterRepository;
+  let orderValidationService: OrderValidationInterface;
   let updateChapterUseCase: UpdateChapterUseCase;
 
   beforeEach(async () => {
     chapterRepository = new InMemoryChapterRepository();
-    updateChapterUseCase = new UpdateChapterUseCase(chapterRepository);
+    orderValidationService = new InMemoryOrderValidationService();
+    updateChapterUseCase = new UpdateChapterUseCase(
+      chapterRepository,
+      orderValidationService,
+    );
 
     await chapterRepository.removeAll();
     await chapterRepository.create({
       id: 'chapter-id',
       title: 'Un chapitre',
       description: 'Ceci est un chapitre',
+      order: 1,
     });
   });
 
@@ -44,6 +53,7 @@ describe('UpdateChapterUseCase', () => {
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
       isPublished: false,
+      order: 1,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       createdAt: expect.any(Date),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -55,6 +65,7 @@ describe('UpdateChapterUseCase', () => {
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
       isPublished: false,
+      order: 1,
       createdAt: chapter.createdAt,
       updatedAt: chapter.updatedAt,
     });
@@ -121,6 +132,51 @@ describe('UpdateChapterUseCase', () => {
     await expect(updateChapterUseCase.execute(command)).rejects.toThrow(
       'Chapter with id non-existing-chapter-id not found',
     );
+  });
+
+  it('should throw an error when trying to update a chapter with an order that already exists', async () => {
+    // Given
+    await chapterRepository.create({
+      id: 'chapter-id-2',
+      title: 'Un autre chapitre',
+      description: 'Ceci est un autre chapitre',
+      order: 2,
+    });
+
+    const command: UpdateChapterCommand = {
+      currentUser: getCurrentUser(),
+      chapterId: 'chapter-id',
+      title: 'Un super chapitre modifié',
+      description: 'Ceci est un super chapitre modifié',
+      order: 2, // Ordre déjà utilisé par chapter-id-2
+    };
+
+    // When & Then
+    await expect(updateChapterUseCase.execute(command)).rejects.toThrow(
+      OrderConflictError,
+    );
+
+    // Vérifier que le chapitre n'a pas été modifié
+    const chapter = await chapterRepository.findById('chapter-id');
+    expect(chapter?.order).toBe(1);
+  });
+
+  it('should allow updating a chapter with its own order value', async () => {
+    // Given
+    const command: UpdateChapterCommand = {
+      currentUser: getCurrentUser(),
+      chapterId: 'chapter-id',
+      title: 'Un super chapitre modifié',
+      description: 'Ceci est un super chapitre modifié',
+      order: 1, // Même ordre que celui actuel
+    };
+
+    // When
+    const result = await updateChapterUseCase.execute(command);
+
+    // Then
+    expect(result.order).toBe(1);
+    expect(result.title).toBe('Un super chapitre modifié');
   });
 
   function getCurrentUser(): Pick<User, 'id' | 'type'> {

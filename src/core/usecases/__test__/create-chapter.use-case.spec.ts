@@ -4,16 +4,24 @@ import {
 } from '../create-chapter.use-case';
 import { ChapterRepository } from '../../domain/repository/chapter.repository';
 import { InMemoryChapterRepository } from '../../../adapters/in-memory/in-memory-chapter.repository';
+import { OrderValidationInterface } from '../../domain/service/order-validation.service';
 import { User } from '../../domain/model/User';
 import { UserType } from '../../domain/type/UserType';
+import { InMemoryOrderValidationService } from '../../../adapters/in-memory/in-memory-order-validation.service';
+import { OrderConflictError } from '../../domain/error/OrderConflictError';
 
 describe('CreateChapterUseCase', () => {
   let chapterRepository: ChapterRepository;
+  let OrderValidation: OrderValidationInterface;
   let createChapterUseCase: CreateChapterUseCase;
 
   beforeEach(() => {
     chapterRepository = new InMemoryChapterRepository();
-    createChapterUseCase = new CreateChapterUseCase(chapterRepository);
+    OrderValidation = new InMemoryOrderValidationService();
+    createChapterUseCase = new CreateChapterUseCase(
+      chapterRepository,
+      OrderValidation,
+    );
   });
 
   it('should return created chapter', async () => {
@@ -22,6 +30,7 @@ describe('CreateChapterUseCase', () => {
       currentUser: getCurrentUser(),
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
+      order: 0,
     };
 
     // When
@@ -35,6 +44,7 @@ describe('CreateChapterUseCase', () => {
       id: expect.any(String),
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
+      order: 0,
       isPublished: false,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       createdAt: expect.any(Date),
@@ -46,6 +56,7 @@ describe('CreateChapterUseCase', () => {
       id: chapter.id,
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
+      order: 0,
       isPublished: false,
       createdAt: chapter.createdAt,
       updatedAt: chapter.updatedAt,
@@ -58,6 +69,7 @@ describe('CreateChapterUseCase', () => {
       currentUser: getCurrentUser(),
       title: '',
       description: 'Ceci est un super chapitre',
+      order: 0,
     };
 
     // When & Then
@@ -72,6 +84,7 @@ describe('CreateChapterUseCase', () => {
       currentUser: getCurrentUser(),
       title: 'Un super chapitre',
       description: '',
+      order: 0,
     };
 
     // When & Then
@@ -89,12 +102,40 @@ describe('CreateChapterUseCase', () => {
       },
       title: 'Un super chapitre',
       description: 'Ceci est un super chapitre',
+      order: 0,
     };
 
     // When & Then
     await expect(createChapterUseCase.execute(command)).rejects.toThrow(
       'Unauthorized: Only admins can create chapters',
     );
+  });
+
+  it('should throw an error if a chapter with the same order already exists', async () => {
+    // Given
+    const firstCommand: CreateChapterCommand = {
+      currentUser: getCurrentUser(),
+      title: 'Premier chapitre',
+      description: 'Description du premier chapitre',
+      order: 1,
+    };
+
+    await createChapterUseCase.execute(firstCommand);
+
+    const secondCommand: CreateChapterCommand = {
+      currentUser: getCurrentUser(),
+      title: 'Second chapitre avec le même ordre',
+      description: 'Description du second chapitre',
+      order: 1, // Même ordre que le premier chapitre
+    };
+
+    // When & Then
+    await expect(createChapterUseCase.execute(secondCommand)).rejects.toThrow(
+      OrderConflictError,
+    );
+
+    const chapters = await chapterRepository.findAll();
+    expect(chapters.length).toBe(1); // Seul le premier chapitre a été créé
   });
 
   function getCurrentUser(): Pick<User, 'id' | 'type'> {

@@ -50,4 +50,32 @@ export class PrismaChapterRepository implements ChapterRepository {
   async removeAll(): Promise<void> {
     await this.prisma.chapter.deleteMany();
   }
+
+  async findAllWithLessonsDetails(userId: string): Promise<any[]> {
+    const entities = await this.prisma.chapter.findMany({
+      where: {
+        isPublished: true,
+      },
+      include: {
+        lessons: {
+          where: {
+            isPublished: true,
+          },
+          orderBy: { order: 'asc' },
+          include: {
+            modules: {
+              orderBy: { createdAt: 'asc' },
+              include: {
+                Progression: {
+                  where: { userId },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { order: 'asc' },
+    });
+    return entities;
+  }
 }

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsString, IsNumber, Min } from 'class-validator';
 
 export class CreateChapterRequest {
   @ApiProperty()
@@ -10,8 +10,14 @@ export class CreateChapterRequest {
   @IsString()
   description: string;
 
-  constructor(title: string, description: string) {
+  @ApiProperty()
+  @IsNumber()
+  @Min(0)
+  order: number;
+
+  constructor(title: string, description: string, order: number) {
     this.title = title;
     this.description = description;
+    this.order = order;
   }
 }

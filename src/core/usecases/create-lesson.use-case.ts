@@ -5,6 +5,7 @@ import { User } from '../domain/model/User';
 import { UserType } from '../domain/type/UserType';
 import { UserNotAllowedError } from '../domain/error/UserNotAllowedError';
 import { GameType } from '../domain/type/GameType';
+import { OrderValidationService } from '../domain/service/order-validation.service';
 
 export type CreateLessonCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
@@ -18,7 +19,10 @@ export type CreateLessonCommand = {
 export class CreateLessonUseCase
   implements UseCase<CreateLessonCommand, Lesson>
 {
-  constructor(private readonly lessonRepository: LessonRepository) {}
+  constructor(
+    private readonly lessonRepository: LessonRepository,
+    private readonly orderValidationService: OrderValidationService,
+  ) {}
 
   async execute(command: CreateLessonCommand): Promise<Lesson> {
     if (!this.canExecute(command.currentUser)) {
@@ -27,6 +31,13 @@ export class CreateLessonUseCase
       );
     }
     const { title, description, chapterId, order, gameType } = command;
+
+    await this.orderValidationService.validateLessonOrder(
+      this.lessonRepository,
+      chapterId,
+      order,
+    );
+
     const lesson = new Lesson(
       this.generateId(),
       title,
