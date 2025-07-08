@@ -14,7 +14,10 @@ async function bootstrap() {
   app.useGlobalFilters(new DomainErrorFilter());
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
+    origin: [
+      process.env.ADMIN_APP_BASE_URL || 'http://localhost:5173/',
+      process.env.MOBILE_APP_BASE_URL || 'http://localhost:8080/',
+    ],
   });
 
   const reflector = app.get(Reflector);
