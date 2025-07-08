@@ -1,12 +1,12 @@
 import { GameModule } from '../../domain/model/GameModule';
-import {
-  CompleteGameModuleCommand,
-  CompleteGameModuleResult,
-} from '../complete-game-module.usecase';
+import { CompleteGameModuleCommand } from '../complete-game-module.usecase';
 
 export interface CompleteGameModuleStrategy {
-  validateMcq(
+  validate(
     gameModule: GameModule,
     command: CompleteGameModuleCommand,
-  ): CompleteGameModuleResult;
+  ): {
+    isCorrect: boolean;
+    feedback: string;
+  };
 }

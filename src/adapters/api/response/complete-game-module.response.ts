@@ -5,7 +5,7 @@ export class CompleteGameModuleResponse {
     description: 'Whether the answer is correct',
     example: true,
   })
-  correctAnswer: boolean;
+  isCorrect: boolean;
 
   @ApiProperty({
     description: 'Feedback message for the answer',
@@ -33,13 +33,13 @@ export class CompleteGameModuleResponse {
   totalGameModules: number;
 
   constructor(
-    correctAnswer: boolean,
+    isCorrect: boolean,
     feedback: string,
     nextGameModuleId: string | null,
     currentGameModuleIndex: number,
     totalGameModules: number,
   ) {
-    this.correctAnswer = correctAnswer;
+    this.isCorrect = isCorrect;
     this.feedback = feedback;
     this.nextGameModuleId = nextGameModuleId;
     this.currentGameModuleIndex = currentGameModuleIndex;

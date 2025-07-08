@@ -40,7 +40,7 @@ describe('CompleteGameModuleMapper', () => {
     it('should map CompleteGameModuleResult to CompleteGameModuleResponse for correct answer', () => {
       // Given
       const result: CompleteGameModuleResult = {
-        correctAnswer: true,
+        isCorrect: true,
         feedback: 'Correct! Well done.',
         nextGameModuleId: 'module-next',
         currentGameModuleIndex: 0,
@@ -51,7 +51,7 @@ describe('CompleteGameModuleMapper', () => {
       const response = CompleteGameModuleMapper.fromDomain(result);
 
       // Then
-      expect(response.correctAnswer).toBe(true);
+      expect(response.isCorrect).toBe(true);
       expect(response.feedback).toBe('Correct! Well done.');
       expect(response.nextGameModuleId).toBe('module-next');
       expect(response.currentGameModuleIndex).toBe(0);
@@ -61,7 +61,7 @@ describe('CompleteGameModuleMapper', () => {
     it('should map CompleteGameModuleResult to CompleteGameModuleResponse for incorrect answer', () => {
       // Given
       const result: CompleteGameModuleResult = {
-        correctAnswer: false,
+        isCorrect: false,
         feedback: 'Incorrect. Try again.',
         nextGameModuleId: null,
         currentGameModuleIndex: 1,
@@ -72,7 +72,7 @@ describe('CompleteGameModuleMapper', () => {
       const response = CompleteGameModuleMapper.fromDomain(result);
 
       // Then
-      expect(response.correctAnswer).toBe(false);
+      expect(response.isCorrect).toBe(false);
       expect(response.feedback).toBe('Incorrect. Try again.');
       expect(response.nextGameModuleId).toBe(null);
       expect(response.currentGameModuleIndex).toBe(1);

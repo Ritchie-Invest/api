@@ -21,6 +21,7 @@ import {
 } from '../../request/complete-game-module.request';
 import { McqModule } from '../../../../core/domain/model/McqModule';
 import { McqChoice } from '../../../../core/domain/model/McqChoice';
+import { CompleteGameModuleResponse } from '../../response/complete-game-module.response';
 
 describe('GameModuleControllerIT', () => {
   let app: INestApplication<App>;
@@ -57,14 +58,12 @@ describe('GameModuleControllerIT', () => {
     userRepository = app.get(UserRepository);
     tokenService = app.get('TokenService');
 
-    // Clean up all data
     await progressionRepository.removeAll();
     await gameModuleRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
     await userRepository.removeAll();
 
-    // Create the test user that corresponds to our token
     await userRepository.create({
       id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
       email: 'test@ritchie-invest.com',
@@ -141,21 +140,17 @@ describe('GameModuleControllerIT', () => {
 
       // Then
       expect(response.status).toBe(HttpStatus.CREATED);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.correctAnswer).toBe(true);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.feedback).toBe('Well done!');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.nextGameModuleId).toBeNull(); // Only one module in this test
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.currentGameModuleIndex).toBe(0);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.totalGameModules).toBe(1);
+      const responseBody = response.body as CompleteGameModuleResponse;
+      expect(responseBody.isCorrect).toBe(true);
+      expect(responseBody.feedback).toBe('Well done!');
+      expect(responseBody.nextGameModuleId).toBeNull();
+      expect(responseBody.currentGameModuleIndex).toBe(0);
+      expect(responseBody.totalGameModules).toBe(1);
 
       // Verify progression was created
       const progression =
         await progressionRepository.findByUserIdAndGameModuleId(
-          'be7cbc6d-782b-4939-8cff-e577dfe3e79a', // User ID from token
+          'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
           testGameModule.id,
         );
       expect(progression).toBeDefined();
@@ -219,21 +214,16 @@ describe('GameModuleControllerIT', () => {
 
       // Then
       expect(response.status).toBe(HttpStatus.CREATED);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.correctAnswer).toBe(false);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.feedback).toBe('Not quite right.');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.nextGameModuleId).toBeNull();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.currentGameModuleIndex).toBe(0);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.totalGameModules).toBe(1);
+      const responseBody = response.body as CompleteGameModuleResponse;
+      expect(responseBody.isCorrect).toBe(false);
+      expect(responseBody.feedback).toBe('Not quite right.');
+      expect(responseBody.nextGameModuleId).toBeNull();
+      expect(responseBody.currentGameModuleIndex).toBe(0);
+      expect(responseBody.totalGameModules).toBe(1);
 
-      // Verify progression was NOT created for wrong answer
       const progression =
         await progressionRepository.findByUserIdAndGameModuleId(
-          'be7cbc6d-782b-4939-8cff-e577dfe3e79a', // User ID from token
+          'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
           testGameModule.id,
         );
       expect(progression).toBeNull();
@@ -397,14 +387,11 @@ describe('GameModuleControllerIT', () => {
 
       // Then
       expect(response.status).toBe(HttpStatus.CREATED);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.correctAnswer).toBe(true);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.nextGameModuleId).toBeNull();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.currentGameModuleIndex).toBe(0);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.totalGameModules).toBe(1);
+      const responseBody = response.body as CompleteGameModuleResponse;
+      expect(responseBody.isCorrect).toBe(true);
+      expect(responseBody.nextGameModuleId).toBeNull();
+      expect(responseBody.currentGameModuleIndex).toBe(0);
+      expect(responseBody.totalGameModules).toBe(1);
     });
   });
 

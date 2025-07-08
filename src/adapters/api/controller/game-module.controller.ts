@@ -21,6 +21,7 @@ import { CompleteGameModuleResponse } from '../response/complete-game-module.res
 import { CompleteGameModuleMapper } from '../mapper/complete-game-module.mapper';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ProfileRequest } from '../request/profile.request';
+import { CurrentUser } from '../decorator/current-user.decorator';
 
 @ApiTags('GameModules')
 @Controller('/v1/modules')
@@ -50,13 +51,13 @@ export class GameModuleController {
   })
   async completeGameModule(
     @Param('moduleId') moduleId: string,
-    @Body() request: CompleteGameModuleRequest,
-    @Request() req: Request & { user: ProfileRequest },
+    @Body() body: CompleteGameModuleRequest,
+    @CurrentUser() currentUser: ProfileRequest,
   ): Promise<CompleteGameModuleResponse> {
     const command = CompleteGameModuleMapper.toDomain(
-      req.user.id,
+      currentUser.id,
       moduleId,
-      request,
+      body,
     );
     const result = await this.completeGameModuleUseCase.execute(command);
     return CompleteGameModuleMapper.fromDomain(result);

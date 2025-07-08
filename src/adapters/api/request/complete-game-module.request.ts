@@ -42,11 +42,6 @@ export class CompleteGameModuleRequest {
   @Type(() => McqAnswerRequest)
   mcq?: McqAnswerRequest;
 
-  // Future game types can add their own answer fields here
-  // dragDrop?: DragDropAnswerRequest;
-  // quiz?: QuizAnswerRequest;
-  // etc.
-
   constructor(gameType: GameType, mcq?: McqAnswerRequest) {
     this.gameType = gameType;
     this.mcq = mcq;

@@ -22,11 +22,7 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
     throw new Error('Method not implemented.');
   }
 
-  findById(id: string): GameModule | Promise<GameModule | null> | null {
-    return this.findByIdAsync(id);
-  }
-
-  private async findByIdAsync(id: string): Promise<GameModule | null> {
+  async findById(id: string): Promise<GameModule | null> {
     const entity = await this.prisma.gameModule.findUnique({
       where: { id },
       include: { mcq: true },
@@ -50,16 +46,6 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
   async removeAll(): Promise<void> {
     await this.prisma.mcqModule.deleteMany();
     await this.prisma.gameModule.deleteMany();
-  }
-
-  async findByLessonId(lessonId: string): Promise<GameModule[]> {
-    const entities = await this.prisma.gameModule.findMany({
-      where: { lessonId },
-      include: { mcq: true },
-      orderBy: { createdAt: 'asc' }, // Order by creation time to maintain consistent ordering
-    });
-
-    return entities.map((entity) => this.mapper.toDomain(entity));
   }
 
   private async createMcqModule(data: McqModule): Promise<McqModule> {

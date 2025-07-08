@@ -21,9 +21,9 @@ export class McqModule extends GameModule {
     if (!Array.isArray(params.choices) || params.choices.length < 2) {
       throw new McqModuleInvalidDataError('At least two choices are required');
     }
-    if (!params.choices.some((choice) => choice.isCorrect)) {
+    if (params.choices.filter((choice) => choice.isCorrect).length !== 1) {
       throw new McqModuleInvalidDataError(
-        'At least one correct answer is required',
+        'Exactly one choice must be marked as correct',
       );
     }
     this.question = params.question;

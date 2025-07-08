@@ -25,7 +25,6 @@ describe('CompleteGameModuleUseCase', () => {
     lessonRepository = new InMemoryLessonRepository();
     progressionRepository = new InMemoryProgressionRepository();
 
-    // Create strategy factory
     const strategyFactory = new MapCompleteGameModuleStrategyFactory([
       {
         type: GameType.MCQ,
@@ -44,7 +43,6 @@ describe('CompleteGameModuleUseCase', () => {
     progressionRepository.removeAll();
   });
 
-  // Helper function to create a test lesson
   const createTestLesson = () => {
     const lesson = {
       id: 'lesson-1',
@@ -99,7 +97,7 @@ describe('CompleteGameModuleUseCase', () => {
       const result = await useCase.execute(command);
 
       // Then
-      expect(result.correctAnswer).toBe(true);
+      expect(result.isCorrect).toBe(true);
       expect(result.feedback).toBe(
         'Correct! Paris is indeed the capital of France.',
       );
@@ -156,7 +154,7 @@ describe('CompleteGameModuleUseCase', () => {
       const result = await useCase.execute(command);
 
       // Then
-      expect(result.correctAnswer).toBe(false);
+      expect(result.isCorrect).toBe(false);
       expect(result.feedback).toBe(
         'Incorrect. Lyon is a major city but not the capital.',
       );

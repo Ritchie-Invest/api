@@ -8,6 +8,7 @@ import { Progression } from '../domain/model/Progression';
 import { GameModuleNotFoundError } from '../domain/error/GameModuleNotFoundError';
 import { GameType } from '../domain/type/GameType';
 import { CompleteGameModuleStrategyFactory } from './strategies/complete-game-module-strategy-factory';
+import { LessonNotFoundError } from '../domain/error/LessonNotFoundError';
 
 export type CompleteGameModuleCommand = {
   userId: string;
@@ -16,13 +17,10 @@ export type CompleteGameModuleCommand = {
   mcq?: {
     choiceId: string;
   };
-  // Future game types can add their answer data here
-  // dragDrop?: { positions: Array<{ itemId: string; position: { x: number; y: number } }> };
-  // quiz?: { answers: string[] };
 };
 
 export type CompleteGameModuleResult = {
-  correctAnswer: boolean;
+  isCorrect: boolean;
   feedback: string;
   nextGameModuleId: string | null;
   currentGameModuleIndex: number;
@@ -43,13 +41,6 @@ export class CompleteGameModuleUseCase
   async execute(
     command: CompleteGameModuleCommand,
   ): Promise<CompleteGameModuleResult> {
-    if (!command.userId) {
-      throw new Error('User ID is required');
-    }
-    if (!command.moduleId) {
-      throw new Error('Module ID is required');
-    }
-
     const gameModule = await this.gameModuleRepository.findById(
       command.moduleId,
     );
@@ -57,36 +48,32 @@ export class CompleteGameModuleUseCase
       throw new GameModuleNotFoundError(command.moduleId);
     }
 
-    // Use strategy pattern to handle different game types
     const strategy = this.strategyFactory.getStrategy(command.gameType);
-    const strategyResult = strategy.validateMcq(gameModule, command);
+    const { isCorrect, feedback } = strategy.validate(gameModule, command);
 
-    // Only create progression if answer is correct
-    if (strategyResult.correctAnswer) {
+    if (isCorrect) {
       await this.saveProgression(command.userId, command.moduleId, true);
     }
 
-    // Get lesson information to calculate progression
     const lesson = await this.lessonRepository.findById(gameModule.lessonId);
-    const allModulesInLesson = lesson
-      ? await this.gameModuleRepository.findByLessonId(gameModule.lessonId)
-      : [];
+    if (!lesson) {
+      throw new LessonNotFoundError(gameModule.lessonId);
+    }
 
-    // Find current module index and next module
-    const currentIndex = allModulesInLesson.findIndex(
+    const currentIndex = lesson.modules.findIndex(
       (module: GameModule) => module.id === command.moduleId,
     );
     const nextModule =
-      currentIndex >= 0 && currentIndex < allModulesInLesson.length - 1
-        ? allModulesInLesson[currentIndex + 1]
+      currentIndex >= 0 && currentIndex < lesson.modules.length - 1
+        ? lesson.modules[currentIndex + 1]
         : null;
 
     return {
-      correctAnswer: strategyResult.correctAnswer,
-      feedback: strategyResult.feedback,
+      isCorrect,
+      feedback,
       nextGameModuleId: nextModule?.id || null,
       currentGameModuleIndex: Math.max(0, currentIndex),
-      totalGameModules: allModulesInLesson.length,
+      totalGameModules: lesson.modules.length,
     };
   }
 
@@ -103,7 +90,6 @@ export class CompleteGameModuleUseCase
 
     if (existingProgression) {
       existingProgression.isCompleted = isCompleted;
-      existingProgression.updatedAt = new Date();
       await this.progressionRepository.update(
         existingProgression.id,
         existingProgression,

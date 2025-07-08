@@ -30,6 +30,7 @@ export class PrismaLessonRepository implements LessonRepository {
             createdAt: true,
             updatedAt: true,
           },
+          orderBy: { createdAt: 'asc' },
         },
       },
     });
