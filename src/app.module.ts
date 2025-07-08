@@ -37,6 +37,15 @@ import {
 } from './core/usecases/strategies/game-module-strategy-factory';
 import { GameType } from './core/domain/type/GameType';
 import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strategy';
+import { ProgressionRepository } from './core/domain/repository/progression.repository';
+import { PrismaProgressionRepository } from './adapters/prisma/prisma-progression.repository';
+import { CompleteGameModuleUseCase } from './core/usecases/complete-game-module.usecase';
+import { GameModuleController } from './adapters/api/controller/game-module.controller';
+import {
+  CompleteGameModuleStrategyFactory,
+  MapCompleteGameModuleStrategyFactory,
+} from './core/usecases/strategies/complete-game-module-strategy-factory';
+import { McqCompleteGameModuleStrategy } from './core/usecases/strategies/mcq-complete-game-module-strategy';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -45,6 +54,7 @@ import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strateg
     UserController,
     ChapterController,
     LessonController,
+    GameModuleController,
   ],
   providers: [
     PrismaService,
@@ -61,6 +71,16 @@ import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strateg
           {
             type: GameType.MCQ,
             strategy: new McqModuleStrategy(),
+          },
+        ]),
+    },
+    {
+      provide: 'CompleteGameModuleStrategyFactory',
+      useFactory: () =>
+        new MapCompleteGameModuleStrategyFactory([
+          {
+            type: GameType.MCQ,
+            strategy: new McqCompleteGameModuleStrategy(),
           },
         ]),
     },
@@ -90,6 +110,12 @@ import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strateg
       provide: GameModuleRepository,
       useFactory: (prisma: PrismaService) =>
         new PrismaGameModuleRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: ProgressionRepository,
+      useFactory: (prisma: PrismaService) =>
+        new PrismaProgressionRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -195,6 +221,27 @@ import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strateg
         LessonRepository,
         GameModuleRepository,
         'GameModuleStrategyFactory',
+      ],
+    },
+    {
+      provide: CompleteGameModuleUseCase,
+      useFactory: (
+        gameModuleRepository: GameModuleRepository,
+        progressionRepository: ProgressionRepository,
+        lessonRepository: LessonRepository,
+        strategyFactory: CompleteGameModuleStrategyFactory,
+      ) =>
+        new CompleteGameModuleUseCase(
+          gameModuleRepository,
+          progressionRepository,
+          lessonRepository,
+          strategyFactory,
+        ),
+      inject: [
+        GameModuleRepository,
+        ProgressionRepository,
+        LessonRepository,
+        'CompleteGameModuleStrategyFactory',
       ],
     },
   ],

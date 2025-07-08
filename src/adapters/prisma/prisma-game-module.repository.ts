@@ -22,8 +22,17 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
     throw new Error('Method not implemented.');
   }
 
-  findById(): GameModule | Promise<GameModule | null> | null {
-    throw new Error('Method not implemented.');
+  async findById(id: string): Promise<GameModule | null> {
+    const entity = await this.prisma.gameModule.findUnique({
+      where: { id },
+      include: { mcq: true },
+    });
+
+    if (!entity) {
+      return null;
+    }
+
+    return this.mapper.toDomain(entity);
   }
 
   update(): GameModule | Promise<GameModule | null> | null {
