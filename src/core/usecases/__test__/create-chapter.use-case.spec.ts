@@ -8,7 +8,7 @@ import { OrderValidationInterface } from '../../domain/service/order-validation.
 import { User } from '../../domain/model/User';
 import { UserType } from '../../domain/type/UserType';
 import { InMemoryOrderValidationService } from '../../../adapters/in-memory/in-memory-order-validation.service';
-import { OrderConflictError } from '../../domain/error/OrderConflictError';
+import { ChapterOrderConflictError } from '../../domain/error/ChapterOrderConflictError';
 
 describe('CreateChapterUseCase', () => {
   let chapterRepository: ChapterRepository;
@@ -131,7 +131,7 @@ describe('CreateChapterUseCase', () => {
 
     // When & Then
     await expect(createChapterUseCase.execute(secondCommand)).rejects.toThrow(
-      OrderConflictError,
+      ChapterOrderConflictError,
     );
 
     const chapters = await chapterRepository.findAll();

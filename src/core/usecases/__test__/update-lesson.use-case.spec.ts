@@ -10,7 +10,7 @@ import {
   UpdateLessonUseCase,
 } from '../update-lesson.use-case';
 import { GameType } from '../../domain/type/GameType';
-import { OrderConflictError } from '../../domain/error/OrderConflictError';
+import { LessonOrderConflictError } from '../../domain/error/LessonOrderConflictError';
 
 describe('UpdateLessonUseCase', () => {
   let lessonRepository: LessonRepository;
@@ -167,7 +167,7 @@ describe('UpdateLessonUseCase', () => {
 
     // When & Then
     await expect(updateLessonUseCase.execute(command)).rejects.toThrow(
-      OrderConflictError,
+      LessonOrderConflictError,
     );
 
     // Vérifier que la leçon n'a pas été modifiée

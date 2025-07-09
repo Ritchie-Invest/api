@@ -8,7 +8,7 @@ import {
 } from '../update-chapter.use-case';
 import { OrderValidationInterface } from '../../domain/service/order-validation.service';
 import { InMemoryOrderValidationService } from '../../../adapters/in-memory/in-memory-order-validation.service';
-import { OrderConflictError } from '../../domain/error/OrderConflictError';
+import { ChapterOrderConflictError } from '../../domain/error/ChapterOrderConflictError';
 
 describe('UpdateChapterUseCase', () => {
   let chapterRepository: ChapterRepository;
@@ -153,7 +153,7 @@ describe('UpdateChapterUseCase', () => {
 
     // When & Then
     await expect(updateChapterUseCase.execute(command)).rejects.toThrow(
-      OrderConflictError,
+      ChapterOrderConflictError,
     );
 
     // Vérifier que le chapitre n'a pas été modifié
