@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { UseCase } from '../base/use-case';
-import { ChapterRepository } from '../domain/repository/chapter.repository';
-import { LessonRepository } from '../domain/repository/lesson.repository';
-import { GameModuleRepository } from '../domain/repository/game-module.repository';
-import { ProgressionRepository } from '../domain/repository/progression.repository';
+import {
+  ChapterRepository,
+  ChapterData,
+  LessonData,
+  ModuleData,
+} from '../domain/repository/chapter.repository';
+import { InvalidUserError } from '../domain/error/InvalidUserError';
 
 export type GetUserChaptersCommand = {
   userId: string;
@@ -40,9 +43,6 @@ export class GetUserChaptersUseCase
 {
   constructor(
     private readonly chapterRepository: ChapterRepository,
-    private readonly lessonRepository: LessonRepository,
-    private readonly gameModuleRepository: GameModuleRepository,
-    private readonly progressionRepository: ProgressionRepository,
   ) {}
 
   /*
@@ -53,7 +53,7 @@ export class GetUserChaptersUseCase
     command: GetUserChaptersCommand,
   ): Promise<GetUserChaptersResult> {
     if (!command.userId) {
-      throw new Error('User ID is required');
+      throw new InvalidUserError('User ID is required');
     }
 
     const chaptersData = await this.chapterRepository.findAllWithLessonsDetails(
@@ -64,6 +64,8 @@ export class GetUserChaptersUseCase
 
     for (let i = 0; i < chaptersData.length; i++) {
       const chapterData = chaptersData[i];
+      if (!chapterData) continue;
+
       const isChapterUnlocked = this.isChapterUnlocked(i, chaptersData);
 
       const processedLessons = this.processLessons(
@@ -94,15 +96,16 @@ export class GetUserChaptersUseCase
    * et retourne à la fois les résumés de leçons et le nombre de leçons complétées.
    */
   private processLessons(
-    lessons: any[],
+    lessons: LessonData[],
     chapterIndex: number,
-    chaptersData: any[],
+    chaptersData: ChapterData[],
   ): { lessonSummaries: LessonSummary[]; completedLessonsCount: number } {
     const lessonSummaries: LessonSummary[] = [];
     let completedLessonsCount = 0;
 
     for (let j = 0; j < lessons.length; j++) {
       const lessonData = lessons[j];
+      if (!lessonData) continue;
 
       const { completedModules, totalModules } = this.calculateModulesProgress(
         lessonData.modules,
@@ -141,12 +144,12 @@ export class GetUserChaptersUseCase
    * Calcule la progression des modules en comptant le nombre total et le nombre
    * de modules complétés pour une leçon donnée.
    */
-  private calculateModulesProgress(modules: any[]): {
+  private calculateModulesProgress(modules: ModuleData[]): {
     completedModules: number;
     totalModules: number;
   } {
-    const completedModules = modules.filter((module: any) =>
-      module.Progression.some((prog: any) => prog.isCompleted),
+    const completedModules = modules.filter((module) =>
+      module.Progression.some((prog) => prog.isCompleted),
     ).length;
 
     const totalModules = modules.length;
@@ -173,16 +176,19 @@ export class GetUserChaptersUseCase
   private isLessonUnlocked(
     lessonIndex: number,
     chapterIndex: number,
-    chaptersData: any[],
-    lessons: any[],
+    chaptersData: ChapterData[],
+    lessons: LessonData[],
   ): boolean {
     if (lessonIndex === 0) {
+      const previousChapter = chaptersData[chapterIndex - 1];
       return (
         chapterIndex === 0 ||
-        this.isChapterCompleted(chaptersData[chapterIndex - 1])
+        (previousChapter ? this.isChapterCompleted(previousChapter) : false)
       );
     } else {
       const previousLessonData = lessons[lessonIndex - 1];
+      if (!previousLessonData) return false;
+
       const { completedModules, totalModules } = this.calculateModulesProgress(
         previousLessonData.modules,
       );
@@ -197,11 +203,12 @@ export class GetUserChaptersUseCase
    */
   private isChapterUnlocked(
     chapterIndex: number,
-    chaptersData: any[],
+    chaptersData: ChapterData[],
   ): boolean {
+    const previousChapter = chaptersData[chapterIndex - 1];
     return (
       chapterIndex === 0 ||
-      this.isChapterCompleted(chaptersData[chapterIndex - 1])
+      (previousChapter ? this.isChapterCompleted(previousChapter) : false)
     );
   }
 
@@ -209,18 +216,18 @@ export class GetUserChaptersUseCase
    * Vérifie si un chapitre est complété en s'assurant que toutes ses leçons sont complétées.
    * Un chapitre est complété seulement si toutes ses leçons ont tous leurs modules complétés.
    */
-  private isChapterCompleted(chapterData: any): boolean {
-    if (!chapterData.lessons || chapterData.lessons.length === 0) {
+  private isChapterCompleted(chapterData: ChapterData): boolean {
+    if (!chapterData?.lessons || chapterData.lessons.length === 0) {
       return false;
     }
 
-    return chapterData.lessons.every((lessonData: any) => {
-      if (!lessonData.modules || lessonData.modules.length === 0) {
+    return chapterData.lessons.every((lessonData) => {
+      if (!lessonData?.modules || lessonData.modules.length === 0) {
         return false;
       }
 
-      const completedModules = lessonData.modules.filter((module: any) =>
-        module.Progression.some((prog: any) => prog.isCompleted),
+      const completedModules = lessonData.modules.filter((module) =>
+        module.Progression.some((prog) => prog.isCompleted),
       ).length;
 
       return completedModules === lessonData.modules.length;

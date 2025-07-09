@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { ChapterRepository } from '../../core/domain/repository/chapter.repository';
+import {
+  ChapterRepository,
+  ChapterData,
+} from '../../core/domain/repository/chapter.repository';
 import { Chapter } from '../../core/domain/model/Chapter';
+import { LessonRepository } from '../../core/domain/repository/lesson.repository';
+import { GameModuleRepository } from '../../core/domain/repository/game-module.repository';
+import { ProgressionRepository } from '../../core/domain/repository/progression.repository';
 
 @Injectable()
 export class InMemoryChapterRepository implements ChapterRepository {
@@ -43,24 +49,23 @@ export class InMemoryChapterRepository implements ChapterRepository {
     this.chapters.clear();
   }
 
-  // Pour les tests, nous devons stocker les leçons et les modules manuellement
-  private lessonsRepository: any = null;
-  private gameModuleRepository: any = null;
-  private progressionRepository: any = null;
+  private lessonsRepository: LessonRepository | null = null;
+  private gameModuleRepository: GameModuleRepository | null = null;
+  private progressionRepository: ProgressionRepository | null = null;
 
   setDependencies(
-    lessonsRepository: any,
-    gameModuleRepository: any,
-    progressionRepository: any,
+    lessonsRepository: LessonRepository,
+    gameModuleRepository: GameModuleRepository,
+    progressionRepository: ProgressionRepository,
   ): void {
     this.lessonsRepository = lessonsRepository;
     this.gameModuleRepository = gameModuleRepository;
     this.progressionRepository = progressionRepository;
   }
 
-  async findAllWithLessonsDetails(userId: string): Promise<any[]> {
+  async findAllWithLessonsDetails(userId: string): Promise<ChapterData[]> {
     const chapters = Array.from(this.chapters.values()).sort(
-      (a, b) => a.order - b.order,
+      (a, b) => (a.order || 0) - (b.order || 0),
     );
 
     if (
@@ -69,12 +74,15 @@ export class InMemoryChapterRepository implements ChapterRepository {
       !this.progressionRepository
     ) {
       return chapters.map((chapter) => ({
-        ...chapter,
+        id: chapter.id,
+        title: chapter.title,
+        description: chapter.description,
+        order: chapter.order || 0,
         lessons: [],
       }));
     }
 
-    const result = [];
+    const result: ChapterData[] = [];
 
     for (const chapter of chapters) {
       const lessons = await this.lessonsRepository.findByChapter(chapter.id);
@@ -90,23 +98,29 @@ export class InMemoryChapterRepository implements ChapterRepository {
           const progressions =
             await this.progressionRepository.findByGameModuleId(module.id);
           const filteredProgressions = progressions.filter(
-            (prog: any) => prog.userId === userId,
+            (prog) => prog.userId === userId,
           );
 
           modulesWithProgress.push({
-            ...module,
+            id: module.id,
             Progression: filteredProgressions,
           });
         }
 
         lessonsWithModules.push({
-          ...lesson,
+          id: lesson.id,
+          title: lesson.title,
+          description: lesson.description,
+          order: lesson.order || 0,
           modules: modulesWithProgress,
         });
       }
 
       result.push({
-        ...chapter,
+        id: chapter.id,
+        title: chapter.title,
+        description: chapter.description,
+        order: chapter.order || 0,
         lessons: lessonsWithModules,
       });
     }
