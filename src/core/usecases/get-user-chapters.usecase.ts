@@ -41,9 +41,7 @@ export type GetUserChaptersResult = {
 export class GetUserChaptersUseCase
   implements UseCase<GetUserChaptersCommand, GetUserChaptersResult>
 {
-  constructor(
-    private readonly chapterRepository: ChapterRepository,
-  ) {}
+  constructor(private readonly chapterRepository: ChapterRepository) {}
 
   /*
    * Point d'entrée principal du use case qui retourne tous les chapitres avec leurs leçons

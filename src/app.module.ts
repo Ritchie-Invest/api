@@ -194,24 +194,9 @@ import { GetUserChaptersUseCase } from './core/usecases/get-user-chapters.usecas
     },
     {
       provide: GetUserChaptersUseCase,
-      useFactory: (
-        chapterRepository: ChapterRepository,
-        lessonRepository: LessonRepository,
-        gameModuleRepository: GameModuleRepository,
-        progressionRepository: ProgressionRepository,
-      ) =>
-        new GetUserChaptersUseCase(
-          chapterRepository,
-          lessonRepository,
-          gameModuleRepository,
-          progressionRepository,
-        ),
-      inject: [
-        ChapterRepository,
-        LessonRepository,
-        GameModuleRepository,
-        ProgressionRepository,
-      ],
+      useFactory: (chapterRepository: ChapterRepository) =>
+        new GetUserChaptersUseCase(chapterRepository),
+      inject: [ChapterRepository],
     },
     {
       provide: CreateLessonUseCase,

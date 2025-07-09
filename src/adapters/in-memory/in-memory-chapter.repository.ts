@@ -95,15 +95,16 @@ export class InMemoryChapterRepository implements ChapterRepository {
 
         const modulesWithProgress = [];
         for (const module of modules) {
-          const progressions =
-            await this.progressionRepository.findByGameModuleId(module.id);
-          const filteredProgressions = progressions.filter(
-            (prog) => prog.userId === userId,
-          );
+          const progression =
+            await this.progressionRepository.findByUserIdAndGameModuleId(
+              userId,
+              module.id,
+            );
+          const progressions = progression ? [progression] : [];
 
           modulesWithProgress.push({
             id: module.id,
-            Progression: filteredProgressions,
+            Progression: progressions,
           });
         }
 
