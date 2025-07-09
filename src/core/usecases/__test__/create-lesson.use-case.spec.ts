@@ -81,7 +81,7 @@ describe('CreateLessonUseCase', () => {
       title: 'Seconde leçon avec le même ordre',
       description: 'Description de la seconde leçon',
       chapterId: 'chapter-1',
-      order: 1, // Même ordre que la première leçon
+      order: 1, 
       gameType: GameType.MCQ,
     };
 
@@ -91,7 +91,7 @@ describe('CreateLessonUseCase', () => {
     );
 
     const lessons = await lessonRepository.findAll();
-    expect(lessons.length).toBe(1); // Seule la première leçon a été créée
+    expect(lessons.length).toBe(1);
   });
 
   it('should allow creating lessons with the same order in different chapters', async () => {
@@ -111,8 +111,8 @@ describe('CreateLessonUseCase', () => {
       currentUser: { id: 'admin-id', type: UserType.ADMIN },
       title: 'Leçon du chapitre 2',
       description: 'Description de la leçon',
-      chapterId: 'chapter-2', // Chapitre différent
-      order: 1, // Même ordre mais dans un chapitre différent
+      chapterId: 'chapter-2',
+      order: 1,
       gameType: GameType.MCQ,
     };
 

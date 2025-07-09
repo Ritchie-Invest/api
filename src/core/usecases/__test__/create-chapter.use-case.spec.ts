@@ -126,7 +126,7 @@ describe('CreateChapterUseCase', () => {
       currentUser: getCurrentUser(),
       title: 'Second chapitre avec le même ordre',
       description: 'Description du second chapitre',
-      order: 1, // Même ordre que le premier chapitre
+      order: 1,
     };
 
     // When & Then
@@ -135,7 +135,7 @@ describe('CreateChapterUseCase', () => {
     );
 
     const chapters = await chapterRepository.findAll();
-    expect(chapters.length).toBe(1); // Seul le premier chapitre a été créé
+    expect(chapters.length).toBe(1);
   });
 
   function getCurrentUser(): Pick<User, 'id' | 'type'> {

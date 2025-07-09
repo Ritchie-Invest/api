@@ -1,5 +1,10 @@
 import { ChapterRepository } from '../../../../core/domain/repository/chapter.repository';
 import { Chapter } from '../../../../core/domain/model/Chapter';
+import { Lesson } from '../../../../core/domain/model/Lesson';
+import { McqModule } from '../../../../core/domain/model/McqModule';
+import { McqChoice } from '../../../../core/domain/model/McqChoice';
+import { Progression } from '../../../../core/domain/model/Progression';
+import { GameType } from '../../../../core/domain/type/GameType';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../../../app.module';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
@@ -452,33 +457,209 @@ describe('ChapterControllerIT', () => {
     it('should return user chapters with progress', async () => {
       // Given
       const studentToken = generateAccessToken(UserType.STUDENT);
-      const chapter = new Chapter(
+      
+      // Create two chapters
+      const chapter1 = new Chapter(
         'chapter-1',
         'Chapter 1',
         'Description of Chapter 1',
         1,
         true,
       );
-      await chapterRepository.create(chapter);
+      const chapter2 = new Chapter(
+        'chapter-2',
+        'Chapter 2', 
+        'Description of Chapter 2',
+        2,
+        true,
+      );
+      await chapterRepository.create(chapter1);
+      await chapterRepository.create(chapter2);
+
+      // Create lessons for chapter 1
+      const lesson1 = new Lesson(
+        'lesson-1',
+        'Lesson 1',
+        'Description of Lesson 1',
+        'chapter-1',
+        1,
+        true,
+        GameType.MCQ,
+      );
+      const lesson2 = new Lesson(
+        'lesson-2',
+        'Lesson 2',
+        'Description of Lesson 2', 
+        'chapter-1',
+        2,
+        true,
+        GameType.MCQ,
+      );
+      await lessonRepository.create(lesson1);
+      await lessonRepository.create(lesson2);
+
+      // Create lessons for chapter 2
+      const lesson3 = new Lesson(
+        'lesson-3',
+        'Lesson 3',
+        'Description of Lesson 3',
+        'chapter-2',
+        1,
+        true,
+        GameType.MCQ,
+      );
+      await lessonRepository.create(lesson3);
+
+      // Create modules for lessons
+      const module1 = new McqModule({
+        id: 'module-1',
+        lessonId: 'lesson-1',
+        question: 'What is 2+2?',
+        choices: [
+          new McqChoice({
+            id: 'choice-1',
+            text: '4',
+            isCorrect: true,
+            correctionMessage: 'Correct!',
+          }),
+          new McqChoice({
+            id: 'choice-2', 
+            text: '5',
+            isCorrect: false,
+            correctionMessage: 'Incorrect',
+          }),
+        ],
+      });
+
+      const module2 = new McqModule({
+        id: 'module-2',
+        lessonId: 'lesson-1',
+        question: 'What is 3+3?',
+        choices: [
+          new McqChoice({
+            id: 'choice-3',
+            text: '6',
+            isCorrect: true,
+            correctionMessage: 'Correct!',
+          }),
+        ],
+      });
+
+      const module3 = new McqModule({
+        id: 'module-3',
+        lessonId: 'lesson-2',
+        question: 'What is 5+5?',
+        choices: [
+          new McqChoice({
+            id: 'choice-4',
+            text: '10',
+            isCorrect: true,
+            correctionMessage: 'Correct!',
+          }),
+        ],
+      });
+
+      const module4 = new McqModule({
+        id: 'module-4',
+        lessonId: 'lesson-3',
+        question: 'What is 7+7?',
+        choices: [
+          new McqChoice({
+            id: 'choice-5',
+            text: '14',
+            isCorrect: true,
+            correctionMessage: 'Correct!',
+          }),
+        ],
+      });
+
+      await gameModuleRepository.create(module1);
+      await gameModuleRepository.create(module2);
+      await gameModuleRepository.create(module3);
+      await gameModuleRepository.create(module4);
+
+      // Create progressions - complete lesson 1 fully, lesson 2 partially
+      await progressionRepository.create(
+        new Progression('prog-1', 'be7cbc6d-782b-4939-8cff-e577dfe3e79a', 'module-1', true)
+      );
+      await progressionRepository.create(
+        new Progression('prog-2', 'be7cbc6d-782b-4939-8cff-e577dfe3e79a', 'module-2', true)
+      );
+      await progressionRepository.create(
+        new Progression('prog-3', 'be7cbc6d-782b-4939-8cff-e577dfe3e79a', 'module-3', false)
+      );
+      // No progression for module-4, so lesson 3 should be locked
 
       // When
       const response = await request(app.getHttpServer())
         .get('/chapters/user/progress')
         .set('Authorization', `Bearer ${studentToken}`);
+
       // Then
       expect(response.status).toBe(HttpStatus.OK);
       const responseBody = response.body as GetUserChaptersResponse;
       expect(Array.isArray(responseBody.chapters)).toBe(true);
-      expect(responseBody.chapters).toHaveLength(1);
-      expect(responseBody.chapters[0]).toMatchObject({
+      expect(responseBody.chapters).toHaveLength(2);
+
+      // Verify Chapter 1 details
+      const chapter1Response = responseBody.chapters[0];
+      expect(chapter1Response).toMatchObject({
         id: 'chapter-1',
         title: 'Chapter 1',
         description: 'Description of Chapter 1',
         order: 1,
-        is_unlocked: true,
-        completed_lessons: 0,
-        total_lessons: 0,
-        lessons: [],
+        isUnlocked: true,
+        completedLessons: 1, // Only lesson 1 is completed
+        totalLessons: 2,
+      });
+      expect(chapter1Response!.lessons).toHaveLength(2);
+
+      // Verify Lesson 1 (completed)
+      const lesson1Response = chapter1Response!.lessons[0];
+      expect(lesson1Response).toMatchObject({
+        id: 'lesson-1',
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
+        order: 1,
+        isUnlocked: true,
+        completedModules: 2,
+        totalModules: 2,
+      });
+
+      // Verify Lesson 2 (not completed, but unlocked because lesson 1 is completed)
+      const lesson2Response = chapter1Response!.lessons[1];
+      expect(lesson2Response).toMatchObject({
+        id: 'lesson-2',
+        title: 'Lesson 2',
+        description: 'Description of Lesson 2',
+        order: 2,
+        isUnlocked: true,
+        completedModules: 0,
+        totalModules: 1,
+      });
+
+      // Verify Chapter 2 details (locked because chapter 1 is not completed)
+      const chapter2Response = responseBody.chapters[1];
+      expect(chapter2Response).toMatchObject({
+        id: 'chapter-2',
+        title: 'Chapter 2',
+        description: 'Description of Chapter 2',
+        order: 2,
+        isUnlocked: false, // Should be locked
+        completedLessons: 0,
+        totalLessons: 1,
+      });
+
+      // Verify Lesson 3 (locked because chapter 2 is locked)
+      const lesson3Response = chapter2Response!.lessons[0];
+      expect(lesson3Response).toMatchObject({
+        id: 'lesson-3',
+        title: 'Lesson 3',
+        description: 'Description of Lesson 3',
+        order: 1,
+        isUnlocked: false,
+        completedModules: 0,
+        totalModules: 1,
       });
     });
 
@@ -535,7 +716,6 @@ describe('ChapterControllerIT', () => {
       const responseBody = response.body as GetUserChaptersResponse;
       expect(responseBody.chapters).toHaveLength(3);
 
-      // Should be ordered by order field
       expect(responseBody.chapters[0]!.order).toBe(1);
       expect(responseBody.chapters[1]!.order).toBe(2);
       expect(responseBody.chapters[2]!.order).toBe(3);

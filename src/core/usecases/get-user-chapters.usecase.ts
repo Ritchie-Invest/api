@@ -7,31 +7,79 @@ import {
   ModuleData,
 } from '../domain/repository/chapter.repository';
 import { InvalidUserError } from '../domain/error/InvalidUserError';
+import { Chapter } from '../domain/model/Chapter';
+import { Lesson } from '../domain/model/Lesson';
+import { GameType } from '../domain/type/GameType';
 
 export type GetUserChaptersCommand = {
   userId: string;
 };
 
-export type LessonSummary = {
-  id: string;
-  title: string;
-  description: string;
-  order: number;
-  is_unlocked: boolean;
-  completed_modules: number;
-  total_modules: number;
-};
+export class LessonSummary extends Lesson {
+  public readonly isUnlocked: boolean;
+  public readonly completedModules: number;
+  public readonly totalModules: number;
 
-export type ChapterSummary = {
-  id: string;
-  title: string;
-  description: string;
-  order: number;
-  is_unlocked: boolean;
-  completed_lessons: number;
-  total_lessons: number;
-  lessons: LessonSummary[];
-};
+  constructor(
+    lesson: Lesson,
+    isUnlocked: boolean,
+    completedModules: number,
+    totalModules: number,
+  ) {
+    super(
+      lesson.id,
+      lesson.title,
+      lesson.description,
+      lesson.chapterId,
+      lesson.order,
+      lesson.isPublished,
+      lesson.gameType,
+      lesson.modules,
+      lesson.updatedAt,
+      lesson.createdAt,
+    );
+    this.isUnlocked = isUnlocked;
+    this.completedModules = completedModules;
+    this.totalModules = totalModules;
+  }
+
+  isCompleted(): boolean {
+    return this.totalModules > 0 && this.completedModules === this.totalModules;
+  }
+}
+
+export class ChapterSummary extends Chapter {
+  public readonly isUnlocked: boolean;
+  public readonly completedLessons: number;
+  public readonly totalLessons: number;
+  public readonly lessons: LessonSummary[];
+
+  constructor(
+    chapter: Chapter,
+    isUnlocked: boolean,
+    completedLessons: number,
+    totalLessons: number,
+    lessons: LessonSummary[],
+  ) {
+    super(
+      chapter.id,
+      chapter.title,
+      chapter.description,
+      chapter.order,
+      chapter.isPublished,
+      chapter.updatedAt,
+      chapter.createdAt,
+    );
+    this.isUnlocked = isUnlocked;
+    this.completedLessons = completedLessons;
+    this.totalLessons = totalLessons;
+    this.lessons = lessons;
+  }
+
+  isCompleted(): boolean {
+    return this.totalLessons > 0 && this.completedLessons === this.totalLessons;
+  }
+}
 
 export type GetUserChaptersResult = {
   chapters: ChapterSummary[];
@@ -72,16 +120,22 @@ export class GetUserChaptersUseCase
         chaptersData,
       );
 
-      chaptersWithDetails.push({
-        id: chapterData.id,
-        title: chapterData.title,
-        description: chapterData.description,
-        order: chapterData.order,
-        is_unlocked: isChapterUnlocked,
-        completed_lessons: processedLessons.completedLessonsCount,
-        total_lessons: chapterData.lessons.length,
-        lessons: processedLessons.lessonSummaries,
-      });
+      const chapter = new Chapter(
+        chapterData.id,
+        chapterData.title,
+        chapterData.description,
+        chapterData.order,
+      );
+
+      const chapterSummary = new ChapterSummary(
+        chapter,
+        isChapterUnlocked,
+        processedLessons.completedLessonsCount,
+        chapterData.lessons.length,
+        processedLessons.lessonSummaries,
+      );
+
+      chaptersWithDetails.push(chapterSummary);
     }
 
     return {
@@ -124,15 +178,24 @@ export class GetUserChaptersUseCase
         lessons,
       );
 
-      lessonSummaries.push({
-        id: lessonData.id,
-        title: lessonData.title,
-        description: lessonData.description,
-        order: lessonData.order,
-        is_unlocked: isLessonUnlocked,
-        completed_modules: completedModules,
-        total_modules: totalModules,
-      });
+      const lesson = new Lesson(
+        lessonData.id,
+        lessonData.title,
+        lessonData.description,
+        '', // chapterId - nous pourrions l'obtenir du contexte si nécessaire
+        lessonData.order,
+        false, // isPublished
+        GameType.MCQ, // gameType par défaut
+      );
+
+      const lessonSummary = new LessonSummary(
+        lesson,
+        isLessonUnlocked,
+        completedModules,
+        totalModules,
+      );
+
+      lessonSummaries.push(lessonSummary);
     }
 
     return { lessonSummaries, completedLessonsCount };

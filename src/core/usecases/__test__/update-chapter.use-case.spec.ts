@@ -148,7 +148,7 @@ describe('UpdateChapterUseCase', () => {
       chapterId: 'chapter-id',
       title: 'Un super chapitre modifié',
       description: 'Ceci est un super chapitre modifié',
-      order: 2, // Ordre déjà utilisé par chapter-id-2
+      order: 2,
     };
 
     // When & Then
@@ -156,7 +156,6 @@ describe('UpdateChapterUseCase', () => {
       ChapterOrderConflictError,
     );
 
-    // Vérifier que le chapitre n'a pas été modifié
     const chapter = await chapterRepository.findById('chapter-id');
     expect(chapter?.order).toBe(1);
   });
@@ -168,7 +167,7 @@ describe('UpdateChapterUseCase', () => {
       chapterId: 'chapter-id',
       title: 'Un super chapitre modifié',
       description: 'Ceci est un super chapitre modifié',
-      order: 1, // Même ordre que celui actuel
+      order: 1,
     };
 
     // When

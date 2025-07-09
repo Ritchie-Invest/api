@@ -49,38 +49,16 @@ export class InMemoryChapterRepository implements ChapterRepository {
     this.chapters.clear();
   }
 
-  private lessonsRepository: LessonRepository | null = null;
-  private gameModuleRepository: GameModuleRepository | null = null;
-  private progressionRepository: ProgressionRepository | null = null;
-
-  setDependencies(
-    lessonsRepository: LessonRepository,
-    gameModuleRepository: GameModuleRepository,
-    progressionRepository: ProgressionRepository,
-  ): void {
-    this.lessonsRepository = lessonsRepository;
-    this.gameModuleRepository = gameModuleRepository;
-    this.progressionRepository = progressionRepository;
-  }
+  constructor(
+    private readonly lessonsRepository: LessonRepository,
+    private readonly gameModuleRepository: GameModuleRepository,
+    private readonly progressionRepository: ProgressionRepository,
+  ) {}
 
   async findAllWithLessonsDetails(userId: string): Promise<ChapterData[]> {
     const chapters = Array.from(this.chapters.values()).sort(
       (a, b) => (a.order || 0) - (b.order || 0),
     );
-
-    if (
-      !this.lessonsRepository ||
-      !this.gameModuleRepository ||
-      !this.progressionRepository
-    ) {
-      return chapters.map((chapter) => ({
-        id: chapter.id,
-        title: chapter.title,
-        description: chapter.description,
-        order: chapter.order || 0,
-        lessons: [],
-      }));
-    }
 
     const result: ChapterData[] = [];
 

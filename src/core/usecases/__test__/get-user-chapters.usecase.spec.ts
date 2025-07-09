@@ -20,7 +20,6 @@ describe('GetUserChaptersUseCase', () => {
 
   const userId = 'user-123';
 
-  // Helper functions for creating test objects
   const createMcqModule = (id: string, lessonId: string) => {
     const correctChoice = new McqChoice({
       id: `${id}-choice-1`,
@@ -54,24 +53,16 @@ describe('GetUserChaptersUseCase', () => {
   };
 
   beforeEach(() => {
-    chapterRepository = new InMemoryChapterRepository();
     lessonRepository = new InMemoryLessonRepository();
     gameModuleRepository = new InMemoryGameModuleRepository();
     progressionRepository = new InMemoryProgressionRepository();
-
-    // Configure les dépendances pour le repository de chapitres
-    chapterRepository.setDependencies(
+    chapterRepository = new InMemoryChapterRepository(
       lessonRepository,
       gameModuleRepository,
       progressionRepository,
     );
 
-    useCase = new GetUserChaptersUseCase(
-      chapterRepository,
-      lessonRepository,
-      gameModuleRepository,
-      progressionRepository,
-    );
+    useCase = new GetUserChaptersUseCase(chapterRepository);
   });
 
   afterEach(() => {
@@ -101,7 +92,7 @@ describe('GetUserChaptersUseCase', () => {
     });
 
     it('should return chapters with no lessons when chapters exist but no lessons', async () => {
-      // Setup
+      // Given
       chapterRepository.create({
         id: 'chapter-1',
         title: 'Chapter 1',
@@ -117,33 +108,36 @@ describe('GetUserChaptersUseCase', () => {
 
       const command: GetUserChaptersCommand = { userId };
 
+      // When
       const result = await useCase.execute(command);
 
+      // Then
+
       expect(result.chapters).toHaveLength(2);
-      expect(result.chapters[0]).toEqual({
+      expect(result.chapters[0]).toMatchObject({
         id: 'chapter-1',
         title: 'Chapter 1',
         description: 'First chapter',
         order: 1,
-        is_unlocked: true,
-        completed_lessons: 0,
-        total_lessons: 0,
+        isUnlocked: true,
+        completedLessons: 0,
+        totalLessons: 0,
         lessons: [],
       });
-      expect(result.chapters[1]).toEqual({
+      expect(result.chapters[1]).toMatchObject({
         id: 'chapter-2',
         title: 'Chapter 2',
         description: 'Second chapter',
         order: 2,
-        is_unlocked: false,
-        completed_lessons: 0,
-        total_lessons: 0,
+        isUnlocked: false,
+        completedLessons: 0,
+        totalLessons: 0,
         lessons: [],
       });
     });
 
     it('should return chapters with lessons and correct progression data', async () => {
-      // Setup chapters
+      // Given
       chapterRepository.create({
         id: 'chapter-1',
         title: 'Chapter 1',
@@ -153,23 +147,26 @@ describe('GetUserChaptersUseCase', () => {
 
       const command: GetUserChaptersCommand = { userId };
 
+      // When
       const result = await useCase.execute(command);
 
+      // Then
+
       expect(result.chapters).toHaveLength(1);
-      expect(result.chapters[0]).toEqual({
+      expect(result.chapters[0]).toMatchObject({
         id: 'chapter-1',
         title: 'Chapter 1',
         description: 'First chapter',
         order: 1,
-        is_unlocked: true,
-        completed_lessons: 0,
-        total_lessons: 0,
+        isUnlocked: true,
+        completedLessons: 0,
+        totalLessons: 0,
         lessons: [],
       });
     });
 
     it('should handle multiple chapters with complex progression logic', async () => {
-      // Setup chapters
+      // Given
       chapterRepository.create({
         id: 'chapter-1',
         title: 'Chapter 1',
@@ -185,35 +182,38 @@ describe('GetUserChaptersUseCase', () => {
 
       const command: GetUserChaptersCommand = { userId };
 
+      // When
       const result = await useCase.execute(command);
+
+      // Then
 
       expect(result.chapters).toHaveLength(2);
 
-      expect(result.chapters[0]).toEqual({
+      expect(result.chapters[0]).toMatchObject({
         id: 'chapter-1',
         title: 'Chapter 1',
         description: 'First chapter',
         order: 1,
-        is_unlocked: true,
-        completed_lessons: 0,
-        total_lessons: 0,
+        isUnlocked: true,
+        completedLessons: 0,
+        totalLessons: 0,
         lessons: [],
       });
 
-      expect(result.chapters[1]).toEqual({
+      expect(result.chapters[1]).toMatchObject({
         id: 'chapter-2',
         title: 'Chapter 2',
         description: 'Second chapter',
         order: 2,
-        is_unlocked: false,
-        completed_lessons: 0,
-        total_lessons: 0,
+        isUnlocked: false,
+        completedLessons: 0,
+        totalLessons: 0,
         lessons: [],
       });
     });
 
     it('should handle lessons with no modules', async () => {
-      // Setup
+      // Given
       chapterRepository.create({
         id: 'chapter-1',
         title: 'Chapter 1',
@@ -223,7 +223,10 @@ describe('GetUserChaptersUseCase', () => {
 
       const command: GetUserChaptersCommand = { userId };
 
+      // When
       const result = await useCase.execute(command);
+
+      // Then
 
       expect(result.chapters).toHaveLength(1);
       const chapter = result.chapters[0]!;
@@ -232,7 +235,7 @@ describe('GetUserChaptersUseCase', () => {
     });
 
     it('should filter progression data by userId', async () => {
-      // Setup
+      // Given
       chapterRepository.create({
         id: 'chapter-1',
         title: 'Chapter 1',
@@ -242,7 +245,10 @@ describe('GetUserChaptersUseCase', () => {
 
       const command: GetUserChaptersCommand = { userId };
 
+      // When
       const result = await useCase.execute(command);
+
+      // Then
 
       expect(result.chapters).toHaveLength(1);
       const chapter = result.chapters[0]!;
@@ -253,7 +259,7 @@ describe('GetUserChaptersUseCase', () => {
     // Tests pour les méthodes privées
     describe('processLessons (tested indirectly)', () => {
       it('should correctly process lessons and count completed ones', async () => {
-        // Setup chapter with lessons and modules
+        // Given
         const chapterId = 'chapter-1';
         chapterRepository.create({
           id: chapterId,
@@ -310,30 +316,33 @@ describe('GetUserChaptersUseCase', () => {
         );
 
         const command: GetUserChaptersCommand = { userId };
+
+        // When
         const result = await useCase.execute(command);
 
-        // Verify the result
+        // Then
         expect(result.chapters).toHaveLength(1);
-        expect(result.chapters[0]?.completed_lessons).toBe(1);
-        expect(result.chapters[0]?.total_lessons).toBe(2);
+        expect(result.chapters[0]?.completedLessons).toBe(1);
+        expect(result.chapters[0]?.totalLessons).toBe(2);
         expect(result.chapters[0]?.lessons).toHaveLength(2);
 
         // Verify lesson 1 is completed
         const lesson1 = result.chapters[0]?.lessons[0];
-        expect(lesson1?.completed_modules).toBe(2);
-        expect(lesson1?.total_modules).toBe(2);
-        expect(lesson1?.is_unlocked).toBe(true);
+        expect(lesson1?.completedModules).toBe(2);
+        expect(lesson1?.totalModules).toBe(2);
+        expect(lesson1?.isUnlocked).toBe(true);
 
         // Verify lesson 2 is unlocked but not completed
         const lesson2 = result.chapters[0]?.lessons[1];
-        expect(lesson2?.completed_modules).toBe(0);
-        expect(lesson2?.total_modules).toBe(1);
-        expect(lesson2?.is_unlocked).toBe(true);
+        expect(lesson2?.completedModules).toBe(0);
+        expect(lesson2?.totalModules).toBe(1);
+        expect(lesson2?.isUnlocked).toBe(true);
       });
     });
 
     describe('isLessonUnlocked (tested indirectly)', () => {
       it('should unlock first lesson of first chapter', async () => {
+        // Given
         const chapterId = 'chapter-1';
         chapterRepository.create({
           id: chapterId,
@@ -353,12 +362,17 @@ describe('GetUserChaptersUseCase', () => {
         });
 
         const command: GetUserChaptersCommand = { userId };
+
+        // When
         const result = await useCase.execute(command);
 
-        expect(result.chapters[0]?.lessons[0]?.is_unlocked).toBe(true);
+        // Then
+
+        expect(result.chapters[0]?.lessons[0]?.isUnlocked).toBe(true);
       });
 
       it('should not unlock first lesson of second chapter when first chapter is incomplete', async () => {
+        // Given
         const chapter1Id = 'chapter-1';
         chapterRepository.create({
           id: chapter1Id,
@@ -400,19 +414,22 @@ describe('GetUserChaptersUseCase', () => {
         });
 
         const command: GetUserChaptersCommand = { userId };
+
+        // When
         const result = await useCase.execute(command);
 
-        // First chapter's lesson should be unlocked
-        expect(result.chapters[0]?.lessons[0]?.is_unlocked).toBe(true);
+        // Then
+        expect(result.chapters[0]?.lessons[0]?.isUnlocked).toBe(true);
 
         // Second chapter should be locked
-        expect(result.chapters[1]?.is_unlocked).toBe(false);
+        expect(result.chapters[1]?.isUnlocked).toBe(false);
 
         // Second chapter's first lesson should be locked
-        expect(result.chapters[1]?.lessons[0]?.is_unlocked).toBe(false);
+        expect(result.chapters[1]?.lessons[0]?.isUnlocked).toBe(false);
       });
 
       it('should unlock second lesson when first lesson is completed', async () => {
+        // Given
         const chapterId = 'chapter-1';
         chapterRepository.create({
           id: chapterId,
@@ -421,7 +438,6 @@ describe('GetUserChaptersUseCase', () => {
           order: 1,
         });
 
-        // First lesson with completed module
         const lesson1Id = 'lesson-1';
         lessonRepository.create({
           id: lesson1Id,
@@ -436,12 +452,10 @@ describe('GetUserChaptersUseCase', () => {
         const mcqModule1 = createMcqModule(module1Id, lesson1Id);
         gameModuleRepository.create(mcqModule1);
 
-        // Complete the module
         progressionRepository.create(
           new Progression('prog-1', userId, module1Id, true),
         );
 
-        // Second lesson
         const lesson2Id = 'lesson-2';
         lessonRepository.create({
           id: lesson2Id,
@@ -453,16 +467,18 @@ describe('GetUserChaptersUseCase', () => {
         });
 
         const command: GetUserChaptersCommand = { userId };
+
+        // When
         const result = await useCase.execute(command);
 
-        // Second lesson should be unlocked because first is completed
-        expect(result.chapters[0]?.lessons[1]?.is_unlocked).toBe(true);
+        // Then
+        expect(result.chapters[0]?.lessons[1]?.isUnlocked).toBe(true);
       });
     });
 
     describe('isChapterUnlocked and isChapterCompleted (tested indirectly)', () => {
       it('should unlock second chapter when first chapter is completed', async () => {
-        // First chapter with completed lesson
+        // Given
         const chapter1Id = 'chapter-1';
         chapterRepository.create({
           id: chapter1Id,
@@ -485,12 +501,10 @@ describe('GetUserChaptersUseCase', () => {
         const mcqModule1 = createMcqModule(module1Id, lesson1Id);
         gameModuleRepository.create(mcqModule1);
 
-        // Complete the module
         progressionRepository.create(
           new Progression('prog-1', userId, module1Id, true),
         );
 
-        // Second chapter
         const chapter2Id = 'chapter-2';
         chapterRepository.create({
           id: chapter2Id,
@@ -500,18 +514,20 @@ describe('GetUserChaptersUseCase', () => {
         });
 
         const command: GetUserChaptersCommand = { userId };
+
+        // When
         const result = await useCase.execute(command);
 
-        // First chapter should be completed
-        expect(result.chapters[0]?.completed_lessons).toBe(1);
-        expect(result.chapters[0]?.total_lessons).toBe(1);
+        // Then
+        expect(result.chapters[0]?.completedLessons).toBe(1);
+        expect(result.chapters[0]?.totalLessons).toBe(1);
 
         // Second chapter should be unlocked
-        expect(result.chapters[1]?.is_unlocked).toBe(true);
+        expect(result.chapters[1]?.isUnlocked).toBe(true);
       });
 
       it('should not consider chapter completed if it has no lessons', async () => {
-        // First chapter with no lessons
+        // Given
         const chapter1Id = 'chapter-1';
         chapterRepository.create({
           id: chapter1Id,
@@ -520,7 +536,6 @@ describe('GetUserChaptersUseCase', () => {
           order: 1,
         });
 
-        // Second chapter
         const chapter2Id = 'chapter-2';
         chapterRepository.create({
           id: chapter2Id,
@@ -530,15 +545,18 @@ describe('GetUserChaptersUseCase', () => {
         });
 
         const command: GetUserChaptersCommand = { userId };
+
+        // When
         const result = await useCase.execute(command);
 
-        // Second chapter should not be unlocked
-        expect(result.chapters[1]?.is_unlocked).toBe(false);
+        // Then
+        expect(result.chapters[1]?.isUnlocked).toBe(false);
       });
     });
 
     describe('calculateModulesProgress (tested indirectly)', () => {
       it('should correctly calculate modules progress', async () => {
+        // Given
         const chapterId = 'chapter-1';
         chapterRepository.create({
           id: chapterId,
@@ -557,7 +575,6 @@ describe('GetUserChaptersUseCase', () => {
           gameType: GameType.MCQ,
         });
 
-        // Add three modules, complete 2 of them
         const module1Id = 'module-1';
         const mcqModule1 = createMcqModule(module1Id, lessonId);
         gameModuleRepository.create(mcqModule1);
@@ -581,18 +598,20 @@ describe('GetUserChaptersUseCase', () => {
         );
 
         const command: GetUserChaptersCommand = { userId };
+
+        // When
         const result = await useCase.execute(command);
 
-        // Should have 2 completed modules out of 3
-        expect(result.chapters[0]?.lessons[0]?.completed_modules).toBe(2);
-        expect(result.chapters[0]?.lessons[0]?.total_modules).toBe(3);
+        // Then
+        expect(result.chapters[0]?.lessons[0]?.completedModules).toBe(2);
+        expect(result.chapters[0]?.lessons[0]?.totalModules).toBe(3);
       });
     });
   });
 
   describe('Progress', () => {
     it('should correctly calculate modules progress', async () => {
-      // Setup
+      // Given
       const chapterId = 'chapter-1';
       chapterRepository.create({
         id: chapterId,
@@ -611,28 +630,28 @@ describe('GetUserChaptersUseCase', () => {
         gameType: GameType.MCQ,
       });
 
-      // Create modules and progressions for a very simple test case
       const mcqModule = createMcqModule('module-1', lessonId);
       gameModuleRepository.create(mcqModule);
 
-      // Complete the module
       progressionRepository.create(
         createProgression('prog-1', userId, 'module-1', true),
       );
 
       const command: GetUserChaptersCommand = { userId };
+
+      // When
       const result = await useCase.execute(command);
 
-      // Verify module progress calculation
-      expect(result.chapters[0]?.lessons[0]?.completed_modules).toBe(1);
-      expect(result.chapters[0]?.lessons[0]?.total_modules).toBe(1);
+      // Then
+      expect(result.chapters[0]?.lessons[0]?.completedModules).toBe(1);
+      expect(result.chapters[0]?.lessons[0]?.totalModules).toBe(1);
 
       // Verify lesson is marked as completed
-      expect(result.chapters[0]?.completed_lessons).toBe(1);
+      expect(result.chapters[0]?.completedLessons).toBe(1);
     });
 
     it('should unlock lessons based on completion status of previous lessons or chapters', async () => {
-      // Create two chapters
+      // Given
       chapterRepository.create({
         id: 'chapter-1',
         title: 'Chapter 1',
@@ -647,7 +666,6 @@ describe('GetUserChaptersUseCase', () => {
         order: 2,
       });
 
-      // Add one completed lesson to first chapter
       lessonRepository.create({
         id: 'lesson-1-1',
         chapterId: 'chapter-1',
@@ -657,14 +675,12 @@ describe('GetUserChaptersUseCase', () => {
         gameType: GameType.MCQ,
       });
 
-      // Add a module and complete it
       const mcqModule = createMcqModule('module-1', 'lesson-1-1');
       gameModuleRepository.create(mcqModule);
       progressionRepository.create(
         createProgression('prog-1', userId, 'module-1', true),
       );
 
-      // Add first lesson to second chapter
       lessonRepository.create({
         id: 'lesson-2-1',
         chapterId: 'chapter-2',
@@ -675,16 +691,18 @@ describe('GetUserChaptersUseCase', () => {
       });
 
       const command: GetUserChaptersCommand = { userId };
+
+      // When
       const result = await useCase.execute(command);
 
-      // Verify first chapter's lesson is unlocked and completed
-      expect(result.chapters[0]?.lessons[0]?.is_unlocked).toBe(true);
+      // Then
+      expect(result.chapters[0]?.lessons[0]?.isUnlocked).toBe(true);
 
       // Verify second chapter is unlocked since first is completed
-      expect(result.chapters[1]?.is_unlocked).toBe(true);
+      expect(result.chapters[1]?.isUnlocked).toBe(true);
 
       // Verify second chapter's lesson is also unlocked
-      expect(result.chapters[1]?.lessons[0]?.is_unlocked).toBe(true);
+      expect(result.chapters[1]?.lessons[0]?.isUnlocked).toBe(true);
     });
   });
 });

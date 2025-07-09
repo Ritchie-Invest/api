@@ -161,7 +161,7 @@ describe('UpdateLessonUseCase', () => {
       lessonId: 'lesson-id',
       title: 'Une super leçon modifiée',
       description: 'Ceci est une super leçon modifiée',
-      order: 2, // Ordre déjà utilisé par lesson-id-2 dans le même chapitre
+      order: 2,
       isPublished: true,
     };
 
@@ -170,7 +170,6 @@ describe('UpdateLessonUseCase', () => {
       LessonOrderConflictError,
     );
 
-    // Vérifier que la leçon n'a pas été modifiée
     const lesson = await lessonRepository.findById('lesson-id');
     expect(lesson?.order).toBe(1);
   });
@@ -182,7 +181,7 @@ describe('UpdateLessonUseCase', () => {
       lessonId: 'lesson-id',
       title: 'Une super leçon modifiée',
       description: 'Ceci est une super leçon modifiée',
-      order: 1, // Même ordre que celui actuel
+      order: 1,
       isPublished: true,
     };
 
@@ -201,7 +200,7 @@ describe('UpdateLessonUseCase', () => {
       lessonId: 'lesson-id',
       title: 'Une super leçon modifiée',
       description: 'Ceci est une super leçon modifiée',
-      order: 3, // Nouvel ordre qui n'existe pas encore
+      order: 3, 
       isPublished: true,
     };
 
@@ -227,7 +226,7 @@ describe('UpdateLessonUseCase', () => {
       lessonId: 'lesson-id',
       title: 'Une super leçon modifiée',
       description: 'Ceci est une super leçon modifiée',
-      order: 5, // Même ordre que lesson-id-3 mais dans un chapitre différent
+      order: 5, 
       isPublished: true,
     };
 

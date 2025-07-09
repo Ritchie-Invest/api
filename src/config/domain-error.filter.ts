@@ -13,8 +13,10 @@ import { UserNotAllowedError } from '../core/domain/error/UserNotAllowedError';
 import { TokenInvalidOrExpiredError } from '../core/domain/error/TokenInvalidOrExpiredError';
 import { ChapterNotFoundError } from '../core/domain/error/ChapterNotFoundError';
 import { ChapterInvalidDataError } from '../core/domain/error/ChapterInvalidDataError';
+import { ChapterOrderConflictError } from '../core/domain/error/ChapterOrderConflictError';
 import { LessonNotFoundError } from '../core/domain/error/LessonNotFoundError';
 import { LessonInvalidDataError } from '../core/domain/error/LessonInvalidDataError';
+import { LessonOrderConflictError } from '../core/domain/error/LessonOrderConflictError';
 import { GameModuleTypeMismatchError } from '../core/domain/error/GameModuleTypeMismatchError';
 import { GameModuleStrategyNotFoundError } from '../core/domain/error/GameModuleStrategyNotFoundError';
 import { GameModuleNotFoundError } from '../core/domain/error/GameModuleNotFoundError';
@@ -59,7 +61,11 @@ export class DomainErrorFilter implements ExceptionFilter {
     ) {
       return HttpStatus.NOT_FOUND;
     }
-    if (exception instanceof UserAlreadyExistsError) {
+    if (
+      exception instanceof UserAlreadyExistsError ||
+      exception instanceof ChapterOrderConflictError ||
+      exception instanceof LessonOrderConflictError
+    ) {
       return HttpStatus.CONFLICT;
     }
     if (exception instanceof UserNotAllowedError) {
