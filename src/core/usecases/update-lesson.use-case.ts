@@ -5,7 +5,6 @@ import { User } from '../domain/model/User';
 import { UserType } from '../domain/type/UserType';
 import { UserNotAllowedError } from '../domain/error/UserNotAllowedError';
 import { LessonNotFoundError } from '../domain/error/LessonNotFoundError';
-import { OrderValidationService } from '../domain/service/order-validation.service';
 
 export type UpdateLessonCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
@@ -21,7 +20,6 @@ export class UpdateLessonUseCase
 {
   constructor(
     private readonly lessonRepository: LessonRepository,
-    private readonly orderValidationService: OrderValidationService,
   ) {}
 
   async execute(command: UpdateLessonCommand): Promise<Lesson> {
@@ -39,8 +37,7 @@ export class UpdateLessonUseCase
     }
 
     if (order !== undefined && order !== currentLesson.order) {
-      await this.orderValidationService.validateLessonOrder(
-        this.lessonRepository,
+      await this.lessonRepository.validateUniqueOrderInChapter(
         currentLesson.chapterId,
         order,
         lessonId,

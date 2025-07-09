@@ -4,24 +4,27 @@ import {
 } from '../create-chapter.use-case';
 import { ChapterRepository } from '../../domain/repository/chapter.repository';
 import { InMemoryChapterRepository } from '../../../adapters/in-memory/in-memory-chapter.repository';
-import { OrderValidationInterface } from '../../domain/service/order-validation.service';
+import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
+import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
+import { InMemoryProgressionRepository } from '../../../adapters/in-memory/in-memory-progression.repository';
 import { User } from '../../domain/model/User';
 import { UserType } from '../../domain/type/UserType';
-import { InMemoryOrderValidationService } from '../../../adapters/in-memory/in-memory-order-validation.service';
 import { ChapterOrderConflictError } from '../../domain/error/ChapterOrderConflictError';
 
 describe('CreateChapterUseCase', () => {
   let chapterRepository: ChapterRepository;
-  let OrderValidation: OrderValidationInterface;
   let createChapterUseCase: CreateChapterUseCase;
 
   beforeEach(() => {
-    chapterRepository = new InMemoryChapterRepository();
-    OrderValidation = new InMemoryOrderValidationService();
-    createChapterUseCase = new CreateChapterUseCase(
-      chapterRepository,
-      OrderValidation,
+    const lessonRepository = new InMemoryLessonRepository();
+    const gameModuleRepository = new InMemoryGameModuleRepository();
+    const progressionRepository = new InMemoryProgressionRepository();
+    chapterRepository = new InMemoryChapterRepository(
+      lessonRepository,
+      gameModuleRepository,
+      progressionRepository,
     );
+    createChapterUseCase = new CreateChapterUseCase(chapterRepository);
   });
 
   it('should return created chapter', async () => {

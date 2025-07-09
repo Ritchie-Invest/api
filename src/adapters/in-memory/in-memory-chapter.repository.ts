@@ -7,10 +7,31 @@ import { Chapter } from '../../core/domain/model/Chapter';
 import { LessonRepository } from '../../core/domain/repository/lesson.repository';
 import { GameModuleRepository } from '../../core/domain/repository/game-module.repository';
 import { ProgressionRepository } from '../../core/domain/repository/progression.repository';
+import { ChapterOrderConflictError } from '../../core/domain/error/ChapterOrderConflictError';
 
 @Injectable()
 export class InMemoryChapterRepository implements ChapterRepository {
   private chapters: Map<string, Chapter> = new Map();
+
+  async validateUniqueOrder(order: number, excludeChapterId?: string): Promise<void> {
+    const existingChapters = await this.findAll();
+    const conflictingChapter = existingChapters.find(
+      (chapter: Chapter) =>
+        chapter.order === order && chapter.id !== excludeChapterId,
+    );
+
+    if (conflictingChapter) {
+      throw new ChapterOrderConflictError(order);
+    }
+  }
+
+  async getNextOrder(): Promise<number> {
+    const chapters = await this.findAll();
+    if (chapters.length === 0) {
+      return 0;
+    }
+    return Math.max(...chapters.map((c: Chapter) => c.order)) + 1;
+  }
 
   create(
     data: Pick<Chapter, 'id' | 'title' | 'description' | 'order'>,

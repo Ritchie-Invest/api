@@ -1,8 +1,5 @@
 import { LessonRepository } from '../../domain/repository/lesson.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
-
-import { OrderValidationInterface } from '../../domain/service/order-validation.service';
-import { InMemoryOrderValidationService } from '../../../adapters/in-memory/in-memory-order-validation.service';
 import { User } from '../../domain/model/User';
 import { UserType } from '../../domain/type/UserType';
 import {
@@ -14,16 +11,11 @@ import { LessonOrderConflictError } from '../../domain/error/LessonOrderConflict
 
 describe('UpdateLessonUseCase', () => {
   let lessonRepository: LessonRepository;
-  let OrderValidation: OrderValidationInterface;
   let updateLessonUseCase: UpdateLessonUseCase;
 
   beforeEach(async () => {
     lessonRepository = new InMemoryLessonRepository();
-    OrderValidation = new InMemoryOrderValidationService();
-    updateLessonUseCase = new UpdateLessonUseCase(
-      lessonRepository,
-      OrderValidation,
-    );
+    updateLessonUseCase = new UpdateLessonUseCase(lessonRepository);
 
     await lessonRepository.removeAll();
     await lessonRepository.create({

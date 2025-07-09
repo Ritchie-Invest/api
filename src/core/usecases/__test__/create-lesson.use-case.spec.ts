@@ -6,21 +6,16 @@ import { UserType } from '../../domain/type/UserType';
 import { UserNotAllowedError } from '../../domain/error/UserNotAllowedError';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { LessonRepository } from '../../domain/repository/lesson.repository';
-
-import { OrderValidationInterface } from '../../domain/service/order-validation.service';
-import { InMemoryOrderValidationService } from '../../../adapters/in-memory/in-memory-order-validation.service';
 import { GameType } from '../../domain/type/GameType';
 import { LessonOrderConflictError } from '../../domain/error/LessonOrderConflictError';
 
 describe('CreateLessonUseCase', () => {
   let useCase: CreateLessonUseCase;
   let lessonRepository: LessonRepository;
-  let OrderValidation: OrderValidationInterface;
 
   beforeEach(() => {
     lessonRepository = new InMemoryLessonRepository();
-    OrderValidation = new InMemoryOrderValidationService();
-    useCase = new CreateLessonUseCase(lessonRepository, OrderValidation);
+    useCase = new CreateLessonUseCase(lessonRepository);
   });
 
   it('should create a lesson When user is admin', async () => {

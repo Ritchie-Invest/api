@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from './core/usecases/app.module';
 import { DomainErrorFilter } from './config/domain-error.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';

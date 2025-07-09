@@ -1,27 +1,30 @@
 import { ChapterRepository } from '../../domain/repository/chapter.repository';
 import { InMemoryChapterRepository } from '../../../adapters/in-memory/in-memory-chapter.repository';
+import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
+import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
+import { InMemoryProgressionRepository } from '../../../adapters/in-memory/in-memory-progression.repository';
 import { User } from '../../domain/model/User';
 import { UserType } from '../../domain/type/UserType';
 import {
   UpdateChapterCommand,
   UpdateChapterUseCase,
 } from '../update-chapter.use-case';
-import { OrderValidationInterface } from '../../domain/service/order-validation.service';
-import { InMemoryOrderValidationService } from '../../../adapters/in-memory/in-memory-order-validation.service';
 import { ChapterOrderConflictError } from '../../domain/error/ChapterOrderConflictError';
 
 describe('UpdateChapterUseCase', () => {
   let chapterRepository: ChapterRepository;
-  let orderValidationService: OrderValidationInterface;
   let updateChapterUseCase: UpdateChapterUseCase;
 
   beforeEach(async () => {
-    chapterRepository = new InMemoryChapterRepository();
-    orderValidationService = new InMemoryOrderValidationService();
-    updateChapterUseCase = new UpdateChapterUseCase(
-      chapterRepository,
-      orderValidationService,
+    const lessonRepository = new InMemoryLessonRepository();
+    const gameModuleRepository = new InMemoryGameModuleRepository();
+    const progressionRepository = new InMemoryProgressionRepository();
+    chapterRepository = new InMemoryChapterRepository(
+      lessonRepository,
+      gameModuleRepository,
+      progressionRepository,
     );
+    updateChapterUseCase = new UpdateChapterUseCase(chapterRepository);
 
     await chapterRepository.removeAll();
     await chapterRepository.create({

@@ -5,7 +5,6 @@ import { User } from '../domain/model/User';
 import { UserType } from '../domain/type/UserType';
 import { UserNotAllowedError } from '../domain/error/UserNotAllowedError';
 import { ChapterNotFoundError } from '../domain/error/ChapterNotFoundError';
-import { OrderValidationService } from '../domain/service/order-validation.service';
 
 export type UpdateChapterCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
@@ -21,7 +20,6 @@ export class UpdateChapterUseCase
 {
   constructor(
     private readonly chapterRepository: ChapterRepository,
-    private readonly orderValidationService: OrderValidationService,
   ) {}
 
   async execute(command: UpdateChapterCommand): Promise<Chapter> {
@@ -39,11 +37,7 @@ export class UpdateChapterUseCase
     }
 
     if (order !== undefined && order !== currentChapter.order) {
-      await this.orderValidationService.validateChapterOrder(
-        this.chapterRepository,
-        order,
-        chapterId,
-      );
+      await this.chapterRepository.validateUniqueOrder(order, chapterId);
     }
 
     const chapter = new Chapter(

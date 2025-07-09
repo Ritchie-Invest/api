@@ -6,7 +6,7 @@ import { McqChoice } from '../../../../core/domain/model/McqChoice';
 import { Progression } from '../../../../core/domain/model/Progression';
 import { GameType } from '../../../../core/domain/type/GameType';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../../../app.module';
+import { AppModule } from '../../../../core/usecases/app.module';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { App } from 'supertest/types';
 import request from 'supertest';
