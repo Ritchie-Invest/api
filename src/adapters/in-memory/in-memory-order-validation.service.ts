@@ -1,7 +1,8 @@
 import { OrderValidationInterface } from '../../core/domain/service/order-validation.service';
 import { ChapterRepository } from '../../core/domain/repository/chapter.repository';
 import { LessonRepository } from '../../core/domain/repository/lesson.repository';
-import { OrderConflictError } from '../../core/domain/error/OrderConflictError';
+import { ChapterOrderConflictError } from '../../core/domain/error/ChapterOrderConflictError';
+import { LessonOrderConflictError } from '../../core/domain/error/LessonOrderConflictError';
 import { Chapter } from '../../core/domain/model/Chapter';
 import { Lesson } from '../../core/domain/model/Lesson';
 
@@ -21,9 +22,7 @@ export class InMemoryOrderValidationService
     );
 
     if (conflictingChapter) {
-      throw new OrderConflictError(
-        `A chapter with order ${order} already exists`,
-      );
+      throw new ChapterOrderConflictError(order);
     }
   }
 
@@ -41,9 +40,7 @@ export class InMemoryOrderValidationService
     );
 
     if (conflictingLesson) {
-      throw new OrderConflictError(
-        `A lesson with order ${order} already exists in chapter ${chapterId}`,
-      );
+      throw new LessonOrderConflictError(order, chapterId);
     }
   }
 

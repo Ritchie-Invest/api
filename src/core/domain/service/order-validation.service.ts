@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ChapterRepository } from '../../domain/repository/chapter.repository';
 import { LessonRepository } from '../../domain/repository/lesson.repository';
-import { OrderConflictError } from '../../domain/error/OrderConflictError';
+import { ChapterOrderConflictError } from '../../domain/error/ChapterOrderConflictError';
+import { LessonOrderConflictError } from '../../domain/error/LessonOrderConflictError';
 import { Chapter } from '../../domain/model/Chapter';
 import { Lesson } from '../../domain/model/Lesson';
 
@@ -44,9 +45,7 @@ export class OrderValidationService extends OrderValidationInterface {
     );
 
     if (conflictingChapter) {
-      throw new OrderConflictError(
-        `A chapter with order ${order} already exists`,
-      );
+      throw new ChapterOrderConflictError(order);
     }
   }
 
@@ -64,9 +63,7 @@ export class OrderValidationService extends OrderValidationInterface {
     );
 
     if (conflictingLesson) {
-      throw new OrderConflictError(
-        `A lesson with order ${order} already exists in chapter ${chapterId}`,
-      );
+      throw new LessonOrderConflictError(order, chapterId);
     }
   }
 
