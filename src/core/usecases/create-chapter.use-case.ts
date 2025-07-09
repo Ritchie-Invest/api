@@ -15,9 +15,7 @@ export type CreateChapterCommand = {
 export class CreateChapterUseCase
   implements UseCase<CreateChapterCommand, Chapter>
 {
-  constructor(
-    private readonly chapterRepository: ChapterRepository,
-  ) {}
+  constructor(private readonly chapterRepository: ChapterRepository) {}
 
   async execute(command: CreateChapterCommand): Promise<Chapter> {
     if (!this.canExecute(command.currentUser)) {

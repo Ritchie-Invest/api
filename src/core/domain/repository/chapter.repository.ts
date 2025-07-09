@@ -31,7 +31,10 @@ export type ChapterData = {
 export abstract class ChapterRepository extends Repository<Chapter> {
   abstract findAllWithLessonsDetails(userId: string): Promise<ChapterData[]>;
 
-  async validateUniqueOrder(order: number, excludeChapterId?: string): Promise<void> {
+  async validateUniqueOrder(
+    order: number,
+    excludeChapterId?: string,
+  ): Promise<void> {
     const existingChapters = await this.findAll();
     const conflictingChapter = existingChapters.find(
       (chapter: Chapter) =>

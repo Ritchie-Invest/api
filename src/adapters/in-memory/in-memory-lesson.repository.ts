@@ -7,12 +7,12 @@ import { LessonOrderConflictError } from '../../core/domain/error/LessonOrderCon
 export class InMemoryLessonRepository implements LessonRepository {
   private lessons: Map<string, Lesson> = new Map();
 
-  async validateUniqueOrderInChapter(
+  validateUniqueOrderInChapter(
     chapterId: string,
     order: number,
     excludeLessonId?: string,
   ): Promise<void> {
-    const existingLessons = await this.findByChapter(chapterId);
+    const existingLessons = this.findByChapter(chapterId);
     const conflictingLesson = existingLessons.find(
       (lesson: Lesson) =>
         lesson.order === order && lesson.id !== excludeLessonId,
@@ -21,14 +21,17 @@ export class InMemoryLessonRepository implements LessonRepository {
     if (conflictingLesson) {
       throw new LessonOrderConflictError(order, chapterId);
     }
+    return Promise.resolve();
   }
 
-  async getNextOrderInChapter(chapterId: string): Promise<number> {
-    const lessons = await this.findByChapter(chapterId);
+  getNextOrderInChapter(chapterId: string): Promise<number> {
+    const lessons = this.findByChapter(chapterId);
     if (lessons.length === 0) {
-      return 0;
+      return Promise.resolve(0);
     }
-    return Math.max(...lessons.map((l: Lesson) => l.order ?? 0)) + 1;
+    return Promise.resolve(
+      Math.max(...lessons.map((l: Lesson) => l.order ?? 0)) + 1,
+    );
   }
 
   constructor() {}

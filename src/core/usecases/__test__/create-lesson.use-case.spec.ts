@@ -76,7 +76,7 @@ describe('CreateLessonUseCase', () => {
       title: 'Seconde leçon avec le même ordre',
       description: 'Description de la seconde leçon',
       chapterId: 'chapter-1',
-      order: 1, 
+      order: 1,
       gameType: GameType.MCQ,
     };
 

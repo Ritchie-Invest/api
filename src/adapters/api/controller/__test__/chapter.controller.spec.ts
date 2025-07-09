@@ -457,7 +457,7 @@ describe('ChapterControllerIT', () => {
     it('should return user chapters with progress', async () => {
       // Given
       const studentToken = generateAccessToken(UserType.STUDENT);
-      
+
       // Create two chapters
       const chapter1 = new Chapter(
         'chapter-1',
@@ -468,7 +468,7 @@ describe('ChapterControllerIT', () => {
       );
       const chapter2 = new Chapter(
         'chapter-2',
-        'Chapter 2', 
+        'Chapter 2',
         'Description of Chapter 2',
         2,
         true,
@@ -489,7 +489,7 @@ describe('ChapterControllerIT', () => {
       const lesson2 = new Lesson(
         'lesson-2',
         'Lesson 2',
-        'Description of Lesson 2', 
+        'Description of Lesson 2',
         'chapter-1',
         2,
         true,
@@ -523,7 +523,7 @@ describe('ChapterControllerIT', () => {
             correctionMessage: 'Correct!',
           }),
           new McqChoice({
-            id: 'choice-2', 
+            id: 'choice-2',
             text: '5',
             isCorrect: false,
             correctionMessage: 'Incorrect',
@@ -580,13 +580,28 @@ describe('ChapterControllerIT', () => {
 
       // Create progressions - complete lesson 1 fully, lesson 2 partially
       await progressionRepository.create(
-        new Progression('prog-1', 'be7cbc6d-782b-4939-8cff-e577dfe3e79a', 'module-1', true)
+        new Progression(
+          'prog-1',
+          'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+          'module-1',
+          true,
+        ),
       );
       await progressionRepository.create(
-        new Progression('prog-2', 'be7cbc6d-782b-4939-8cff-e577dfe3e79a', 'module-2', true)
+        new Progression(
+          'prog-2',
+          'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+          'module-2',
+          true,
+        ),
       );
       await progressionRepository.create(
-        new Progression('prog-3', 'be7cbc6d-782b-4939-8cff-e577dfe3e79a', 'module-3', false)
+        new Progression(
+          'prog-3',
+          'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+          'module-3',
+          false,
+        ),
       );
       // No progression for module-4, so lesson 3 should be locked
 

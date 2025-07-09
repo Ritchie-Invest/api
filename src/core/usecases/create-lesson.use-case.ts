@@ -18,9 +18,7 @@ export type CreateLessonCommand = {
 export class CreateLessonUseCase
   implements UseCase<CreateLessonCommand, Lesson>
 {
-  constructor(
-    private readonly lessonRepository: LessonRepository,
-  ) {}
+  constructor(private readonly lessonRepository: LessonRepository) {}
 
   async execute(command: CreateLessonCommand): Promise<Lesson> {
     if (!this.canExecute(command.currentUser)) {
@@ -30,10 +28,7 @@ export class CreateLessonUseCase
     }
     const { title, description, chapterId, order, gameType } = command;
 
-    await this.lessonRepository.validateUniqueOrderInChapter(
-      chapterId,
-      order,
-    );
+    await this.lessonRepository.validateUniqueOrderInChapter(chapterId, order);
 
     const lesson = new Lesson(
       this.generateId(),

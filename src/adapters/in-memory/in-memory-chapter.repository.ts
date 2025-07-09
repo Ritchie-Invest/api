@@ -13,8 +13,8 @@ import { ChapterOrderConflictError } from '../../core/domain/error/ChapterOrderC
 export class InMemoryChapterRepository implements ChapterRepository {
   private chapters: Map<string, Chapter> = new Map();
 
-  async validateUniqueOrder(order: number, excludeChapterId?: string): Promise<void> {
-    const existingChapters = await this.findAll();
+  validateUniqueOrder(order: number, excludeChapterId?: string): Promise<void> {
+    const existingChapters = this.findAll();
     const conflictingChapter = existingChapters.find(
       (chapter: Chapter) =>
         chapter.order === order && chapter.id !== excludeChapterId,
@@ -23,14 +23,17 @@ export class InMemoryChapterRepository implements ChapterRepository {
     if (conflictingChapter) {
       throw new ChapterOrderConflictError(order);
     }
+    return Promise.resolve();
   }
 
-  async getNextOrder(): Promise<number> {
-    const chapters = await this.findAll();
+  getNextOrder(): Promise<number> {
+    const chapters = this.findAll();
     if (chapters.length === 0) {
-      return 0;
+      return Promise.resolve(0);
     }
-    return Math.max(...chapters.map((c: Chapter) => c.order)) + 1;
+    return Promise.resolve(
+      Math.max(...chapters.map((c: Chapter) => c.order)) + 1,
+    );
   }
 
   create(

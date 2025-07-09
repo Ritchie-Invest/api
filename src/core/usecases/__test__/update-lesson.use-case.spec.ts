@@ -192,7 +192,7 @@ describe('UpdateLessonUseCase', () => {
       lessonId: 'lesson-id',
       title: 'Une super leçon modifiée',
       description: 'Ceci est une super leçon modifiée',
-      order: 3, 
+      order: 3,
       isPublished: true,
     };
 
@@ -218,7 +218,7 @@ describe('UpdateLessonUseCase', () => {
       lessonId: 'lesson-id',
       title: 'Une super leçon modifiée',
       description: 'Ceci est une super leçon modifiée',
-      order: 5, 
+      order: 5,
       isPublished: true,
     };
 

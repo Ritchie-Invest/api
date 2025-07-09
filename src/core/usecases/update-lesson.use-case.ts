@@ -18,9 +18,7 @@ export type UpdateLessonCommand = {
 export class UpdateLessonUseCase
   implements UseCase<UpdateLessonCommand, Lesson>
 {
-  constructor(
-    private readonly lessonRepository: LessonRepository,
-  ) {}
+  constructor(private readonly lessonRepository: LessonRepository) {}
 
   async execute(command: UpdateLessonCommand): Promise<Lesson> {
     if (!this.canExecute(command.currentUser)) {
