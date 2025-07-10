@@ -14,30 +14,30 @@ export class LessonSummaryResponse {
   order: number;
 
   @ApiProperty()
-  is_unlocked: boolean;
+  isUnlocked: boolean;
 
   @ApiProperty()
-  completed_modules: number;
+  completedModules: number;
 
   @ApiProperty()
-  total_modules: number;
+  totalModules: number;
 
   constructor(
     id: string,
     title: string,
     description: string,
     order: number,
-    is_unlocked: boolean,
-    completed_modules: number,
-    total_modules: number,
+    isUnlocked: boolean,
+    completedModules: number,
+    totalModules: number,
   ) {
     this.id = id;
     this.title = title;
     this.description = description;
     this.order = order;
-    this.is_unlocked = is_unlocked;
-    this.completed_modules = completed_modules;
-    this.total_modules = total_modules;
+    this.isUnlocked = isUnlocked;
+    this.completedModules = completedModules;
+    this.totalModules = totalModules;
   }
 }
 
@@ -55,13 +55,13 @@ export class ChapterSummaryResponse {
   order: number;
 
   @ApiProperty()
-  is_unlocked: boolean;
+  isUnlocked: boolean;
 
   @ApiProperty()
-  completed_lessons: number;
+  completedLessons: number;
 
   @ApiProperty()
-  total_lessons: number;
+  totalLessons: number;
 
   @ApiProperty({ type: [LessonSummaryResponse] })
   lessons: LessonSummaryResponse[];
@@ -71,18 +71,18 @@ export class ChapterSummaryResponse {
     title: string,
     description: string,
     order: number,
-    is_unlocked: boolean,
-    completed_lessons: number,
-    total_lessons: number,
+    isUnlocked: boolean,
+    completedLessons: number,
+    totalLessons: number,
     lessons: LessonSummaryResponse[],
   ) {
     this.id = id;
     this.title = title;
     this.description = description;
     this.order = order;
-    this.is_unlocked = is_unlocked;
-    this.completed_lessons = completed_lessons;
-    this.total_lessons = total_lessons;
+    this.isUnlocked = isUnlocked;
+    this.completedLessons = completedLessons;
+    this.totalLessons = totalLessons;
     this.lessons = lessons;
   }
 }

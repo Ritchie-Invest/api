@@ -256,7 +256,6 @@ describe('GetUserChaptersUseCase', () => {
       expect(chapter.lessons).toHaveLength(0);
     });
 
-    // Tests pour les méthodes privées
     describe('processLessons (tested indirectly)', () => {
       it('should correctly process lessons and count completed ones', async () => {
         // Given
@@ -268,7 +267,6 @@ describe('GetUserChaptersUseCase', () => {
           order: 1,
         });
 
-        // Add two lessons to the chapter
         const lesson1Id = 'lesson-1';
         lessonRepository.create({
           id: lesson1Id,
@@ -289,7 +287,6 @@ describe('GetUserChaptersUseCase', () => {
           gameType: GameType.MCQ,
         });
 
-        // Add modules to lessons
         const module1Id = 'module-1';
         const mcqModule1 = createMcqModule(module1Id, lesson1Id);
         gameModuleRepository.create(mcqModule1);
@@ -302,7 +299,6 @@ describe('GetUserChaptersUseCase', () => {
         const mcqModule3 = createMcqModule(module3Id, lesson2Id);
         gameModuleRepository.create(mcqModule3);
 
-        // Complete all modules in lesson 1
         progressionRepository.create(
           new Progression('prog-1', userId, module1Id, true),
         );
@@ -310,7 +306,6 @@ describe('GetUserChaptersUseCase', () => {
           new Progression('prog-2', userId, module2Id, true),
         );
 
-        // Mark module in lesson 2 as incomplete
         progressionRepository.create(
           new Progression('prog-3', userId, module3Id, false),
         );
@@ -326,13 +321,11 @@ describe('GetUserChaptersUseCase', () => {
         expect(result.chapters[0]?.totalLessons).toBe(2);
         expect(result.chapters[0]?.lessons).toHaveLength(2);
 
-        // Verify lesson 1 is completed
         const lesson1 = result.chapters[0]?.lessons[0];
         expect(lesson1?.completedModules).toBe(2);
         expect(lesson1?.totalModules).toBe(2);
         expect(lesson1?.isUnlocked).toBe(true);
 
-        // Verify lesson 2 is unlocked but not completed
         const lesson2 = result.chapters[0]?.lessons[1];
         expect(lesson2?.completedModules).toBe(0);
         expect(lesson2?.totalModules).toBe(1);
@@ -421,10 +414,8 @@ describe('GetUserChaptersUseCase', () => {
         // Then
         expect(result.chapters[0]?.lessons[0]?.isUnlocked).toBe(true);
 
-        // Second chapter should be locked
         expect(result.chapters[1]?.isUnlocked).toBe(false);
 
-        // Second chapter's first lesson should be locked
         expect(result.chapters[1]?.lessons[0]?.isUnlocked).toBe(false);
       });
 
@@ -522,7 +513,6 @@ describe('GetUserChaptersUseCase', () => {
         expect(result.chapters[0]?.completedLessons).toBe(1);
         expect(result.chapters[0]?.totalLessons).toBe(1);
 
-        // Second chapter should be unlocked
         expect(result.chapters[1]?.isUnlocked).toBe(true);
       });
 
@@ -646,7 +636,6 @@ describe('GetUserChaptersUseCase', () => {
       expect(result.chapters[0]?.lessons[0]?.completedModules).toBe(1);
       expect(result.chapters[0]?.lessons[0]?.totalModules).toBe(1);
 
-      // Verify lesson is marked as completed
       expect(result.chapters[0]?.completedLessons).toBe(1);
     });
 
@@ -698,10 +687,8 @@ describe('GetUserChaptersUseCase', () => {
       // Then
       expect(result.chapters[0]?.lessons[0]?.isUnlocked).toBe(true);
 
-      // Verify second chapter is unlocked since first is completed
       expect(result.chapters[1]?.isUnlocked).toBe(true);
 
-      // Verify second chapter's lesson is also unlocked
       expect(result.chapters[1]?.lessons[0]?.isUnlocked).toBe(true);
     });
   });

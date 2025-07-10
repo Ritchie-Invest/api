@@ -67,7 +67,6 @@ describe('ChapterControllerIT', () => {
     await chapterRepository.removeAll();
     await userRepository.removeAll();
 
-    // Create a test user for progression tests
     await userRepository.create({
       id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
       email: 'test@ritchie-invest.com',
@@ -459,7 +458,6 @@ describe('ChapterControllerIT', () => {
       // Given
       const studentToken = generateAccessToken(UserType.STUDENT);
 
-      // Create two chapters
       const chapter1 = new Chapter(
         'chapter-1',
         'Chapter 1',
@@ -477,7 +475,6 @@ describe('ChapterControllerIT', () => {
       await chapterRepository.create(chapter1);
       await chapterRepository.create(chapter2);
 
-      // Create lessons for chapter 1
       const lesson1 = new Lesson(
         'lesson-1',
         'Lesson 1',
@@ -499,7 +496,6 @@ describe('ChapterControllerIT', () => {
       await lessonRepository.create(lesson1);
       await lessonRepository.create(lesson2);
 
-      // Create lessons for chapter 2
       const lesson3 = new Lesson(
         'lesson-3',
         'Lesson 3',
@@ -511,7 +507,6 @@ describe('ChapterControllerIT', () => {
       );
       await lessonRepository.create(lesson3);
 
-      // Create modules for lessons
       const module1 = new McqModule({
         id: 'module-1',
         lessonId: 'lesson-1',
@@ -543,6 +538,12 @@ describe('ChapterControllerIT', () => {
             isCorrect: true,
             correctionMessage: 'Correct!',
           }),
+          new McqChoice({
+        id: 'choice-8',
+        text: '7',
+        isCorrect: false,
+        correctionMessage: 'Incorrect',
+          }),
         ],
       });
 
@@ -556,6 +557,12 @@ describe('ChapterControllerIT', () => {
             text: '10',
             isCorrect: true,
             correctionMessage: 'Correct!',
+          }),
+          new McqChoice({
+            id: 'choice-7',
+            text: '11',
+            isCorrect: false,
+            correctionMessage: 'Incorrect',
           }),
         ],
       });
@@ -571,6 +578,12 @@ describe('ChapterControllerIT', () => {
             isCorrect: true,
             correctionMessage: 'Correct!',
           }),
+          new McqChoice({
+            id: 'choice-6',
+            text: '15',
+            isCorrect: false,
+            correctionMessage: 'Incorrect',
+          }),
         ],
       });
 
@@ -579,7 +592,6 @@ describe('ChapterControllerIT', () => {
       await gameModuleRepository.create(module3);
       await gameModuleRepository.create(module4);
 
-      // Create progressions - complete lesson 1 fully, lesson 2 partially
       await progressionRepository.create(
         new Progression(
           'prog-1',
@@ -604,7 +616,6 @@ describe('ChapterControllerIT', () => {
           false,
         ),
       );
-      // No progression for module-4, so lesson 3 should be locked
 
       // When
       const response = await request(app.getHttpServer())
@@ -617,7 +628,6 @@ describe('ChapterControllerIT', () => {
       expect(Array.isArray(responseBody.chapters)).toBe(true);
       expect(responseBody.chapters).toHaveLength(2);
 
-      // Verify Chapter 1 details
       const chapter1Response = responseBody.chapters[0];
       expect(chapter1Response).toMatchObject({
         id: 'chapter-1',
@@ -625,12 +635,11 @@ describe('ChapterControllerIT', () => {
         description: 'Description of Chapter 1',
         order: 1,
         isUnlocked: true,
-        completedLessons: 1, // Only lesson 1 is completed
+        completedLessons: 1,
         totalLessons: 2,
       });
       expect(chapter1Response!.lessons).toHaveLength(2);
 
-      // Verify Lesson 1 (completed)
       const lesson1Response = chapter1Response!.lessons[0];
       expect(lesson1Response).toMatchObject({
         id: 'lesson-1',
@@ -642,7 +651,6 @@ describe('ChapterControllerIT', () => {
         totalModules: 2,
       });
 
-      // Verify Lesson 2 (not completed, but unlocked because lesson 1 is completed)
       const lesson2Response = chapter1Response!.lessons[1];
       expect(lesson2Response).toMatchObject({
         id: 'lesson-2',
@@ -654,19 +662,17 @@ describe('ChapterControllerIT', () => {
         totalModules: 1,
       });
 
-      // Verify Chapter 2 details (locked because chapter 1 is not completed)
       const chapter2Response = responseBody.chapters[1];
       expect(chapter2Response).toMatchObject({
         id: 'chapter-2',
         title: 'Chapter 2',
         description: 'Description of Chapter 2',
         order: 2,
-        isUnlocked: false, // Should be locked
+        isUnlocked: false,
         completedLessons: 0,
         totalLessons: 1,
       });
 
-      // Verify Lesson 3 (locked because chapter 2 is locked)
       const lesson3Response = chapter2Response!.lessons[0];
       expect(lesson3Response).toMatchObject({
         id: 'lesson-3',
@@ -697,7 +703,6 @@ describe('ChapterControllerIT', () => {
     it('should return chapters ordered by order field', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      // Create chapters in reverse order
       const chapter3 = new Chapter(
         'chapter-3',
         'Chapter 3',

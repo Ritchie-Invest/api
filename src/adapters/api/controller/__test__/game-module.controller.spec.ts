@@ -149,7 +149,6 @@ describe('GameModuleControllerIT', () => {
       expect(responseBody.currentGameModuleIndex).toBe(0);
       expect(responseBody.totalGameModules).toBe(1);
 
-      // Verify progression was created
       const progression =
         await progressionRepository.findByUserIdAndGameModuleId(
           'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
