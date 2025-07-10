@@ -24,6 +24,8 @@ import { McqChoice } from '../../../../core/domain/model/McqChoice';
 import { CompleteGameModuleResponse } from '../../response/complete-game-module.response';
 import { Chapter } from '../../../../core/domain/model/Chapter';
 import { AppModule } from '../../../../app.module';
+import { Lesson } from '../../../../core/domain/model/Lesson';
+
 describe('GameModuleControllerIT', () => {
   let app: INestApplication<App>;
   let chapterRepository: ChapterRepository;
@@ -83,6 +85,266 @@ describe('GameModuleControllerIT', () => {
     await userRepository.removeAll();
   });
 
+  describe('getGameModuleById', () => {
+    it('should return game module by id as admin', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        1,
+        true,
+      );
+      await chapterRepository.create(chapter);
+      const lesson = new Lesson(
+        'lesson-1',
+        'Lesson 1',
+        'Description of Lesson 1',
+        'chapter-1',
+        1,
+        true,
+        GameType.MCQ,
+      );
+      await lessonRepository.create(lesson);
+      const choices = [
+        new McqChoice({
+          id: 'choice-1',
+          text: 'Choice 1',
+          isCorrect: true,
+          correctionMessage: 'Correct!',
+        }),
+        new McqChoice({
+          id: 'choice-2',
+          text: 'Choice 2',
+          isCorrect: false,
+          correctionMessage: 'Incorrect.',
+        }),
+      ];
+      const gameModule = new McqModule({
+        id: 'module-123',
+        lessonId: 'lesson-1',
+        question: 'What is 2 + 2?',
+        choices: choices,
+      });
+      await gameModuleRepository.create(gameModule);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .get(`/modules/module-123`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toEqual({
+        id: 'module-123',
+        lessonId: 'lesson-1',
+        details: {
+          question: 'What is 2 + 2?',
+          choices: [
+            {
+              id: 'choice-1',
+              text: 'Choice 1',
+              isCorrect: true,
+              correctionMessage: 'Correct!',
+            },
+            {
+              id: 'choice-2',
+              text: 'Choice 2',
+              isCorrect: false,
+              correctionMessage: 'Incorrect.',
+            },
+          ],
+        },
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        updatedAt: expect.any(String),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        createdAt: expect.any(String),
+      });
+    });
+
+    describe('getGameModuleById', () => {
+      it('should return game module by id as admin', async () => {
+        // Given
+        const adminToken = generateAccessToken(UserType.ADMIN);
+        const chapter = new Chapter(
+          'chapter-1',
+          'Chapter 1',
+          'Description of Chapter 1',
+          1,
+          true,
+        );
+        await chapterRepository.create(chapter);
+        const lesson = new Lesson(
+          'lesson-1',
+          'Lesson 1',
+          'Description of Lesson 1',
+          'chapter-1',
+          1,
+          true,
+          GameType.MCQ,
+        );
+        await lessonRepository.create(lesson);
+        const choices = [
+          new McqChoice({
+            id: 'choice-1',
+            text: 'Choice 1',
+            isCorrect: true,
+            correctionMessage: 'Correct!',
+          }),
+          new McqChoice({
+            id: 'choice-2',
+            text: 'Choice 2',
+            isCorrect: false,
+            correctionMessage: 'Incorrect.',
+          }),
+        ];
+        const gameModule = new McqModule({
+          id: 'module-123',
+          lessonId: 'lesson-1',
+          question: 'What is 2 + 2?',
+          choices: choices,
+        });
+        await gameModuleRepository.create(gameModule);
+
+        // When
+        const response = await request(app.getHttpServer())
+          .get(`/modules/module-123`)
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        // Then
+        expect(response.status).toBe(HttpStatus.OK);
+        expect(response.body).toMatchObject({
+          id: 'module-123',
+          lessonId: 'lesson-1',
+          details: {
+            question: 'What is 2 + 2?',
+            choices: [
+              {
+                id: 'choice-1',
+                text: 'Choice 1',
+                isCorrect: true,
+                correctionMessage: 'Correct!',
+              },
+              {
+                id: 'choice-2',
+                text: 'Choice 2',
+                isCorrect: false,
+                correctionMessage: 'Incorrect.',
+              },
+            ],
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          updatedAt: expect.any(String),
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          createdAt: expect.any(String),
+        });
+      });
+
+      it('should return game module by id as student', async () => {
+        // Given
+        const adminToken = generateAccessToken(UserType.STUDENT);
+        const chapter = new Chapter(
+          'chapter-1',
+          'Chapter 1',
+          'Description of Chapter 1',
+          1,
+          true,
+        );
+        await chapterRepository.create(chapter);
+        const lesson = new Lesson(
+          'lesson-1',
+          'Lesson 1',
+          'Description of Lesson 1',
+          'chapter-1',
+          1,
+          true,
+          GameType.MCQ,
+        );
+        await lessonRepository.create(lesson);
+        const choices = [
+          new McqChoice({
+            id: 'choice-1',
+            text: 'Choice 1',
+            isCorrect: true,
+            correctionMessage: 'Correct!',
+          }),
+          new McqChoice({
+            id: 'choice-2',
+            text: 'Choice 2',
+            isCorrect: false,
+            correctionMessage: 'Incorrect.',
+          }),
+        ];
+        const gameModule = new McqModule({
+          id: 'module-123',
+          lessonId: 'lesson-1',
+          question: 'What is 2 + 2?',
+          choices: choices,
+        });
+        await gameModuleRepository.create(gameModule);
+
+        // When
+        const response = await request(app.getHttpServer())
+          .get(`/modules/module-123`)
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        // Then
+        expect(response.status).toBe(HttpStatus.OK);
+        expect(response.body).toEqual({
+          id: 'module-123',
+          lessonId: 'lesson-1',
+          details: {
+            question: 'What is 2 + 2?',
+            choices: [
+              {
+                id: 'choice-1',
+                text: 'Choice 1',
+              },
+              {
+                id: 'choice-2',
+                text: 'Choice 2',
+              },
+            ],
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          updatedAt: expect.any(String),
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          createdAt: expect.any(String),
+        });
+      });
+
+      it('should return 404 if game module not found', async () => {
+        // Given
+        const adminToken = generateAccessToken(UserType.ADMIN);
+
+        // When
+        const response = await request(app.getHttpServer())
+          .get('/modules/non-existing-id')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        // Then
+        expect(response.status).toBe(HttpStatus.NOT_FOUND);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        expect(response.body.message).toBe(
+          'Game module with id non-existing-id not found',
+        );
+      });
+
+      it('should return 401 if not authenticated', async () => {
+        // When
+        const response = await request(app.getHttpServer()).get(
+          '/modules/existing-id',
+        );
+
+        // Then
+        expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        expect(response.body.message).toBe('No token provided');
+      });
+    });
+  });
+
   describe('completeGameModule', () => {
     it('should return correct answer response when answer is correct', async () => {
       // Given
@@ -136,7 +398,7 @@ describe('GameModuleControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .post(`/v1/modules/${testGameModule.id}/complete`)
+        .post(`/modules/${testGameModule.id}/complete`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(completeGameModuleRequest);
 
@@ -210,7 +472,7 @@ describe('GameModuleControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .post(`/v1/modules/${testGameModule.id}/complete`)
+        .post(`/modules/${testGameModule.id}/complete`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(completeGameModuleRequest);
 
@@ -241,7 +503,7 @@ describe('GameModuleControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .post('/v1/modules/non-existent-module/complete')
+        .post('/modules/non-existent-module/complete')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(completeGameModuleRequest);
 
@@ -305,7 +567,7 @@ describe('GameModuleControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .post(`/v1/modules/${testGameModule.id}/complete`)
+        .post(`/modules/${testGameModule.id}/complete`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(completeGameModuleRequest);
 
@@ -324,7 +586,7 @@ describe('GameModuleControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .post('/v1/modules/module-id/complete')
+        .post('/modules/module-id/complete')
         .send(completeGameModuleRequest);
 
       // Then
@@ -385,7 +647,7 @@ describe('GameModuleControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .post(`/v1/modules/${testGameModule.id}/complete`)
+        .post(`/modules/${testGameModule.id}/complete`)
         .set('Authorization', `Bearer ${studentToken}`)
         .send(completeGameModuleRequest);
 
