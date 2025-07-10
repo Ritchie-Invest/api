@@ -40,7 +40,6 @@ describe('AuthControllerIT', () => {
     await app.init();
   });
 
-
   beforeEach(async () => {
     userRepository = app.get(UserRepository);
     refreshTokenRepository = app.get(RefreshTokenRepository);

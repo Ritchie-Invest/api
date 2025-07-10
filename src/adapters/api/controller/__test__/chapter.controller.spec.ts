@@ -539,10 +539,10 @@ describe('ChapterControllerIT', () => {
             correctionMessage: 'Correct!',
           }),
           new McqChoice({
-        id: 'choice-8',
-        text: '7',
-        isCorrect: false,
-        correctionMessage: 'Incorrect',
+            id: 'choice-8',
+            text: '7',
+            isCorrect: false,
+            correctionMessage: 'Incorrect',
           }),
         ],
       });

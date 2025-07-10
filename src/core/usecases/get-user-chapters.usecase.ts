@@ -10,76 +10,12 @@ import { InvalidUserError } from '../domain/error/InvalidUserError';
 import { Chapter } from '../domain/model/Chapter';
 import { Lesson } from '../domain/model/Lesson';
 import { GameType } from '../domain/type/GameType';
+import { ChapterSummary } from '../domain/model/ChapterSummary';
+import { LessonSummary } from '../domain/model/LessonSummary';
 
 export type GetUserChaptersCommand = {
   userId: string;
 };
-
-export class LessonSummary extends Lesson {
-  public readonly isUnlocked: boolean;
-  public readonly completedModules: number;
-  public readonly totalModules: number;
-
-  constructor(
-    lesson: Lesson,
-    isUnlocked: boolean,
-    completedModules: number,
-    totalModules: number,
-  ) {
-    super(
-      lesson.id,
-      lesson.title,
-      lesson.description,
-      lesson.chapterId,
-      lesson.order,
-      lesson.isPublished,
-      lesson.gameType,
-      lesson.modules,
-      lesson.updatedAt,
-      lesson.createdAt,
-    );
-    this.isUnlocked = isUnlocked;
-    this.completedModules = completedModules;
-    this.totalModules = totalModules;
-  }
-
-  isCompleted(): boolean {
-    return this.totalModules > 0 && this.completedModules === this.totalModules;
-  }
-}
-
-export class ChapterSummary extends Chapter {
-  public readonly isUnlocked: boolean;
-  public readonly completedLessons: number;
-  public readonly totalLessons: number;
-  public readonly lessons: LessonSummary[];
-
-  constructor(
-    chapter: Chapter,
-    isUnlocked: boolean,
-    completedLessons: number,
-    totalLessons: number,
-    lessons: LessonSummary[],
-  ) {
-    super(
-      chapter.id,
-      chapter.title,
-      chapter.description,
-      chapter.order,
-      chapter.isPublished,
-      chapter.updatedAt,
-      chapter.createdAt,
-    );
-    this.isUnlocked = isUnlocked;
-    this.completedLessons = completedLessons;
-    this.totalLessons = totalLessons;
-    this.lessons = lessons;
-  }
-
-  isCompleted(): boolean {
-    return this.totalLessons > 0 && this.completedLessons === this.totalLessons;
-  }
-}
 
 export type GetUserChaptersResult = {
   chapters: ChapterSummary[];
