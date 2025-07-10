@@ -1,10 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { LessonRepository } from '../../core/domain/repository/lesson.repository';
 import { Lesson } from '../../core/domain/model/Lesson';
+import { LessonOrderConflictError } from '../../core/domain/error/LessonOrderConflictError';
 
 @Injectable()
 export class InMemoryLessonRepository implements LessonRepository {
   private lessons: Map<string, Lesson> = new Map();
+
+  validateUniqueOrderInChapter(
+    chapterId: string,
+    order: number,
+    excludeLessonId?: string,
+  ): Promise<void> {
+    const existingLessons = this.findByChapter(chapterId);
+    const conflictingLesson = existingLessons.find(
+      (lesson: Lesson) =>
+        lesson.order === order && lesson.id !== excludeLessonId,
+    );
+
+    if (conflictingLesson) {
+      throw new LessonOrderConflictError(order, chapterId);
+    }
+    return Promise.resolve();
+  }
+
+  getNextOrderInChapter(chapterId: string): Promise<number> {
+    const lessons = this.findByChapter(chapterId);
+    if (lessons.length === 0) {
+      return Promise.resolve(0);
+    }
+    return Promise.resolve(
+      Math.max(...lessons.map((l: Lesson) => l.order ?? 0)) + 1,
+    );
+  }
+
+  constructor() {}
 
   create(
     data: Pick<

@@ -12,7 +12,7 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { CreateLessonResponse } from '../response/create-lesson.response';
-import { CreateLessonUseCase } from '../../../core/usecases/create-lesson';
+import { CreateLessonUseCase } from '../../../core/usecases/create-lesson.use-case';
 import { CreateLessonRequest } from '../request/create-lesson.request';
 import { CreateLessonMapper } from '../mapper/create-lesson.mapper';
 import { UpdateLessonUseCase } from '../../../core/usecases/update-lesson.use-case';
@@ -25,7 +25,7 @@ import { GetLessonByIdMapper } from '../mapper/get-lesson-by-id.mapper';
 import { GetLessonsByChapterIdResponse } from '../response/get-lessons-by-chapter.response';
 import { GetLessonsByChapterIdUseCase } from '../../../core/usecases/get-lessons-by-chapter.use-case';
 import { GetLessonsByChapterIdMapper } from '../mapper/get-lessons-by-chapter.mapper';
-import { CreateGameModuleUseCase } from '../../../core/usecases/create-game-module.usecase';
+import { CreateGameModuleUseCase } from '../../../core/usecases/create-game-module.use-case';
 import { CreateGameModuleRequest } from '../request/create-game-module.request';
 import { CreateGameModuleMapper } from '../mapper/create-game-module.mapper';
 

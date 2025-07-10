@@ -1,7 +1,7 @@
 import {
   CompleteGameModuleCommand,
   CompleteGameModuleResult,
-} from '../../../core/usecases/complete-game-module.usecase';
+} from '../../../core/usecases/complete-game-module.use-case';
 import { CompleteGameModuleRequest } from '../request/complete-game-module.request';
 import { CompleteGameModuleResponse } from '../response/complete-game-module.response';
 

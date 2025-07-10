@@ -16,7 +16,7 @@ import { UpdateChapterUseCase } from './core/usecases/update-chapter.use-case';
 import { GetChapterByIdUseCase } from './core/usecases/get-chapter-by-id.use-case';
 import { LessonRepository } from './core/domain/repository/lesson.repository';
 import { PrismaLessonRepository } from './adapters/prisma/prisma-lesson.repository';
-import { CreateLessonUseCase } from './core/usecases/create-lesson';
+import { CreateLessonUseCase } from './core/usecases/create-lesson.use-case';
 import { UpdateLessonUseCase } from './core/usecases/update-lesson.use-case';
 import { GetLessonByIdUseCase } from './core/usecases/get-lesson-by-id.use-case';
 import { GetLessonsByChapterIdUseCase } from './core/usecases/get-lessons-by-chapter.use-case';
@@ -30,7 +30,7 @@ import { RefreshUseCase } from './core/usecases/refresh.use-case';
 import { PrismaRefreshTokenRepository } from './adapters/prisma/prisma-refresh-token.repository';
 import { GameModuleRepository } from './core/domain/repository/game-module.repository';
 import { PrismaGameModuleRepository } from './adapters/prisma/prisma-game-module.repository';
-import { CreateGameModuleUseCase } from './core/usecases/create-game-module.usecase';
+import { CreateGameModuleUseCase } from './core/usecases/create-game-module.use-case';
 import {
   GameModuleStrategyFactory,
   MapGameModuleStrategyFactory,
@@ -39,13 +39,14 @@ import { GameType } from './core/domain/type/GameType';
 import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strategy';
 import { ProgressionRepository } from './core/domain/repository/progression.repository';
 import { PrismaProgressionRepository } from './adapters/prisma/prisma-progression.repository';
-import { CompleteGameModuleUseCase } from './core/usecases/complete-game-module.usecase';
+import { CompleteGameModuleUseCase } from './core/usecases/complete-game-module.use-case';
 import { GameModuleController } from './adapters/api/controller/game-module.controller';
 import {
   CompleteGameModuleStrategyFactory,
   MapCompleteGameModuleStrategyFactory,
 } from './core/usecases/strategies/complete-game-module-strategy-factory';
 import { McqCompleteGameModuleStrategy } from './core/usecases/strategies/mcq-complete-game-module-strategy';
+import { GetUserChaptersUseCase } from './core/usecases/get-user-chapters.usecase';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -179,6 +180,12 @@ import { McqCompleteGameModuleStrategy } from './core/usecases/strategies/mcq-co
       provide: GetChaptersUseCase,
       useFactory: (chapterRepository: ChapterRepository) =>
         new GetChaptersUseCase(chapterRepository),
+      inject: [ChapterRepository],
+    },
+    {
+      provide: GetUserChaptersUseCase,
+      useFactory: (chapterRepository: ChapterRepository) =>
+        new GetUserChaptersUseCase(chapterRepository),
       inject: [ChapterRepository],
     },
     {

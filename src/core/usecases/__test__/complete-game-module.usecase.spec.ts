@@ -1,7 +1,7 @@
 import {
   CompleteGameModuleUseCase,
   CompleteGameModuleCommand,
-} from '../complete-game-module.usecase';
+} from '../complete-game-module.use-case';
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { McqModule } from '../../domain/model/McqModule';
@@ -102,7 +102,6 @@ describe('CompleteGameModuleUseCase', () => {
         'Correct! Paris is indeed the capital of France.',
       );
 
-      // Verify progression was saved
       const progression = progressionRepository.findByUserIdAndGameModuleId(
         'user-1',
         'question-1',
@@ -159,7 +158,6 @@ describe('CompleteGameModuleUseCase', () => {
         'Incorrect. Lyon is a major city but not the capital.',
       );
 
-      // Verify progression was NOT created for wrong answer
       const progression = progressionRepository.findByUserIdAndGameModuleId(
         'user-1',
         'question-1',
@@ -194,7 +192,6 @@ describe('CompleteGameModuleUseCase', () => {
 
       gameModuleRepository.create(mcqModule);
 
-      // Create existing progression
       const existingProgression = new Progression(
         'progression-1',
         'user-1',

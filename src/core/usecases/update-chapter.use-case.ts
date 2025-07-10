@@ -11,6 +11,7 @@ export type UpdateChapterCommand = {
   chapterId: string;
   title?: string;
   description?: string;
+  order?: number;
   isPublished?: boolean;
 };
 
@@ -26,18 +27,25 @@ export class UpdateChapterUseCase
       );
     }
 
-    const { chapterId, title, description } = command;
+    const { chapterId, title, description, order } = command;
 
     const currentChapter = await this.chapterRepository.findById(chapterId);
     if (!currentChapter) {
       throw new ChapterNotFoundError(chapterId);
     }
 
+    if (order !== undefined && order !== currentChapter.order) {
+      await this.chapterRepository.validateUniqueOrder(order, chapterId);
+    }
+
     const chapter = new Chapter(
       currentChapter.id,
       title ?? currentChapter.title,
       description ?? currentChapter.description,
+      order ?? currentChapter.order,
       command.isPublished ?? currentChapter.isPublished,
+      currentChapter.updatedAt,
+      currentChapter.createdAt,
     );
 
     const updatedChapter = await this.chapterRepository.update(

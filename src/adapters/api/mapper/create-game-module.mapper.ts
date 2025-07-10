@@ -2,7 +2,7 @@ import {
   CreateGameModuleRequest,
   McqGameModuleContract,
 } from '../request/create-game-module.request';
-import { CreateGameModuleCommand } from '../../../core/usecases/create-game-module.usecase';
+import { CreateGameModuleCommand } from '../../../core/usecases/create-game-module.use-case';
 import { GameType } from '../../../core/domain/type/GameType';
 import { CreateLessonResponse } from '../response/create-lesson.response';
 import { Lesson } from '../../../core/domain/model/Lesson';

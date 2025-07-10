@@ -15,7 +15,7 @@ import {
   ApiTags,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { CompleteGameModuleUseCase } from '../../../core/usecases/complete-game-module.usecase';
+import { CompleteGameModuleUseCase } from '../../../core/usecases/complete-game-module.use-case';
 import { CompleteGameModuleRequest } from '../request/complete-game-module.request';
 import { CompleteGameModuleResponse } from '../response/complete-game-module.response';
 import { CompleteGameModuleMapper } from '../mapper/complete-game-module.mapper';

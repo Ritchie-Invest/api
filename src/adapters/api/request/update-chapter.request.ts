@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsString } from 'class-validator';
+import { IsBoolean, IsString, IsNumber, Min } from 'class-validator';
 
 export class UpdateChapterRequest {
   @ApiProperty()
@@ -11,12 +11,23 @@ export class UpdateChapterRequest {
   description: string;
 
   @ApiProperty()
+  @IsNumber()
+  @Min(0)
+  order: number;
+
+  @ApiProperty()
   @IsBoolean()
   isPublished: boolean;
 
-  constructor(title: string, description: string, isPublished: boolean) {
+  constructor(
+    title: string,
+    description: string,
+    order: number,
+    isPublished: boolean,
+  ) {
     this.title = title;
     this.description = description;
+    this.order = order;
     this.isPublished = isPublished;
   }
 }

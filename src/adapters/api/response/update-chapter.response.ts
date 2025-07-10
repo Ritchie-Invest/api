@@ -11,6 +11,9 @@ export class UpdateChapterResponse {
   description: string;
 
   @ApiProperty()
+  order: number;
+
+  @ApiProperty()
   isPublished: boolean;
 
   @ApiProperty()
@@ -23,6 +26,7 @@ export class UpdateChapterResponse {
     id: string,
     title: string,
     description: string,
+    order: number,
     isPublished: boolean,
     updatedAt: Date,
     createdAt: Date,
@@ -30,6 +34,7 @@ export class UpdateChapterResponse {
     this.id = id;
     this.title = title;
     this.description = description;
+    this.order = order;
     this.isPublished = isPublished;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;

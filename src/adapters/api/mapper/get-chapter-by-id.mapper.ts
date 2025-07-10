@@ -22,6 +22,7 @@ export class GetChapterByIdMapper {
       chapter.id,
       chapter.title,
       chapter.description,
+      chapter.order,
       chapter.isPublished,
       chapter.updatedAt,
       chapter.createdAt,

@@ -48,6 +48,15 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
     await this.prisma.gameModule.deleteMany();
   }
 
+  async findByLessonId(lessonId: string): Promise<GameModule[]> {
+    const entities = await this.prisma.gameModule.findMany({
+      where: { lessonId },
+      include: { mcq: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    return entities.map((entity) => this.mapper.toDomain(entity));
+  }
+
   private async createMcqModule(data: McqModule): Promise<McqModule> {
     const createdEntity = await this.prisma.gameModule.create({
       data: {

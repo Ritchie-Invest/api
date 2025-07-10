@@ -1,13 +1,50 @@
 import { Injectable } from '@nestjs/common';
-import { ChapterRepository } from '../../core/domain/repository/chapter.repository';
+import {
+  ChapterRepository,
+  ChapterData,
+} from '../../core/domain/repository/chapter.repository';
 import { Chapter } from '../../core/domain/model/Chapter';
+import { LessonRepository } from '../../core/domain/repository/lesson.repository';
+import { GameModuleRepository } from '../../core/domain/repository/game-module.repository';
+import { ProgressionRepository } from '../../core/domain/repository/progression.repository';
+import { ChapterOrderConflictError } from '../../core/domain/error/ChapterOrderConflictError';
 
 @Injectable()
 export class InMemoryChapterRepository implements ChapterRepository {
   private chapters: Map<string, Chapter> = new Map();
 
-  create(data: Pick<Chapter, 'id' | 'title' | 'description'>): Chapter {
-    const chapter = new Chapter(data.id, data.title, data.description);
+  validateUniqueOrder(order: number, excludeChapterId?: string): Promise<void> {
+    const existingChapters = this.findAll();
+    const conflictingChapter = existingChapters.find(
+      (chapter: Chapter) =>
+        chapter.order === order && chapter.id !== excludeChapterId,
+    );
+
+    if (conflictingChapter) {
+      throw new ChapterOrderConflictError(order);
+    }
+    return Promise.resolve();
+  }
+
+  getNextOrder(): Promise<number> {
+    const chapters = this.findAll();
+    if (chapters.length === 0) {
+      return Promise.resolve(0);
+    }
+    return Promise.resolve(
+      Math.max(...chapters.map((c: Chapter) => c.order)) + 1,
+    );
+  }
+
+  create(
+    data: Pick<Chapter, 'id' | 'title' | 'description' | 'order'>,
+  ): Chapter {
+    const chapter = new Chapter(
+      data.id,
+      data.title,
+      data.description,
+      data.order,
+    );
     this.chapters.set(chapter.id, chapter);
     return chapter;
   }
@@ -34,5 +71,63 @@ export class InMemoryChapterRepository implements ChapterRepository {
 
   removeAll(): void {
     this.chapters.clear();
+  }
+
+  constructor(
+    private readonly lessonsRepository: LessonRepository,
+    private readonly gameModuleRepository: GameModuleRepository,
+    private readonly progressionRepository: ProgressionRepository,
+  ) {}
+
+  async findAllWithLessonsDetails(userId: string): Promise<ChapterData[]> {
+    const chapters = Array.from(this.chapters.values()).sort(
+      (a, b) => (a.order || 0) - (b.order || 0),
+    );
+
+    const result: ChapterData[] = [];
+
+    for (const chapter of chapters) {
+      const lessons = await this.lessonsRepository.findByChapter(chapter.id);
+
+      const lessonsWithModules = [];
+      for (const lesson of lessons) {
+        const modules = await this.gameModuleRepository.findByLessonId(
+          lesson.id,
+        );
+
+        const modulesWithProgress = [];
+        for (const module of modules) {
+          const progression =
+            await this.progressionRepository.findByUserIdAndGameModuleId(
+              userId,
+              module.id,
+            );
+          const progressions = progression ? [progression] : [];
+
+          modulesWithProgress.push({
+            id: module.id,
+            Progression: progressions,
+          });
+        }
+
+        lessonsWithModules.push({
+          id: lesson.id,
+          title: lesson.title,
+          description: lesson.description,
+          order: lesson.order || 0,
+          modules: modulesWithProgress,
+        });
+      }
+
+      result.push({
+        id: chapter.id,
+        title: chapter.title,
+        description: chapter.description,
+        order: chapter.order || 0,
+        lessons: lessonsWithModules,
+      });
+    }
+
+    return result;
   }
 }

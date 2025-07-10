@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../../../app.module';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { App } from 'supertest/types';
 import request from 'supertest';
@@ -11,6 +10,7 @@ import { TokenService } from '../../../../core/domain/service/token.service';
 import { UserType } from '../../../../core/domain/type/UserType';
 import { UserRepository } from '../../../../core/domain/repository/user.repository';
 import { UpdateUserTypeRequest } from '../../request/update-user-type.request';
+import { AppModule } from '../../../../app.module';
 
 describe('UserControllerIT', () => {
   let app: INestApplication<App>;

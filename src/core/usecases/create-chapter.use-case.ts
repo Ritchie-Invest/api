@@ -9,6 +9,7 @@ export type CreateChapterCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
   title: string;
   description: string;
+  order: number;
 };
 
 export class CreateChapterUseCase
@@ -23,8 +24,17 @@ export class CreateChapterUseCase
       );
     }
 
-    const { title, description } = command;
-    const chapter = new Chapter(this.generateId(), title, description, false);
+    const { title, description, order } = command;
+
+    await this.chapterRepository.validateUniqueOrder(order);
+
+    const chapter = new Chapter(
+      this.generateId(),
+      title,
+      description,
+      order,
+      false,
+    );
 
     return this.chapterRepository.create(chapter);
   }

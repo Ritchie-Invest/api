@@ -13,7 +13,6 @@ export type UpdateLessonCommand = {
   description: string;
   order?: number;
   isPublished: boolean;
-  UpdateLessonCommand?: boolean;
 };
 
 export class UpdateLessonUseCase
@@ -35,13 +34,25 @@ export class UpdateLessonUseCase
       throw new LessonNotFoundError(lessonId);
     }
 
+    if (order !== undefined && order !== currentLesson.order) {
+      await this.lessonRepository.validateUniqueOrderInChapter(
+        currentLesson.chapterId,
+        order,
+        lessonId,
+      );
+    }
+
     const lesson = new Lesson(
       currentLesson.id,
       title ?? currentLesson.title,
       description ?? currentLesson.description,
       currentLesson.chapterId,
-      order,
+      order ?? currentLesson.order,
       command.isPublished ?? currentLesson.isPublished,
+      currentLesson.gameType,
+      currentLesson.modules,
+      currentLesson.updatedAt,
+      currentLesson.createdAt,
     );
 
     const updatedLesson = await this.lessonRepository.update(lessonId, lesson);

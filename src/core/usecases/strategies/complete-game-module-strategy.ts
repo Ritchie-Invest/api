@@ -1,5 +1,5 @@
 import { GameModule } from '../../domain/model/GameModule';
-import { CompleteGameModuleCommand } from '../complete-game-module.usecase';
+import { CompleteGameModuleCommand } from '../complete-game-module.use-case';
 
 export interface CompleteGameModuleStrategy {
   validate(

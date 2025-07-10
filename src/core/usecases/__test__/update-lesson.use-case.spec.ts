@@ -7,6 +7,7 @@ import {
   UpdateLessonUseCase,
 } from '../update-lesson.use-case';
 import { GameType } from '../../domain/type/GameType';
+import { LessonOrderConflictError } from '../../domain/error/LessonOrderConflictError';
 
 describe('UpdateLessonUseCase', () => {
   let lessonRepository: LessonRepository;
@@ -135,6 +136,98 @@ describe('UpdateLessonUseCase', () => {
     await expect(updateLessonUseCase.execute(command)).rejects.toThrow(
       'Lesson with id non-existing-lesson-id not found',
     );
+  });
+
+  it('should throw an error when trying to update a lesson with an order that already exists in the same chapter', async () => {
+    // Given
+    await lessonRepository.create({
+      id: 'lesson-id-2',
+      title: 'Une autre leçon',
+      description: 'Ceci est une autre leçon',
+      chapterId: 'chapter-1',
+      order: 2,
+    });
+
+    const command: UpdateLessonCommand = {
+      currentUser: getCurrentUser(),
+      lessonId: 'lesson-id',
+      title: 'Une super leçon modifiée',
+      description: 'Ceci est une super leçon modifiée',
+      order: 2,
+      isPublished: true,
+    };
+
+    // When & Then
+    await expect(updateLessonUseCase.execute(command)).rejects.toThrow(
+      LessonOrderConflictError,
+    );
+
+    const lesson = await lessonRepository.findById('lesson-id');
+    expect(lesson?.order).toBe(1);
+  });
+
+  it('should allow updating a lesson with its own order value', async () => {
+    // Given
+    const command: UpdateLessonCommand = {
+      currentUser: getCurrentUser(),
+      lessonId: 'lesson-id',
+      title: 'Une super leçon modifiée',
+      description: 'Ceci est une super leçon modifiée',
+      order: 1,
+      isPublished: true,
+    };
+
+    // When
+    const result = await updateLessonUseCase.execute(command);
+
+    // Then
+    expect(result.order).toBe(1);
+    expect(result.title).toBe('Une super leçon modifiée');
+  });
+
+  it('should allow updating a lesson to a new order that does not conflict in the same chapter', async () => {
+    // Given
+    const command: UpdateLessonCommand = {
+      currentUser: getCurrentUser(),
+      lessonId: 'lesson-id',
+      title: 'Une super leçon modifiée',
+      description: 'Ceci est une super leçon modifiée',
+      order: 3,
+      isPublished: true,
+    };
+
+    // When
+    const result = await updateLessonUseCase.execute(command);
+
+    // Then
+    expect(result.order).toBe(3);
+  });
+
+  it('should allow updating lessons with the same order in different chapters', async () => {
+    // Given
+    await lessonRepository.create({
+      id: 'lesson-id-3',
+      title: 'Une leçon dans un autre chapitre',
+      description: 'Ceci est une leçon dans un autre chapitre',
+      chapterId: 'chapter-2',
+      order: 5,
+    });
+
+    const command: UpdateLessonCommand = {
+      currentUser: getCurrentUser(),
+      lessonId: 'lesson-id',
+      title: 'Une super leçon modifiée',
+      description: 'Ceci est une super leçon modifiée',
+      order: 5,
+      isPublished: true,
+    };
+
+    // When
+    const result = await updateLessonUseCase.execute(command);
+
+    // Then
+    expect(result.order).toBe(5);
+    expect(result.chapterId).toBe('chapter-1');
   });
 
   function getCurrentUser(): Pick<User, 'id' | 'type'> {

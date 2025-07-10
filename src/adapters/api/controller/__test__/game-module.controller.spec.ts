@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../../../app.module';
+
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { App } from 'supertest/types';
 import request from 'supertest';
@@ -22,7 +22,8 @@ import {
 import { McqModule } from '../../../../core/domain/model/McqModule';
 import { McqChoice } from '../../../../core/domain/model/McqChoice';
 import { CompleteGameModuleResponse } from '../../response/complete-game-module.response';
-
+import { Chapter } from '../../../../core/domain/model/Chapter';
+import { AppModule } from '../../../../app.module';
 describe('GameModuleControllerIT', () => {
   let app: INestApplication<App>;
   let chapterRepository: ChapterRepository;
@@ -86,12 +87,13 @@ describe('GameModuleControllerIT', () => {
     it('should return correct answer response when answer is correct', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = {
-        id: 'chapter-1',
-        title: 'Chapter 1',
-        description: 'Description of Chapter 1',
-        isPublished: true,
-      };
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        1,
+        true,
+      );
       await chapterRepository.create(chapter);
 
       const lesson = {
@@ -147,7 +149,6 @@ describe('GameModuleControllerIT', () => {
       expect(responseBody.currentGameModuleIndex).toBe(0);
       expect(responseBody.totalGameModules).toBe(1);
 
-      // Verify progression was created
       const progression =
         await progressionRepository.findByUserIdAndGameModuleId(
           'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
@@ -160,12 +161,13 @@ describe('GameModuleControllerIT', () => {
     it('should return incorrect answer response when answer is wrong', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = {
-        id: 'chapter-1',
-        title: 'Chapter 1',
-        description: 'Description of Chapter 1',
-        isPublished: true,
-      };
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        1,
+        true,
+      );
       await chapterRepository.create(chapter);
 
       const lesson = {
@@ -254,12 +256,13 @@ describe('GameModuleControllerIT', () => {
     it('should return 400 when choice does not exist', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = {
-        id: 'chapter-1',
-        title: 'Chapter 1',
-        description: 'Description of Chapter 1',
-        isPublished: true,
-      };
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        1,
+        true,
+      );
       await chapterRepository.create(chapter);
 
       const lesson = {
@@ -333,12 +336,13 @@ describe('GameModuleControllerIT', () => {
     it('should allow student to complete game module', async () => {
       // Given
       const studentToken = generateAccessToken(UserType.STUDENT);
-      const chapter = {
-        id: 'chapter-1',
-        title: 'Chapter 1',
-        description: 'Description of Chapter 1',
-        isPublished: true,
-      };
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        1,
+        true,
+      );
       await chapterRepository.create(chapter);
 
       const lesson = {

@@ -50,4 +50,56 @@ export class PrismaChapterRepository implements ChapterRepository {
   async removeAll(): Promise<void> {
     await this.prisma.chapter.deleteMany();
   }
+
+  async findAllWithLessonsDetails(userId: string): Promise<any[]> {
+    const entities = await this.prisma.chapter.findMany({
+      where: {
+        isPublished: true,
+      },
+      include: {
+        lessons: {
+          where: {
+            isPublished: true,
+          },
+          orderBy: { order: 'asc' },
+          include: {
+            modules: {
+              orderBy: { createdAt: 'asc' },
+              include: {
+                Progression: {
+                  where: { userId },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { order: 'asc' },
+    });
+    return entities;
+  }
+
+  async validateUniqueOrder(
+    order: number,
+    excludeChapterId?: string,
+  ): Promise<void> {
+    const existingChapters = await this.findAll();
+    const conflictingChapter = existingChapters.find(
+      (chapter: Chapter) =>
+        chapter.order === order && chapter.id !== excludeChapterId,
+    );
+    if (conflictingChapter) {
+      throw new (
+        await import('../../core/domain/error/ChapterOrderConflictError')
+      ).ChapterOrderConflictError(order);
+    }
+  }
+
+  async getNextOrder(): Promise<number> {
+    const chapters = await this.findAll();
+    if (chapters.length === 0) {
+      return 0;
+    }
+    return Math.max(...chapters.map((c: Chapter) => c.order)) + 1;
+  }
 }
