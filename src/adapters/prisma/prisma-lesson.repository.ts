@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { LessonRepository } from '../../core/domain/repository/lesson.repository';
 import { PrismaLessonMapper } from './mapper/prisma-lesson.mapper';
 import { Lesson } from '../../core/domain/model/Lesson';
+import { LessonOrderConflictError } from '../../core/domain/error/LessonOrderConflictError';
 
 @Injectable()
 export class PrismaLessonRepository implements LessonRepository {
@@ -69,5 +70,28 @@ export class PrismaLessonRepository implements LessonRepository {
 
   findAll(): Promise<Lesson[]> {
     throw new Error('Method not implemented.');
+  }
+
+  async validateUniqueOrderInChapter(
+    chapterId: string,
+    order: number,
+    excludeLessonId?: string,
+  ): Promise<void> {
+    const existingLessons = await this.findByChapter(chapterId);
+    const conflictingLesson = existingLessons.find(
+      (lesson: Lesson) =>
+        lesson.order === order && lesson.id !== excludeLessonId,
+    );
+    if (conflictingLesson) {
+      throw new LessonOrderConflictError(order, chapterId);
+    }
+  }
+
+  async getNextOrderInChapter(chapterId: string): Promise<number> {
+    const lessons = await this.findByChapter(chapterId);
+    if (lessons.length === 0) {
+      return 0;
+    }
+    return Math.max(...lessons.map((l: Lesson) => l.order ?? 0)) + 1;
   }
 }

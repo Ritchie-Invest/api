@@ -6,7 +6,7 @@ import { McqChoice } from '../../../../core/domain/model/McqChoice';
 import { Progression } from '../../../../core/domain/model/Progression';
 import { GameType } from '../../../../core/domain/type/GameType';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../../../core/usecases/app.module';
+
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { App } from 'supertest/types';
 import request from 'supertest';
@@ -24,6 +24,7 @@ import { GameModuleRepository } from '../../../../core/domain/repository/game-mo
 import { LessonRepository } from '../../../../core/domain/repository/lesson.repository';
 import { ProgressionRepository } from '../../../../core/domain/repository/progression.repository';
 import { GetUserChaptersResponse } from '../../response/get-user-chapters.response';
+import { AppModule } from '../../../../app.module';
 
 describe('ChapterControllerIT', () => {
   let app: INestApplication<App>;

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../../../core/usecases/app.module';
+
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { App } from 'supertest/types';
 import request from 'supertest';
@@ -19,7 +19,7 @@ import { UpdateLessonRequest } from '../../request/update-lesson.request';
 import { GameType } from '../../../../core/domain/type/GameType';
 import { CreateGameModuleRequest } from '../../request/create-game-module.request';
 import { GameModuleRepository } from '../../../../core/domain/repository/game-module.repository';
-
+import { AppModule } from '../../../../app.module';
 describe('LessonControllerIT', () => {
   let app: INestApplication<App>;
   let chapterRepository: ChapterRepository;

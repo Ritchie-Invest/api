@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../../../core/usecases/app.module';
+
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { App } from 'supertest/types';
 import request from 'supertest';
@@ -15,7 +15,7 @@ import { RegisterResponse } from '../../response/register.response';
 import { LoginResponse } from '../../response/login.response';
 import { LoginRequest } from '../../request/login.request';
 import { TokenService } from '../../../../core/domain/service/token.service';
-
+import { AppModule } from '../../../../app.module';
 describe('AuthControllerIT', () => {
   let app: INestApplication<App>;
   let userRepository: UserRepository;
@@ -39,6 +39,7 @@ describe('AuthControllerIT', () => {
 
     await app.init();
   });
+
 
   beforeEach(async () => {
     userRepository = app.get(UserRepository);

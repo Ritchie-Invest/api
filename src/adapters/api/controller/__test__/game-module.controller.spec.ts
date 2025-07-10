@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../../../core/usecases/app.module';
+
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { App } from 'supertest/types';
 import request from 'supertest';
@@ -23,7 +23,7 @@ import { McqModule } from '../../../../core/domain/model/McqModule';
 import { McqChoice } from '../../../../core/domain/model/McqChoice';
 import { CompleteGameModuleResponse } from '../../response/complete-game-module.response';
 import { Chapter } from '../../../../core/domain/model/Chapter';
-
+import { AppModule } from '../../../../app.module';
 describe('GameModuleControllerIT', () => {
   let app: INestApplication<App>;
   let chapterRepository: ChapterRepository;
