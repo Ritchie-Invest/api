@@ -34,7 +34,7 @@ import { GetChapterByIdMapper } from '../mapper/get-chapter-by-id.mapper';
 import { GetChaptersResponse } from '../response/get-chapters.response';
 import { GetChaptersUseCase } from '../../../core/usecases/get-chapters.use-case';
 import { GetChaptersMapper } from '../mapper/get-chapters.mapper';
-import { GetUserChaptersUseCase } from '../../../core/usecases/get-user-chapters.usecase';
+import { GetUserChaptersUseCase } from '../../../core/usecases/get-user-chapters.use-case';
 import { GetUserChaptersMapper } from '../mapper/get-user-chapters.mapper';
 import { GetUserChaptersResponse } from '../response/get-user-chapters.response';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';

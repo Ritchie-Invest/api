@@ -1,23 +1,22 @@
-import {
-  CreateGameModuleRequest,
-  CreateMcqGameModuleContract,
-} from '../request/create-game-module.request';
-import { CreateGameModuleCommand } from '../../../core/usecases/create-game-module.use-case';
 import { GameType } from '../../../core/domain/type/GameType';
 import { CreateLessonResponse } from '../response/create-lesson.response';
 import { Lesson } from '../../../core/domain/model/Lesson';
+import {
+  UpdateGameModuleRequest,
+  UpdateMcqGameModuleContract,
+} from '../request/update-game-module.request';
+import { UpdateGameModuleCommand } from '../../../core/usecases/update-game-module.use-case';
 
-export class CreateGameModuleMapper {
+export class UpdateGameModuleMapper {
   static toDomain(
-    lessonId: string,
-    request: CreateGameModuleRequest,
-  ): CreateGameModuleCommand {
+    gameModuleId: string,
+    request: UpdateGameModuleRequest,
+  ): UpdateGameModuleCommand {
     switch (request.gameType) {
       case GameType.MCQ: {
-        const contract = request.contract as CreateMcqGameModuleContract;
+        const contract = request.contract as UpdateMcqGameModuleContract;
         return {
-          lessonId,
-          gameType: request.gameType,
+          gameModuleId,
           mcq: {
             question: contract?.question,
             choices: contract?.choices,

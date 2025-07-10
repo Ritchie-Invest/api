@@ -2,9 +2,9 @@ import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { GameType } from '../../../core/domain/type/GameType';
 import { IsEnum } from 'class-validator';
 
-export class CreateGameModuleContract {}
+export class UpdateGameModuleContract {}
 
-export class CreateMcqChoice {
+export class UpdateMcqChoice {
   @ApiProperty()
   text: string;
 
@@ -21,32 +21,32 @@ export class CreateMcqChoice {
   }
 }
 
-export class CreateMcqGameModuleContract extends CreateGameModuleContract {
+export class UpdateMcqGameModuleContract extends UpdateGameModuleContract {
   @ApiProperty()
   question: string;
 
-  @ApiProperty({ type: [CreateMcqChoice] })
-  choices: CreateMcqChoice[];
+  @ApiProperty({ type: [UpdateMcqChoice] })
+  choices: UpdateMcqChoice[];
 
-  constructor(question: string, choices: CreateMcqChoice[]) {
+  constructor(question: string, choices: UpdateMcqChoice[]) {
     super();
     this.question = question;
     this.choices = choices;
   }
 }
 
-@ApiExtraModels(CreateMcqGameModuleContract)
-export class CreateGameModuleRequest {
+@ApiExtraModels(UpdateMcqGameModuleContract)
+export class UpdateGameModuleRequest {
   @ApiProperty({ enum: GameType })
   @IsEnum(GameType)
   gameType: GameType;
 
   @ApiProperty({
-    oneOf: [{ $ref: getSchemaPath(CreateMcqGameModuleContract) }],
+    oneOf: [{ $ref: getSchemaPath(UpdateMcqGameModuleContract) }],
   })
-  contract: CreateGameModuleContract;
+  contract: UpdateGameModuleContract;
 
-  constructor(gameType: GameType, contract: CreateGameModuleContract) {
+  constructor(gameType: GameType, contract: UpdateMcqGameModuleContract) {
     this.gameType = gameType;
     this.contract = contract;
   }

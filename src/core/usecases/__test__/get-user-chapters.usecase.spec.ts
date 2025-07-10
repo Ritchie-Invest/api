@@ -1,7 +1,7 @@
 import {
   GetUserChaptersUseCase,
   GetUserChaptersCommand,
-} from '../get-user-chapters.usecase';
+} from '../get-user-chapters.use-case';
 import { InMemoryChapterRepository } from '../../../adapters/in-memory/in-memory-chapter.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';

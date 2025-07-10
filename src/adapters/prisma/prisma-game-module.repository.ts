@@ -35,8 +35,14 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
     return this.mapper.toDomain(entity);
   }
 
-  update(): GameModule | Promise<GameModule | null> | null {
-    throw new Error('Method not implemented.');
+  update(
+    gameModuleId: string,
+    gameModule: GameModule,
+  ): Promise<GameModule | null> {
+    if (gameModule instanceof McqModule) {
+      return this.updateMcqModule(gameModuleId, gameModule);
+    }
+    throw new Error('Unsupported module type');
   }
 
   remove(): void {
@@ -77,5 +83,34 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
       include: { mcq: true },
     });
     return this.mapper.toDomain(createdEntity) as McqModule;
+  }
+
+  private async updateMcqModule(
+    gameModuleId: string,
+    data: McqModule,
+  ): Promise<McqModule | null> {
+    const updatedEntity = await this.prisma.gameModule.update({
+      where: { id: gameModuleId },
+      data: {
+        mcq: {
+          update: {
+            question: data.question,
+            choices: data.choices.map((choice) => ({
+              id: choice.id,
+              text: choice.text,
+              isCorrect: choice.isCorrect,
+              correctionMessage: choice.correctionMessage,
+            })),
+          },
+        },
+      },
+      include: { mcq: true },
+    });
+
+    if (!updatedEntity) {
+      return null;
+    }
+
+    return this.mapper.toDomain(updatedEntity) as McqModule;
   }
 }
