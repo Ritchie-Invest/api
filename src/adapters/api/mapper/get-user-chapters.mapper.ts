@@ -2,7 +2,7 @@ import { ProfileRequest } from '../request/profile.request';
 import {
   GetUserChaptersCommand,
   GetUserChaptersResult,
-} from '../../../core/usecases/get-user-chapters.usecase';
+} from '../../../core/usecases/get-user-chapters.use-case';
 import {
   GetUserChaptersResponse,
   ChapterSummaryResponse,

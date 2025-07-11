@@ -31,6 +31,8 @@ export class PrismaGameModuleMapper
               correctionMessage: choice.correctionMessage,
             }),
         ),
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt,
       });
     }
     throw new Error('Unsupported module entity');

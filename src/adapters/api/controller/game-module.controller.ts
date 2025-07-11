@@ -3,10 +3,12 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CompleteGameModuleUseCase } from '../../../core/usecases/complete-game-module.use-case';
 import { CompleteGameModuleRequest } from '../request/complete-game-module.request';
@@ -18,8 +20,13 @@ import { CurrentUser } from '../decorator/current-user.decorator';
 import { GetGameModuleByIdUseCase } from '../../../core/usecases/get-game-module-by-id.use-case';
 import { GetGameModuleByIdResponse } from '../response/get-game-module-by-id.response';
 import { GetGameModuleByIdMapper } from '../mapper/get-game-module-by-id.mapper';
-import { UserType } from '../../../core/domain/type/UserType';
 import { GetLightGameModuleByIdMapper } from '../mapper/get-light-game-module-by-id.mapper';
+import { UserType } from '../../../core/domain/type/UserType';
+import { UpdateGameModuleUseCase } from '../../../core/usecases/update-game-module.use-case';
+import { Roles } from '../decorator/roles.decorator';
+import { CreateLessonResponse } from '../response/create-lesson.response';
+import { UpdateGameModuleRequest } from '../request/update-game-module.request';
+import { UpdateGameModuleMapper } from '../mapper/update-game-module.mapper';
 
 @ApiTags('GameModules')
 @Controller('/modules')
@@ -27,6 +34,7 @@ import { GetLightGameModuleByIdMapper } from '../mapper/get-light-game-module-by
 @ApiBearerAuth()
 export class GameModuleController {
   constructor(
+    private readonly updateGameModuleUseCase: UpdateGameModuleUseCase,
     private readonly completeGameModuleUseCase: CompleteGameModuleUseCase,
     private readonly getGameModuleByIdUseCase: GetGameModuleByIdUseCase,
   ) {}
@@ -55,6 +63,31 @@ export class GameModuleController {
       return GetGameModuleByIdMapper.fromDomain(result);
     }
     return GetLightGameModuleByIdMapper.fromDomain(result);
+  }
+
+  @Post('/:moduleId')
+  @Roles(UserType.ADMIN)
+  @ApiOperation({ summary: 'Update a game module for a lesson' })
+  @ApiCreatedResponse({
+    description: 'Game module successfully updated',
+    type: CreateLessonResponse,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid request or parameters',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized access',
+  })
+  @ApiForbiddenResponse({
+    description: 'User not allowed to create game module',
+  })
+  async updateGameModule(
+    @Param('moduleId') moduleId: string,
+    @Body() request: UpdateGameModuleRequest,
+  ): Promise<CreateLessonResponse> {
+    const command = UpdateGameModuleMapper.toDomain(moduleId, request);
+    const result = await this.updateGameModuleUseCase.execute(command);
+    return UpdateGameModuleMapper.fromDomain(result);
   }
 
   @Post('/:moduleId/complete')
