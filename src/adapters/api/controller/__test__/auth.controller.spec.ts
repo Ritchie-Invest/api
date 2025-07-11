@@ -70,14 +70,15 @@ describe('AuthControllerIT', () => {
       // Then
       expect(response.status).toBe(HttpStatus.CREATED);
       const responseBody = response.body as RegisterResponse;
-      expect(responseBody).toHaveProperty('id');
-      expect(responseBody.email).toBe(registerRequest.email);
-      expect(responseBody.type).toBe(UserType.STUDENT);
-      expect(responseBody.createdAt).toBeDefined();
-      expect(responseBody.updatedAt).toBeDefined();
+      expect(responseBody).toHaveProperty('accessToken');
+      expect(responseBody).toHaveProperty('refreshToken');
+      expect(responseBody.accessToken).toBeTruthy();
+      expect(responseBody.refreshToken).toBeTruthy();
 
-      const user = await userRepository.findById(responseBody.id);
-      expect(user).toBeDefined();
+      // Vérifier que l'utilisateur a été créé en base
+      const users = await userRepository.findAll();
+      expect(users.length).toBe(1);
+      const user = users[0];
       expect(user?.email).toBe(registerRequest.email);
       expect(user?.type).toBe(UserType.STUDENT);
       expect(user?.createdAt).toBeDefined();

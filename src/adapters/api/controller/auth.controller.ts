@@ -8,7 +8,6 @@ import { ProfileRequest } from '../request/profile.request';
 import { LoginResponse } from '../response/login.response';
 import { RegisterMapper } from '../mapper/register.mapper';
 import { LogoutMapper } from '../mapper/logout.mapper';
-import { User } from '../../../core/domain/model/User';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import { Public } from '../decorator/public.decorator';
 import {
@@ -20,7 +19,6 @@ import {
   ApiOkResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { RegisterResponse } from '../response/register.response';
 import { LoginMapper } from '../mapper/login.mapper';
 
 @Controller('/auth')
@@ -36,7 +34,7 @@ export class AuthController {
   @Post('/register')
   @ApiCreatedResponse({
     description: 'User successfully registered',
-    type: User,
+    type: LoginResponse,
   })
   @ApiBadRequestResponse({
     description: 'Invalid input or validation error',
@@ -47,10 +45,10 @@ export class AuthController {
   @ApiInternalServerErrorResponse({
     description: 'Internal server error',
   })
-  async register(@Body() body: RegisterRequest): Promise<RegisterResponse> {
+  async register(@Body() body: RegisterRequest): Promise<LoginResponse> {
     const command = RegisterMapper.toDomain(body);
-    const user = await this.createUserUseCase.execute(command);
-    return RegisterMapper.fromDomain(user);
+    const result = await this.createUserUseCase.execute(command);
+    return new LoginResponse(result.accessToken, result.refreshToken);
   }
 
   @Public()

@@ -6,19 +6,31 @@ import { User } from '../domain/model/User';
 import { UserRepository } from '../domain/repository/user.repository';
 import { UserType } from '../domain/type/UserType';
 import * as bcrypt from 'bcryptjs';
+import { RefreshTokenRepository } from '../domain/repository/refresh-token.repository';
+import { TokenService } from '../domain/service/token.service';
 
 export type CreateUserCommand = {
   email: string;
   password: string;
 };
 
-export class CreateUserUseCase implements UseCase<CreateUserCommand, User> {
+export type CreateUserResult = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+
+export class CreateUserUseCase implements UseCase<CreateUserCommand, CreateUserResult> {
   private readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   private readonly PASSWORD_LENGTH = 8;
 
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly refreshTokenRepository: RefreshTokenRepository,
+    private readonly tokenService: TokenService,
+  ) {}
 
-  async execute(command: CreateUserCommand): Promise<User> {
+  async execute(command: CreateUserCommand): Promise<CreateUserResult> {
     const { email, password } = command;
 
     if (!this.EMAIL_REGEX.test(email)) {
@@ -45,7 +57,30 @@ export class CreateUserUseCase implements UseCase<CreateUserCommand, User> {
     );
 
     await this.userRepository.create(user);
-    return user;
+
+    const accessToken = this.tokenService.generateAccessToken({
+      id: user.id,
+      email: user.email,
+      type: user.type,
+    });
+
+    const refreshToken = this.tokenService.generateRefreshToken({
+      id: user.id,
+      email: user.email,
+      type: user.type,
+    });
+
+    await this.refreshTokenRepository.create({
+      userId: user.id,
+      token: refreshToken,
+      expiresAt: new Date(
+        Date.now() +
+          parseInt(process.env.REFRESH_TOKEN_TTL_MS || '604800000', 10),
+      ),
+    });
+
+    return { accessToken, refreshToken };
+
   }
 
   private generateId(): string {

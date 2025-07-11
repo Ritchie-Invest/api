@@ -1,30 +1,22 @@
 import { RegisterMapper } from '../register.mapper';
 import { RegisterRequest } from '../../request/register.request';
-import { User } from '../../../../core/domain/model/User';
-import { UserType } from '../../../../core/domain/type/UserType';
+import { CreateUserResult } from '../../../../core/usecases/create-user.use-case';
 
 describe('RegisterMapper', () => {
-  it('should map User to RegisterResponse', () => {
+  it('should map CreateUserResult to RegisterResponse', () => {
     // Given
-    const user: User = {
-      id: '123',
-      email: 'user@example.com',
-      password: 'hashOfPassword',
-      type: UserType.STUDENT,
-      createdAt: new Date('2023-01-01T00:00:00Z'),
-      updatedAt: new Date('2023-01-02T00:00:00Z'),
+    const result: CreateUserResult = {
+      accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
     };
 
     // When
-    const response = RegisterMapper.fromDomain(user);
+    const response = RegisterMapper.fromDomain(result);
 
     // Then
     expect(response).toEqual({
-      id: '123',
-      email: 'user@example.com',
-      type: UserType.STUDENT,
-      createdAt: new Date('2023-01-01T00:00:00Z'),
-      updatedAt: new Date('2023-01-02T00:00:00Z'),
+      accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
     });
   });
 

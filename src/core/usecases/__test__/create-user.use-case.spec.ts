@@ -1,21 +1,34 @@
 import { CreateUserUseCase, CreateUserCommand } from '../create-user.use-case';
 import { UserRepository } from '../../domain/repository/user.repository';
 import { InMemoryUserRepository } from '../../../adapters/in-memory/in-memory-user.repository';
+import { RefreshTokenRepository } from '../../domain/repository/refresh-token.repository';
+import { InMemoryRefreshTokenRepository } from '../../../adapters/in-memory/in-memory-refresh-token.repository';
+import { TokenService } from '../../domain/service/token.service';
+import { JwtServiceAdapter } from '../../../adapters/jwt/jwt.service';
+import { JwtService } from '@nestjs/jwt';
 
 describe('CreateUserUseCase', () => {
   let userRepository: UserRepository;
+  let refreshTokenRepository: RefreshTokenRepository;
+  let tokenService: TokenService;
   let createUserUseCase: CreateUserUseCase;
 
   beforeEach(() => {
     userRepository = new InMemoryUserRepository();
-    createUserUseCase = new CreateUserUseCase(userRepository);
+    refreshTokenRepository = new InMemoryRefreshTokenRepository();
+    tokenService = new JwtServiceAdapter(new JwtService());
+    createUserUseCase = new CreateUserUseCase(
+      userRepository,
+      refreshTokenRepository,
+      tokenService,
+    );
   });
 
   it('should be defined', () => {
     expect(createUserUseCase).toBeDefined();
   });
 
-  it('should return created user', async () => {
+  it('should return access and refresh tokens', async () => {
     // Given
     const command: CreateUserCommand = {
       email: 'john.doe@example.com',
@@ -23,24 +36,29 @@ describe('CreateUserUseCase', () => {
     };
 
     // When
-    const user = await createUserUseCase.execute(command);
+    const result = await createUserUseCase.execute(command);
 
     // Then
     const users = await userRepository.findAll();
     expect(users.length).toEqual(1);
-    expect(user).toEqual({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      id: expect.any(String),
-      email: 'john.doe@example.com',
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      password: expect.any(String),
-      type: 'STUDENT',
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      createdAt: expect.any(Date),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      updatedAt: expect.any(Date),
+    
+    const createdUser = users[0]!;
+    expect(createdUser.email).toBe('john.doe@example.com');
+    expect(createdUser.type).toBe('STUDENT');
+    expect(createdUser.password).not.toEqual(command.password);
+    
+    expect(result).toEqual({
+      accessToken: expect.any(String),
+      refreshToken: expect.any(String),
     });
-    expect(user.password).not.toEqual(command.password);
+    expect(result.accessToken).toBeTruthy();
+    expect(result.refreshToken).toBeTruthy();
+    
+    // Vérifier que le refresh token a été stocké
+    const refreshTokens = await refreshTokenRepository.findAll();
+    expect(refreshTokens.length).toBe(1);
+    expect(refreshTokens[0]!.token).toBe(result.refreshToken);
+    expect(refreshTokens[0]!.userId).toBe(createdUser.id);
   });
 
   it('should throw UserAlreadyExistsError if user already exists', async () => {
