@@ -75,7 +75,6 @@ describe('AuthControllerIT', () => {
       expect(responseBody.accessToken).toBeTruthy();
       expect(responseBody.refreshToken).toBeTruthy();
 
-      // Vérifier que l'utilisateur a été créé en base
       const users = await userRepository.findAll();
       expect(users.length).toBe(1);
       const user = users[0];

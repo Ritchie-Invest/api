@@ -54,7 +54,6 @@ describe('CreateUserUseCase', () => {
     expect(result.accessToken).toBeTruthy();
     expect(result.refreshToken).toBeTruthy();
     
-    // Vérifier que le refresh token a été stocké
     const refreshTokens = await refreshTokenRepository.findAll();
     expect(refreshTokens.length).toBe(1);
     expect(refreshTokens[0]!.token).toBe(result.refreshToken);
