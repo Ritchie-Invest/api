@@ -19,8 +19,9 @@ export type CreateUserResult = {
   refreshToken: string;
 };
 
-
-export class CreateUserUseCase implements UseCase<CreateUserCommand, CreateUserResult> {
+export class CreateUserUseCase
+  implements UseCase<CreateUserCommand, CreateUserResult>
+{
   private readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   private readonly PASSWORD_LENGTH = 8;
 
@@ -80,7 +81,6 @@ export class CreateUserUseCase implements UseCase<CreateUserCommand, CreateUserR
     });
 
     return { accessToken, refreshToken };
-
   }
 
   private generateId(): string {

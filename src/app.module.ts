@@ -127,7 +127,11 @@ import { GetGameModuleByIdUseCase } from './core/usecases/get-game-module-by-id.
         refreshTokenRepository: RefreshTokenRepository,
         tokenService: TokenService,
       ) =>
-        new CreateUserUseCase(userRepository, refreshTokenRepository, tokenService),
+        new CreateUserUseCase(
+          userRepository,
+          refreshTokenRepository,
+          tokenService,
+        ),
       inject: [UserRepository, RefreshTokenRepository, 'TokenService'],
     },
     {

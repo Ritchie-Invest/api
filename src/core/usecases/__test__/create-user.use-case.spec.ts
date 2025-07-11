@@ -41,23 +41,28 @@ describe('CreateUserUseCase', () => {
     // Then
     const users = await userRepository.findAll();
     expect(users.length).toEqual(1);
-    
-    const createdUser = users[0]!;
-    expect(createdUser.email).toBe('john.doe@example.com');
-    expect(createdUser.type).toBe('STUDENT');
-    expect(createdUser.password).not.toEqual(command.password);
-    
+
+    const createdUser = users[0];
+    expect(createdUser).toBeDefined();
+    expect(createdUser?.email).toBe('john.doe@example.com');
+    expect(createdUser?.type).toBe('STUDENT');
+    expect(createdUser?.password).not.toEqual(command.password);
+
     expect(result).toEqual({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       accessToken: expect.any(String),
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       refreshToken: expect.any(String),
     });
     expect(result.accessToken).toBeTruthy();
     expect(result.refreshToken).toBeTruthy();
-    
+
     const refreshTokens = await refreshTokenRepository.findAll();
     expect(refreshTokens.length).toBe(1);
-    expect(refreshTokens[0]!.token).toBe(result.refreshToken);
-    expect(refreshTokens[0]!.userId).toBe(createdUser.id);
+    const refreshToken = refreshTokens[0];
+    expect(refreshToken).toBeDefined();
+    expect(refreshToken?.token).toBe(result.refreshToken);
+    expect(refreshToken?.userId).toBe(createdUser?.id);
   });
 
   it('should throw UserAlreadyExistsError if user already exists', async () => {
