@@ -34,8 +34,8 @@ export class InMemoryGameModuleRepository implements GameModuleRepository {
   }
 
   findByLessonId(lessonId: string): GameModule[] {
-    return Array.from(this.modules.values()).filter(
-      (module) => module.lessonId === lessonId,
-    );
+    return Array.from(this.modules.values())
+      .filter((module) => module.lessonId === lessonId)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   }
 }

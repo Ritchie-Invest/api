@@ -22,6 +22,9 @@ export class LessonSummaryResponse {
   @ApiProperty()
   totalModules: number;
 
+  @ApiProperty({ nullable: true })
+  gameModuleId: string | null;
+
   constructor(
     id: string,
     title: string,
@@ -30,6 +33,7 @@ export class LessonSummaryResponse {
     isUnlocked: boolean,
     completedModules: number,
     totalModules: number,
+    gameModuleId: string | null = null,
   ) {
     this.id = id;
     this.title = title;
@@ -38,6 +42,7 @@ export class LessonSummaryResponse {
     this.isUnlocked = isUnlocked;
     this.completedModules = completedModules;
     this.totalModules = totalModules;
+    this.gameModuleId = gameModuleId;
   }
 }
 
