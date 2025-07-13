@@ -44,9 +44,8 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
   }
 
   async expireNow(token: string) {
-    await this.prisma.refreshToken.updateMany({
+    await this.prisma.refreshToken.delete({
       where: { token },
-      data: { expiresAt: new Date() },
     });
   }
 

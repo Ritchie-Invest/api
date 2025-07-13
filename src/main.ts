@@ -8,17 +8,22 @@ import { ValidationPipe } from '@nestjs/common';
 import { RolesGuard } from './adapters/api/guards/roles.guard';
 import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './adapters/api/guards/jwt-auth.guard';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalFilters(new DomainErrorFilter());
   app.useGlobalPipes(new ValidationPipe());
+
   app.enableCors({
     origin: [
       process.env.ADMIN_APP_BASE_URL || 'http://localhost:5173/',
       process.env.MOBILE_APP_BASE_URL || 'http://localhost:8080/',
     ],
+    credentials: true,
   });
+
+  app.use(cookieParser());
 
   const reflector = app.get(Reflector);
   app.useGlobalGuards(

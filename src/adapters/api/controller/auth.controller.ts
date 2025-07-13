@@ -1,4 +1,12 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Res,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { Response, Request } from 'express';
 import { CreateUserUseCase } from '../../../core/usecases/create-user.use-case';
 import { LoginUseCase } from '../../../core/usecases/login.use-case';
 import { LogoutUseCase } from '../../../core/usecases/logout.use-case';
@@ -22,6 +30,10 @@ import {
 } from '@nestjs/swagger';
 import { RegisterResponse } from '../response/register.response';
 import { LoginMapper } from '../mapper/login.mapper';
+
+export type LoginApiResponse = {
+  accessToken: string;
+};
 
 @Controller('/auth')
 export class AuthController {
@@ -65,10 +77,20 @@ export class AuthController {
   @ApiInternalServerErrorResponse({
     description: 'Internal server error',
   })
-  async login(@Body() body: RegisterRequest): Promise<LoginResponse> {
+  async login(
+    @Body() body: RegisterRequest,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<LoginApiResponse> {
     const command = LoginMapper.toDomain(body);
     const result = await this.loginUseCase.execute(command);
-    return LoginMapper.fromDomain(result);
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/auth',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return { accessToken: result.accessToken };
   }
 
   @Post('/logout')
@@ -83,12 +105,20 @@ export class AuthController {
   })
   async logout(
     @CurrentUser() currentUser: ProfileRequest,
-    @Body('refreshToken') refreshToken: string,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
-    const command = LogoutMapper.toDomain(currentUser, refreshToken);
+    const refreshTokenUnknown: unknown = req.cookies?.['refreshToken'];
+    if (typeof refreshTokenUnknown !== 'string') {
+      throw new UnauthorizedException('Refresh token missing');
+    }
+    const refreshTokenRaw = refreshTokenUnknown;
+    const command = LogoutMapper.toDomain(currentUser, refreshTokenRaw);
     await this.logoutUseCase.execute(command);
+    res.clearCookie('refreshToken', { path: '/auth' });
   }
 
+  @Public()
   @Post('/refresh')
   @ApiOkResponse({
     description: 'User token refreshed successfully',
@@ -99,8 +129,23 @@ export class AuthController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized access',
   })
-  async refresh(@Body('refreshToken') token: string): Promise<LoginResponse> {
-    const result = await this.refreshUseCase.execute({ token });
-    return LoginMapper.fromDomain(result);
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<LoginApiResponse> {
+    const tokenUnknown: unknown = req.cookies?.['refreshToken'];
+    if (typeof tokenUnknown !== 'string') {
+      throw new UnauthorizedException('Refresh token missing');
+    }
+    const tokenRaw = tokenUnknown;
+    const result = await this.refreshUseCase.execute({ token: tokenRaw });
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/auth',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return { accessToken: result.accessToken };
   }
 }
