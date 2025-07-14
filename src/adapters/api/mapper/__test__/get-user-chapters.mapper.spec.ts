@@ -56,21 +56,11 @@ describe('GetUserChaptersMapper', () => {
         now,
       );
 
-      const lessonSummary = new LessonSummary(
-        lesson,
-        true, 
-        2, 
-        3, 
-        'module-123',
-      );
+      const lessonSummary = new LessonSummary(lesson, true, 2, 3, 'module-123');
 
-      const chapterSummary = new ChapterSummary(
-        chapter,
-        true,
-        1, 
-        1, 
-        [lessonSummary],
-      );
+      const chapterSummary = new ChapterSummary(chapter, true, 1, 1, [
+        lessonSummary,
+      ]);
 
       const domainResult: GetUserChaptersResult = {
         chapters: [chapterSummary],
@@ -134,21 +124,11 @@ describe('GetUserChaptersMapper', () => {
         now,
       );
 
-      const lessonSummary = new LessonSummary(
-        lesson,
-        true, 
-        0, 
-        0, 
-        null, 
-      );
+      const lessonSummary = new LessonSummary(lesson, true, 0, 0, null);
 
-      const chapterSummary = new ChapterSummary(
-        chapter,
-        true, 
-        0, 
-        1, 
-        [lessonSummary],
-      );
+      const chapterSummary = new ChapterSummary(chapter, true, 0, 1, [
+        lessonSummary,
+      ]);
 
       const domainResult: GetUserChaptersResult = {
         chapters: [chapterSummary],
