@@ -49,6 +49,7 @@ import { McqCompleteGameModuleStrategy } from './core/usecases/strategies/mcq-co
 import { GetUserChaptersUseCase } from './core/usecases/get-user-chapters.use-case';
 import { GetGameModuleByIdUseCase } from './core/usecases/get-game-module-by-id.use-case';
 import { UpdateGameModuleUseCase } from './core/usecases/update-game-module.use-case';
+import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -276,6 +277,14 @@ import { UpdateGameModuleUseCase } from './core/usecases/update-game-module.use-
         GameModuleRepository,
         'GameModuleStrategyFactory',
       ],
+    },
+    {
+      provide: CompleteLessonUseCase,
+      useFactory: (
+        progressionRepository: ProgressionRepository,
+        lessonRepository: LessonRepository,
+      ) => new CompleteLessonUseCase(progressionRepository, lessonRepository),
+      inject: [ProgressionRepository, LessonRepository],
     },
   ],
 })

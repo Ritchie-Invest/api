@@ -52,6 +52,21 @@ export class PrismaProgressionRepository extends ProgressionRepository {
     return this.mapper.toDomain(entity);
   }
 
+  async findByUserIdAndLessonId(
+    userId: string,
+    lessonId: string,
+  ): Promise<Progression[]> {
+    const entities = await this.prisma.progression.findMany({
+      where: {
+        userId,
+        gameModule: {
+          lessonId: lessonId,
+        },
+      },
+    });
+    return entities.map((entity) => this.mapper.toDomain(entity));
+  }
+
   async update(id: string, data: Progression): Promise<Progression | null> {
     const entity = this.mapper.fromDomain(data);
     const updatedEntity = await this.prisma.progression.update({

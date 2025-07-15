@@ -28,6 +28,9 @@ import { GetLessonsByChapterIdMapper } from '../mapper/get-lessons-by-chapter.ma
 import { CreateGameModuleUseCase } from '../../../core/usecases/create-game-module.use-case';
 import { CreateGameModuleRequest } from '../request/create-game-module.request';
 import { CreateGameModuleMapper } from '../mapper/create-game-module.mapper';
+import { CompleteLessonMapper } from '../mapper/complete-lesson.mapper';
+import { CompleteLessonUseCase } from '../../../core/usecases/complete-lesson.use-case';
+import { CompleteLessonResponse } from '../response/complete-lesson.response';
 
 @Controller('/lessons')
 export class LessonController {
@@ -37,6 +40,7 @@ export class LessonController {
     private readonly getLessonByIdUseCase: GetLessonByIdUseCase,
     private readonly updateLessonUseCase: UpdateLessonUseCase,
     private readonly createGameModuleUseCase: CreateGameModuleUseCase,
+    private readonly completeLessonUseCase: CompleteLessonUseCase,
   ) {}
 
   @Get('/chapter/:chapterId')
@@ -178,5 +182,26 @@ export class LessonController {
     const command = CreateGameModuleMapper.toDomain(lessonId, request);
     const result = await this.createGameModuleUseCase.execute(command);
     return CreateGameModuleMapper.fromDomain(result);
+  }
+
+  @Post('/:lessonId/complete')
+  @ApiOperation({ summary: 'Complete a lesson' })
+  @ApiCreatedResponse({
+    description: 'Lesson successfully completed',
+    type: CompleteLessonResponse,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid request or parameters',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized access',
+  })
+  async completeLesson(
+    @CurrentUser() currentUser: ProfileRequest,
+    @Param('lessonId') lessonId: string,
+  ): Promise<CompleteLessonResponse> {
+    const command = CompleteLessonMapper.toDomain(currentUser.id, lessonId);
+    const result = await this.completeLessonUseCase.execute(command);
+    return CompleteLessonMapper.fromDomain(result);
   }
 }

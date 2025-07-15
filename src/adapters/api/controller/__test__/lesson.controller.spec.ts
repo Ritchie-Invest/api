@@ -20,11 +20,19 @@ import { GameType } from '../../../../core/domain/type/GameType';
 import { CreateGameModuleRequest } from '../../request/create-game-module.request';
 import { GameModuleRepository } from '../../../../core/domain/repository/game-module.repository';
 import { AppModule } from '../../../../app.module';
+import { McqModule } from '../../../../core/domain/model/McqModule';
+import { Progression } from '../../../../core/domain/model/Progression';
+import { ProgressionRepository } from '../../../../core/domain/repository/progression.repository';
+import { UserRepository } from '../../../../core/domain/repository/user.repository';
+import { User } from '../../../../core/domain/model/User';
+
 describe('LessonControllerIT', () => {
   let app: INestApplication<App>;
   let chapterRepository: ChapterRepository;
   let lessonRepository: LessonRepository;
   let gameModuleRepository: GameModuleRepository;
+  let progressionRepository: ProgressionRepository;
+  let userRepository: UserRepository;
   let tokenService: TokenService;
 
   beforeAll(async () => {
@@ -49,17 +57,23 @@ describe('LessonControllerIT', () => {
     chapterRepository = app.get(ChapterRepository);
     lessonRepository = app.get(LessonRepository);
     gameModuleRepository = app.get(GameModuleRepository);
+    progressionRepository = app.get(ProgressionRepository);
+    userRepository = app.get(UserRepository);
     tokenService = app.get('TokenService');
 
+    await progressionRepository.removeAll();
     await gameModuleRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
+    await userRepository.removeAll();
   });
 
   afterEach(async () => {
+    await progressionRepository.removeAll();
     await gameModuleRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
+    await userRepository.removeAll();
   });
 
   describe('getLessonsByChapterId', () => {
@@ -599,6 +613,135 @@ describe('LessonControllerIT', () => {
 
       // Then
       expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('completeLesson', () => {
+    it('should complete a lesson', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const user = new User(
+        'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+        'test@ritchie.com',
+        'password',
+        UserType.STUDENT,
+      );
+      await userRepository.create(user);
+      const chapter = new Chapter(
+        'chapter-1',
+        'Chapter 1',
+        'Description of Chapter 1',
+        0,
+        true,
+      );
+      await chapterRepository.create(chapter);
+      const lesson = new Lesson(
+        'lesson-1',
+        'Lesson 1',
+        'Description of Lesson 1',
+        'chapter-1',
+        1,
+        true,
+        GameType.MCQ,
+      );
+      const createdLesson = await lessonRepository.create(lesson);
+      const gameModule1 = new McqModule({
+        id: 'module-1',
+        lessonId: createdLesson.id,
+        question: 'What is the capital of France?',
+        choices: [
+          {
+            id: 'choice-1',
+            text: 'Paris',
+            isCorrect: true,
+            correctionMessage: 'Correct! Paris is the capital of France.',
+          },
+          {
+            id: 'choice-2',
+            text: 'London',
+            isCorrect: false,
+            correctionMessage:
+              'Incorrect! London is not the capital of France.',
+          },
+        ],
+      });
+      await gameModuleRepository.create(gameModule1);
+      const gameModule2 = new McqModule({
+        id: 'module-2',
+        lessonId: createdLesson.id,
+        question: 'What is 2+2?',
+        choices: [
+          {
+            id: 'choice-3',
+            text: '3',
+            isCorrect: false,
+            correctionMessage: 'No, try again.',
+          },
+          {
+            id: 'choice-4',
+            text: '4',
+            isCorrect: true,
+            correctionMessage: 'Yes, that is correct!',
+          },
+        ],
+      });
+      await gameModuleRepository.create(gameModule2);
+      const gameModule3 = new McqModule({
+        id: 'module-3',
+        lessonId: createdLesson.id,
+        question: 'What is 3+3?',
+        choices: [
+          {
+            id: 'choice-5',
+            text: '6',
+            isCorrect: true,
+            correctionMessage: 'Correct! 3+3 equals 6.',
+          },
+          {
+            id: 'choice-6',
+            text: '7',
+            isCorrect: false,
+            correctionMessage: 'Incorrect, try again.',
+          },
+        ],
+      });
+      await gameModuleRepository.create(gameModule3);
+      const progression = new Progression(
+        'progression-1',
+        'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+        gameModule1.id,
+        true,
+      );
+      await progressionRepository.create(progression);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/lessons/${createdLesson.id}/complete`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.CREATED);
+      expect(response.body).toMatchObject({
+        score: 1,
+        totalGameModules: 3,
+      });
+    });
+
+    it('should return 404 if lesson not found', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post('/lessons/non-existing-id/complete')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        'Lesson with id non-existing-id not found',
+      );
     });
   });
 

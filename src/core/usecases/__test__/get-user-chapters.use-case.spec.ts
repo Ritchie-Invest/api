@@ -55,7 +55,9 @@ describe('GetUserChaptersUseCase', () => {
   beforeEach(() => {
     lessonRepository = new InMemoryLessonRepository();
     gameModuleRepository = new InMemoryGameModuleRepository();
-    progressionRepository = new InMemoryProgressionRepository();
+    progressionRepository = new InMemoryProgressionRepository(
+      gameModuleRepository,
+    );
     chapterRepository = new InMemoryChapterRepository(
       lessonRepository,
       gameModuleRepository,

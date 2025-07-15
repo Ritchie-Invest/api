@@ -13,6 +13,12 @@ import { ChapterOrderConflictError } from '../../core/domain/error/ChapterOrderC
 export class InMemoryChapterRepository implements ChapterRepository {
   private chapters: Map<string, Chapter> = new Map();
 
+  constructor(
+    private readonly lessonsRepository: LessonRepository,
+    private readonly gameModuleRepository: GameModuleRepository,
+    private readonly progressionRepository: ProgressionRepository,
+  ) {}
+
   validateUniqueOrder(order: number, excludeChapterId?: string): Promise<void> {
     const existingChapters = this.findAll();
     const conflictingChapter = existingChapters.find(
@@ -72,12 +78,6 @@ export class InMemoryChapterRepository implements ChapterRepository {
   removeAll(): void {
     this.chapters.clear();
   }
-
-  constructor(
-    private readonly lessonsRepository: LessonRepository,
-    private readonly gameModuleRepository: GameModuleRepository,
-    private readonly progressionRepository: ProgressionRepository,
-  ) {}
 
   async findAllWithLessonsDetails(userId: string): Promise<ChapterData[]> {
     const chapters = Array.from(this.chapters.values()).sort(
