@@ -110,7 +110,8 @@ export class AuthController {
   ): Promise<void> {
     const refreshTokenUnknown: unknown = req.cookies?.['refreshToken'];
     if (typeof refreshTokenUnknown !== 'string') {
-      throw new UnauthorizedException('Refresh token missing');
+      res.clearCookie('refreshToken', { path: '/auth' });
+      return;
     }
     const refreshTokenRaw = refreshTokenUnknown;
     const command = LogoutMapper.toDomain(currentUser, refreshTokenRaw);
@@ -138,14 +139,20 @@ export class AuthController {
       throw new UnauthorizedException('Refresh token missing');
     }
     const tokenRaw = tokenUnknown;
-    const result = await this.refreshUseCase.execute({ token: tokenRaw });
-    res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/auth',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    return { accessToken: result.accessToken };
+    try {
+      const result = await this.refreshUseCase.execute({ token: tokenRaw });
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/auth',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      res.status(200);
+      return { accessToken: result.accessToken };
+    } catch (err) {
+      console.error('[AUTH/REFRESH] Error during refresh:', err);
+      throw err;
+    }
   }
 }
