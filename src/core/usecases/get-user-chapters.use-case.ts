@@ -114,14 +114,19 @@ export class GetUserChaptersUseCase
         lessons,
       );
 
+      const gameModuleId =
+        lessonData.modules.length > 0
+          ? lessonData.modules[0]?.id || null
+          : null;
+
       const lesson = new Lesson(
         lessonData.id,
         lessonData.title,
         lessonData.description,
-        '', // chapterId - nous pourrions l'obtenir du contexte si nécessaire
+        '',
         lessonData.order,
-        false, // isPublished
-        GameType.MCQ, // gameType par défaut
+        false,
+        GameType.MCQ,
       );
 
       const lessonSummary = new LessonSummary(
@@ -129,6 +134,7 @@ export class GetUserChaptersUseCase
         isLessonUnlocked,
         completedModules,
         totalModules,
+        gameModuleId,
       );
 
       lessonSummaries.push(lessonSummary);

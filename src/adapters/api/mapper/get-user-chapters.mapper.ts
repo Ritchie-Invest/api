@@ -37,6 +37,7 @@ export class GetUserChaptersMapper {
                 lesson.isUnlocked,
                 lesson.completedModules,
                 lesson.totalModules,
+                lesson.gameModuleId,
               ),
           ),
         ),

@@ -649,6 +649,7 @@ describe('ChapterControllerIT', () => {
         isUnlocked: true,
         completedModules: 2,
         totalModules: 2,
+        gameModuleId: 'module-1',
       });
 
       const lesson2Response = chapter1Response!.lessons[1];
@@ -660,6 +661,7 @@ describe('ChapterControllerIT', () => {
         isUnlocked: true,
         completedModules: 0,
         totalModules: 1,
+        gameModuleId: 'module-3',
       });
 
       const chapter2Response = responseBody.chapters[1];
@@ -682,6 +684,7 @@ describe('ChapterControllerIT', () => {
         isUnlocked: false,
         completedModules: 0,
         totalModules: 1,
+        gameModuleId: 'module-4',
       });
     });
 

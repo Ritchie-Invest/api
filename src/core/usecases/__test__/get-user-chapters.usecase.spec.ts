@@ -256,6 +256,41 @@ describe('GetUserChaptersUseCase', () => {
       expect(chapter.lessons).toHaveLength(0);
     });
 
+    it('should handle lessons with no modules and gameModuleId should be null', async () => {
+      // Given
+      const chapterId = 'chapter-1';
+      chapterRepository.create({
+        id: chapterId,
+        title: 'Chapter 1',
+        description: 'First chapter',
+        order: 1,
+      });
+
+      const lessonId = 'lesson-1';
+      lessonRepository.create({
+        id: lessonId,
+        chapterId,
+        title: 'Lesson 1',
+        description: 'First lesson',
+        order: 1,
+        gameType: GameType.MCQ,
+      });
+
+      const command: GetUserChaptersCommand = { userId };
+
+      // When
+      const result = await useCase.execute(command);
+
+      // Then
+      expect(result.chapters).toHaveLength(1);
+      expect(result.chapters[0]?.lessons).toHaveLength(1);
+
+      const lesson = result.chapters[0]?.lessons[0];
+      expect(lesson?.gameModuleId).toBeNull();
+      expect(lesson?.completedModules).toBe(0);
+      expect(lesson?.totalModules).toBe(0);
+    });
+
     describe('processLessons (tested indirectly)', () => {
       it('should correctly process lessons and count completed ones', async () => {
         // Given
@@ -325,11 +360,13 @@ describe('GetUserChaptersUseCase', () => {
         expect(lesson1?.completedModules).toBe(2);
         expect(lesson1?.totalModules).toBe(2);
         expect(lesson1?.isUnlocked).toBe(true);
+        expect(lesson1?.gameModuleId).toBe(module1Id); // Premier module créé pour lesson1
 
         const lesson2 = result.chapters[0]?.lessons[1];
         expect(lesson2?.completedModules).toBe(0);
         expect(lesson2?.totalModules).toBe(1);
         expect(lesson2?.isUnlocked).toBe(true);
+        expect(lesson2?.gameModuleId).toBe(module3Id); // Premier module créé pour lesson2
       });
     });
 
@@ -595,6 +632,7 @@ describe('GetUserChaptersUseCase', () => {
         // Then
         expect(result.chapters[0]?.lessons[0]?.completedModules).toBe(2);
         expect(result.chapters[0]?.lessons[0]?.totalModules).toBe(3);
+        expect(result.chapters[0]?.lessons[0]?.gameModuleId).toBe(module1Id);
       });
     });
   });
@@ -635,6 +673,7 @@ describe('GetUserChaptersUseCase', () => {
       // Then
       expect(result.chapters[0]?.lessons[0]?.completedModules).toBe(1);
       expect(result.chapters[0]?.lessons[0]?.totalModules).toBe(1);
+      expect(result.chapters[0]?.lessons[0]?.gameModuleId).toBe('module-1');
 
       expect(result.chapters[0]?.completedLessons).toBe(1);
     });
