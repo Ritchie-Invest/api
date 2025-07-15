@@ -21,29 +21,31 @@ export class RefreshUseCase implements UseCase<RefreshCommand, RefreshResult> {
 
   async execute(command: RefreshCommand): Promise<RefreshResult> {
     const { token } = command;
-    const payload: TokenPayload = this.tokenService.verifyRefreshToken(token);
+    let payload: TokenPayload;
+    try {
+      payload = this.tokenService.verifyRefreshToken(token);
+    } catch {
+      throw new TokenInvalidOrExpiredError(
+        'Refresh token is invalid or expired',
+      );
+    }
     const dbToken = await this.refreshTokenRepository.findByToken(token);
-
     if (!payload || !dbToken || dbToken.expiresAt <= new Date()) {
       throw new TokenInvalidOrExpiredError(
         'Refresh token is invalid or expired',
       );
     }
-
     await this.refreshTokenRepository.expireNow(token);
-
     const accessToken = this.tokenService.generateAccessToken({
       id: payload.id,
       email: payload.email,
       type: payload.type,
     });
-
     const refreshToken = this.tokenService.generateRefreshToken({
       id: payload.id,
       email: payload.email,
       type: payload.type,
     });
-
     await this.refreshTokenRepository.create({
       userId: payload.id,
       token: refreshToken,
@@ -52,7 +54,6 @@ export class RefreshUseCase implements UseCase<RefreshCommand, RefreshResult> {
           parseInt(process.env.REFRESH_TOKEN_TTL_MS || '604800000', 10),
       ),
     });
-
     return { accessToken, refreshToken };
   }
 }

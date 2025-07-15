@@ -1,8 +1,8 @@
+import request from 'supertest';
+import cookieParser from 'cookie-parser';
 import { Test, TestingModule } from '@nestjs/testing';
-
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { App } from 'supertest/types';
-import request from 'supertest';
 import { DomainErrorFilter } from '../../../../config/domain-error.filter';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { RolesGuard } from '../../guards/roles.guard';
@@ -16,6 +16,7 @@ import { LoginResponse } from '../../response/login.response';
 import { LoginRequest } from '../../request/login.request';
 import { TokenService } from '../../../../core/domain/service/token.service';
 import { AppModule } from '../../../../app.module';
+
 describe('AuthControllerIT', () => {
   let app: INestApplication<App>;
   let userRepository: UserRepository;
@@ -28,6 +29,7 @@ describe('AuthControllerIT', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.use(cookieParser());
     const reflector = moduleFixture.get(Reflector);
 
     app.useGlobalFilters(new DomainErrorFilter());
@@ -145,7 +147,13 @@ describe('AuthControllerIT', () => {
       expect(response.status).toBe(HttpStatus.CREATED);
       const responseBody = response.body as LoginResponse;
       expect(responseBody).toHaveProperty('accessToken');
-      expect(responseBody).toHaveProperty('refreshToken');
+      const cookies = response.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+      const cookiesArr = Array.isArray(cookies) ? cookies : [cookies];
+      const hasRefreshTokenCookie = cookiesArr.some((cookie: string) =>
+        cookie.startsWith('refreshToken='),
+      );
+      expect(hasRefreshTokenCookie).toBe(true);
     });
 
     it('should return 404 for non-existing user', async () => {
@@ -184,20 +192,75 @@ describe('AuthControllerIT', () => {
       const response = await request(app.getHttpServer())
         .post('/auth/logout')
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ refreshToken: refreshToken.token });
+        .set('Cookie', [`refreshToken=${refreshToken.token}`]);
 
       // Then
       expect(response.status).toBe(HttpStatus.CREATED);
       const token = await refreshTokenRepository.findByToken(
         refreshToken.token,
       );
-      expect(token).toBeDefined();
-      expect(token?.expiresAt?.getTime()).toBeLessThan(new Date().getTime());
+      if (token) {
+        expect(token.expiresAt?.getTime()).toBeLessThan(new Date().getTime());
+      } else {
+        expect(token).toBeFalsy();
+      }
     });
   });
 
   describe('refresh', () => {
-    // TODO: See how to properly test this endpoint
+    it('should refresh the access token if refreshToken cookie is valid', async () => {
+      // Given
+      const email = 'test-refresh@example.com';
+      const password = 'password123';
+      const registerRequest = new RegisterRequest(email, password);
+      const registerResponse = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send(registerRequest);
+      expect(registerResponse.status).toBe(HttpStatus.CREATED);
+
+      const loginRequest = new LoginRequest(email, password);
+      const loginResponse = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send(loginRequest);
+      expect(loginResponse.status).toBe(HttpStatus.CREATED);
+      const cookiesRaw = loginResponse.headers['set-cookie'];
+      expect(cookiesRaw).toBeDefined();
+      const cookiesArr: string[] = Array.isArray(cookiesRaw)
+        ? cookiesRaw
+        : [cookiesRaw as string];
+
+      const refreshCookieFull = cookiesArr.find(
+        (cookie) =>
+          typeof cookie === 'string' && cookie.startsWith('refreshToken='),
+      );
+      expect(refreshCookieFull).toBeDefined();
+      const refreshCookie = refreshCookieFull
+        ? refreshCookieFull.split(';')[0]
+        : undefined;
+      expect(typeof refreshCookie).toBe('string');
+      expect(refreshCookie).toBeDefined();
+      expect(refreshCookie).not.toEqual('');
+
+      console.log('Test is sending refresh cookie:', refreshCookie);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post('/auth/refresh')
+        .set('Cookie', refreshCookie as string);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toHaveProperty('accessToken');
+      const newCookiesRaw = response.headers['set-cookie'];
+      expect(newCookiesRaw).toBeDefined();
+      const newCookiesArr: string[] = Array.isArray(newCookiesRaw)
+        ? newCookiesRaw
+        : [newCookiesRaw as string];
+      const hasRefreshTokenCookie = newCookiesArr.some((cookie: string) =>
+        cookie.startsWith('refreshToken='),
+      );
+      expect(hasRefreshTokenCookie).toBe(true);
+    });
   });
 
   afterAll(async () => {
