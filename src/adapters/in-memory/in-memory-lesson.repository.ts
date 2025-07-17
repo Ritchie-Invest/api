@@ -7,6 +7,8 @@ import { LessonOrderConflictError } from '../../core/domain/error/LessonOrderCon
 export class InMemoryLessonRepository implements LessonRepository {
   private lessons: Map<string, Lesson> = new Map();
 
+  constructor() {}
+
   validateUniqueOrderInChapter(
     chapterId: string,
     order: number,
@@ -34,12 +36,16 @@ export class InMemoryLessonRepository implements LessonRepository {
     );
   }
 
-  constructor() {}
-
   create(
     data: Pick<
       Lesson,
-      'id' | 'title' | 'description' | 'chapterId' | 'order' | 'gameType'
+      | 'id'
+      | 'title'
+      | 'description'
+      | 'chapterId'
+      | 'order'
+      | 'gameType'
+      | 'modules'
     >,
   ): Lesson {
     const lesson = new Lesson(
@@ -50,6 +56,7 @@ export class InMemoryLessonRepository implements LessonRepository {
       data.order,
       false,
       data.gameType,
+      data.modules || [],
     );
     this.lessons.set(lesson.id, lesson);
     return lesson;

@@ -18,7 +18,9 @@ describe('CreateChapterUseCase', () => {
   beforeEach(() => {
     const lessonRepository = new InMemoryLessonRepository();
     const gameModuleRepository = new InMemoryGameModuleRepository();
-    const progressionRepository = new InMemoryProgressionRepository();
+    const progressionRepository = new InMemoryProgressionRepository(
+      gameModuleRepository,
+    );
     chapterRepository = new InMemoryChapterRepository(
       lessonRepository,
       gameModuleRepository,

@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ProgressionRepository } from '../../core/domain/repository/progression.repository';
 import { Progression } from '../../core/domain/model/Progression';
+import { GameModuleRepository } from '../../core/domain/repository/game-module.repository';
 
 @Injectable()
-export class InMemoryProgressionRepository extends ProgressionRepository {
+export class InMemoryProgressionRepository implements ProgressionRepository {
   private progressions: Map<string, Progression> = new Map();
+
+  constructor(private readonly gameModuleRepository: GameModuleRepository) {}
 
   create(data: Progression): Progression {
     this.progressions.set(data.id, data);
@@ -30,6 +33,29 @@ export class InMemoryProgressionRepository extends ProgressionRepository {
           progression.gameModuleId === gameModuleId,
       ) || null
     );
+  }
+
+  async findByUserIdAndLessonId(
+    userId: string,
+    lessonId: string,
+  ): Promise<Progression[]> {
+    const progressions = Array.from(this.progressions.values());
+    const filteredProgressions: Progression[] = [];
+
+    for (const progression of progressions) {
+      const gameModule = await this.gameModuleRepository.findById(
+        progression.gameModuleId,
+      );
+      if (
+        gameModule &&
+        progression.userId === userId &&
+        gameModule.lessonId === lessonId
+      ) {
+        filteredProgressions.push(progression);
+      }
+    }
+
+    return filteredProgressions;
   }
 
   update(id: string, data: Progression): Progression | null {

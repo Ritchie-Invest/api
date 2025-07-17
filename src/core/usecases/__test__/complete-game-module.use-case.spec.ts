@@ -13,6 +13,7 @@ import { InMemoryProgressionRepository } from '../../../adapters/in-memory/in-me
 import { GameType } from '../../domain/type/GameType';
 import { MapCompleteGameModuleStrategyFactory } from '../strategies/complete-game-module-strategy-factory';
 import { McqCompleteGameModuleStrategy } from '../strategies/mcq-complete-game-module-strategy';
+import { Lesson } from '../../domain/model/Lesson';
 
 describe('CompleteGameModuleUseCase', () => {
   let gameModuleRepository: InMemoryGameModuleRepository;
@@ -23,7 +24,9 @@ describe('CompleteGameModuleUseCase', () => {
   beforeEach(() => {
     gameModuleRepository = new InMemoryGameModuleRepository();
     lessonRepository = new InMemoryLessonRepository();
-    progressionRepository = new InMemoryProgressionRepository();
+    progressionRepository = new InMemoryProgressionRepository(
+      gameModuleRepository,
+    );
 
     const strategyFactory = new MapCompleteGameModuleStrategyFactory([
       {
@@ -44,14 +47,15 @@ describe('CompleteGameModuleUseCase', () => {
   });
 
   const createTestLesson = () => {
-    const lesson = {
-      id: 'lesson-1',
-      title: 'Test Lesson',
-      description: 'A test lesson',
-      chapterId: 'chapter-1',
-      order: 1,
-      gameType: GameType.MCQ,
-    };
+    const lesson = new Lesson(
+      'lesson-1',
+      'Test Lesson',
+      'A test lesson',
+      'chapter-1',
+      1,
+      true,
+      GameType.MCQ,
+    );
     lessonRepository.create(lesson);
   };
 

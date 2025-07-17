@@ -6,4 +6,9 @@ export abstract class ProgressionRepository extends Repository<Progression> {
     userId: string,
     gameModuleId: string,
   ): Promise<Progression | null> | Progression | null;
+
+  abstract findByUserIdAndLessonId(
+    userId: string,
+    lessonId: string,
+  ): Promise<Progression[]> | Progression[];
 }
