@@ -16,6 +16,7 @@ import { LoginResponse } from '../../response/login.response';
 import { LoginRequest } from '../../request/login.request';
 import { TokenService } from '../../../../core/domain/service/token.service';
 import { AppModule } from '../../../../app.module';
+import { UserFactory } from './utils/user.factory';
 
 describe('AuthControllerIT', () => {
   let app: INestApplication<App>;
@@ -105,11 +106,10 @@ describe('AuthControllerIT', () => {
 
     it('should return 409 for existing user', async () => {
       // Given
-      await userRepository.create({
+      const user = UserFactory.make({
         email: 'test@example.com',
-        password: 'hashedPassword',
-        type: UserType.STUDENT,
       });
+      await userRepository.create(user);
       const registerRequest = new RegisterRequest(
         'test@example.com',
         'password123',
@@ -130,12 +130,12 @@ describe('AuthControllerIT', () => {
   describe('login', () => {
     it('should login an existing user', async () => {
       // Given
-      await userRepository.create({
+      const user = UserFactory.make({
         email: 'test@example.com',
         password:
           '$2b$10$uKniZFGl/gr6.SWpifzq1ebJLN79UjKw0UcQjv.0oe6jyedaxTNqK',
-        type: UserType.STUDENT,
       });
+      await userRepository.create(user);
       const loginRequest = new LoginRequest('test@example.com', 'password123');
 
       // When
@@ -178,11 +178,10 @@ describe('AuthControllerIT', () => {
     it('should logout an existing user', async () => {
       // Given
       const accessToken = generateAccessToken(UserType.STUDENT);
-      const user = await userRepository.create({
+      const user = UserFactory.make({
         email: 'test@ritchie-invest.com',
-        password: 'hashedPassword',
-        type: UserType.STUDENT,
       });
+      await userRepository.create(user);
       const refreshToken = await refreshTokenRepository.create({
         userId: user.id,
         token: 'validRefreshToken',
