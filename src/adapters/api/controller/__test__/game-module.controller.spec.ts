@@ -22,10 +22,10 @@ import {
 import { McqModule } from '../../../../core/domain/model/McqModule';
 import { McqChoice } from '../../../../core/domain/model/McqChoice';
 import { CompleteGameModuleResponse } from '../../response/complete-game-module.response';
-import { Chapter } from '../../../../core/domain/model/Chapter';
 import { AppModule } from '../../../../app.module';
-import { Lesson } from '../../../../core/domain/model/Lesson';
 import { UpdateGameModuleRequest } from '../../request/update-game-module.request';
+import { ChapterFactory } from './utils/chapter.factory';
+import { LessonFactory } from './utils/lesson.factory';
 
 describe('GameModuleControllerIT', () => {
   let app: INestApplication<App>;
@@ -90,23 +90,11 @@ describe('GameModuleControllerIT', () => {
     it('should return game module by id as admin', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = new Chapter(
-        'chapter-1',
-        'Chapter 1',
-        'Description of Chapter 1',
-        1,
-        true,
-      );
+      const chapter = ChapterFactory.make();
       await chapterRepository.create(chapter);
-      const lesson = new Lesson(
-        'lesson-1',
-        'Lesson 1',
-        'Description of Lesson 1',
-        'chapter-1',
-        1,
-        true,
-        GameType.MCQ,
-      );
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
       await lessonRepository.create(lesson);
       const choices = [
         new McqChoice({
@@ -124,7 +112,7 @@ describe('GameModuleControllerIT', () => {
       ];
       const gameModule = new McqModule({
         id: 'module-123',
-        lessonId: 'lesson-1',
+        lessonId: lesson.id,
         question: 'What is 2 + 2?',
         choices: choices,
       });
@@ -139,7 +127,7 @@ describe('GameModuleControllerIT', () => {
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toEqual({
         id: 'module-123',
-        lessonId: 'lesson-1',
+        lessonId: lesson.id,
         details: {
           question: 'What is 2 + 2?',
           choices: [
@@ -168,23 +156,11 @@ describe('GameModuleControllerIT', () => {
       it('should return game module by id as admin', async () => {
         // Given
         const adminToken = generateAccessToken(UserType.ADMIN);
-        const chapter = new Chapter(
-          'chapter-1',
-          'Chapter 1',
-          'Description of Chapter 1',
-          1,
-          true,
-        );
+        const chapter = ChapterFactory.make();
         await chapterRepository.create(chapter);
-        const lesson = new Lesson(
-          'lesson-1',
-          'Lesson 1',
-          'Description of Lesson 1',
-          'chapter-1',
-          1,
-          true,
-          GameType.MCQ,
-        );
+        const lesson = LessonFactory.make({
+          chapterId: chapter.id,
+        });
         await lessonRepository.create(lesson);
         const choices = [
           new McqChoice({
@@ -202,7 +178,7 @@ describe('GameModuleControllerIT', () => {
         ];
         const gameModule = new McqModule({
           id: 'module-123',
-          lessonId: 'lesson-1',
+          lessonId: lesson.id,
           question: 'What is 2 + 2?',
           choices: choices,
         });
@@ -217,7 +193,7 @@ describe('GameModuleControllerIT', () => {
         expect(response.status).toBe(HttpStatus.OK);
         expect(response.body).toMatchObject({
           id: 'module-123',
-          lessonId: 'lesson-1',
+          lessonId: lesson.id,
           details: {
             question: 'What is 2 + 2?',
             choices: [
@@ -245,23 +221,11 @@ describe('GameModuleControllerIT', () => {
       it('should return game module by id as student', async () => {
         // Given
         const adminToken = generateAccessToken(UserType.STUDENT);
-        const chapter = new Chapter(
-          'chapter-1',
-          'Chapter 1',
-          'Description of Chapter 1',
-          1,
-          true,
-        );
+        const chapter = ChapterFactory.make();
         await chapterRepository.create(chapter);
-        const lesson = new Lesson(
-          'lesson-1',
-          'Lesson 1',
-          'Description of Lesson 1',
-          'chapter-1',
-          1,
-          true,
-          GameType.MCQ,
-        );
+        const lesson = LessonFactory.make({
+          chapterId: chapter.id,
+        });
         await lessonRepository.create(lesson);
         const choices = [
           new McqChoice({
@@ -279,7 +243,7 @@ describe('GameModuleControllerIT', () => {
         ];
         const gameModule = new McqModule({
           id: 'module-123',
-          lessonId: 'lesson-1',
+          lessonId: lesson.id,
           question: 'What is 2 + 2?',
           choices: choices,
         });
@@ -294,7 +258,7 @@ describe('GameModuleControllerIT', () => {
         expect(response.status).toBe(HttpStatus.OK);
         expect(response.body).toEqual({
           id: 'module-123',
-          lessonId: 'lesson-1',
+          lessonId: lesson.id,
           details: {
             question: 'What is 2 + 2?',
             choices: [
@@ -344,80 +308,41 @@ describe('GameModuleControllerIT', () => {
         expect(response.body.message).toBe('No token provided');
       });
     });
+  });
 
-    describe('updateGameModule', () => {
-      it('should create a game module for a lesson', async () => {
-        // Given
-        const adminToken = generateAccessToken(UserType.ADMIN);
-        const chapter = new Chapter(
-          'chapter-1',
-          'Chapter 1',
-          'Description of Chapter 1',
-          1,
-          true,
-        );
-        await chapterRepository.create(chapter);
-        const lesson = new Lesson(
-          'lesson-1',
-          'Lesson 1',
-          'Description of Lesson 1',
-          'chapter-1',
-          1,
-          true,
-        );
-        await lessonRepository.create(lesson);
-        const mcqModule = new McqModule({
-          id: 'module-123',
-          lessonId: 'lesson-1',
-          question: 'What is 2 + 2?',
-          choices: [
-            new McqChoice({
-              id: 'choice-1',
-              text: '4',
-              isCorrect: true,
-              correctionMessage: 'Correct!',
-            }),
-            new McqChoice({
-              id: 'choice-2',
-              text: '5',
-              isCorrect: false,
-              correctionMessage: 'Incorrect.',
-            }),
-          ],
-        });
-        const createdModule = await gameModuleRepository.create(mcqModule);
-        const updateGameModuleRequest = new UpdateGameModuleRequest(
-          GameType.MCQ,
-          {
-            question: 'What is the capital of France?',
-            choices: [
-              {
-                text: 'Paris',
-                isCorrect: true,
-                correctionMessage: 'Correct! Paris is the capital of France.',
-              },
-              {
-                text: 'London',
-                isCorrect: false,
-                correctionMessage:
-                  'Incorrect! London is not the capital of France.',
-              },
-            ],
-          },
-        );
-
-        // When
-        const response = await request(app.getHttpServer())
-          .post(`/modules/${createdModule.id}`)
-          .set('Authorization', `Bearer ${adminToken}`)
-          .send(updateGameModuleRequest);
-
-        // Then
-        const updatedModule = (await gameModuleRepository.findById(
-          createdModule.id,
-        )) as McqModule;
-        expect(updatedModule).toBeDefined();
-        expect(updatedModule).toMatchObject({
+  describe('updateGameModule', () => {
+    it('should create a game module for a lesson', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const chapter = ChapterFactory.make();
+      await chapterRepository.create(chapter);
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
+      await lessonRepository.create(lesson);
+      const mcqModule = new McqModule({
+        id: 'module-123',
+        lessonId: lesson.id,
+        question: 'What is 2 + 2?',
+        choices: [
+          new McqChoice({
+            id: 'choice-1',
+            text: '4',
+            isCorrect: true,
+            correctionMessage: 'Correct!',
+          }),
+          new McqChoice({
+            id: 'choice-2',
+            text: '5',
+            isCorrect: false,
+            correctionMessage: 'Incorrect.',
+          }),
+        ],
+      });
+      const createdModule = await gameModuleRepository.create(mcqModule);
+      const updateGameModuleRequest = new UpdateGameModuleRequest(
+        GameType.MCQ,
+        {
           question: 'What is the capital of France?',
           choices: [
             {
@@ -432,422 +357,406 @@ describe('GameModuleControllerIT', () => {
                 'Incorrect! London is not the capital of France.',
             },
           ],
-        });
-        expect(response.status).toBe(HttpStatus.CREATED);
-        expect(response.body).toMatchObject({
-          id: 'lesson-1',
-          title: 'Lesson 1',
-          description: 'Description of Lesson 1',
-          isPublished: true,
-          chapterId: 'chapter-1',
-          order: 1,
-          gameType: GameType.MCQ,
-          modules: [
-            {
-              id: 'module-123',
-              lessonId: 'lesson-1',
-              question: 'What is the capital of France?',
-              choices: [
-                {
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                  id: expect.any(String),
-                  text: 'Paris',
-                  isCorrect: true,
-                  correctionMessage: 'Correct! Paris is the capital of France.',
-                },
-                {
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                  id: expect.any(String),
-                  text: 'London',
-                  isCorrect: false,
-                  correctionMessage:
-                    'Incorrect! London is not the capital of France.',
-                },
-              ],
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              updatedAt: expect.any(String),
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              createdAt: expect.any(String),
-            },
-          ],
-        });
-      });
+        },
+      );
 
-      it('should return 404 if lesson not found', async () => {
-        // Given
-        const adminToken = generateAccessToken(UserType.ADMIN);
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/modules/${createdModule.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(updateGameModuleRequest);
 
-        // When
-        const response = await request(app.getHttpServer())
-          .post('/modules/non-existing-id')
-          .set('Authorization', `Bearer ${adminToken}`)
-          .send({ gameType: GameType.MCQ });
-
-        // Then
-        expect(response.status).toBe(HttpStatus.NOT_FOUND);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(response.body.message).toBe(
-          'Game module with id non-existing-id not found',
-        );
-      });
-
-      it('should return 401 if not authenticated', async () => {
-        // Given
-        const updateGameModuleRequest = new UpdateGameModuleRequest(
-          GameType.MCQ,
+      // Then
+      const updatedModule = (await gameModuleRepository.findById(
+        createdModule.id,
+      )) as McqModule;
+      expect(updatedModule).toBeDefined();
+      expect(updatedModule).toMatchObject({
+        question: 'What is the capital of France?',
+        choices: [
           {
-            question: 'What is 2 + 2?',
+            text: 'Paris',
+            isCorrect: true,
+            correctionMessage: 'Correct! Paris is the capital of France.',
+          },
+          {
+            text: 'London',
+            isCorrect: false,
+            correctionMessage:
+              'Incorrect! London is not the capital of France.',
+          },
+        ],
+      });
+      expect(response.status).toBe(HttpStatus.CREATED);
+      expect(response.body).toMatchObject({
+        id: lesson.id,
+        title: lesson.title,
+        description: lesson.description,
+        isPublished: lesson.isPublished,
+        chapterId: chapter.id,
+        order: lesson.order,
+        gameType: GameType.MCQ,
+        modules: [
+          {
+            id: 'module-123',
+            lessonId: lesson.id,
+            question: 'What is the capital of France?',
             choices: [
               {
-                text: '4',
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                id: expect.any(String),
+                text: 'Paris',
                 isCorrect: true,
-                correctionMessage: 'Correct!',
+                correctionMessage: 'Correct! Paris is the capital of France.',
               },
               {
-                text: '5',
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                id: expect.any(String),
+                text: 'London',
                 isCorrect: false,
-                correctionMessage: 'Incorrect.',
+                correctionMessage:
+                  'Incorrect! London is not the capital of France.',
               },
             ],
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            updatedAt: expect.any(String),
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            createdAt: expect.any(String),
           },
-        );
-
-        // When
-        const response = await request(app.getHttpServer())
-          .post(`/modules/existing-lesson-id`)
-          .send(updateGameModuleRequest);
-
-        // Then
-        expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+        ],
       });
     });
 
-    describe('completeGameModule', () => {
-      it('should return correct answer response when answer is correct', async () => {
-        // Given
-        const adminToken = generateAccessToken(UserType.ADMIN);
-        const chapter = new Chapter(
-          'chapter-1',
-          'Chapter 1',
-          'Description of Chapter 1',
-          1,
-          true,
-        );
-        await chapterRepository.create(chapter);
+    it('should return 404 if lesson not found', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
 
-        const lesson = {
-          title: 'Lesson 1',
-          description: 'Description of Lesson 1',
-          isPublished: true,
-          chapterId: 'chapter-1',
-          order: 1,
-        };
-        const createdLesson = await lessonRepository.create(lesson);
+      // When
+      const response = await request(app.getHttpServer())
+        .post('/modules/non-existing-id')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ gameType: GameType.MCQ });
 
-        const choices = [
-          new McqChoice({
-            id: 'choice-1',
-            text: 'Correct answer',
-            isCorrect: true,
-            correctionMessage: 'Well done!',
-          }),
-          new McqChoice({
-            id: 'choice-2',
-            text: 'Wrong answer',
-            isCorrect: false,
-            correctionMessage: 'Not quite right.',
-          }),
-        ];
-
-        const testGameModule = new McqModule({
-          id: 'module-456',
-          lessonId: createdLesson.id,
-          question: 'What is 2 + 2?',
-          choices: choices,
-        });
-
-        await gameModuleRepository.create(testGameModule);
-
-        const completeGameModuleRequest = new CompleteGameModuleRequest(
-          GameType.MCQ,
-          new McqAnswerRequest('choice-1'),
-        );
-
-        // When
-        const response = await request(app.getHttpServer())
-          .post(`/modules/${testGameModule.id}/complete`)
-          .set('Authorization', `Bearer ${adminToken}`)
-          .send(completeGameModuleRequest);
-
-        // Then
-        expect(response.status).toBe(HttpStatus.CREATED);
-        const responseBody = response.body as CompleteGameModuleResponse;
-        expect(responseBody.isCorrect).toBe(true);
-        expect(responseBody.feedback).toBe('Well done!');
-        expect(responseBody.nextGameModuleId).toBeNull();
-        expect(responseBody.currentGameModuleIndex).toBe(0);
-        expect(responseBody.totalGameModules).toBe(1);
-
-        const progression =
-          await progressionRepository.findByUserIdAndGameModuleId(
-            'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-            testGameModule.id,
-          );
-        expect(progression).toBeDefined();
-        expect(progression?.isCompleted).toBe(true);
-      });
-
-      it('should return incorrect answer response when answer is wrong', async () => {
-        // Given
-        const adminToken = generateAccessToken(UserType.ADMIN);
-        const chapter = new Chapter(
-          'chapter-1',
-          'Chapter 1',
-          'Description of Chapter 1',
-          1,
-          true,
-        );
-        await chapterRepository.create(chapter);
-
-        const lesson = {
-          title: 'Lesson 1',
-          description: 'Description of Lesson 1',
-          isPublished: true,
-          chapterId: 'chapter-1',
-          order: 1,
-        };
-        const createdLesson = await lessonRepository.create(lesson);
-
-        const choices = [
-          new McqChoice({
-            id: 'choice-1',
-            text: 'Correct answer',
-            isCorrect: true,
-            correctionMessage: 'Well done!',
-          }),
-          new McqChoice({
-            id: 'choice-2',
-            text: 'Wrong answer',
-            isCorrect: false,
-            correctionMessage: 'Not quite right.',
-          }),
-        ];
-
-        const testGameModule = new McqModule({
-          id: 'module-456',
-          lessonId: createdLesson.id,
-          question: 'What is 2 + 2?',
-          choices: choices,
-        });
-
-        await gameModuleRepository.create(testGameModule);
-
-        const completeGameModuleRequest = new CompleteGameModuleRequest(
-          GameType.MCQ,
-          new McqAnswerRequest('choice-2'),
-        );
-
-        // When
-        const response = await request(app.getHttpServer())
-          .post(`/modules/${testGameModule.id}/complete`)
-          .set('Authorization', `Bearer ${adminToken}`)
-          .send(completeGameModuleRequest);
-
-        // Then
-        expect(response.status).toBe(HttpStatus.CREATED);
-        const responseBody = response.body as CompleteGameModuleResponse;
-        expect(responseBody.isCorrect).toBe(false);
-        expect(responseBody.feedback).toBe('Not quite right.');
-        expect(responseBody.nextGameModuleId).toBeNull();
-        expect(responseBody.currentGameModuleIndex).toBe(0);
-        expect(responseBody.totalGameModules).toBe(1);
-
-        const progression =
-          await progressionRepository.findByUserIdAndGameModuleId(
-            'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-            testGameModule.id,
-          );
-        expect(progression).toBeNull();
-      });
-
-      it('should return 404 when module does not exist', async () => {
-        // Given
-        const adminToken = generateAccessToken(UserType.ADMIN);
-        const completeGameModuleRequest = new CompleteGameModuleRequest(
-          GameType.MCQ,
-          new McqAnswerRequest('choice-1'),
-        );
-
-        // When
-        const response = await request(app.getHttpServer())
-          .post('/modules/non-existent-module/complete')
-          .set('Authorization', `Bearer ${adminToken}`)
-          .send(completeGameModuleRequest);
-
-        // Then
-        expect(response.status).toBe(HttpStatus.NOT_FOUND);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(response.body.message).toBe(
-          'Game module with id non-existent-module not found',
-        );
-      });
-
-      it('should return 400 when choice does not exist', async () => {
-        // Given
-        const adminToken = generateAccessToken(UserType.ADMIN);
-        const chapter = new Chapter(
-          'chapter-1',
-          'Chapter 1',
-          'Description of Chapter 1',
-          1,
-          true,
-        );
-        await chapterRepository.create(chapter);
-
-        const lesson = {
-          title: 'Lesson 1',
-          description: 'Description of Lesson 1',
-          isPublished: true,
-          chapterId: 'chapter-1',
-          order: 1,
-        };
-        const createdLesson = await lessonRepository.create(lesson);
-
-        const choices = [
-          new McqChoice({
-            id: 'choice-1',
-            text: 'Correct answer',
-            isCorrect: true,
-            correctionMessage: 'Well done!',
-          }),
-          new McqChoice({
-            id: 'choice-2',
-            text: 'Wrong answer',
-            isCorrect: false,
-            correctionMessage: 'Not quite right.',
-          }),
-        ];
-
-        const testGameModule = new McqModule({
-          id: 'module-456',
-          lessonId: createdLesson.id,
-          question: 'What is 2 + 2?',
-          choices: choices,
-        });
-
-        await gameModuleRepository.create(testGameModule);
-
-        const completeGameModuleRequest = new CompleteGameModuleRequest(
-          GameType.MCQ,
-          new McqAnswerRequest('non-existent-choice'),
-        );
-
-        // When
-        const response = await request(app.getHttpServer())
-          .post(`/modules/${testGameModule.id}/complete`)
-          .set('Authorization', `Bearer ${adminToken}`)
-          .send(completeGameModuleRequest);
-
-        // Then
-        expect(response.status).toBe(HttpStatus.BAD_REQUEST);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(response.body.message).toContain('Invalid answer');
-      });
-
-      it('should return 401 if not authenticated', async () => {
-        // Given
-        const completeGameModuleRequest = new CompleteGameModuleRequest(
-          GameType.MCQ,
-          new McqAnswerRequest('choice-1'),
-        );
-
-        // When
-        const response = await request(app.getHttpServer())
-          .post('/modules/module-id/complete')
-          .send(completeGameModuleRequest);
-
-        // Then
-        expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(response.body.message).toBe('No token provided');
-      });
-
-      it('should allow student to complete game module', async () => {
-        // Given
-        const studentToken = generateAccessToken(UserType.STUDENT);
-        const chapter = new Chapter(
-          'chapter-1',
-          'Chapter 1',
-          'Description of Chapter 1',
-          1,
-          true,
-        );
-        await chapterRepository.create(chapter);
-
-        const lesson = {
-          title: 'Lesson 1',
-          description: 'Description of Lesson 1',
-          isPublished: true,
-          chapterId: 'chapter-1',
-          order: 1,
-        };
-        const createdLesson = await lessonRepository.create(lesson);
-
-        const choices = [
-          new McqChoice({
-            id: 'choice-1',
-            text: 'Correct answer',
-            isCorrect: true,
-            correctionMessage: 'Well done!',
-          }),
-          new McqChoice({
-            id: 'choice-2',
-            text: 'Wrong answer',
-            isCorrect: false,
-            correctionMessage: 'Not quite right.',
-          }),
-        ];
-
-        const testGameModule = new McqModule({
-          id: 'module-456',
-          lessonId: createdLesson.id,
-          question: 'What is 2 + 2?',
-          choices: choices,
-        });
-
-        await gameModuleRepository.create(testGameModule);
-
-        const completeGameModuleRequest = new CompleteGameModuleRequest(
-          GameType.MCQ,
-          new McqAnswerRequest('choice-1'),
-        );
-
-        // When
-        const response = await request(app.getHttpServer())
-          .post(`/modules/${testGameModule.id}/complete`)
-          .set('Authorization', `Bearer ${studentToken}`)
-          .send(completeGameModuleRequest);
-
-        // Then
-        expect(response.status).toBe(HttpStatus.CREATED);
-        const responseBody = response.body as CompleteGameModuleResponse;
-        expect(responseBody.isCorrect).toBe(true);
-        expect(responseBody.nextGameModuleId).toBeNull();
-        expect(responseBody.currentGameModuleIndex).toBe(0);
-        expect(responseBody.totalGameModules).toBe(1);
-      });
+      // Then
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        'Game module with id non-existing-id not found',
+      );
     });
 
-    afterAll(async () => {
-      await app.close();
-    });
+    it('should return 401 if not authenticated', async () => {
+      // Given
+      const updateGameModuleRequest = new UpdateGameModuleRequest(
+        GameType.MCQ,
+        {
+          question: 'What is 2 + 2?',
+          choices: [
+            {
+              text: '4',
+              isCorrect: true,
+              correctionMessage: 'Correct!',
+            },
+            {
+              text: '5',
+              isCorrect: false,
+              correctionMessage: 'Incorrect.',
+            },
+          ],
+        },
+      );
 
-    function generateAccessToken(userType: UserType): string {
-      return tokenService.generateAccessToken({
-        id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-        email: 'test@ritchie-invest.com',
-        type: userType,
-      });
-    }
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/modules/existing-lesson-id`)
+        .send(updateGameModuleRequest);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
   });
+
+  describe('completeGameModule', () => {
+    it('should return correct answer response when answer is correct', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const chapter = ChapterFactory.make();
+      await chapterRepository.create(chapter);
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
+      await lessonRepository.create(lesson);
+
+      const choices = [
+        new McqChoice({
+          id: 'choice-1',
+          text: 'Correct answer',
+          isCorrect: true,
+          correctionMessage: 'Well done!',
+        }),
+        new McqChoice({
+          id: 'choice-2',
+          text: 'Wrong answer',
+          isCorrect: false,
+          correctionMessage: 'Not quite right.',
+        }),
+      ];
+
+      const testGameModule = new McqModule({
+        id: 'module-456',
+        lessonId: lesson.id,
+        question: 'What is 2 + 2?',
+        choices: choices,
+      });
+
+      await gameModuleRepository.create(testGameModule);
+
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
+        GameType.MCQ,
+        new McqAnswerRequest('choice-1'),
+      );
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/modules/${testGameModule.id}/complete`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(completeGameModuleRequest);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.CREATED);
+      const responseBody = response.body as CompleteGameModuleResponse;
+      expect(responseBody.isCorrect).toBe(true);
+      expect(responseBody.feedback).toBe('Well done!');
+      expect(responseBody.nextGameModuleId).toBeNull();
+      expect(responseBody.currentGameModuleIndex).toBe(0);
+      expect(responseBody.totalGameModules).toBe(1);
+
+      const progression =
+        await progressionRepository.findByUserIdAndGameModuleId(
+          'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+          testGameModule.id,
+        );
+      expect(progression).toBeDefined();
+      expect(progression?.isCompleted).toBe(true);
+    });
+
+    it('should return incorrect answer response when answer is wrong', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const chapter = ChapterFactory.make();
+      await chapterRepository.create(chapter);
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
+      await lessonRepository.create(lesson);
+
+      const choices = [
+        new McqChoice({
+          id: 'choice-1',
+          text: 'Correct answer',
+          isCorrect: true,
+          correctionMessage: 'Well done!',
+        }),
+        new McqChoice({
+          id: 'choice-2',
+          text: 'Wrong answer',
+          isCorrect: false,
+          correctionMessage: 'Not quite right.',
+        }),
+      ];
+
+      const testGameModule = new McqModule({
+        id: 'module-456',
+        lessonId: lesson.id,
+        question: 'What is 2 + 2?',
+        choices: choices,
+      });
+
+      await gameModuleRepository.create(testGameModule);
+
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
+        GameType.MCQ,
+        new McqAnswerRequest('choice-2'),
+      );
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/modules/${testGameModule.id}/complete`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(completeGameModuleRequest);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.CREATED);
+      const responseBody = response.body as CompleteGameModuleResponse;
+      expect(responseBody.isCorrect).toBe(false);
+      expect(responseBody.feedback).toBe('Not quite right.');
+      expect(responseBody.nextGameModuleId).toBeNull();
+      expect(responseBody.currentGameModuleIndex).toBe(0);
+      expect(responseBody.totalGameModules).toBe(1);
+
+      const progression =
+        await progressionRepository.findByUserIdAndGameModuleId(
+          'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+          testGameModule.id,
+        );
+      expect(progression).toBeNull();
+    });
+
+    it('should return 404 when module does not exist', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
+        GameType.MCQ,
+        new McqAnswerRequest('choice-1'),
+      );
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post('/modules/non-existent-module/complete')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(completeGameModuleRequest);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        'Game module with id non-existent-module not found',
+      );
+    });
+
+    it('should return 400 when choice does not exist', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const chapter = ChapterFactory.make();
+      await chapterRepository.create(chapter);
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
+      await lessonRepository.create(lesson);
+
+      const choices = [
+        new McqChoice({
+          id: 'choice-1',
+          text: 'Correct answer',
+          isCorrect: true,
+          correctionMessage: 'Well done!',
+        }),
+        new McqChoice({
+          id: 'choice-2',
+          text: 'Wrong answer',
+          isCorrect: false,
+          correctionMessage: 'Not quite right.',
+        }),
+      ];
+
+      const testGameModule = new McqModule({
+        id: 'module-456',
+        lessonId: lesson.id,
+        question: 'What is 2 + 2?',
+        choices: choices,
+      });
+
+      await gameModuleRepository.create(testGameModule);
+
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
+        GameType.MCQ,
+        new McqAnswerRequest('non-existent-choice'),
+      );
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/modules/${testGameModule.id}/complete`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(completeGameModuleRequest);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toContain('Invalid answer');
+    });
+
+    it('should return 401 if not authenticated', async () => {
+      // Given
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
+        GameType.MCQ,
+        new McqAnswerRequest('choice-1'),
+      );
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post('/modules/module-id/complete')
+        .send(completeGameModuleRequest);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe('No token provided');
+    });
+
+    it('should allow student to complete game module', async () => {
+      // Given
+      const studentToken = generateAccessToken(UserType.STUDENT);
+      const chapter = ChapterFactory.make();
+      await chapterRepository.create(chapter);
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
+      await lessonRepository.create(lesson);
+
+      const choices = [
+        new McqChoice({
+          id: 'choice-1',
+          text: 'Correct answer',
+          isCorrect: true,
+          correctionMessage: 'Well done!',
+        }),
+        new McqChoice({
+          id: 'choice-2',
+          text: 'Wrong answer',
+          isCorrect: false,
+          correctionMessage: 'Not quite right.',
+        }),
+      ];
+
+      const testGameModule = new McqModule({
+        id: 'module-456',
+        lessonId: lesson.id,
+        question: 'What is 2 + 2?',
+        choices: choices,
+      });
+
+      await gameModuleRepository.create(testGameModule);
+
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
+        GameType.MCQ,
+        new McqAnswerRequest('choice-1'),
+      );
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/modules/${testGameModule.id}/complete`)
+        .set('Authorization', `Bearer ${studentToken}`)
+        .send(completeGameModuleRequest);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.CREATED);
+      const responseBody = response.body as CompleteGameModuleResponse;
+      expect(responseBody.isCorrect).toBe(true);
+      expect(responseBody.nextGameModuleId).toBeNull();
+      expect(responseBody.currentGameModuleIndex).toBe(0);
+      expect(responseBody.totalGameModules).toBe(1);
+    });
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  function generateAccessToken(userType: UserType): string {
+    return tokenService.generateAccessToken({
+      id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+      email: 'test@ritchie-invest.com',
+      type: userType,
+    });
+  }
 });

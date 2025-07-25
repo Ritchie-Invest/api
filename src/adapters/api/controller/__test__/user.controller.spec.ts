@@ -11,6 +11,7 @@ import { UserType } from '../../../../core/domain/type/UserType';
 import { UserRepository } from '../../../../core/domain/repository/user.repository';
 import { UpdateUserTypeRequest } from '../../request/update-user-type.request';
 import { AppModule } from '../../../../app.module';
+import { UserFactory } from './utils/user.factory';
 
 describe('UserControllerIT', () => {
   let app: INestApplication<App>;
@@ -50,32 +51,27 @@ describe('UserControllerIT', () => {
     it('should update user type successfully', async () => {
       // Given
       const accessToken = generateAccessToken(UserType.SUPERADMIN);
-      const user = await userRepository.create({
+      const existingUser = UserFactory.make({
         id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-        email: 'user@test.com',
-        type: UserType.STUDENT,
-        password: 'hashed_password',
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
-
+      await userRepository.create(existingUser);
       const updateUserTypeRequest: UpdateUserTypeRequest = {
         type: UserType.ADMIN,
       };
 
       // When
       const response = await request(app.getHttpServer())
-        .patch(`/users/${user.id}`)
+        .patch(`/users/${existingUser.id}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .send(updateUserTypeRequest);
 
       // Then
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toEqual({
-        id: user.id,
-        email: user.email,
+        id: existingUser.id,
+        email: existingUser.email,
         type: UserType.ADMIN,
-        createdAt: user.createdAt.toISOString(),
+        createdAt: existingUser.createdAt.toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         updatedAt: expect.any(String),
       });
@@ -83,20 +79,17 @@ describe('UserControllerIT', () => {
 
     it('should return 401 if user is not authenticated', async () => {
       // Given
-      const user = await userRepository.create({
+      const existingUser = UserFactory.make({
         id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-        email: 'user@test.com',
-        type: UserType.STUDENT,
-        password: 'hashed_password',
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
+      await userRepository.create(existingUser);
       const updateUserTypeRequest: UpdateUserTypeRequest = {
         type: UserType.ADMIN,
       };
+
       // When
       const response = await request(app.getHttpServer())
-        .patch(`/users/${user.id}`)
+        .patch(`/users/${existingUser.id}`)
         .send(updateUserTypeRequest);
 
       // Then
@@ -108,21 +101,17 @@ describe('UserControllerIT', () => {
     it('should return 403 if user is not a superadmin', async () => {
       // Given
       const accessToken = generateAccessToken(UserType.STUDENT);
-      const user = await userRepository.create({
+      const existingUser = UserFactory.make({
         id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-        email: 'user@test.com',
-        type: UserType.STUDENT,
-        password: 'hashed_password',
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
+      await userRepository.create(existingUser);
       const updateUserTypeRequest: UpdateUserTypeRequest = {
         type: UserType.ADMIN,
       };
 
       // When
       const response = await request(app.getHttpServer())
-        .patch(`/users/${user.id}`)
+        .patch(`/users/${existingUser.id}`)
         .set('Authorization', `Bearer ${accessToken}`)
         .send(updateUserTypeRequest);
 

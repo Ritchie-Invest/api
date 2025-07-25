@@ -13,8 +13,6 @@ import { LessonRepository } from '../../../../core/domain/repository/lesson.repo
 import { GetLessonsByChapterIdResponse } from '../../response/get-lessons-by-chapter.response';
 import { CreateLessonRequest } from '../../request/create-lesson.request';
 import { ChapterRepository } from '../../../../core/domain/repository/chapter.repository';
-import { Chapter } from '../../../../core/domain/model/Chapter';
-import { Lesson } from '../../../../core/domain/model/Lesson';
 import { UpdateLessonRequest } from '../../request/update-lesson.request';
 import { GameType } from '../../../../core/domain/type/GameType';
 import { CreateGameModuleRequest } from '../../request/create-game-module.request';
@@ -24,7 +22,9 @@ import { McqModule } from '../../../../core/domain/model/McqModule';
 import { Progression } from '../../../../core/domain/model/Progression';
 import { ProgressionRepository } from '../../../../core/domain/repository/progression.repository';
 import { UserRepository } from '../../../../core/domain/repository/user.repository';
-import { User } from '../../../../core/domain/model/User';
+import { LessonFactory } from './utils/lesson.factory';
+import { ChapterFactory } from './utils/chapter.factory';
+import { UserFactory } from './utils/user.factory';
 
 describe('LessonControllerIT', () => {
   let app: INestApplication<App>;
@@ -80,33 +80,25 @@ describe('LessonControllerIT', () => {
     it('should return lessons', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = new Chapter(
-        'chapter-1',
-        'Chapter 1',
-        'Description of Chapter 1',
-        0,
-        true,
-      );
+      const chapter = ChapterFactory.make();
       await chapterRepository.create(chapter);
-      const lesson1 = new Lesson(
-        'lesson-1',
-        'Lesson 1',
-        'Description of Lesson 1',
-        'chapter-1',
-        1,
-        true,
-        GameType.MCQ,
-      );
+      const lesson1 = LessonFactory.make({
+        id: 'lesson-1',
+        title: 'Lesson 1',
+        description: 'Description of Lesson 1',
+        chapterId: chapter.id,
+        order: 1,
+        isPublished: true,
+      });
       await lessonRepository.create(lesson1);
-      const lesson2 = new Lesson(
-        'lesson-2',
-        'Lesson 2',
-        'Description of Lesson 2',
-        'chapter-1',
-        2,
-        false,
-        GameType.MCQ,
-      );
+      const lesson2 = LessonFactory.make({
+        id: 'lesson-2',
+        title: 'Lesson 2',
+        description: 'Description of Lesson 2',
+        chapterId: chapter.id,
+        order: 2,
+        isPublished: false,
+      });
       await lessonRepository.create(lesson2);
 
       // When
@@ -123,14 +115,14 @@ describe('LessonControllerIT', () => {
         title: 'Lesson 1',
         description: 'Description of Lesson 1',
         isPublished: true,
-        chapterId: 'chapter-1',
+        chapterId: chapter.id,
         order: 1,
       });
       expect(responseBody.lessons?.[1]).toMatchObject({
         title: 'Lesson 2',
         description: 'Description of Lesson 2',
         isPublished: false,
-        chapterId: 'chapter-1',
+        chapterId: chapter.id,
         order: 2,
       });
     });
@@ -169,39 +161,27 @@ describe('LessonControllerIT', () => {
     it('should return lesson by id', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = new Chapter(
-        'chapter-1',
-        'Chapter 1',
-        'Description of Chapter 1',
-        0,
-        true,
-      );
+      const chapter = ChapterFactory.make();
       await chapterRepository.create(chapter);
-      const lesson = new Lesson(
-        'lesson-1',
-        'Lesson 1',
-        'Description of Lesson 1',
-        'chapter-1',
-        1,
-        true,
-        GameType.MCQ,
-      );
-      const createdLesson = await lessonRepository.create(lesson);
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
+      await lessonRepository.create(lesson);
 
       // When
       const response = await request(app.getHttpServer())
-        .get(`/lessons/${createdLesson.id}`)
+        .get(`/lessons/${lesson.id}`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       // Then
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toMatchObject({
-        id: createdLesson.id,
-        title: 'Lesson 1',
-        description: 'Description of Lesson 1',
-        isPublished: true,
-        chapterId: 'chapter-1',
-        order: 1,
+        id: lesson.id,
+        title: lesson.title,
+        description: lesson.description,
+        chapterId: lesson.chapterId,
+        order: lesson.order,
+        isPublished: lesson.isPublished,
       });
     });
 
@@ -256,18 +236,12 @@ describe('LessonControllerIT', () => {
     it('should create a lesson', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = new Chapter(
-        'chapter-1',
-        'Chapter 1',
-        'Description of Chapter 1',
-        0,
-        true,
-      );
+      const chapter = ChapterFactory.make();
       await chapterRepository.create(chapter);
       const lesson = new CreateLessonRequest(
         'New Lesson',
         'Description of New Lesson',
-        'chapter-1',
+        chapter.id,
         1,
         GameType.MCQ,
       );
@@ -284,7 +258,7 @@ describe('LessonControllerIT', () => {
         title: 'New Lesson',
         description: 'Description of New Lesson',
         isPublished: false,
-        chapterId: 'chapter-1',
+        chapterId: chapter.id,
       });
     });
 
@@ -294,7 +268,7 @@ describe('LessonControllerIT', () => {
       const createLessonRequest = new CreateLessonRequest(
         '',
         'Description of New Lesson',
-        'chapter-1',
+        'chapter-id',
         1,
         GameType.MCQ,
       );
@@ -316,7 +290,7 @@ describe('LessonControllerIT', () => {
       const createLessonRequest = new CreateLessonRequest(
         'New Lesson',
         'Description of New Lesson',
-        'chapter-1',
+        'chapter-id',
         1,
         GameType.MCQ,
       );
@@ -338,7 +312,7 @@ describe('LessonControllerIT', () => {
       const createLessonRequest = new CreateLessonRequest(
         'New Lesson',
         'Description of New Lesson',
-        'chapter-1',
+        'chapter-id',
         1,
         GameType.MCQ,
       );
@@ -362,24 +336,12 @@ describe('LessonControllerIT', () => {
     it('should update a chapter', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = new Chapter(
-        'chapter-1',
-        'Chapter 1',
-        'Description of Chapter 1',
-        0,
-        true,
-      );
+      const chapter = ChapterFactory.make();
       await chapterRepository.create(chapter);
-      const lesson = new Lesson(
-        'lesson-1',
-        'Lesson 1',
-        'Description of Lesson 1',
-        'chapter-1',
-        1,
-        true,
-        GameType.MCQ,
-      );
-      const createdLesson = await lessonRepository.create(lesson);
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
+      await lessonRepository.create(lesson);
       const updateLessonRequest = new UpdateLessonRequest(
         'Updated Lesson 1',
         'Updated Description of Lesson 1',
@@ -388,18 +350,18 @@ describe('LessonControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .patch(`/lessons/${createdLesson.id}`)
+        .patch(`/lessons/${lesson.id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(updateLessonRequest);
 
       // Then
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toMatchObject({
-        id: createdLesson.id,
+        id: lesson.id,
         title: 'Updated Lesson 1',
         description: 'Updated Description of Lesson 1',
         isPublished: false,
-        chapterId: 'chapter-1',
+        chapterId: chapter.id,
       });
     });
 
@@ -428,24 +390,12 @@ describe('LessonControllerIT', () => {
 
     it('should return 401 if not authenticated', async () => {
       // Given
-      const chapter = new Chapter(
-        'chapter-1',
-        'Chapter 1',
-        'Description of Chapter 1',
-        0,
-        true,
-      );
+      const chapter = ChapterFactory.make();
       await chapterRepository.create(chapter);
-      const lesson = new Lesson(
-        'lesson-1',
-        'Lesson 1',
-        'Description of Lesson 1',
-        'chapter-1',
-        1,
-        true,
-        GameType.MCQ,
-      );
-      const createdLesson = await lessonRepository.create(lesson);
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
+      await lessonRepository.create(lesson);
       const updateLessonRequest = new UpdateLessonRequest(
         'Updated Lesson 1',
         'Updated Description of Lesson 1',
@@ -454,7 +404,7 @@ describe('LessonControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .patch(`/lessons/${createdLesson.id}`)
+        .patch(`/lessons/${lesson.id}`)
         .send(updateLessonRequest);
 
       // Then
@@ -485,24 +435,12 @@ describe('LessonControllerIT', () => {
     it('should create a game module for a lesson', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const chapter = new Chapter(
-        'chapter-1',
-        'Chapter 1',
-        'Description of Chapter 1',
-        0,
-        true,
-      );
+      const chapter = ChapterFactory.make();
       await chapterRepository.create(chapter);
-      const lesson = new Lesson(
-        'lesson-1',
-        'Lesson 1',
-        'Description of Lesson 1',
-        'chapter-1',
-        1,
-        true,
-        GameType.MCQ,
-      );
-      const createdLesson = await lessonRepository.create(lesson);
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
+      await lessonRepository.create(lesson);
       const createGameModuleRequest = new CreateGameModuleRequest(
         GameType.MCQ,
         {
@@ -525,25 +463,25 @@ describe('LessonControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .post(`/lessons/${createdLesson.id}/modules`)
+        .post(`/lessons/${lesson.id}/modules`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(createGameModuleRequest);
 
       // Then
       expect(response.status).toBe(HttpStatus.CREATED);
       expect(response.body).toMatchObject({
-        id: createdLesson.id,
-        title: 'Lesson 1',
-        description: 'Description of Lesson 1',
-        isPublished: true,
-        chapterId: 'chapter-1',
-        order: 1,
+        id: lesson.id,
+        title: lesson.title,
+        description: lesson.description,
+        isPublished: lesson.isPublished,
+        chapterId: chapter.id,
+        order: lesson.order,
         gameType: GameType.MCQ,
         modules: [
           {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             id: expect.any(String),
-            lessonId: createdLesson.id,
+            lessonId: lesson.id,
             question: 'What is the capital of France?',
             choices: [
               {
@@ -587,28 +525,16 @@ describe('LessonControllerIT', () => {
 
     it('should return 401 if not authenticated', async () => {
       // Given
-      const chapter = new Chapter(
-        'chapter-1',
-        'Chapter 1',
-        'Description of Chapter 1',
-        0,
-        true,
-      );
+      const chapter = ChapterFactory.make();
       await chapterRepository.create(chapter);
-      const lesson = new Lesson(
-        'lesson-1',
-        'Lesson 1',
-        'Description of Lesson 1',
-        'chapter-1',
-        1,
-        true,
-        GameType.MCQ,
-      );
-      const createdLesson = await lessonRepository.create(lesson);
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
+      await lessonRepository.create(lesson);
 
       // When
       const response = await request(app.getHttpServer())
-        .post(`/lessons/${createdLesson.id}/modules`)
+        .post(`/lessons/${lesson.id}/modules`)
         .send({ gameType: GameType.MCQ });
 
       // Then
@@ -620,34 +546,19 @@ describe('LessonControllerIT', () => {
     it('should complete a lesson', async () => {
       // Given
       const adminToken = generateAccessToken(UserType.ADMIN);
-      const user = new User(
-        'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-        'test@ritchie.com',
-        'password',
-        UserType.STUDENT,
-      );
+      const user = UserFactory.make({
+        id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+      });
       await userRepository.create(user);
-      const chapter = new Chapter(
-        'chapter-1',
-        'Chapter 1',
-        'Description of Chapter 1',
-        0,
-        true,
-      );
+      const chapter = ChapterFactory.make();
       await chapterRepository.create(chapter);
-      const lesson = new Lesson(
-        'lesson-1',
-        'Lesson 1',
-        'Description of Lesson 1',
-        'chapter-1',
-        1,
-        true,
-        GameType.MCQ,
-      );
-      const createdLesson = await lessonRepository.create(lesson);
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
+      await lessonRepository.create(lesson);
       const gameModule1 = new McqModule({
         id: 'module-1',
-        lessonId: createdLesson.id,
+        lessonId: lesson.id,
         question: 'What is the capital of France?',
         choices: [
           {
@@ -668,7 +579,7 @@ describe('LessonControllerIT', () => {
       await gameModuleRepository.create(gameModule1);
       const gameModule2 = new McqModule({
         id: 'module-2',
-        lessonId: createdLesson.id,
+        lessonId: lesson.id,
         question: 'What is 2+2?',
         choices: [
           {
@@ -688,7 +599,7 @@ describe('LessonControllerIT', () => {
       await gameModuleRepository.create(gameModule2);
       const gameModule3 = new McqModule({
         id: 'module-3',
-        lessonId: createdLesson.id,
+        lessonId: lesson.id,
         question: 'What is 3+3?',
         choices: [
           {
@@ -716,7 +627,7 @@ describe('LessonControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .post(`/lessons/${createdLesson.id}/complete`)
+        .post(`/lessons/${lesson.id}/complete`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       // Then
