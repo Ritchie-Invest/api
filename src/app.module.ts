@@ -50,6 +50,11 @@ import { GetUserChaptersUseCase } from './core/usecases/get-user-chapters.use-ca
 import { GetGameModuleByIdUseCase } from './core/usecases/get-game-module-by-id.use-case';
 import { UpdateGameModuleUseCase } from './core/usecases/update-game-module.use-case';
 import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case';
+import { PrismaLessonAttemptRepository } from './adapters/prisma/prisma-lesson-attempt.repository';
+import { LessonAttemptRepository } from './core/domain/repository/lesson-attempt.repository';
+import { PrismaModuleAttemptRepository } from './adapters/prisma/prisma-module-attempt.repository';
+import { PrismaLessonCompletionRepository } from './adapters/prisma/prisma-lesson-completion.repository';
+import { ModuleAttemptRepository } from './core/domain/repository/module-attempt.repository';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -120,6 +125,24 @@ import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case'
       provide: ProgressionRepository,
       useFactory: (prisma: PrismaService) =>
         new PrismaProgressionRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'LessonAttemptRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaLessonAttemptRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'ModuleAttemptRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaModuleAttemptRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'LessonCompletionRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaLessonCompletionRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -237,21 +260,24 @@ import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case'
       provide: CompleteGameModuleUseCase,
       useFactory: (
         gameModuleRepository: GameModuleRepository,
-        progressionRepository: ProgressionRepository,
         lessonRepository: LessonRepository,
         strategyFactory: CompleteGameModuleStrategyFactory,
+        lessonAttemptRepository: LessonAttemptRepository,
+        moduleAttemptRepository: ModuleAttemptRepository,
       ) =>
         new CompleteGameModuleUseCase(
           gameModuleRepository,
-          progressionRepository,
           lessonRepository,
           strategyFactory,
+          lessonAttemptRepository,
+          moduleAttemptRepository,
         ),
       inject: [
         GameModuleRepository,
-        ProgressionRepository,
         LessonRepository,
         'CompleteGameModuleStrategyFactory',
+        'LessonAttemptRepository',
+        'ModuleAttemptRepository',
       ],
     },
     {
@@ -281,10 +307,23 @@ import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case'
     {
       provide: CompleteLessonUseCase,
       useFactory: (
-        progressionRepository: ProgressionRepository,
         lessonRepository: LessonRepository,
-      ) => new CompleteLessonUseCase(progressionRepository, lessonRepository),
-      inject: [ProgressionRepository, LessonRepository],
+        lessonCompletionRepository: PrismaLessonCompletionRepository,
+        lessonAttemptRepository: LessonAttemptRepository,
+        moduleAttemptRepository: ModuleAttemptRepository,
+      ) =>
+        new CompleteLessonUseCase(
+          lessonRepository,
+          lessonCompletionRepository,
+          lessonAttemptRepository,
+          moduleAttemptRepository,
+        ),
+      inject: [
+        LessonRepository,
+        'LessonCompletionRepository',
+        'LessonAttemptRepository',
+        'ModuleAttemptRepository',
+      ],
     },
   ],
 })

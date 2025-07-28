@@ -13,6 +13,10 @@ export class CompleteLessonMapper {
   }
 
   static fromDomain(result: CompleteLessonResult): CompleteLessonResponse {
-    return new CompleteLessonResponse(result.score, result.totalGameModules);
+    return new CompleteLessonResponse(
+      result.completedGameModules,
+      result.totalGameModules,
+      result.isCompleted,
+    );
   }
 }
