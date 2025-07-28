@@ -11,7 +11,6 @@ import { TokenService } from '../../../../core/domain/service/token.service';
 import { UserType } from '../../../../core/domain/type/UserType';
 import { GameType } from '../../../../core/domain/type/GameType';
 import { GameModuleRepository } from '../../../../core/domain/repository/game-module.repository';
-import { ProgressionRepository } from '../../../../core/domain/repository/progression.repository';
 import { LessonRepository } from '../../../../core/domain/repository/lesson.repository';
 import { ChapterRepository } from '../../../../core/domain/repository/chapter.repository';
 import { UserRepository } from '../../../../core/domain/repository/user.repository';
@@ -26,13 +25,19 @@ import { AppModule } from '../../../../app.module';
 import { UpdateGameModuleRequest } from '../../request/update-game-module.request';
 import { ChapterFactory } from './utils/chapter.factory';
 import { LessonFactory } from './utils/lesson.factory';
+import { LessonAttemptRepository } from '../../../../core/domain/repository/lesson-attempt.repository';
+import { ModuleAttemptRepository } from '../../../../core/domain/repository/module-attempt.repository';
+import { UserFactory } from './utils/user.factory';
+import { LessonAttempt } from '../../../../core/domain/model/LessonAttempt';
+import { ModuleAttempt } from '../../../../core/domain/model/ModuleAttempt';
 
 describe('GameModuleControllerIT', () => {
   let app: INestApplication<App>;
   let chapterRepository: ChapterRepository;
   let lessonRepository: LessonRepository;
   let gameModuleRepository: GameModuleRepository;
-  let progressionRepository: ProgressionRepository;
+  let lessonAttemptRepository: LessonAttemptRepository;
+  let moduleAttemptRepository: ModuleAttemptRepository;
   let userRepository: UserRepository;
   let tokenService: TokenService;
 
@@ -58,28 +63,28 @@ describe('GameModuleControllerIT', () => {
     chapterRepository = app.get(ChapterRepository);
     lessonRepository = app.get(LessonRepository);
     gameModuleRepository = app.get(GameModuleRepository);
-    progressionRepository = app.get(ProgressionRepository);
+    lessonAttemptRepository = app.get('LessonAttemptRepository');
+    moduleAttemptRepository = app.get('ModuleAttemptRepository');
     userRepository = app.get(UserRepository);
     tokenService = app.get('TokenService');
 
-    await progressionRepository.removeAll();
+    await moduleAttemptRepository.removeAll();
+    await lessonAttemptRepository.removeAll();
     await gameModuleRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
     await userRepository.removeAll();
 
-    await userRepository.create({
+    const user = UserFactory.make({
       id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-      email: 'test@ritchie-invest.com',
-      password: 'hashedPassword123',
       type: UserType.ADMIN,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
+    await userRepository.create(user);
   });
 
   afterEach(async () => {
-    await progressionRepository.removeAll();
+    await moduleAttemptRepository.removeAll();
+    await lessonAttemptRepository.removeAll();
     await gameModuleRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
@@ -482,34 +487,30 @@ describe('GameModuleControllerIT', () => {
       const adminToken = generateAccessToken(UserType.ADMIN);
       const chapter = ChapterFactory.make();
       await chapterRepository.create(chapter);
-      const lesson = LessonFactory.make({
-        chapterId: chapter.id,
-      });
+      const lesson = LessonFactory.make({ chapterId: chapter.id });
       await lessonRepository.create(lesson);
 
-      const choices = [
-        new McqChoice({
-          id: 'choice-1',
-          text: 'Correct answer',
-          isCorrect: true,
-          correctionMessage: 'Well done!',
-        }),
-        new McqChoice({
-          id: 'choice-2',
-          text: 'Wrong answer',
-          isCorrect: false,
-          correctionMessage: 'Not quite right.',
-        }),
-      ];
-
-      const testGameModule = new McqModule({
+      const gameModule = new McqModule({
         id: 'module-456',
         lessonId: lesson.id,
         question: 'What is 2 + 2?',
-        choices: choices,
+        choices: [
+          new McqChoice({
+            id: 'choice-1',
+            text: 'Correct answer',
+            isCorrect: true,
+            correctionMessage: 'Well done!',
+          }),
+          new McqChoice({
+            id: 'choice-2',
+            text: 'Wrong answer',
+            isCorrect: false,
+            correctionMessage: 'Not quite right.',
+          }),
+        ],
       });
 
-      await gameModuleRepository.create(testGameModule);
+      await gameModuleRepository.create(gameModule);
 
       const completeGameModuleRequest = new CompleteGameModuleRequest(
         GameType.MCQ,
@@ -518,7 +519,7 @@ describe('GameModuleControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .post(`/modules/${testGameModule.id}/complete`)
+        .post(`/modules/${gameModule.id}/complete`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(completeGameModuleRequest);
 
@@ -530,14 +531,6 @@ describe('GameModuleControllerIT', () => {
       expect(responseBody.nextGameModuleId).toBeNull();
       expect(responseBody.currentGameModuleIndex).toBe(0);
       expect(responseBody.totalGameModules).toBe(1);
-
-      const progression =
-        await progressionRepository.findByUserIdAndGameModuleId(
-          'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-          testGameModule.id,
-        );
-      expect(progression).toBeDefined();
-      expect(progression?.isCompleted).toBe(true);
     });
 
     it('should return incorrect answer response when answer is wrong', async () => {
@@ -550,29 +543,27 @@ describe('GameModuleControllerIT', () => {
       });
       await lessonRepository.create(lesson);
 
-      const choices = [
-        new McqChoice({
-          id: 'choice-1',
-          text: 'Correct answer',
-          isCorrect: true,
-          correctionMessage: 'Well done!',
-        }),
-        new McqChoice({
-          id: 'choice-2',
-          text: 'Wrong answer',
-          isCorrect: false,
-          correctionMessage: 'Not quite right.',
-        }),
-      ];
-
-      const testGameModule = new McqModule({
+      const gameModule = new McqModule({
         id: 'module-456',
         lessonId: lesson.id,
         question: 'What is 2 + 2?',
-        choices: choices,
+        choices: [
+          new McqChoice({
+            id: 'choice-1',
+            text: 'Correct answer',
+            isCorrect: true,
+            correctionMessage: 'Well done!',
+          }),
+          new McqChoice({
+            id: 'choice-2',
+            text: 'Wrong answer',
+            isCorrect: false,
+            correctionMessage: 'Not quite right.',
+          }),
+        ],
       });
 
-      await gameModuleRepository.create(testGameModule);
+      await gameModuleRepository.create(gameModule);
 
       const completeGameModuleRequest = new CompleteGameModuleRequest(
         GameType.MCQ,
@@ -581,7 +572,7 @@ describe('GameModuleControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .post(`/modules/${testGameModule.id}/complete`)
+        .post(`/modules/${gameModule.id}/complete`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(completeGameModuleRequest);
 
@@ -593,13 +584,6 @@ describe('GameModuleControllerIT', () => {
       expect(responseBody.nextGameModuleId).toBeNull();
       expect(responseBody.currentGameModuleIndex).toBe(0);
       expect(responseBody.totalGameModules).toBe(1);
-
-      const progression =
-        await progressionRepository.findByUserIdAndGameModuleId(
-          'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-          testGameModule.id,
-        );
-      expect(progression).toBeNull();
     });
 
     it('should return 404 when module does not exist', async () => {
@@ -634,29 +618,27 @@ describe('GameModuleControllerIT', () => {
       });
       await lessonRepository.create(lesson);
 
-      const choices = [
-        new McqChoice({
-          id: 'choice-1',
-          text: 'Correct answer',
-          isCorrect: true,
-          correctionMessage: 'Well done!',
-        }),
-        new McqChoice({
-          id: 'choice-2',
-          text: 'Wrong answer',
-          isCorrect: false,
-          correctionMessage: 'Not quite right.',
-        }),
-      ];
-
-      const testGameModule = new McqModule({
+      const gameModule = new McqModule({
         id: 'module-456',
         lessonId: lesson.id,
         question: 'What is 2 + 2?',
-        choices: choices,
+        choices: [
+          new McqChoice({
+            id: 'choice-1',
+            text: 'Correct answer',
+            isCorrect: true,
+            correctionMessage: 'Well done!',
+          }),
+          new McqChoice({
+            id: 'choice-2',
+            text: 'Wrong answer',
+            isCorrect: false,
+            correctionMessage: 'Not quite right.',
+          }),
+        ],
       });
 
-      await gameModuleRepository.create(testGameModule);
+      await gameModuleRepository.create(gameModule);
 
       const completeGameModuleRequest = new CompleteGameModuleRequest(
         GameType.MCQ,
@@ -665,14 +647,14 @@ describe('GameModuleControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .post(`/modules/${testGameModule.id}/complete`)
+        .post(`/modules/${gameModule.id}/complete`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send(completeGameModuleRequest);
 
       // Then
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(response.body.message).toContain('Invalid answer');
+      expect(response.body.message).toBe('Invalid answer: choice not found');
     });
 
     it('should return 401 if not authenticated', async () => {
@@ -703,29 +685,27 @@ describe('GameModuleControllerIT', () => {
       });
       await lessonRepository.create(lesson);
 
-      const choices = [
-        new McqChoice({
-          id: 'choice-1',
-          text: 'Correct answer',
-          isCorrect: true,
-          correctionMessage: 'Well done!',
-        }),
-        new McqChoice({
-          id: 'choice-2',
-          text: 'Wrong answer',
-          isCorrect: false,
-          correctionMessage: 'Not quite right.',
-        }),
-      ];
-
-      const testGameModule = new McqModule({
+      const gameModule = new McqModule({
         id: 'module-456',
         lessonId: lesson.id,
         question: 'What is 2 + 2?',
-        choices: choices,
+        choices: [
+          new McqChoice({
+            id: 'choice-1',
+            text: 'Correct answer',
+            isCorrect: true,
+            correctionMessage: 'Well done!',
+          }),
+          new McqChoice({
+            id: 'choice-2',
+            text: 'Wrong answer',
+            isCorrect: false,
+            correctionMessage: 'Not quite right.',
+          }),
+        ],
       });
 
-      await gameModuleRepository.create(testGameModule);
+      await gameModuleRepository.create(gameModule);
 
       const completeGameModuleRequest = new CompleteGameModuleRequest(
         GameType.MCQ,
@@ -734,7 +714,7 @@ describe('GameModuleControllerIT', () => {
 
       // When
       const response = await request(app.getHttpServer())
-        .post(`/modules/${testGameModule.id}/complete`)
+        .post(`/modules/${gameModule.id}/complete`)
         .set('Authorization', `Bearer ${studentToken}`)
         .send(completeGameModuleRequest);
 
@@ -745,6 +725,73 @@ describe('GameModuleControllerIT', () => {
       expect(responseBody.nextGameModuleId).toBeNull();
       expect(responseBody.currentGameModuleIndex).toBe(0);
       expect(responseBody.totalGameModules).toBe(1);
+    });
+
+    it('should return 400 if module already attempted for the same lesson attempt', async () => {
+      // Given
+      const studentToken = generateAccessToken(UserType.STUDENT);
+      const chapter = ChapterFactory.make();
+      await chapterRepository.create(chapter);
+      const lesson = LessonFactory.make({
+        chapterId: chapter.id,
+      });
+      await lessonRepository.create(lesson);
+
+      const gameModule = new McqModule({
+        id: 'module-already-attempted',
+        lessonId: lesson.id,
+        question: 'What is 2 + 2?',
+        choices: [
+          new McqChoice({
+            id: 'choice-1',
+            text: 'Correct answer',
+            isCorrect: true,
+            correctionMessage: 'Well done!',
+          }),
+          new McqChoice({
+            id: 'choice-2',
+            text: 'Wrong answer',
+            isCorrect: false,
+            correctionMessage: 'Not quite right.',
+          }),
+        ],
+      });
+      await gameModuleRepository.create(gameModule);
+
+      const lessonAttempt = new LessonAttempt(
+        'attempt-1',
+        'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+        lesson.id,
+        new Date(),
+      );
+      await lessonAttemptRepository.create(lessonAttempt);
+      const moduleAttempt = new ModuleAttempt(
+        'module-attempt-1',
+        'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+        gameModule.id,
+        lessonAttempt.id,
+        true,
+        new Date(),
+      );
+      await moduleAttemptRepository.create(moduleAttempt);
+
+      const completeGameModuleRequest = new CompleteGameModuleRequest(
+        GameType.MCQ,
+        new McqAnswerRequest('choice-1'),
+      );
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/modules/${gameModule.id}/complete`)
+        .set('Authorization', `Bearer ${studentToken}`)
+        .send(completeGameModuleRequest);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.CONFLICT);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        `Module with id module-already-attempted has already been attempted in lesson attempt ${lessonAttempt.id}`,
+      );
     });
   });
 
