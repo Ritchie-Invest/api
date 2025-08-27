@@ -1,25 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import { UseCase } from '../base/use-case';
-import {
-  ChapterRepository,
-  ChapterData,
-  LessonData,
-  ModuleData,
-} from '../domain/repository/chapter.repository';
+import { ChapterRepository } from '../domain/repository/chapter.repository';
 import { InvalidUserError } from '../domain/error/InvalidUserError';
-import { Chapter } from '../domain/model/Chapter';
-import { Lesson } from '../domain/model/Lesson';
-import { GameType } from '../domain/type/GameType';
-import { ChapterSummary } from '../domain/model/ChapterSummary';
-import { LessonSummary } from '../domain/model/LessonSummary';
+import { ChapterWithLessons } from '../domain/model/ChapterWithLessons';
+import { LessonWithFirstGameModule } from '../domain/model/LessonWithFirstGameModule';
+import { ChapterStatus } from '../domain/type/ChapterStatus';
+import { LessonStatus } from '../domain/type/LessonStatus';
 
 export type GetUserChaptersCommand = {
   userId: string;
 };
 
-export type GetUserChaptersResult = {
-  chapters: ChapterSummary[];
+export type LessonSummary = {
+  id: string;
+  title: string;
+  description: string;
+  order: number;
+  status: LessonStatus;
+  gameModuleId: string | null;
 };
+
+export type ChapterSummary = {
+  id: string;
+  title: string;
+  description: string;
+  order: number;
+  status: ChapterStatus;
+  completedLessons: number;
+  totalLessons: number;
+  lessons: LessonSummary[];
+};
+
+export type GetUserChaptersResult = ChapterSummary[];
 
 @Injectable()
 export class GetUserChaptersUseCase
@@ -27,10 +39,6 @@ export class GetUserChaptersUseCase
 {
   constructor(private readonly chapterRepository: ChapterRepository) {}
 
-  /*
-   * Point d'entrée principal du use case qui retourne tous les chapitres avec leurs leçons
-   * pour un utilisateur, en calculant l'état de progression et de déverrouillage.
-   */
   async execute(
     command: GetUserChaptersCommand,
   ): Promise<GetUserChaptersResult> {
@@ -38,202 +46,110 @@ export class GetUserChaptersUseCase
       throw new InvalidUserError('User ID is required');
     }
 
-    const chaptersData = await this.chapterRepository.findAllWithLessonsDetails(
+    const chaptersWithLessons = await this.chapterRepository.findAllWithDetails(
       command.userId,
     );
 
-    const chaptersWithDetails: ChapterSummary[] = [];
+    const chaptersSummaries: ChapterSummary[] = [];
 
-    for (let i = 0; i < chaptersData.length; i++) {
-      const chapterData = chaptersData[i];
-      if (!chapterData) continue;
+    for (let i = 0; i < chaptersWithLessons.length; i++) {
+      const chapterWithLessons = chaptersWithLessons[i];
+      if (!chapterWithLessons) continue;
 
-      const isChapterUnlocked = this.isChapterUnlocked(i, chaptersData);
+      const isChapterUnlocked = this.isChapterUnlocked(i, chaptersWithLessons);
 
       const processedLessons = this.processLessons(
-        chapterData.lessons,
-        i,
-        chaptersData,
-      );
-
-      const chapter = new Chapter(
-        chapterData.id,
-        chapterData.title,
-        chapterData.description,
-        chapterData.order,
-      );
-
-      const chapterSummary = new ChapterSummary(
-        chapter,
+        chapterWithLessons.lessons,
         isChapterUnlocked,
-        processedLessons.completedLessonsCount,
-        chapterData.lessons.length,
-        processedLessons.lessonSummaries,
       );
-
-      chaptersWithDetails.push(chapterSummary);
+      chaptersSummaries.push({
+        id: chapterWithLessons.id,
+        title: chapterWithLessons.title,
+        description: chapterWithLessons.description,
+        order: chapterWithLessons.order,
+        status: this.getChapterStatus(chapterWithLessons, isChapterUnlocked),
+        completedLessons: processedLessons.filter(
+          (lesson) => lesson.status === LessonStatus.COMPLETED,
+        ).length,
+        totalLessons: chapterWithLessons.lessons.length,
+        lessons: processedLessons,
+      });
     }
 
-    return {
-      chapters: chaptersWithDetails,
-    };
+    return chaptersSummaries;
   }
 
-  /*
-   * Traite toutes les leçons d'un chapitre pour calculer leur état
-   * et retourne à la fois les résumés de leçons et le nombre de leçons complétées.
-   */
   private processLessons(
-    lessons: LessonData[],
-    chapterIndex: number,
-    chaptersData: ChapterData[],
-  ): { lessonSummaries: LessonSummary[]; completedLessonsCount: number } {
+    lessons: LessonWithFirstGameModule[],
+    isChapterUnlocked: boolean,
+  ) {
     const lessonSummaries: LessonSummary[] = [];
-    let completedLessonsCount = 0;
 
-    for (let j = 0; j < lessons.length; j++) {
-      const lessonData = lessons[j];
-      if (!lessonData) continue;
-
-      const { completedModules, totalModules } = this.calculateModulesProgress(
-        lessonData.modules,
-      );
-      const isLessonCompleted = this.isLessonCompleted(
-        completedModules,
-        totalModules,
-      );
-
-      if (isLessonCompleted) {
-        completedLessonsCount++;
+    for (let i = 0; i < lessons.length; i++) {
+      const lesson = lessons[i];
+      if (!lesson) {
+        continue;
       }
 
       const isLessonUnlocked = this.isLessonUnlocked(
-        j,
-        chapterIndex,
-        chaptersData,
         lessons,
+        i,
+        isChapterUnlocked,
       );
 
-      const gameModuleId =
-        lessonData.modules.length > 0
-          ? lessonData.modules[0]?.id || null
-          : null;
-
-      const lesson = new Lesson(
-        lessonData.id,
-        lessonData.title,
-        lessonData.description,
-        '',
-        lessonData.order,
-        false,
-        GameType.MCQ,
-      );
-
-      const lessonSummary = new LessonSummary(
-        lesson,
-        isLessonUnlocked,
-        completedModules,
-        totalModules,
-        gameModuleId,
-      );
-
-      lessonSummaries.push(lessonSummary);
+      lessonSummaries.push({
+        id: lesson.id,
+        title: lesson.title,
+        description: lesson.description,
+        order: lesson.order,
+        status: this.getLessonStatus(isLessonUnlocked, lesson.isCompleted),
+        gameModuleId: lesson.gameModuleId,
+      });
     }
 
-    return { lessonSummaries, completedLessonsCount };
+    return lessonSummaries;
   }
 
-  /*
-   * Calcule la progression des modules en comptant le nombre total et le nombre
-   * de modules complétés pour une leçon donnée.
-   */
-  private calculateModulesProgress(modules: ModuleData[]): {
-    completedModules: number;
-    totalModules: number;
-  } {
-    const completedModules = modules.filter((module) =>
-      module.Progression.some((prog) => prog.isCompleted),
-    ).length;
-
-    const totalModules = modules.length;
-
-    return { completedModules, totalModules };
-  }
-
-  /*
-   * Détermine si une leçon est considérée comme complétée en vérifiant
-   * si tous les modules sont terminés et s'il y a au moins un module.
-   */
-  private isLessonCompleted(
-    completedModules: number,
-    totalModules: number,
-  ): boolean {
-    return totalModules > 0 && completedModules === totalModules;
-  }
-
-  /*
-   * Vérifie si une leçon est déverrouillée selon les règles suivantes:
-   * - La première leçon d'un chapitre est déverrouillée si c'est le premier chapitre ou si le chapitre précédent est complété
-   * - Les autres leçons sont déverrouillées si la leçon précédente dans le même chapitre est complétée
-   */
   private isLessonUnlocked(
+    lessons: LessonWithFirstGameModule[],
     lessonIndex: number,
-    chapterIndex: number,
-    chaptersData: ChapterData[],
-    lessons: LessonData[],
+    isChapterUnlocked: boolean,
   ): boolean {
-    if (lessonIndex === 0) {
-      const previousChapter = chaptersData[chapterIndex - 1];
-      return (
-        chapterIndex === 0 ||
-        (previousChapter ? this.isChapterCompleted(previousChapter) : false)
-      );
-    } else {
-      const previousLessonData = lessons[lessonIndex - 1];
-      if (!previousLessonData) return false;
-
-      const { completedModules, totalModules } = this.calculateModulesProgress(
-        previousLessonData.modules,
-      );
-      return this.isLessonCompleted(completedModules, totalModules);
-    }
-  }
-
-  /*
-   * Détermine si un chapitre est déverrouillé:
-   * - Le premier chapitre est toujours déverrouillé
-   * - Les chapitres suivants sont déverrouillés si le chapitre précédent est complété
-   */
-  private isChapterUnlocked(
-    chapterIndex: number,
-    chaptersData: ChapterData[],
-  ): boolean {
-    const previousChapter = chaptersData[chapterIndex - 1];
+    const previousLesson = lessons[lessonIndex - 1];
     return (
-      chapterIndex === 0 ||
-      (previousChapter ? this.isChapterCompleted(previousChapter) : false)
+      (lessonIndex === 0 || previousLesson?.isCompleted || false) &&
+      isChapterUnlocked
     );
   }
 
-  /*
-   * Vérifie si un chapitre est complété en s'assurant que toutes ses leçons sont complétées.
-   * Un chapitre est complété seulement si toutes ses leçons ont tous leurs modules complétés.
-   */
-  private isChapterCompleted(chapterData: ChapterData): boolean {
-    if (!chapterData?.lessons || chapterData.lessons.length === 0) {
-      return false;
+  private isChapterUnlocked(
+    chapterIndex: number,
+    chaptersWithLessons: ChapterWithLessons[],
+  ): boolean {
+    const previousChapter = chaptersWithLessons[chapterIndex - 1];
+    return chapterIndex === 0 || previousChapter?.isCompleted() || false;
+  }
+
+  private getLessonStatus(
+    isLessonUnlocked: boolean,
+    isLessonCompleted: boolean,
+  ): LessonStatus {
+    if (isLessonCompleted) {
+      return LessonStatus.COMPLETED;
     }
+    return isLessonUnlocked ? LessonStatus.UNLOCKED : LessonStatus.LOCKED;
+  }
 
-    return chapterData.lessons.every((lessonData) => {
-      if (!lessonData?.modules || lessonData.modules.length === 0) {
-        return false;
-      }
-
-      const completedModules = lessonData.modules.filter((module) =>
-        module.Progression.some((prog) => prog.isCompleted),
-      ).length;
-
-      return completedModules === lessonData.modules.length;
-    });
+  private getChapterStatus(
+    chapter: ChapterWithLessons,
+    isChapterUnlocked: boolean,
+  ): ChapterStatus {
+    if (chapter.isCompleted()) {
+      return ChapterStatus.COMPLETED;
+    }
+    if (chapter.isInProgress()) {
+      return ChapterStatus.IN_PROGRESS;
+    }
+    return isChapterUnlocked ? ChapterStatus.UNLOCKED : ChapterStatus.LOCKED;
   }
 }

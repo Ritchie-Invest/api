@@ -17,14 +17,14 @@ export class GetUserChaptersMapper {
   }
 
   static fromDomain(result: GetUserChaptersResult): GetUserChaptersResponse {
-    const chapters = result.chapters.map(
+    const chapters = result.map(
       (chapter) =>
         new ChapterSummaryResponse(
           chapter.id,
           chapter.title,
           chapter.description,
           chapter.order,
-          chapter.isUnlocked,
+          chapter.status,
           chapter.completedLessons,
           chapter.totalLessons,
           chapter.lessons.map(
@@ -34,9 +34,7 @@ export class GetUserChaptersMapper {
                 lesson.title,
                 lesson.description,
                 lesson.order ?? 0,
-                lesson.isUnlocked,
-                lesson.completedModules,
-                lesson.totalModules,
+                lesson.status,
                 lesson.gameModuleId,
               ),
           ),

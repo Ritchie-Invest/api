@@ -1,35 +1,10 @@
 import { Repository } from '../../base/repository';
 import { Chapter } from '../model/Chapter';
 import { ChapterOrderConflictError } from '../error/ChapterOrderConflictError';
-
-export type ProgressionData = {
-  isCompleted: boolean;
-  userId: string;
-};
-
-export type ModuleData = {
-  id: string;
-  Progression: ProgressionData[];
-};
-
-export type LessonData = {
-  id: string;
-  title: string;
-  description: string;
-  order: number;
-  modules: ModuleData[];
-};
-
-export type ChapterData = {
-  id: string;
-  title: string;
-  description: string;
-  order: number;
-  lessons: LessonData[];
-};
+import { ChapterWithLessons } from '../model/ChapterWithLessons';
 
 export abstract class ChapterRepository extends Repository<Chapter> {
-  abstract findAllWithLessonsDetails(userId: string): Promise<ChapterData[]>;
+  abstract findAllWithDetails(userId: string): Promise<ChapterWithLessons[]>;
 
   async validateUniqueOrder(
     order: number,
