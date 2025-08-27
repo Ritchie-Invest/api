@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ChapterStatus } from '../../../core/domain/type/ChapterStatus';
+import { LessonStatus } from '../../../core/domain/type/LessonStatus';
 
 export class LessonSummaryResponse {
   @ApiProperty()
@@ -13,14 +15,8 @@ export class LessonSummaryResponse {
   @ApiProperty()
   order: number;
 
-  @ApiProperty()
-  isUnlocked: boolean;
-
-  @ApiProperty()
-  completedModules: number;
-
-  @ApiProperty()
-  totalModules: number;
+  @ApiProperty({ enum: LessonStatus })
+  status: LessonStatus;
 
   @ApiProperty({ nullable: true })
   gameModuleId: string | null;
@@ -30,18 +26,14 @@ export class LessonSummaryResponse {
     title: string,
     description: string,
     order: number,
-    isUnlocked: boolean,
-    completedModules: number,
-    totalModules: number,
+    status: LessonStatus,
     gameModuleId: string | null = null,
   ) {
     this.id = id;
     this.title = title;
     this.description = description;
     this.order = order;
-    this.isUnlocked = isUnlocked;
-    this.completedModules = completedModules;
-    this.totalModules = totalModules;
+    this.status = status;
     this.gameModuleId = gameModuleId;
   }
 }
@@ -59,8 +51,8 @@ export class ChapterSummaryResponse {
   @ApiProperty()
   order: number;
 
-  @ApiProperty()
-  isUnlocked: boolean;
+  @ApiProperty({ enum: ChapterStatus })
+  status: ChapterStatus;
 
   @ApiProperty()
   completedLessons: number;
@@ -76,7 +68,7 @@ export class ChapterSummaryResponse {
     title: string,
     description: string,
     order: number,
-    isUnlocked: boolean,
+    status: ChapterStatus,
     completedLessons: number,
     totalLessons: number,
     lessons: LessonSummaryResponse[],
@@ -85,7 +77,7 @@ export class ChapterSummaryResponse {
     this.title = title;
     this.description = description;
     this.order = order;
-    this.isUnlocked = isUnlocked;
+    this.status = status;
     this.completedLessons = completedLessons;
     this.totalLessons = totalLessons;
     this.lessons = lessons;

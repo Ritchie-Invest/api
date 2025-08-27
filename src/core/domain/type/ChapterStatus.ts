@@ -1,0 +1,6 @@
+export enum ChapterStatus {
+  LOCKED = 'LOCKED',
+  UNLOCKED = 'UNLOCKED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+}

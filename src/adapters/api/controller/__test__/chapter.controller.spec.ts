@@ -1,7 +1,6 @@
 import { ChapterRepository } from '../../../../core/domain/repository/chapter.repository';
 import { McqModule } from '../../../../core/domain/model/McqModule';
 import { McqChoice } from '../../../../core/domain/model/McqChoice';
-import { Progression } from '../../../../core/domain/model/Progression';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
@@ -19,18 +18,28 @@ import { UpdateChapterRequest } from '../../request/update-chapter.request';
 import { UserRepository } from '../../../../core/domain/repository/user.repository';
 import { GameModuleRepository } from '../../../../core/domain/repository/game-module.repository';
 import { LessonRepository } from '../../../../core/domain/repository/lesson.repository';
-import { ProgressionRepository } from '../../../../core/domain/repository/progression.repository';
 import { GetUserChaptersResponse } from '../../response/get-user-chapters.response';
 import { AppModule } from '../../../../app.module';
 import { ChapterFactory } from './utils/chapter.factory';
 import { LessonFactory } from './utils/lesson.factory';
+import { ChapterStatus } from '../../../../core/domain/type/ChapterStatus';
+import { LessonStatus } from '../../../../core/domain/type/LessonStatus';
+import { LessonAttempt } from '../../../../core/domain/model/LessonAttempt';
+import { UserFactory } from './utils/user.factory';
+import { LessonAttemptRepository } from '../../../../core/domain/repository/lesson-attempt.repository';
+import { ModuleAttemptRepository } from '../../../../core/domain/repository/module-attempt.repository';
+import { LessonCompletionRepository } from '../../../../core/domain/repository/lesson-completion.repository';
+import { ModuleAttempt } from '../../../../core/domain/model/ModuleAttempt';
+import { LessonCompletion } from '../../../../core/domain/model/LessonCompletion';
 
 describe('ChapterControllerIT', () => {
   let app: INestApplication<App>;
   let chapterRepository: ChapterRepository;
   let lessonRepository: LessonRepository;
   let gameModuleRepository: GameModuleRepository;
-  let progressionRepository: ProgressionRepository;
+  let lessonAttemptRepository: LessonAttemptRepository;
+  let moduleAttemptRepository: ModuleAttemptRepository;
+  let lessonCompletionRepository: LessonCompletionRepository;
   let userRepository: UserRepository;
   let tokenService: TokenService;
 
@@ -56,11 +65,15 @@ describe('ChapterControllerIT', () => {
     chapterRepository = app.get(ChapterRepository);
     lessonRepository = app.get(LessonRepository);
     gameModuleRepository = app.get(GameModuleRepository);
-    progressionRepository = app.get(ProgressionRepository);
+    lessonAttemptRepository = app.get('LessonAttemptRepository');
+    moduleAttemptRepository = app.get('ModuleAttemptRepository');
+    lessonCompletionRepository = app.get('LessonCompletionRepository');
     userRepository = app.get(UserRepository);
     tokenService = app.get('TokenService');
 
-    await progressionRepository.removeAll();
+    await lessonCompletionRepository.removeAll();
+    await moduleAttemptRepository.removeAll();
+    await lessonAttemptRepository.removeAll();
     await gameModuleRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
@@ -77,7 +90,9 @@ describe('ChapterControllerIT', () => {
   });
 
   afterEach(async () => {
-    await progressionRepository.removeAll();
+    await lessonCompletionRepository.removeAll();
+    await moduleAttemptRepository.removeAll();
+    await lessonAttemptRepository.removeAll();
     await gameModuleRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
@@ -437,6 +452,10 @@ describe('ChapterControllerIT', () => {
       // Given
       const studentToken = generateAccessToken(UserType.STUDENT);
 
+      const user = UserFactory.make({
+        id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+      });
+
       const chapter1 = ChapterFactory.make();
       await chapterRepository.create(chapter1);
       const chapter2 = ChapterFactory.make();
@@ -540,30 +559,41 @@ describe('ChapterControllerIT', () => {
       await gameModuleRepository.create(module3);
       await gameModuleRepository.create(module4);
 
-      await progressionRepository.create(
-        new Progression(
-          'prog-1',
-          'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-          'module-1',
-          true,
-        ),
+      const lessonAttempt1 = new LessonAttempt(
+        'lesson-attempt-1',
+        user.id,
+        lesson1.id,
+        new Date(),
       );
-      await progressionRepository.create(
-        new Progression(
-          'prog-2',
-          'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-          'module-2',
-          true,
-        ),
+      await lessonAttemptRepository.create(lessonAttempt1);
+
+      const moduleAttempt1 = new ModuleAttempt(
+        'module-attempt-1',
+        user.id,
+        module1.id,
+        lessonAttempt1.id,
+        true,
+        new Date(),
       );
-      await progressionRepository.create(
-        new Progression(
-          'prog-3',
-          'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-          'module-3',
-          false,
-        ),
+      await moduleAttemptRepository.create(moduleAttempt1);
+      const moduleAttempt2 = new ModuleAttempt(
+        'module-attempt-2',
+        user.id,
+        module2.id,
+        lessonAttempt1.id,
+        true,
+        new Date(),
       );
+      await moduleAttemptRepository.create(moduleAttempt2);
+
+      const lessonCompletion1 = new LessonCompletion(
+        'lesson-completion-1',
+        user.id,
+        lesson1.id,
+        2,
+        new Date(),
+      );
+      await lessonCompletionRepository.create(lessonCompletion1);
 
       // When
       const response = await request(app.getHttpServer())
@@ -573,66 +603,56 @@ describe('ChapterControllerIT', () => {
       // Then
       expect(response.status).toBe(HttpStatus.OK);
       const responseBody = response.body as GetUserChaptersResponse;
-      expect(Array.isArray(responseBody.chapters)).toBe(true);
-      expect(responseBody.chapters).toHaveLength(2);
 
-      const chapter1Response = responseBody.chapters[0];
-      expect(chapter1Response).toMatchObject({
-        id: chapter1.id,
-        title: chapter1.title,
-        description: chapter1.description,
-        order: chapter1.order,
-        isUnlocked: true,
-        completedLessons: 1,
-        totalLessons: 2,
-      });
-      expect(chapter1Response!.lessons).toHaveLength(2);
-
-      const lesson1Response = chapter1Response!.lessons[0];
-      expect(lesson1Response).toMatchObject({
-        id: lesson1.id,
-        title: lesson1.title,
-        description: lesson1.description,
-        order: lesson1.order,
-        isUnlocked: true,
-        completedModules: 2,
-        totalModules: 2,
-        gameModuleId: 'module-1',
-      });
-
-      const lesson2Response = chapter1Response!.lessons[1];
-      expect(lesson2Response).toMatchObject({
-        id: lesson2.id,
-        title: lesson2.title,
-        description: lesson2.description,
-        order: lesson2.order,
-        isUnlocked: true,
-        completedModules: 0,
-        totalModules: 1,
-        gameModuleId: 'module-3',
-      });
-
-      const chapter2Response = responseBody.chapters[1];
-      expect(chapter2Response).toMatchObject({
-        id: chapter2.id,
-        title: chapter2.title,
-        description: chapter2.description,
-        order: chapter2.order,
-        isUnlocked: false,
-        completedLessons: 0,
-        totalLessons: 1,
-      });
-
-      const lesson3Response = chapter2Response!.lessons[0];
-      expect(lesson3Response).toMatchObject({
-        id: lesson3.id,
-        title: lesson3.title,
-        description: lesson3.description,
-        order: lesson3.order,
-        isUnlocked: false,
-        completedModules: 0,
-        totalModules: 1,
-        gameModuleId: 'module-4',
+      expect(responseBody).toStrictEqual({
+        chapters: [
+          {
+            id: chapter1.id,
+            title: chapter1.title,
+            description: chapter1.description,
+            order: chapter1.order,
+            status: ChapterStatus.IN_PROGRESS,
+            completedLessons: 1,
+            totalLessons: 2,
+            lessons: [
+              {
+                id: lesson1.id,
+                title: lesson1.title,
+                description: lesson1.description,
+                order: lesson1.order,
+                status: LessonStatus.COMPLETED,
+                gameModuleId: 'module-1',
+              },
+              {
+                id: lesson2.id,
+                title: lesson2.title,
+                description: lesson2.description,
+                order: lesson2.order,
+                status: LessonStatus.UNLOCKED,
+                gameModuleId: 'module-3',
+              },
+            ],
+          },
+          {
+            id: chapter2.id,
+            title: chapter2.title,
+            description: chapter2.description,
+            order: chapter2.order,
+            status: ChapterStatus.LOCKED,
+            completedLessons: 0,
+            totalLessons: 1,
+            lessons: [
+              {
+                id: lesson3.id,
+                title: lesson3.title,
+                description: lesson3.description,
+                order: lesson3.order,
+                status: LessonStatus.LOCKED,
+                gameModuleId: 'module-4',
+              },
+            ],
+          },
+        ],
       });
     });
 

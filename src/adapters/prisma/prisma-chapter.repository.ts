@@ -3,10 +3,13 @@ import { Injectable } from '@nestjs/common';
 import { ChapterRepository } from '../../core/domain/repository/chapter.repository';
 import { PrismaChapterMapper } from './mapper/prisma-chapter.mapper';
 import { Chapter } from '../../core/domain/model/Chapter';
+import { ChapterWithLessons } from '../../core/domain/model/ChapterWithLessons';
+import { PrismaChapterWithLessonsMapper } from './mapper/prisma-chapter-with-lessons.mapper';
 
 @Injectable()
 export class PrismaChapterRepository implements ChapterRepository {
   private mapper: PrismaChapterMapper = new PrismaChapterMapper();
+  private chapterWithLessonsMapper = new PrismaChapterWithLessonsMapper();
 
   constructor(private readonly prisma: PrismaService) {
     this.mapper = new PrismaChapterMapper();
@@ -51,32 +54,31 @@ export class PrismaChapterRepository implements ChapterRepository {
     await this.prisma.chapter.deleteMany();
   }
 
-  async findAllWithLessonsDetails(userId: string): Promise<any[]> {
-    const entities = await this.prisma.chapter.findMany({
-      where: {
-        isPublished: true,
-      },
+  async findAllWithDetails(userId: string): Promise<ChapterWithLessons[]> {
+    const chapters = await this.prisma.chapter.findMany({
+      where: { isPublished: true },
+      orderBy: { order: 'asc' },
       include: {
         lessons: {
-          where: {
-            isPublished: true,
-          },
+          where: { isPublished: true },
           orderBy: { order: 'asc' },
           include: {
             modules: {
               orderBy: { createdAt: 'asc' },
-              include: {
-                Progression: {
-                  where: { userId },
-                },
-              },
+              select: { id: true },
+            },
+            lessonCompletion: {
+              where: { userId },
+              select: { id: true },
             },
           },
         },
       },
-      orderBy: { order: 'asc' },
     });
-    return entities;
+
+    return chapters.map((chapter) =>
+      this.chapterWithLessonsMapper.toDomain(chapter),
+    );
   }
 
   async validateUniqueOrder(
