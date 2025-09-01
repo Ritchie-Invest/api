@@ -37,8 +37,6 @@ import {
 } from './core/usecases/strategies/game-module-strategy-factory';
 import { GameType } from './core/domain/type/GameType';
 import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strategy';
-import { ProgressionRepository } from './core/domain/repository/progression.repository';
-import { PrismaProgressionRepository } from './adapters/prisma/prisma-progression.repository';
 import { CompleteGameModuleUseCase } from './core/usecases/complete-game-module.use-case';
 import { GameModuleController } from './adapters/api/controller/game-module.controller';
 import {
@@ -119,12 +117,6 @@ import { ModuleAttemptRepository } from './core/domain/repository/module-attempt
       provide: GameModuleRepository,
       useFactory: (prisma: PrismaService) =>
         new PrismaGameModuleRepository(prisma),
-      inject: [PrismaService],
-    },
-    {
-      provide: ProgressionRepository,
-      useFactory: (prisma: PrismaService) =>
-        new PrismaProgressionRepository(prisma),
       inject: [PrismaService],
     },
     {
