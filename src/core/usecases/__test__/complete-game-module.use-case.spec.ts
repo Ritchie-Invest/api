@@ -105,6 +105,7 @@ describe('CompleteGameModuleUseCase', () => {
     expect(result.feedback).toBe(
       'Correct! Paris is indeed the capital of France.',
     );
+    expect(result.correctChoiceId).toBe('choice-1');
 
     const lessonAttempt = lessonAttemptRepository.findLastByUserIdAndLessonId(
       'user-1',
@@ -164,6 +165,7 @@ describe('CompleteGameModuleUseCase', () => {
     expect(result.feedback).toBe(
       'Incorrect. Lyon is a major city but not the capital.',
     );
+    expect(result.correctChoiceId).toBe('choice-1');
     const lessonAttempt = lessonAttemptRepository.findLastByUserIdAndLessonId(
       'user-1',
       'lesson-1',

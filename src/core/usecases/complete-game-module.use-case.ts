@@ -25,6 +25,7 @@ export type CompleteGameModuleCommand = {
 export type CompleteGameModuleResult = {
   isCorrect: boolean;
   feedback: string;
+  correctChoiceId: string; // id de la bonne réponse pour le module
   nextGameModuleId: string | null;
   currentGameModuleIndex: number;
   totalGameModules: number;
@@ -82,7 +83,10 @@ export class CompleteGameModuleUseCase
     }
 
     const strategy = this.strategyFactory.getStrategy(command.gameType);
-    const { isCorrect, feedback } = strategy.validate(gameModule, command);
+    const { isCorrect, feedback, correctChoiceId } = strategy.validate(
+      gameModule,
+      command,
+    );
 
     const moduleAttempt = new ModuleAttempt(
       crypto.randomUUID(),
@@ -105,6 +109,7 @@ export class CompleteGameModuleUseCase
     return {
       isCorrect,
       feedback,
+      correctChoiceId,
       nextGameModuleId: nextModule?.id || null,
       currentGameModuleIndex: Math.max(0, currentIndex),
       totalGameModules: lesson.modules.length,

@@ -528,6 +528,7 @@ describe('GameModuleControllerIT', () => {
       const responseBody = response.body as CompleteGameModuleResponse;
       expect(responseBody.isCorrect).toBe(true);
       expect(responseBody.feedback).toBe('Well done!');
+      expect(responseBody.correctChoiceId).toBe('choice-1');
       expect(responseBody.nextGameModuleId).toBeNull();
       expect(responseBody.currentGameModuleIndex).toBe(0);
       expect(responseBody.totalGameModules).toBe(1);
@@ -581,6 +582,7 @@ describe('GameModuleControllerIT', () => {
       const responseBody = response.body as CompleteGameModuleResponse;
       expect(responseBody.isCorrect).toBe(false);
       expect(responseBody.feedback).toBe('Not quite right.');
+      expect(responseBody.correctChoiceId).toBe('choice-1');
       expect(responseBody.nextGameModuleId).toBeNull();
       expect(responseBody.currentGameModuleIndex).toBe(0);
       expect(responseBody.totalGameModules).toBe(1);
@@ -722,6 +724,7 @@ describe('GameModuleControllerIT', () => {
       expect(response.status).toBe(HttpStatus.CREATED);
       const responseBody = response.body as CompleteGameModuleResponse;
       expect(responseBody.isCorrect).toBe(true);
+      expect(responseBody.correctChoiceId).toBe('choice-1');
       expect(responseBody.nextGameModuleId).toBeNull();
       expect(responseBody.currentGameModuleIndex).toBe(0);
       expect(responseBody.totalGameModules).toBe(1);
