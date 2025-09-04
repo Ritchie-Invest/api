@@ -6,10 +6,10 @@ import { ChapterRepository } from '../../domain/repository/chapter.repository';
 import { InMemoryChapterRepository } from '../../../adapters/in-memory/in-memory-chapter.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
-import { InMemoryProgressionRepository } from '../../../adapters/in-memory/in-memory-progression.repository';
 import { User } from '../../domain/model/User';
 import { UserType } from '../../domain/type/UserType';
 import { ChapterOrderConflictError } from '../../domain/error/ChapterOrderConflictError';
+import { InMemoryLessonCompletionRepository } from '../../../adapters/in-memory/in-memory-lesson-completion.repository';
 
 describe('CreateChapterUseCase', () => {
   let chapterRepository: ChapterRepository;
@@ -18,13 +18,11 @@ describe('CreateChapterUseCase', () => {
   beforeEach(() => {
     const lessonRepository = new InMemoryLessonRepository();
     const gameModuleRepository = new InMemoryGameModuleRepository();
-    const progressionRepository = new InMemoryProgressionRepository(
-      gameModuleRepository,
-    );
+    const lessonCompletionRepository = new InMemoryLessonCompletionRepository();
     chapterRepository = new InMemoryChapterRepository(
       lessonRepository,
       gameModuleRepository,
-      progressionRepository,
+      lessonCompletionRepository,
     );
     createChapterUseCase = new CreateChapterUseCase(chapterRepository);
   });

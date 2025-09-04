@@ -13,7 +13,7 @@ import { MapGameModuleStrategyFactory } from '../strategies/game-module-strategy
 import { GameModuleStrategyNotFoundError } from '../../domain/error/GameModuleStrategyNotFoundError';
 import { McqModule } from '../../domain/model/McqModule';
 import { McqModuleInvalidDataError } from '../../domain/error/McqModuleInvalidDataError';
-import { FillInTheBlankModuleStrategy } from '../strategies/fill-in-the-blanks-module-strategy copy';
+import { FillInTheBlankModuleStrategy } from '../strategies/fill-in-the-blanks-module-strategy';
 import { FillInTheBlankModule } from '../../domain/model/FillInTheBlankModule';
 import { FillInTheBlankModuleInvalidDataError } from '../../domain/error/FillInTheBlankModuleInvalidDataError';
 

@@ -16,10 +16,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   app.enableCors({
-    origin: [
-      process.env.ADMIN_APP_BASE_URL || 'http://localhost:5173/',
-      process.env.MOBILE_APP_BASE_URL || 'http://localhost:8080/',
-    ],
+    origin: '*',
     credentials: true,
   });
 
@@ -37,6 +34,15 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
+
+  app.use('/health', (_req: any, res: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    res.status(200).json({
+      status: 'ok',
+      message: 'Server is running',
+      timestamp: new Date().toISOString(),
+    });
+  });
 
   app.use(
     '/reference',

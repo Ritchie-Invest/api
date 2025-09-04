@@ -18,14 +18,16 @@ enum GameType {
 }
 
 model User {
-  id             String         @id @default(cuid())
-  email          String         @unique
-  password       String
-  type           UserType       @default(STUDENT)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  refresh_tokens RefreshToken[]
-  progressions   Progression[]
+  id               String             @id @default(cuid())
+  email            String             @unique
+  password         String
+  type             UserType           @default(STUDENT)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  refresh_tokens   RefreshToken[]
+  LessonCompletion LessonCompletion[]
+  LessonAttempt    LessonAttempt[]
+  ModuleAttempt    ModuleAttempt[]
 }
 
 model RefreshToken {
@@ -49,29 +51,30 @@ model Chapter {
 }
 
 model Lesson {
-  id          String       @id @default(cuid())
-  title       String
-  description String
-  chapterId   String
-  order       Int
-  isPublished Boolean
-  gameType    GameType     @default(MCQ)
-  updatedAt   DateTime     @updatedAt
-  createdAt   DateTime     @default(now())
-  chapter     Chapter      @relation(fields: [chapterId], references: [id])
-  modules     GameModule[]
+  id               String             @id @default(cuid())
+  title            String
+  description      String
+  chapterId        String
+  order            Int
+  isPublished      Boolean
+  gameType         GameType           @default(MCQ)
+  updatedAt        DateTime           @updatedAt
+  createdAt        DateTime           @default(now())
+  chapter          Chapter            @relation(fields: [chapterId], references: [id])
+  modules          GameModule[]
+  lessonCompletion LessonCompletion[]
+  lessonAttempt    LessonAttempt[]
 }
 
 model GameModule {
-  id        String   @id @default(cuid())
-  lessonId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  lesson               Lesson                @relation(fields: [lessonId], references: [id])
-  mcq                  McqModule?
-  Progression          Progression[]
-  FillInTheBlankModule FillInTheBlankModule?
+  id            String                @id @default(cuid())
+  lessonId      String
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  lesson        Lesson                @relation(fields: [lessonId], references: [id])
+  mcq           McqModule?
+  fillblank     FillInTheBlankModule?
+  moduleAttempt ModuleAttempt[]
 }
 
 model McqModule {
@@ -91,16 +94,40 @@ model FillInTheBlankModule {
   gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
 }
 
-model Progression {
-  id           String   @id @default(cuid())
-  userId       String
-  gameModuleId String
-  isCompleted  Boolean
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model LessonCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  score       Float
+  completedAt DateTime @default(now())
 
-  user       User       @relation(fields: [userId], references: [id])
-  gameModule GameModule @relation(fields: [gameModuleId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
 
-  @@unique([userId, gameModuleId])
+  @@unique([userId, lessonId])
+}
+
+model LessonAttempt {
+  id         String    @id @default(cuid())
+  userId     String
+  lessonId   String
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  user           User            @relation(fields: [userId], references: [id])
+  lesson         Lesson          @relation(fields: [lessonId], references: [id])
+  moduleAttempts ModuleAttempt[]
+}
+
+model ModuleAttempt {
+  id              String   @id @default(cuid())
+  userId          String
+  gameModuleId    String
+  lessonAttemptId String
+  isCorrect       Boolean
+  answeredAt      DateTime @default(now())
+
+  user          User          @relation(fields: [userId], references: [id])
+  gameModule    GameModule    @relation(fields: [gameModuleId], references: [id])
+  lessonAttempt LessonAttempt @relation(fields: [lessonAttemptId], references: [id])
 }

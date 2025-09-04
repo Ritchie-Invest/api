@@ -29,6 +29,7 @@ export class CompleteGameModuleMapper {
     return new CompleteGameModuleResponse(
       result.isCorrect,
       result.feedback,
+      result.correctChoiceId,
       result.nextGameModuleId,
       result.currentGameModuleIndex,
       result.totalGameModules,

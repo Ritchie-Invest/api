@@ -19,19 +19,25 @@ import { CreateGameModuleRequest } from '../../request/create-game-module.reques
 import { GameModuleRepository } from '../../../../core/domain/repository/game-module.repository';
 import { AppModule } from '../../../../app.module';
 import { McqModule } from '../../../../core/domain/model/McqModule';
-import { Progression } from '../../../../core/domain/model/Progression';
-import { ProgressionRepository } from '../../../../core/domain/repository/progression.repository';
 import { UserRepository } from '../../../../core/domain/repository/user.repository';
 import { LessonFactory } from './utils/lesson.factory';
 import { ChapterFactory } from './utils/chapter.factory';
 import { UserFactory } from './utils/user.factory';
+import { LessonAttempt } from '../../../../core/domain/model/LessonAttempt';
+import { LessonAttemptRepository } from '../../../../core/domain/repository/lesson-attempt.repository';
+import { ModuleAttemptRepository } from '../../../../core/domain/repository/module-attempt.repository';
+import { ModuleAttempt } from '../../../../core/domain/model/ModuleAttempt';
+import { LessonCompletionRepository } from '../../../../core/domain/repository/lesson-completion.repository';
+import { LessonCompletion } from '../../../../core/domain/model/LessonCompletion';
 
 describe('LessonControllerIT', () => {
   let app: INestApplication<App>;
   let chapterRepository: ChapterRepository;
   let lessonRepository: LessonRepository;
   let gameModuleRepository: GameModuleRepository;
-  let progressionRepository: ProgressionRepository;
+  let lessonAttemptRepository: LessonAttemptRepository;
+  let moduleAttemptRepository: ModuleAttemptRepository;
+  let lessonCompletionRepository: LessonCompletionRepository;
   let userRepository: UserRepository;
   let tokenService: TokenService;
 
@@ -57,11 +63,15 @@ describe('LessonControllerIT', () => {
     chapterRepository = app.get(ChapterRepository);
     lessonRepository = app.get(LessonRepository);
     gameModuleRepository = app.get(GameModuleRepository);
-    progressionRepository = app.get(ProgressionRepository);
+    lessonAttemptRepository = app.get('LessonAttemptRepository');
+    moduleAttemptRepository = app.get('ModuleAttemptRepository');
+    lessonCompletionRepository = app.get('LessonCompletionRepository');
     userRepository = app.get(UserRepository);
     tokenService = app.get('TokenService');
 
-    await progressionRepository.removeAll();
+    await lessonCompletionRepository.removeAll();
+    await moduleAttemptRepository.removeAll();
+    await lessonAttemptRepository.removeAll();
     await gameModuleRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
@@ -69,7 +79,9 @@ describe('LessonControllerIT', () => {
   });
 
   afterEach(async () => {
-    await progressionRepository.removeAll();
+    await lessonCompletionRepository.removeAll();
+    await moduleAttemptRepository.removeAll();
+    await lessonAttemptRepository.removeAll();
     await gameModuleRepository.removeAll();
     await lessonRepository.removeAll();
     await chapterRepository.removeAll();
@@ -617,13 +629,40 @@ describe('LessonControllerIT', () => {
         ],
       });
       await gameModuleRepository.create(gameModule3);
-      const progression = new Progression(
-        'progression-1',
+      const lessonAttempt = new LessonAttempt(
+        'attempt-1',
+        'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+        lesson.id,
+        new Date(),
+      );
+      await lessonAttemptRepository.create(lessonAttempt);
+      const moduleAttempt1 = new ModuleAttempt(
+        'module-attempt-1',
         'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
         gameModule1.id,
+        lessonAttempt.id,
         true,
+        new Date(),
       );
-      await progressionRepository.create(progression);
+      await moduleAttemptRepository.create(moduleAttempt1);
+      const moduleAttempt2 = new ModuleAttempt(
+        'module-attempt-2',
+        'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+        gameModule2.id,
+        lessonAttempt.id,
+        true,
+        new Date(),
+      );
+      await moduleAttemptRepository.create(moduleAttempt2);
+      const moduleAttempt3 = new ModuleAttempt(
+        'module-attempt-3',
+        'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+        gameModule3.id,
+        lessonAttempt.id,
+        true,
+        new Date(),
+      );
+      await moduleAttemptRepository.create(moduleAttempt3);
 
       // When
       const response = await request(app.getHttpServer())
@@ -633,8 +672,9 @@ describe('LessonControllerIT', () => {
       // Then
       expect(response.status).toBe(HttpStatus.CREATED);
       expect(response.body).toMatchObject({
-        score: 1,
+        completedGameModules: 3,
         totalGameModules: 3,
+        isCompleted: true,
       });
     });
 
@@ -652,6 +692,158 @@ describe('LessonControllerIT', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBe(
         'Lesson with id non-existing-id not found',
+      );
+    });
+
+    it('should return 400 if not all modules are attempted', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const user = UserFactory.make({
+        id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+      });
+      await userRepository.create(user);
+      const chapter = ChapterFactory.make();
+      await chapterRepository.create(chapter);
+      const lesson = LessonFactory.make({ chapterId: chapter.id });
+      await lessonRepository.create(lesson);
+      const gameModule1 = new McqModule({
+        id: 'module-1',
+        lessonId: lesson.id,
+        question: 'Q1',
+        choices: [
+          { id: 'c1', text: 'A', isCorrect: true, correctionMessage: '' },
+          { id: 'c2', text: 'B', isCorrect: false, correctionMessage: '' },
+        ],
+      });
+      const gameModule2 = new McqModule({
+        id: 'module-2',
+        lessonId: lesson.id,
+        question: 'Q2',
+        choices: [
+          { id: 'c2', text: 'B', isCorrect: true, correctionMessage: '' },
+          { id: 'c3', text: 'C', isCorrect: false, correctionMessage: '' },
+        ],
+      });
+      await gameModuleRepository.create(gameModule1);
+      await gameModuleRepository.create(gameModule2);
+      const lessonAttempt = new LessonAttempt(
+        'attempt-err1',
+        user.id,
+        lesson.id,
+        new Date(),
+      );
+      await lessonAttemptRepository.create(lessonAttempt);
+      const moduleAttempt1 = new ModuleAttempt(
+        'module-attempt-err1',
+        user.id,
+        gameModule1.id,
+        lessonAttempt.id,
+        true,
+        new Date(),
+      );
+      await moduleAttemptRepository.create(moduleAttempt1);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/lessons/${lesson.id}/complete`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        `All modules in lesson ${lesson.id} have not been fully attempted. Attempted: 1, Total: 2`,
+      );
+    });
+
+    it('should return 409 if lesson is already completed', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const user = UserFactory.make({
+        id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+      });
+      await userRepository.create(user);
+      const chapter = ChapterFactory.make();
+      await chapterRepository.create(chapter);
+      const lesson = LessonFactory.make({ chapterId: chapter.id });
+      await lessonRepository.create(lesson);
+      const lessonCompletion = new LessonCompletion(
+        'completion-1',
+        user.id,
+        lesson.id,
+        2,
+        new Date(),
+      );
+      await lessonCompletionRepository.create(lessonCompletion);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/lessons/${lesson.id}/complete`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.CONFLICT);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        `Lesson with id ${lesson.id} has already been completed.`,
+      );
+    });
+
+    it('should return 404 if lesson attempt not found', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const user = UserFactory.make({
+        id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+      });
+      await userRepository.create(user);
+      const chapter = ChapterFactory.make();
+      await chapterRepository.create(chapter);
+      const lesson = LessonFactory.make({ chapterId: chapter.id });
+      await lessonRepository.create(lesson);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/lessons/${lesson.id}/complete`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        `Lesson attempt not found for user ${user.id} and lesson ${lesson.id}`,
+      );
+    });
+
+    it('should return 409 if lesson attempt is already finished', async () => {
+      // Given
+      const adminToken = generateAccessToken(UserType.ADMIN);
+      const user = UserFactory.make({
+        id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+      });
+      await userRepository.create(user);
+      const chapter = ChapterFactory.make();
+      await chapterRepository.create(chapter);
+      const lesson = LessonFactory.make({ chapterId: chapter.id });
+      await lessonRepository.create(lesson);
+      const lessonAttempt = new LessonAttempt(
+        'attempt-finished',
+        user.id,
+        lesson.id,
+        new Date(),
+        new Date(),
+      );
+      await lessonAttemptRepository.create(lessonAttempt);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .post(`/lessons/${lesson.id}/complete`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.CONFLICT);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        `Lesson attempt with id ${lessonAttempt.id} has already been finished.`,
       );
     });
   });

@@ -12,7 +12,7 @@ import {
   UpdateGameModuleUseCase,
 } from '../update-game-module.use-case';
 import { GameModuleNotFoundError } from '../../domain/error/GameModuleNotFoundError';
-import { FillInTheBlankModuleStrategy } from '../strategies/fill-in-the-blanks-module-strategy copy';
+import { FillInTheBlankModuleStrategy } from '../strategies/fill-in-the-blanks-module-strategy';
 import { FillInTheBlankModule } from '../../domain/model/FillInTheBlankModule';
 import { FillInTheBlankModuleInvalidDataError } from '../../domain/error/FillInTheBlankModuleInvalidDataError';
 import { GameChoice } from '../../domain/model/GameChoice';

@@ -4,6 +4,7 @@ import { GameModuleRepository } from '../../core/domain/repository/game-module.r
 import { GameModule } from '../../core/domain/model/GameModule';
 import { McqModule } from '../../core/domain/model/McqModule';
 import { PrismaGameModuleMapper } from './mapper/prisma-game-module.mapper';
+import { FillInTheBlankModule } from '../../core/domain/model/FillInTheBlankModule';
 
 @Injectable()
 export class PrismaGameModuleRepository implements GameModuleRepository {
@@ -15,6 +16,9 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
     if (data instanceof McqModule) {
       return this.createMcqModule(data);
     }
+    if (data instanceof FillInTheBlankModule) {
+      return this.createFillInTheBlankModule(data);
+    }
     throw new Error('Unsupported module type');
   }
 
@@ -25,7 +29,7 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
   async findById(id: string): Promise<GameModule | null> {
     const entity = await this.prisma.gameModule.findUnique({
       where: { id },
-      include: { mcq: true },
+      include: { mcq: true, fillblank: true },
     });
 
     if (!entity) {
@@ -42,6 +46,9 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
     if (gameModule instanceof McqModule) {
       return this.updateMcqModule(gameModuleId, gameModule);
     }
+    if (gameModule instanceof FillInTheBlankModule) {
+      return this.updateFillInTheBlankModule(gameModuleId, gameModule);
+    }
     throw new Error('Unsupported module type');
   }
 
@@ -51,13 +58,14 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
 
   async removeAll(): Promise<void> {
     await this.prisma.mcqModule.deleteMany();
+    await this.prisma.fillInTheBlankModule.deleteMany();
     await this.prisma.gameModule.deleteMany();
   }
 
   async findByLessonId(lessonId: string): Promise<GameModule[]> {
     const entities = await this.prisma.gameModule.findMany({
       where: { lessonId },
-      include: { mcq: true },
+      include: { mcq: true, fillblank: true },
       orderBy: { createdAt: 'asc' },
     });
     return entities.map((entity) => this.mapper.toDomain(entity));
@@ -80,7 +88,7 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
           },
         },
       },
-      include: { mcq: true },
+      include: { mcq: true, fillblank: true },
     });
     return this.mapper.toDomain(createdEntity) as McqModule;
   }
@@ -104,13 +112,67 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
           },
         },
       },
-      include: { mcq: true },
+      include: { mcq: true, fillblank: true },
     });
+    
 
     if (!updatedEntity) {
       return null;
     }
 
     return this.mapper.toDomain(updatedEntity) as McqModule;
+  }
+
+  private async createFillInTheBlankModule(data: FillInTheBlankModule): Promise<FillInTheBlankModule> {
+    const createdEntity = await this.prisma.gameModule.create({
+      data: {
+        id: data.id,
+        lessonId: data.lessonId,
+        fillblank: {
+          create: {
+            firstText: data.firstText,
+            secondText: data.secondText,
+            blanks: data.blanks.map((blank) => ({
+              id: blank.id,
+              text: blank.text,
+              isCorrect: blank.isCorrect,
+              correctionMessage: blank.correctionMessage,
+            })),
+          },
+        },
+      },
+      include: { mcq: true, fillblank: true },
+    });
+    return this.mapper.toDomain(createdEntity) as FillInTheBlankModule;
+  }
+
+  private async updateFillInTheBlankModule(
+    gameModuleId: string,
+    data: FillInTheBlankModule,
+  ): Promise<FillInTheBlankModule | null> {
+    const updatedEntity = await this.prisma.gameModule.update({
+      where: { id: gameModuleId },
+      data: {
+        fillblank: {
+          update: {
+            firstText: data.firstText,
+            secondText: data.secondText,
+            blanks: data.blanks.map((blank) => ({
+              id: blank.id,
+              text: blank.text,
+              isCorrect: blank.isCorrect,
+              correctionMessage: blank.correctionMessage,
+            })),
+          },
+        },
+      },
+      include: { mcq: true, fillblank: true },
+    });
+
+    if (!updatedEntity) {
+      return null;
+    }
+
+    return this.mapper.toDomain(updatedEntity) as FillInTheBlankModule;
   }
 }
