@@ -35,7 +35,7 @@ export class PrismaLessonMapper implements EntityMapper<Lesson, LessonEntity> {
     entity: LessonEntity & {
       modules?: (GameModuleEntity & { 
         mcq: McqModuleEntity | null;
-        fillblank: FillInTheBlankModuleEntity | null;
+        fillBlank: FillInTheBlankModuleEntity | null;
       })[];
     },
   ): Lesson {
@@ -53,14 +53,14 @@ export class PrismaLessonMapper implements EntityMapper<Lesson, LessonEntity> {
             return this.mcqModuleMapper.toDomain({
               ...module,
               mcq: module.mcq,
-              fillblank: null,
+              fillBlank: null,
             }) as McqModule;
           }
-          if (module.fillblank) {
+          if (module.fillBlank) {
             return this.mcqModuleMapper.toDomain({
               ...module,
               mcq: null,
-              fillblank: module.fillblank,
+              fillBlank: module.fillBlank,
             }) as FillInTheBlankModule;
           }
           throw new Error('Unsupported module type in lesson');
