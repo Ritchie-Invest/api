@@ -6,7 +6,6 @@
 -- the enum.
 
 
-ALTER TYPE "GameType" ADD VALUE 'FILL_IN_THE_BLANK';
 ALTER TYPE "GameType" ADD VALUE 'TRUE_OR_FALSE';
 
 -- CreateTable
