@@ -13,7 +13,9 @@ import {
 } from '../update-game-module.use-case';
 import { GameModuleNotFoundError } from '../../domain/error/GameModuleNotFoundError';
 import { FillInTheBlankModuleStrategy } from '../strategies/fill-in-the-blanks-module-strategy';
+import { TrueOrFalseModuleStrategy } from '../strategies/true-or-false-module-strategy';
 import { FillInTheBlankModule } from '../../domain/model/FillInTheBlankModule';
+import { TrueOrFalseModule } from '../../domain/model/TrueOrFalseModule';
 import { FillInTheBlankModuleInvalidDataError } from '../../domain/error/FillInTheBlankModuleInvalidDataError';
 import { GameChoice } from '../../domain/model/GameChoice';
 
@@ -27,9 +29,11 @@ describe('UpdateGameModuleUseCase', () => {
     gameModuleRepository = new InMemoryGameModuleRepository();
     const mcqStrategy = new McqModuleStrategy();
     const fillInTheBlankStrategy = new FillInTheBlankModuleStrategy();
+    const trueOrFalseStrategy = new TrueOrFalseModuleStrategy();
     const strategyFactory = new MapGameModuleStrategyFactory([
       { type: GameType.MCQ, strategy: mcqStrategy },
       { type: GameType.FILL_IN_THE_BLANK, strategy: fillInTheBlankStrategy },
+      { type: GameType.TRUE_OR_FALSE, strategy: trueOrFalseStrategy },
     ]);
     useCase = new UpdateGameModuleUseCase(
       lessonRepository,
@@ -145,6 +149,58 @@ describe('UpdateGameModuleUseCase', () => {
     const module = gameModuleRepository.findById('module-1');
     expect((module as FillInTheBlankModule).firstText).toBe('The largest city in France is');
     expect((module as FillInTheBlankModule).secondText).toBe('and it is amazing.');
+  });
+
+  it('should update a True or False module', async () => {
+    // Given
+    const lesson = new Lesson(
+      'lesson-1',
+      'title',
+      'desc',
+      'chapter-1',
+      1,
+      false,
+      GameType.TRUE_OR_FALSE,
+      [],
+    );
+    lessonRepository.create(lesson);
+    const trueOrFalseModule = new TrueOrFalseModule({
+      id: 'module-1',
+      lessonId: lesson.id,
+      questions: [
+        new GameChoice({
+          id: 'question-1',
+          text: 'The earth is flat',
+          isCorrect: false,
+          correctionMessage: 'Wrong!',
+        }),
+        new GameChoice({
+          id: 'question-2',
+          text: 'The sun is hot',
+          isCorrect: true,
+          correctionMessage: 'Correct!',
+        }),
+      ],
+    });
+    gameModuleRepository.create(trueOrFalseModule);
+    const command: UpdateGameModuleCommand = {
+      gameModuleId: 'module-1',
+      trueOrFalse: {
+        questions: [
+          { text: 'The earth is round', isCorrect: true, correctionMessage: 'Correct!' },
+          { text: 'The sun is cold', isCorrect: false, correctionMessage: 'Wrong!' },
+        ],
+      },
+    };
+
+    // When
+    await useCase.execute(command);
+
+    // Then
+    const module = gameModuleRepository.findById('module-1');
+    expect((module as TrueOrFalseModule).questions).toHaveLength(2);
+    expect((module as TrueOrFalseModule).questions[0]?.text).toBe('The earth is round');
+    expect((module as TrueOrFalseModule).questions[0]?.isCorrect).toBe(true);
   });
 
   it('should throw if game module not found', async () => {

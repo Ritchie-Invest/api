@@ -5,6 +5,7 @@ import { GameModule } from '../../core/domain/model/GameModule';
 import { McqModule } from '../../core/domain/model/McqModule';
 import { PrismaGameModuleMapper } from './mapper/prisma-game-module.mapper';
 import { FillInTheBlankModule } from '../../core/domain/model/FillInTheBlankModule';
+import { TrueOrFalseModule } from '../../core/domain/model/TrueOrFalseModule';
 
 @Injectable()
 export class PrismaGameModuleRepository implements GameModuleRepository {
@@ -19,6 +20,9 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
     if (data instanceof FillInTheBlankModule) {
       return this.createFillInTheBlankModule(data);
     }
+    if (data instanceof TrueOrFalseModule) {
+      return this.createTrueOrFalseModule(data);
+    }
     throw new Error('Unsupported module type');
   }
 
@@ -29,7 +33,7 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
   async findById(id: string): Promise<GameModule | null> {
     const entity = await this.prisma.gameModule.findUnique({
       where: { id },
-      include: { mcq: true, fillblank: true },
+      include: { mcq: true, fillBlank: true, trueOrFalse: true },
     });
 
     if (!entity) {
@@ -49,6 +53,9 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
     if (gameModule instanceof FillInTheBlankModule) {
       return this.updateFillInTheBlankModule(gameModuleId, gameModule);
     }
+    if (gameModule instanceof TrueOrFalseModule) {
+      return this.updateTrueOrFalseModule(gameModuleId, gameModule);
+    }
     throw new Error('Unsupported module type');
   }
 
@@ -59,13 +66,14 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
   async removeAll(): Promise<void> {
     await this.prisma.mcqModule.deleteMany();
     await this.prisma.fillInTheBlankModule.deleteMany();
+    await this.prisma.trueOrFalseModule.deleteMany();
     await this.prisma.gameModule.deleteMany();
   }
 
   async findByLessonId(lessonId: string): Promise<GameModule[]> {
     const entities = await this.prisma.gameModule.findMany({
       where: { lessonId },
-      include: { mcq: true, fillblank: true },
+      include: { mcq: true, fillBlank: true, trueOrFalse: true },
       orderBy: { createdAt: 'asc' },
     });
     return entities.map((entity) => this.mapper.toDomain(entity));
@@ -88,7 +96,7 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
           },
         },
       },
-      include: { mcq: true, fillblank: true },
+      include: { mcq: true, fillBlank: true, trueOrFalse: true },
     });
     return this.mapper.toDomain(createdEntity) as McqModule;
   }
@@ -112,7 +120,7 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
           },
         },
       },
-      include: { mcq: true, fillblank: true },
+      include: { mcq: true, fillBlank: true, trueOrFalse: true},
     });
     
 
@@ -128,7 +136,7 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
       data: {
         id: data.id,
         lessonId: data.lessonId,
-        fillblank: {
+        fillBlank: {
           create: {
             firstText: data.firstText,
             secondText: data.secondText,
@@ -141,7 +149,7 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
           },
         },
       },
-      include: { mcq: true, fillblank: true },
+      include: { mcq: true, fillBlank: true },
     });
     return this.mapper.toDomain(createdEntity) as FillInTheBlankModule;
   }
@@ -153,7 +161,7 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
     const updatedEntity = await this.prisma.gameModule.update({
       where: { id: gameModuleId },
       data: {
-        fillblank: {
+        fillBlank: {
           update: {
             firstText: data.firstText,
             secondText: data.secondText,
@@ -166,7 +174,7 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
           },
         },
       },
-      include: { mcq: true, fillblank: true },
+      include: { mcq: true, fillBlank: true },
     });
 
     if (!updatedEntity) {
@@ -174,5 +182,54 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
     }
 
     return this.mapper.toDomain(updatedEntity) as FillInTheBlankModule;
+  }
+
+  private async createTrueOrFalseModule(data: TrueOrFalseModule): Promise<TrueOrFalseModule> {
+    const createdEntity = await this.prisma.gameModule.create({
+      data: {
+        id: data.id,
+        lessonId: data.lessonId,
+        trueOrFalse: {
+          create: {
+            questions: data.questions.map((question) => ({
+              id: question.id,
+              text: question.text,
+              isCorrect: question.isCorrect,
+              correctionMessage: question.correctionMessage,
+            })),
+          },
+        },
+      },
+      include: { mcq: true, fillBlank: true, trueOrFalse: true },
+    });
+    return this.mapper.toDomain(createdEntity) as TrueOrFalseModule;
+  }
+
+  private async updateTrueOrFalseModule(
+    gameModuleId: string,
+    data: TrueOrFalseModule,
+  ): Promise<TrueOrFalseModule | null> {
+    const updatedEntity = await this.prisma.gameModule.update({
+      where: { id: gameModuleId },
+      data: {
+        trueOrFalse: {
+          update: {
+            questions: data.questions.map((question) => ({
+              id: question.id,
+              text: question.text,
+              isCorrect: question.isCorrect,
+              correctionMessage: question.correctionMessage,
+            })),
+          },
+        },
+      },
+      include: { mcq: true, fillBlank: true, trueOrFalse: true },
+    });
+
+    if (!updatedEntity) {
+      return null;
+    }
+
+    return this.mapper.toDomain(updatedEntity) as TrueOrFalseModule;
   }
 }

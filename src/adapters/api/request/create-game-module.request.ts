@@ -53,14 +53,28 @@ export class CreateFillInTheBlankGameModuleContract extends CreateGameModuleCont
   }
 }
 
-@ApiExtraModels(CreateMcqGameModuleContract, CreateFillInTheBlankGameModuleContract)
+export class CreateTrueOrFalseGameModuleContract extends CreateGameModuleContract {
+  @ApiProperty({ type: [CreateGameChoice] })
+  questions: CreateGameChoice[];
+
+  constructor(questions: CreateGameChoice[]) {
+    super();
+    this.questions = questions;
+  }
+}
+
+@ApiExtraModels(CreateMcqGameModuleContract, CreateFillInTheBlankGameModuleContract, CreateTrueOrFalseGameModuleContract)
 export class CreateGameModuleRequest {
   @ApiProperty({ enum: GameType })
   @IsEnum(GameType)
   gameType: GameType;
 
   @ApiProperty({
-    oneOf: [{ $ref: getSchemaPath(CreateMcqGameModuleContract) }],
+    oneOf: [
+      { $ref: getSchemaPath(CreateMcqGameModuleContract) },
+      { $ref: getSchemaPath(CreateFillInTheBlankGameModuleContract) },
+      { $ref: getSchemaPath(CreateTrueOrFalseGameModuleContract) },
+    ],
   })
   contract: CreateGameModuleContract;
 

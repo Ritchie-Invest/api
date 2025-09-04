@@ -12,10 +12,13 @@ import { McqModuleStrategy } from '../strategies/mcq-module-strategy';
 import { MapGameModuleStrategyFactory } from '../strategies/game-module-strategy-factory';
 import { GameModuleStrategyNotFoundError } from '../../domain/error/GameModuleStrategyNotFoundError';
 import { McqModule } from '../../domain/model/McqModule';
+import { TrueOrFalseModule } from '../../domain/model/TrueOrFalseModule';
 import { McqModuleInvalidDataError } from '../../domain/error/McqModuleInvalidDataError';
+import { TrueOrFalseModuleInvalidDataError } from '../../domain/error/TrueOrFalseModuleInvalidDataError';
 import { FillInTheBlankModuleStrategy } from '../strategies/fill-in-the-blanks-module-strategy';
 import { FillInTheBlankModule } from '../../domain/model/FillInTheBlankModule';
 import { FillInTheBlankModuleInvalidDataError } from '../../domain/error/FillInTheBlankModuleInvalidDataError';
+import { TrueOrFalseModuleStrategy } from '../strategies/true-or-false-module-strategy';
 
 describe('CreateGameModuleUseCase', () => {
   let lessonRepository: InMemoryLessonRepository;
@@ -27,9 +30,11 @@ describe('CreateGameModuleUseCase', () => {
     gameModuleRepository = new InMemoryGameModuleRepository();
     const mcqStrategy = new McqModuleStrategy();
     const fillInTheBlankStrategy = new FillInTheBlankModuleStrategy();
+    const trueOrFalseStrategy = new TrueOrFalseModuleStrategy();
     const strategyFactory = new MapGameModuleStrategyFactory([
       { type: GameType.MCQ, strategy: mcqStrategy },
       { type: GameType.FILL_IN_THE_BLANK, strategy: fillInTheBlankStrategy },
+      { type: GameType.TRUE_OR_FALSE, strategy: trueOrFalseStrategy },
     ]);
     useCase = new CreateGameModuleUseCase(
       lessonRepository,
@@ -108,6 +113,40 @@ describe('CreateGameModuleUseCase', () => {
     expect(modules.length).toBe(1);
     expect((modules[0] as FillInTheBlankModule).firstText).toBe('The capital of France is');
     expect((modules[0] as FillInTheBlankModule).secondText).toBe('and it is beautiful.');
+  });
+
+  it('should create a True or False module for a lesson', async () => {
+    // Given
+    const lesson = new Lesson(
+      'lesson-1',
+      'title',
+      'desc',
+      'chapter-1',
+      1,
+      false,
+      GameType.TRUE_OR_FALSE,
+      [],
+    );
+    lessonRepository.create(lesson);
+    const command: CreateGameModuleCommand = {
+      lessonId: lesson.id,
+      gameType: GameType.TRUE_OR_FALSE,
+      trueOrFalse: {
+        questions: [
+          { text: 'The earth is round', isCorrect: true, correctionMessage: 'Correct!' },
+          { text: 'The sun is cold', isCorrect: false, correctionMessage: 'Wrong! The sun is hot' },
+        ],
+      },
+    };
+    // When
+    await useCase.execute(command);
+    const modules = gameModuleRepository.findAll();
+
+    // Then
+    expect(modules.length).toBe(1);
+    expect((modules[0] as TrueOrFalseModule).questions).toHaveLength(2);
+    expect((modules[0] as TrueOrFalseModule).questions[0]?.text).toBe('The earth is round');
+    expect((modules[0] as TrueOrFalseModule).questions[0]?.isCorrect).toBe(true);
   });
 
   it('should throw if lesson not found', async () => {
@@ -225,6 +264,30 @@ describe('CreateGameModuleUseCase', () => {
     // When / Then
     await expect(useCase.execute(command)).rejects.toThrow(
       FillInTheBlankModuleInvalidDataError,
+    );
+  });
+
+  it('should throw if True or False data is missing', async () => {
+    // Given
+    const lesson = new Lesson(
+      'lesson-5',
+      'title',
+      'desc',
+      'chapter-1',
+      1,
+      false,
+      GameType.TRUE_OR_FALSE,
+      [],
+    );
+    lessonRepository.create(lesson);
+    const command: CreateGameModuleCommand = {
+      lessonId: lesson.id,
+      gameType: GameType.TRUE_OR_FALSE,
+    };
+
+    // When / Then
+    await expect(useCase.execute(command)).rejects.toThrow(
+      TrueOrFalseModuleInvalidDataError,
     );
   });
 });

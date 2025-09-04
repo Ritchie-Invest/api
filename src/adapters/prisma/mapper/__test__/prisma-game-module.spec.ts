@@ -2,9 +2,11 @@ import {
   GameModule as GameModuleEntity,
   McqModule as McqModuleEntity,
   FillInTheBlankModule as FillInTheBlankModuleEntity,
+  TrueOrFalseModule as TrueOrFalseModuleEntity,
 } from '@prisma/client';
 import { McqModule } from '../../../../core/domain/model/McqModule';
 import { FillInTheBlankModule } from '../../../../core/domain/model/FillInTheBlankModule';
+import { TrueOrFalseModule } from '../../../../core/domain/model/TrueOrFalseModule';
 import { GameChoice } from '../../../../core/domain/model/GameChoice';
 import { PrismaGameModuleMapper } from '../prisma-game-module.mapper';
 
@@ -44,14 +46,16 @@ describe('PrismaGameModuleMapper', () => {
 
         const gameModuleEntity: GameModuleEntity & { 
           mcq: McqModuleEntity | null;
-          fillblank: FillInTheBlankModuleEntity | null;
+          fillBlank: FillInTheBlankModuleEntity | null;
+          trueOrFalse: TrueOrFalseModuleEntity | null;
         } = {
           id: 'module-1',
           lessonId: 'lesson-1',
           createdAt: new Date('2023-10-01T10:00:00Z'),
           updatedAt: new Date('2023-10-01T11:00:00Z'),
           mcq: mcqEntity,
-          fillblank: null,
+          fillBlank: null,
+          trueOrFalse: null,
         };
 
         // When
@@ -77,7 +81,7 @@ describe('PrismaGameModuleMapper', () => {
       });
 
       it('should throw error for empty choices array for MCQ and handle GameChoice with null id', () => {
-        // Given - Test with null choices
+        // Given 
         const mcqEntityWithNullChoices: McqModuleEntity = {
           id: 'mcq-1',
           question: 'Test question?',
@@ -87,20 +91,22 @@ describe('PrismaGameModuleMapper', () => {
 
         const gameModuleEntityWithNullChoices: GameModuleEntity & { 
           mcq: McqModuleEntity | null;
-          fillblank: FillInTheBlankModuleEntity | null;
+          fillBlank: FillInTheBlankModuleEntity | null;
+          trueOrFalse: TrueOrFalseModuleEntity | null;
         } = {
           id: 'module-1',
           lessonId: 'lesson-1',
           createdAt: new Date('2023-10-01T10:00:00Z'),
           updatedAt: new Date('2023-10-01T11:00:00Z'),
           mcq: mcqEntityWithNullChoices,
-          fillblank: null,
+          fillBlank: null,
+          trueOrFalse: null,
         };
 
-        // When/Then - Test null choices
+        // When/Then 
         expect(() => mapper.toDomain(gameModuleEntityWithNullChoices)).toThrow('At least two choices are required');
 
-        // Given - Test with GameChoice with null id (but still need 2 choices minimum)
+        // Given
         const mcqEntityWithNullId: McqModuleEntity = {
           id: 'mcq-1',
           question: 'Test question?',
@@ -123,17 +129,19 @@ describe('PrismaGameModuleMapper', () => {
 
         const gameModuleEntityWithNullId: GameModuleEntity & { 
           mcq: McqModuleEntity | null;
-          fillblank: FillInTheBlankModuleEntity | null;
+          fillBlank: FillInTheBlankModuleEntity | null;
+          trueOrFalse: TrueOrFalseModuleEntity | null;
         } = {
           id: 'module-1',
           lessonId: 'lesson-1',
           createdAt: new Date('2023-10-01T10:00:00Z'),
           updatedAt: new Date('2023-10-01T11:00:00Z'),
           mcq: mcqEntityWithNullId,
-          fillblank: null,
+          fillBlank: null,
+          trueOrFalse: null,
         };
 
-        // When/Then - Test GameChoice with null id (should work and convert to empty string)
+        // When/Then 
         const result = mapper.toDomain(gameModuleEntityWithNullId);
         expect(result).toBeInstanceOf(McqModule);
         const mcqModule = result as McqModule;
@@ -168,14 +176,16 @@ describe('PrismaGameModuleMapper', () => {
 
         const gameModuleEntity: GameModuleEntity & { 
           mcq: McqModuleEntity | null;
-          fillblank: FillInTheBlankModuleEntity | null;
+          fillBlank: FillInTheBlankModuleEntity | null;
+          trueOrFalse: TrueOrFalseModuleEntity | null;
         } = {
           id: 'module-1',
           lessonId: 'lesson-1',
           createdAt: new Date('2023-10-01T10:00:00Z'),
           updatedAt: new Date('2023-10-01T11:00:00Z'),
           mcq: null,
-          fillblank: fillBlankEntity,
+          fillBlank: fillBlankEntity,
+          trueOrFalse: null,
         };
 
         // When
@@ -213,14 +223,16 @@ describe('PrismaGameModuleMapper', () => {
 
         const gameModuleEntity: GameModuleEntity & { 
           mcq: McqModuleEntity | null;
-          fillblank: FillInTheBlankModuleEntity | null;
+          fillBlank: FillInTheBlankModuleEntity | null;
+          trueOrFalse: TrueOrFalseModuleEntity | null;
         } = {
           id: 'module-1',
           lessonId: 'lesson-1',
           createdAt: new Date('2023-10-01T10:00:00Z'),
           updatedAt: new Date('2023-10-01T11:00:00Z'),
           mcq: null,
-          fillblank: fillBlankEntity,
+          fillBlank: fillBlankEntity,
+          trueOrFalse: null,
         };
 
         // When/Then
@@ -228,19 +240,104 @@ describe('PrismaGameModuleMapper', () => {
       });
     });
 
-    describe('Error cases', () => {
-      it('should throw error when neither mcq nor fillblank is provided', () => {
+    describe('True or False Module', () => {
+      it('should map TrueOrFalseModuleEntity to TrueOrFalseModule', () => {
         // Given
+        const trueOrFalseEntity: TrueOrFalseModuleEntity = {
+          questions: [
+            {
+              id: 'question-1',
+              text: 'The earth is round',
+              isCorrect: true,
+              correctionMessage: 'Correct! The earth is indeed round.',
+            },
+            {
+              id: 'question-2',
+              text: 'The sun is cold',
+              isCorrect: false,
+              correctionMessage: 'Incorrect! The sun is actually very hot.',
+            },
+          ],
+          gameModuleId: 'module-1',
+        };
+
         const gameModuleEntity: GameModuleEntity & { 
           mcq: McqModuleEntity | null;
-          fillblank: FillInTheBlankModuleEntity | null;
+          fillBlank: FillInTheBlankModuleEntity | null;
+          trueOrFalse: TrueOrFalseModuleEntity | null;
         } = {
           id: 'module-1',
           lessonId: 'lesson-1',
           createdAt: new Date('2023-10-01T10:00:00Z'),
           updatedAt: new Date('2023-10-01T11:00:00Z'),
           mcq: null,
-          fillblank: null,
+          fillBlank: null,
+          trueOrFalse: trueOrFalseEntity,
+        };
+
+        // When
+        const result = mapper.toDomain(gameModuleEntity);
+
+        // Then
+        expect(result).toBeInstanceOf(TrueOrFalseModule);
+        const trueOrFalseModule = result as TrueOrFalseModule;
+        expect(trueOrFalseModule.id).toBe('module-1');
+        expect(trueOrFalseModule.lessonId).toBe('lesson-1');
+        expect(trueOrFalseModule.questions).toHaveLength(2);
+        expect(trueOrFalseModule.questions[0]).toBeInstanceOf(GameChoice);
+        expect(trueOrFalseModule.questions[0]?.id).toBe('question-1');
+        expect(trueOrFalseModule.questions[0]?.text).toBe('The earth is round');
+        expect(trueOrFalseModule.questions[0]?.isCorrect).toBe(true);
+        expect(trueOrFalseModule.questions[0]?.correctionMessage).toBe('Correct! The earth is indeed round.');
+        expect(trueOrFalseModule.questions[1]?.id).toBe('question-2');
+        expect(trueOrFalseModule.questions[1]?.text).toBe('The sun is cold');
+        expect(trueOrFalseModule.questions[1]?.isCorrect).toBe(false);
+        expect(trueOrFalseModule.questions[1]?.correctionMessage).toBe('Incorrect! The sun is actually very hot.');
+        expect(trueOrFalseModule.createdAt).toEqual(new Date('2023-10-01T10:00:00Z'));
+        expect(trueOrFalseModule.updatedAt).toEqual(new Date('2023-10-01T11:00:00Z'));
+      });
+
+      it('should throw error for empty questions array for True or False', () => {
+        // Given
+        const trueOrFalseEntity: TrueOrFalseModuleEntity = {
+          questions: null,
+          gameModuleId: 'module-1',
+        };
+
+        const gameModuleEntity: GameModuleEntity & { 
+          mcq: McqModuleEntity | null;
+          fillBlank: FillInTheBlankModuleEntity | null;
+          trueOrFalse: TrueOrFalseModuleEntity | null;
+        } = {
+          id: 'module-1',
+          lessonId: 'lesson-1',
+          createdAt: new Date('2023-10-01T10:00:00Z'),
+          updatedAt: new Date('2023-10-01T11:00:00Z'),
+          mcq: null,
+          fillBlank: null,
+          trueOrFalse: trueOrFalseEntity,
+        };
+
+        // When/Then
+        expect(() => mapper.toDomain(gameModuleEntity)).toThrow('At least one question is required');
+      });
+    });
+
+    describe('Error cases', () => {
+      it('should throw error when neither mcq nor fillBlank is provided', () => {
+        // Given
+        const gameModuleEntity: GameModuleEntity & { 
+          mcq: McqModuleEntity | null;
+          fillBlank: FillInTheBlankModuleEntity | null;
+          trueOrFalse: TrueOrFalseModuleEntity | null;
+        } = {
+          id: 'module-1',
+          lessonId: 'lesson-1',
+          createdAt: new Date('2023-10-01T10:00:00Z'),
+          updatedAt: new Date('2023-10-01T11:00:00Z'),
+          mcq: null,
+          fillBlank: null,
+          trueOrFalse: null,
         };
 
         // When/Then

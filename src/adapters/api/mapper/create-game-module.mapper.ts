@@ -1,6 +1,8 @@
 import {
   CreateGameModuleRequest,
   CreateMcqGameModuleContract,
+  CreateFillInTheBlankGameModuleContract,
+  CreateTrueOrFalseGameModuleContract,
 } from '../request/create-game-module.request';
 import { CreateGameModuleCommand } from '../../../core/usecases/create-game-module.use-case';
 import { GameType } from '../../../core/domain/type/GameType';
@@ -21,6 +23,28 @@ export class CreateGameModuleMapper {
           mcq: {
             question: contract?.question,
             choices: contract?.choices,
+          },
+        };
+      }
+      case GameType.FILL_IN_THE_BLANK: {
+        const contract = request.contract as CreateFillInTheBlankGameModuleContract;
+        return {
+          lessonId,
+          gameType: request.gameType,
+          fillInTheBlank: {
+            firstText: contract?.firstText,
+            secondText: contract?.secondText,
+            blanks: contract?.blanks,
+          },
+        };
+      }
+      case GameType.TRUE_OR_FALSE: {
+        const contract = request.contract as CreateTrueOrFalseGameModuleContract;
+        return {
+          lessonId,
+          gameType: request.gameType,
+          trueOrFalse: {
+            questions: contract?.questions,
           },
         };
       }

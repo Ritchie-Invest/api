@@ -49,6 +49,9 @@ import { GetGameModuleByIdUseCase } from './core/usecases/get-game-module-by-id.
 import { UpdateGameModuleUseCase } from './core/usecases/update-game-module.use-case';
 import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case';
 import { FillInTheBlankModuleStrategy } from './core/usecases/strategies/fill-in-the-blanks-module-strategy';
+import { FillInTheBlankCompleteGameModuleStrategy } from './core/usecases/strategies/fill-in-the-blanks-complete-game-module-strategy';
+import { TrueOrFalseModuleStrategy } from './core/usecases/strategies/true-or-false-module-strategy';
+import { TrueOrFalseCompleteGameModuleStrategy } from './core/usecases/strategies/true-or-false-complete-game-module-strategy';
 import { PrismaLessonAttemptRepository } from './adapters/prisma/prisma-lesson-attempt.repository';
 import { LessonAttemptRepository } from './core/domain/repository/lesson-attempt.repository';
 import { PrismaModuleAttemptRepository } from './adapters/prisma/prisma-module-attempt.repository';
@@ -84,6 +87,10 @@ import { ModuleAttemptRepository } from './core/domain/repository/module-attempt
             type: GameType.FILL_IN_THE_BLANK,
             strategy: new FillInTheBlankModuleStrategy(),
           },
+          {
+            type: GameType.TRUE_OR_FALSE,
+            strategy: new TrueOrFalseModuleStrategy(),
+          },
         ]),
     },
     {
@@ -96,7 +103,11 @@ import { ModuleAttemptRepository } from './core/domain/repository/module-attempt
           },
           {
             type: GameType.FILL_IN_THE_BLANK,
-            strategy: new FillInTheBlankModuleStrategy(),
+            strategy: new FillInTheBlankCompleteGameModuleStrategy(),
+          },
+          {
+            type: GameType.TRUE_OR_FALSE,
+            strategy: new TrueOrFalseCompleteGameModuleStrategy(),
           },
         ]),
     },

@@ -17,6 +17,9 @@ export type UpdateGameModuleCommand = {
     secondText: string;
     blanks: { text: string; isCorrect: boolean; correctionMessage: string }[];
   };
+  trueOrFalse?: {
+    questions: { text: string; isCorrect: boolean; correctionMessage: string }[];
+  };
 };
 
 export class UpdateGameModuleUseCase

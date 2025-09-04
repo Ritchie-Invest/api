@@ -19,6 +19,9 @@ export type CreateGameModuleCommand = {
     secondText: string;
     blanks: { text: string; isCorrect: boolean; correctionMessage: string }[];
   };
+  trueOrFalse?: {
+    questions: { text: string; isCorrect: boolean; correctionMessage: string }[];
+  };
 };
 
 export class CreateGameModuleUseCase
