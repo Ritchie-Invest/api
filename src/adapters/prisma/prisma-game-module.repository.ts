@@ -149,7 +149,7 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
           },
         },
       },
-      include: { mcq: true, fillBlank: true },
+      include: { mcq: true, fillBlank: true, trueOrFalse: true },
     });
     return this.mapper.toDomain(createdEntity) as FillInTheBlankModule;
   }
@@ -174,7 +174,7 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
           },
         },
       },
-      include: { mcq: true, fillBlank: true },
+      include: { mcq: true, fillBlank: true, trueOrFalse: true },
     });
 
     if (!updatedEntity) {

@@ -29,6 +29,7 @@ export class PrismaLessonRepository implements LessonRepository {
             lessonId: true,
             mcq: true,
             fillBlank: true,
+            trueOrFalse: true,
             createdAt: true,
             updatedAt: true,
           },
