@@ -4,7 +4,7 @@ import { IsEnum } from 'class-validator';
 
 export class UpdateGameModuleContract {}
 
-export class UpdateMcqChoice {
+export class UpdateGameChoice {
   @ApiProperty()
   text: string;
 
@@ -25,17 +25,34 @@ export class UpdateMcqGameModuleContract extends UpdateGameModuleContract {
   @ApiProperty()
   question: string;
 
-  @ApiProperty({ type: [UpdateMcqChoice] })
-  choices: UpdateMcqChoice[];
+  @ApiProperty({ type: [UpdateGameChoice] })
+  choices: UpdateGameChoice[];
 
-  constructor(question: string, choices: UpdateMcqChoice[]) {
+  constructor(question: string, choices: UpdateGameChoice[]) {
     super();
     this.question = question;
     this.choices = choices;
   }
 }
 
-@ApiExtraModels(UpdateMcqGameModuleContract)
+export class UpdateFillInTheBlankGameModuleContract extends UpdateGameModuleContract {
+  @ApiProperty()
+  firstText: string;
+  
+  @ApiProperty()
+  secondText: string;
+  
+  @ApiProperty({ type: [UpdateGameChoice] })
+  blanks: UpdateGameChoice[];
+  constructor(firstText: string, secondText: string, blanks: UpdateGameChoice[]) {
+    super();
+    this.firstText = firstText;
+    this.secondText = secondText;
+    this.blanks = blanks;
+  }
+}
+
+@ApiExtraModels(UpdateMcqGameModuleContract, UpdateFillInTheBlankGameModuleContract)
 export class UpdateGameModuleRequest {
   @ApiProperty({ enum: GameType })
   @IsEnum(GameType)

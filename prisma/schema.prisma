@@ -17,7 +17,6 @@ enum GameType {
   MCQ
 }
 
-
 model User {
   id             String         @id @default(cuid())
   email          String         @unique
@@ -69,15 +68,25 @@ model GameModule {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  lesson      Lesson        @relation(fields: [lessonId], references: [id])
-  mcq         McqModule?
-  Progression Progression[]
+  lesson               Lesson                @relation(fields: [lessonId], references: [id])
+  mcq                  McqModule?
+  Progression          Progression[]
+  FillInTheBlankModule FillInTheBlankModule?
 }
 
 model McqModule {
   id           String     @id @default(cuid())
   question     String
   choices      Json
+  gameModuleId String     @unique
+  gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
+}
+
+model FillInTheBlankModule {
+  id           String     @id @default(cuid())
+  firstText    String
+  secondText   String
+  blanks       Json
   gameModuleId String     @unique
   gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
 }

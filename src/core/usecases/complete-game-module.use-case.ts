@@ -17,6 +17,9 @@ export type CompleteGameModuleCommand = {
   mcq?: {
     choiceId: string;
   };
+  fillInTheBlank?: {
+    blankId: string;
+  };
 };
 
 export type CompleteGameModuleResult = {

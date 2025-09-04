@@ -5,7 +5,7 @@ import {
 } from '@prisma/client';
 import { GameModule } from '../../../core/domain/model/GameModule';
 import { EntityMapper } from '../../../core/base/entity-mapper';
-import { McqChoice } from '../../../core/domain/model/McqChoice';
+import { GameChoice } from '../../../core/domain/model/GameChoice';
 
 export class PrismaGameModuleMapper
   implements EntityMapper<GameModule, GameModuleEntity>
@@ -23,8 +23,8 @@ export class PrismaGameModuleMapper
         lessonId: entity.lessonId,
         question: entity.mcq.question,
         choices: ((entity.mcq.choices as any[]) || []).map(
-          (choice: McqChoice) =>
-            new McqChoice({
+          (choice: GameChoice) =>
+            new GameChoice({
               id: choice.id ?? '',
               text: choice.text,
               isCorrect: choice.isCorrect,

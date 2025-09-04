@@ -23,6 +23,20 @@ export class McqAnswerRequest {
   }
 }
 
+export class FillInTheBlankAnswerRequest {
+  @ApiProperty({
+    description: 'The ID of the selected blank option',
+    example: 'blank-1',
+  })
+  @IsNotEmpty()
+  @IsString()
+  blankId: string;
+  
+  constructor(blankId: string) {
+    this.blankId = blankId;
+  }
+}
+
 export class CompleteGameModuleRequest {
   @ApiProperty({
     description: 'Type of the game module being completed',
@@ -42,8 +56,23 @@ export class CompleteGameModuleRequest {
   @Type(() => McqAnswerRequest)
   mcq?: McqAnswerRequest;
 
-  constructor(gameType: GameType, mcq?: McqAnswerRequest) {
+  @ApiProperty({
+    description: 'Fill in the blank answer details (required when gameType is FILL_IN_THE_BLANK)',
+    type: FillInTheBlankAnswerRequest,
+    required: false,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => FillInTheBlankAnswerRequest)
+  fillInTheBlank?: FillInTheBlankAnswerRequest;
+
+  constructor(
+    gameType: GameType,
+    mcq?: McqAnswerRequest,
+    fillInTheBlank?: FillInTheBlankAnswerRequest,
+  ) {
     this.gameType = gameType;
     this.mcq = mcq;
+    this.fillInTheBlank = fillInTheBlank;
   }
 }

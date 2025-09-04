@@ -50,6 +50,7 @@ import { GetUserChaptersUseCase } from './core/usecases/get-user-chapters.use-ca
 import { GetGameModuleByIdUseCase } from './core/usecases/get-game-module-by-id.use-case';
 import { UpdateGameModuleUseCase } from './core/usecases/update-game-module.use-case';
 import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case';
+import { FillInTheBlankModuleStrategy } from './core/usecases/strategies/fill-in-the-blanks-module-strategy copy';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -76,6 +77,10 @@ import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case'
             type: GameType.MCQ,
             strategy: new McqModuleStrategy(),
           },
+          {
+            type: GameType.FILL_IN_THE_BLANK,
+            strategy: new FillInTheBlankModuleStrategy(),
+          },
         ]),
     },
     {
@@ -85,6 +90,10 @@ import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case'
           {
             type: GameType.MCQ,
             strategy: new McqCompleteGameModuleStrategy(),
+          },
+          {
+            type: GameType.FILL_IN_THE_BLANK,
+            strategy: new FillInTheBlankModuleStrategy(),
           },
         ]),
     },
