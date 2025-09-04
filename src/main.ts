@@ -16,10 +16,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   app.enableCors({
-    origin: [
-      process.env.ADMIN_APP_BASE_URL || 'http://localhost:5173/',
-      process.env.MOBILE_APP_BASE_URL || 'http://localhost:8080/',
-    ],
+    origin: '*',
     credentials: true,
   });
 
