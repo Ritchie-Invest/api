@@ -15,6 +15,7 @@ enum UserType {
 
 enum GameType {
   MCQ
+  FILL_IN_THE_BLANK
 }
 
 model User {
