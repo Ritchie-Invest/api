@@ -1,3 +1,6 @@
+-- AlterEnum
+ALTER TYPE "GameType" ADD VALUE 'FILL_IN_THE_BLANK';
+
 -- AlterTable
 ALTER TABLE "RefreshToken" ALTER COLUMN "expiresAt" SET DEFAULT CURRENT_TIMESTAMP;
 
