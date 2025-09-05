@@ -10,9 +10,6 @@ import {
 } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { GameType } from '../../../core/domain/type/GameType';
-import { McqModule } from '../../../core/domain/model/McqModule';
-import { GaugeModule } from '../../../core/domain/model/GaugeModule';
-import { ChooseAnOrderModule } from '../../../core/domain/model/ChooseAnOrderModule';
 import { PrismaGameModuleMapper } from './prisma-game-module.mapper';
 
 @Injectable()
