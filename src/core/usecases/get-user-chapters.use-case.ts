@@ -114,10 +114,11 @@ export class GetUserChaptersUseCase
         lessons,
       );
 
-      const gameModuleId =
-        lessonData.modules.length > 0
-          ? lessonData.modules[0]?.id || null
-          : null;
+      const gameModuleId = lessonData.modules.length > 0
+        ? lessonData.modules.find(module =>
+            !module.Progression.some(prog => prog.isCompleted)
+          )?.id || lessonData.modules[0]?.id || null
+        : null;
 
       const lesson = new Lesson(
         lessonData.id,
