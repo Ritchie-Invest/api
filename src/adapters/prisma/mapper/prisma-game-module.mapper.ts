@@ -61,7 +61,7 @@ export class PrismaGameModuleMapper
         id: entity.id,
         lessonId: entity.lessonId,
         question: entity.chooseAnOrder.question,
-        sentences: ((entity.chooseAnOrder.sentences as ChooseAnOrderChoice[]) || []).map(
+        sentences: (((entity.chooseAnOrder.sentences as unknown) as ChooseAnOrderChoice[]) || []).map(
           (sentence: ChooseAnOrderChoice) =>
             new ChooseAnOrderChoice({
               sentence: sentence.sentence,
