@@ -22,7 +22,7 @@ export class GetLightGameModuleByIdMapper {
         new McqModuleDetails(
           gameModule.question,
           gameModule.choices.map(
-            (choice) => new LightMcqChoice(choice.id, choice.text),
+            (choice) => new LightMcqChoice(choice.id, choice.text, choice.isCorrect),
           ),
         ),
         gameModule.updatedAt,

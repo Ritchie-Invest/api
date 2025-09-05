@@ -9,9 +9,13 @@ export class LightMcqChoice {
   @ApiProperty()
   text: string;
 
-  constructor(id: string, text: string) {
+  @ApiProperty()
+  isCorrect: boolean;
+
+  constructor(id: string, text: string, isCorrect: boolean) {
     this.id = id;
     this.text = text;
+    this.isCorrect = isCorrect;
   }
 }
 
