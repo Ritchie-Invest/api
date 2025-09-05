@@ -35,6 +35,28 @@ export class UpdateMcqGameModuleContract extends UpdateGameModuleContract {
   }
 }
 
+export class UpdateMatchChoice {
+  @ApiProperty()
+  value1: string;
+  @ApiProperty()
+  value2: string;
+  constructor(value1: string, value2: string) {
+    this.value1 = value1;
+    this.value2 = value2;
+  }
+}
+export class UpdateMatchGameModuleContract extends UpdateGameModuleContract {
+  @ApiProperty()
+  instruction: string;
+  @ApiProperty({ type: [UpdateMatchChoice] })
+  matches: UpdateMatchChoice[];
+  constructor(instruction: string, matches: UpdateMatchChoice[]) {
+    super();
+    this.instruction = instruction;
+    this.matches = matches;
+  }
+}
+
 @ApiExtraModels(UpdateMcqGameModuleContract)
 export class UpdateGameModuleRequest {
   @ApiProperty({ enum: GameType })

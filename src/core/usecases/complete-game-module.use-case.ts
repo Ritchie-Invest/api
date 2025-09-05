@@ -20,12 +20,15 @@ export type CompleteGameModuleCommand = {
   mcq?: {
     choiceId: string;
   };
+  match?: {
+    answers: { value1: string; value2: string }[];
+  };
 };
 
 export type CompleteGameModuleResult = {
   isCorrect: boolean;
   feedback: string;
-  correctChoiceId: string; // id de la bonne réponse pour le module
+  correctChoiceId: string; 
   nextGameModuleId: string | null;
   currentGameModuleIndex: number;
   totalGameModules: number;
