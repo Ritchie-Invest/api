@@ -52,14 +52,28 @@ export class UpdateFillInTheBlankGameModuleContract extends UpdateGameModuleCont
   }
 }
 
-@ApiExtraModels(UpdateMcqGameModuleContract, UpdateFillInTheBlankGameModuleContract)
+export class UpdateTrueOrFalseGameModuleContract extends UpdateGameModuleContract {
+  @ApiProperty({ type: [UpdateGameChoice] })
+  questions: UpdateGameChoice[];
+
+  constructor(questions: UpdateGameChoice[]) {
+    super();
+    this.questions = questions;
+  }
+}
+
+@ApiExtraModels(UpdateMcqGameModuleContract, UpdateFillInTheBlankGameModuleContract, UpdateTrueOrFalseGameModuleContract)
 export class UpdateGameModuleRequest {
   @ApiProperty({ enum: GameType })
   @IsEnum(GameType)
   gameType: GameType;
 
   @ApiProperty({
-    oneOf: [{ $ref: getSchemaPath(UpdateMcqGameModuleContract) }],
+    oneOf: [
+      { $ref: getSchemaPath(UpdateMcqGameModuleContract) },
+      { $ref: getSchemaPath(UpdateFillInTheBlankGameModuleContract) },
+      { $ref: getSchemaPath(UpdateTrueOrFalseGameModuleContract) },
+    ],
   })
   contract: UpdateGameModuleContract;
 

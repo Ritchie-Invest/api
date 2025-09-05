@@ -6,11 +6,13 @@ import {
   GameModule as GameModuleEntity,
   McqModule as McqModuleEntity,
   FillInTheBlankModule as FillInTheBlankModuleEntity,
+  TrueOrFalseModule as TrueOrFalseModuleEntity,
 } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { GameType } from '../../../core/domain/type/GameType';
 import { McqModule } from '../../../core/domain/model/McqModule';
 import { FillInTheBlankModule } from '../../../core/domain/model/FillInTheBlankModule';
+import { TrueOrFalseModule } from '../../../core/domain/model/TrueOrFalseModule';
 import { PrismaGameModuleMapper } from './prisma-game-module.mapper';
 
 @Injectable()
@@ -35,7 +37,8 @@ export class PrismaLessonMapper implements EntityMapper<Lesson, LessonEntity> {
     entity: LessonEntity & {
       modules?: (GameModuleEntity & { 
         mcq: McqModuleEntity | null;
-        fillblank: FillInTheBlankModuleEntity | null;
+        fillBlank: FillInTheBlankModuleEntity | null;
+        trueOrFalse: TrueOrFalseModuleEntity | null;
       })[];
     },
   ): Lesson {
@@ -53,15 +56,25 @@ export class PrismaLessonMapper implements EntityMapper<Lesson, LessonEntity> {
             return this.mcqModuleMapper.toDomain({
               ...module,
               mcq: module.mcq,
-              fillblank: null,
+              fillBlank: null,
+              trueOrFalse: null,
             }) as McqModule;
           }
-          if (module.fillblank) {
+          if (module.fillBlank) {
             return this.mcqModuleMapper.toDomain({
               ...module,
               mcq: null,
-              fillblank: module.fillblank,
+              fillBlank: module.fillBlank,
+              trueOrFalse: null,
             }) as FillInTheBlankModule;
+          }
+          if (module.trueOrFalse) {
+            return this.mcqModuleMapper.toDomain({
+              ...module,
+              mcq: null,
+              fillBlank: null,
+              trueOrFalse: module.trueOrFalse,
+            }) as TrueOrFalseModule;
           }
           throw new Error('Unsupported module type in lesson');
         }) || [],
@@ -76,6 +89,8 @@ export class PrismaLessonMapper implements EntityMapper<Lesson, LessonEntity> {
         return GameType.MCQ;
       case 'FILL_IN_THE_BLANK':
         return GameType.FILL_IN_THE_BLANK;
+      case 'TRUE_OR_FALSE':
+        return GameType.TRUE_OR_FALSE;
       default:
         throw new Error('Invalid game type');
     }

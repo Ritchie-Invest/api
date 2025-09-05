@@ -13,7 +13,9 @@ import { MapCompleteGameModuleStrategyFactory } from '../strategies/complete-gam
 import { McqCompleteGameModuleStrategy } from '../strategies/mcq-complete-game-module-strategy';
 import { Lesson } from '../../domain/model/Lesson';
 import { FillInTheBlankCompleteGameModuleStrategy } from '../strategies/fill-in-the-blanks-complete-game-module-strategy';
+import { TrueOrFalseCompleteGameModuleStrategy } from '../strategies/true-or-false-complete-game-module-strategy';
 import { FillInTheBlankModule } from '../../domain/model/FillInTheBlankModule';
+import { TrueOrFalseModule } from '../../domain/model/TrueOrFalseModule';
 import { InMemoryModuleAttemptRepository } from '../../../adapters/in-memory/in-memory-module-attempt.repository';
 import { InMemoryLessonAttemptRepository } from '../../../adapters/in-memory/in-memory-lesson-attempt.repository';
 
@@ -38,6 +40,10 @@ describe('CompleteGameModuleUseCase', () => {
       {
         type: GameType.FILL_IN_THE_BLANK,
         strategy: new FillInTheBlankCompleteGameModuleStrategy(),
+      },
+      {
+        type: GameType.TRUE_OR_FALSE,
+        strategy: new TrueOrFalseCompleteGameModuleStrategy(),
       },
     ]);
 
@@ -431,6 +437,160 @@ describe('CompleteGameModuleUseCase', () => {
         gameType: GameType.FILL_IN_THE_BLANK,
         fillInTheBlank: {
           blankId: 'non-existent-blank',
+        },
+      };
+
+      // When & Then
+      await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+    });
+  });
+
+  describe('Scenario 6: True or False valid answer submission', () => {
+    it('should return correct answer and feedback when answer is correct', async () => {
+      // Given
+      createTestLesson();
+
+      const trueQuestion = new GameChoice({
+        id: 'question-1',
+        text: 'The earth is round',
+        isCorrect: true,
+        correctionMessage: 'Correct! The earth is indeed round.',
+      });
+
+      const falseQuestion = new GameChoice({
+        id: 'question-2',
+        text: 'The sun is cold',
+        isCorrect: false,
+        correctionMessage: 'Incorrect. The sun is actually very hot.',
+      });
+
+      const trueOrFalseModule = new TrueOrFalseModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        questions: [trueQuestion, falseQuestion],
+      });
+
+      gameModuleRepository.create(trueOrFalseModule);
+
+      const command: CompleteGameModuleCommand = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.TRUE_OR_FALSE,
+        trueOrFalse: {
+          questionId: 'question-1',
+          answer: true,
+        },
+      };
+
+      // When
+      const result = await useCase.execute(command);
+
+      // Then
+      expect(result.isCorrect).toBe(true);
+      expect(result.feedback).toBe('Correct! The earth is indeed round.');
+    });
+
+    it('should return incorrect answer and feedback when answer is wrong', async () => {
+      // Given
+      createTestLesson();
+
+      const trueQuestion = new GameChoice({
+        id: 'question-1',
+        text: 'The earth is round',
+        isCorrect: true,
+        correctionMessage: 'Correct! The earth is indeed round.',
+      });
+
+      const falseQuestion = new GameChoice({
+        id: 'question-2',
+        text: 'The sun is cold',
+        isCorrect: false,
+        correctionMessage: 'Incorrect. The sun is actually very hot.',
+      });
+
+      const trueOrFalseModule = new TrueOrFalseModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        questions: [trueQuestion, falseQuestion],
+      });
+
+      gameModuleRepository.create(trueOrFalseModule);
+
+      const command: CompleteGameModuleCommand = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.TRUE_OR_FALSE,
+        trueOrFalse: {
+          questionId: 'question-2',
+          answer: true,
+        },
+      };
+
+      // When
+      const result = await useCase.execute(command);
+
+      // Then
+      expect(result.isCorrect).toBe(false);
+      expect(result.feedback).toBe('Incorrect. The sun is actually very hot.');
+    });
+  });
+
+  describe('Scenario 7: True or False invalid or empty answer', () => {
+    it('should throw InvalidAnswerError when questionId is empty', async () => {
+      // Given
+      createTestLesson();
+
+      const trueQuestion = new GameChoice({
+        id: 'question-1',
+        text: 'The earth is round',
+        isCorrect: true,
+        correctionMessage: 'Correct!',
+      });
+
+      const trueOrFalseModule = new TrueOrFalseModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        questions: [trueQuestion],
+      });
+
+      gameModuleRepository.create(trueOrFalseModule);
+
+      const command = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.TRUE_OR_FALSE,
+      } as CompleteGameModuleCommand;
+
+      // When & Then
+      await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+    });
+
+    it('should throw InvalidAnswerError when questionId does not exist in module', async () => {
+      // Given
+      createTestLesson();
+
+      const trueQuestion = new GameChoice({
+        id: 'question-1',
+        text: 'The earth is round',
+        isCorrect: true,
+        correctionMessage: 'Correct!',
+      });
+
+      const trueOrFalseModule = new TrueOrFalseModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        questions: [trueQuestion],
+      });
+
+      gameModuleRepository.create(trueOrFalseModule);
+
+      const command: CompleteGameModuleCommand = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.TRUE_OR_FALSE,
+        trueOrFalse: {
+          questionId: 'non-existent-question',
+          answer: true,
         },
       };
 

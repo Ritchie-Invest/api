@@ -5,6 +5,7 @@ import {
   IsOptional,
   ValidateNested,
   IsEnum,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { GameType } from '../../../core/domain/type/GameType';
@@ -37,6 +38,28 @@ export class FillInTheBlankAnswerRequest {
   }
 }
 
+export class TrueOrFalseAnswerRequest {
+  @ApiProperty({
+    description: 'The ID of the selected question',
+    example: 'question-1',
+  })
+  @IsNotEmpty()
+  @IsString()
+  questionId: string;
+
+  @ApiProperty({
+    description: 'The boolean answer for the true/false question',
+    example: true,
+  })
+  @IsBoolean()
+  answer: boolean;
+  
+  constructor(questionId: string, answer: boolean) {
+    this.questionId = questionId;
+    this.answer = answer;
+  }
+}
+
 export class CompleteGameModuleRequest {
   @ApiProperty({
     description: 'Type of the game module being completed',
@@ -66,13 +89,25 @@ export class CompleteGameModuleRequest {
   @Type(() => FillInTheBlankAnswerRequest)
   fillInTheBlank?: FillInTheBlankAnswerRequest;
 
+  @ApiProperty({
+    description: 'True or False answer details (required when gameType is TRUE_OR_FALSE)',
+    type: TrueOrFalseAnswerRequest,
+    required: false,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => TrueOrFalseAnswerRequest)
+  trueOrFalse?: TrueOrFalseAnswerRequest;
+
   constructor(
     gameType: GameType,
     mcq?: McqAnswerRequest,
     fillInTheBlank?: FillInTheBlankAnswerRequest,
+    trueOrFalse?: TrueOrFalseAnswerRequest,
   ) {
     this.gameType = gameType;
     this.mcq = mcq;
     this.fillInTheBlank = fillInTheBlank;
+    this.trueOrFalse = trueOrFalse;
   }
 }

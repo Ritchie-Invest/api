@@ -23,6 +23,10 @@ export type CompleteGameModuleCommand = {
   fillInTheBlank?: {
     blankId: string;
   };
+  trueOrFalse?: {
+    questionId: string;
+    answer: boolean;
+  };
 };
 
 export type CompleteGameModuleResult = {

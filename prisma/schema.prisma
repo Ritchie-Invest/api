@@ -16,6 +16,7 @@ enum UserType {
 enum GameType {
   MCQ
   FILL_IN_THE_BLANK
+  TRUE_OR_FALSE
 }
 
 model User {
@@ -74,7 +75,8 @@ model GameModule {
   updatedAt     DateTime              @updatedAt
   lesson        Lesson                @relation(fields: [lessonId], references: [id])
   mcq           McqModule?
-  fillblank     FillInTheBlankModule?
+  fillBlank     FillInTheBlankModule?
+  trueOrFalse   TrueOrFalseModule?
   moduleAttempt ModuleAttempt[]
 }
 
@@ -91,6 +93,12 @@ model FillInTheBlankModule {
   firstText    String
   secondText   String
   blanks       Json
+  gameModuleId String     @unique
+  gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
+}
+
+model TrueOrFalseModule {
+  questions    Json
   gameModuleId String     @unique
   gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
 }
