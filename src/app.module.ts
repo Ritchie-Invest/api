@@ -37,6 +37,8 @@ import {
 } from './core/usecases/strategies/game-module-strategy-factory';
 import { GameType } from './core/domain/type/GameType';
 import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strategy';
+import { GaugeGameModuleStrategy } from './core/usecases/strategies/gauge-game-module-strategy';
+import { ChooseAnOrderGameModuleStrategy } from './core/usecases/strategies/choose-an-order-game-module-strategy';
 import { CompleteGameModuleUseCase } from './core/usecases/complete-game-module.use-case';
 import { GameModuleController } from './adapters/api/controller/game-module.controller';
 import {
@@ -44,6 +46,8 @@ import {
   MapCompleteGameModuleStrategyFactory,
 } from './core/usecases/strategies/complete-game-module-strategy-factory';
 import { McqCompleteGameModuleStrategy } from './core/usecases/strategies/mcq-complete-game-module-strategy';
+import { GaugeCompleteGameModuleStrategy } from './core/usecases/strategies/gauge-complete-game-module-strategy';
+import { ChooseAnOrderCompleteGameModuleStrategy } from './core/usecases/strategies/choose-an-order-complete-game-module-strategy';
 import { GetUserChaptersUseCase } from './core/usecases/get-user-chapters.use-case';
 import { GetGameModuleByIdUseCase } from './core/usecases/get-game-module-by-id.use-case';
 import { UpdateGameModuleUseCase } from './core/usecases/update-game-module.use-case';
@@ -79,6 +83,14 @@ import { ModuleAttemptRepository } from './core/domain/repository/module-attempt
             type: GameType.MCQ,
             strategy: new McqModuleStrategy(),
           },
+          {
+            type: GameType.GAUGE,
+            strategy: new GaugeGameModuleStrategy(),
+          },
+          {
+            type: GameType.ORDER,
+            strategy: new ChooseAnOrderGameModuleStrategy(),
+          },
         ]),
     },
     {
@@ -88,6 +100,14 @@ import { ModuleAttemptRepository } from './core/domain/repository/module-attempt
           {
             type: GameType.MCQ,
             strategy: new McqCompleteGameModuleStrategy(),
+          },
+          {
+            type: GameType.GAUGE,
+            strategy: new GaugeCompleteGameModuleStrategy(),
+          },
+          {
+            type: GameType.ORDER,
+            strategy: new ChooseAnOrderCompleteGameModuleStrategy(),
           },
         ]),
     },

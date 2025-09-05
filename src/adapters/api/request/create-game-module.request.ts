@@ -35,14 +35,59 @@ export class CreateMcqGameModuleContract extends CreateGameModuleContract {
   }
 }
 
-@ApiExtraModels(CreateMcqGameModuleContract)
+export class CreateGaugeGameModuleContract extends CreateGameModuleContract {
+  @ApiProperty()
+  question: string;
+
+  @ApiProperty()
+  value: number;
+
+  constructor(question: string, value: number) {
+    super();
+    this.question = question;
+    this.value = value;
+  }
+}
+
+export class CreateChooseAnOrderChoice {
+  @ApiProperty()
+  sentence: string;
+
+  @ApiProperty()
+  value: number;
+
+  constructor(sentence: string, value: number) {
+    this.sentence = sentence;
+    this.value = value;
+  }
+}
+
+export class CreateChooseAnOrderGameModuleContract extends CreateGameModuleContract {
+  @ApiProperty()
+  question: string;
+
+  @ApiProperty({ type: [CreateChooseAnOrderChoice] })
+  sentences: CreateChooseAnOrderChoice[];
+
+  constructor(question: string, sentences: CreateChooseAnOrderChoice[]) {
+    super();
+    this.question = question;
+    this.sentences = sentences;
+  }
+}
+
+@ApiExtraModels(CreateMcqGameModuleContract, CreateGaugeGameModuleContract, CreateChooseAnOrderGameModuleContract)
 export class CreateGameModuleRequest {
   @ApiProperty({ enum: GameType })
   @IsEnum(GameType)
   gameType: GameType;
 
   @ApiProperty({
-    oneOf: [{ $ref: getSchemaPath(CreateMcqGameModuleContract) }],
+    oneOf: [
+      { $ref: getSchemaPath(CreateMcqGameModuleContract) },
+      { $ref: getSchemaPath(CreateGaugeGameModuleContract) },
+      { $ref: getSchemaPath(CreateChooseAnOrderGameModuleContract) },
+    ],
   })
   contract: CreateGameModuleContract;
 

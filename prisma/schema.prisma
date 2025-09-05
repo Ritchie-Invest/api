@@ -15,6 +15,8 @@ enum UserType {
 
 enum GameType {
   MCQ
+  GAUGE
+  ORDER
 }
 
 model User {
@@ -72,15 +74,33 @@ model GameModule {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  lesson        Lesson          @relation(fields: [lessonId], references: [id])
-  mcq           McqModule?
-  moduleAttempt ModuleAttempt[]
+  lesson         Lesson                @relation(fields: [lessonId], references: [id])
+  mcq            McqModule?
+  gauge          GaugeModule?
+  chooseAnOrder  ChooseAnOrderModule?
+  moduleAttempt  ModuleAttempt[]
 }
 
 model McqModule {
   id           String     @id @default(cuid())
   question     String
   choices      Json
+  gameModuleId String     @unique
+  gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
+}
+
+model GaugeModule {
+  id           String     @id @default(cuid())
+  question     String
+  value        Int
+  gameModuleId String     @unique
+  gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
+}
+
+model ChooseAnOrderModule {
+  id           String     @id @default(cuid())
+  question     String
+  sentences    Json
   gameModuleId String     @unique
   gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
 }

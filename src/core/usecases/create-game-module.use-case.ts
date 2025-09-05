@@ -14,6 +14,14 @@ export type CreateGameModuleCommand = {
     question: string;
     choices: { text: string; isCorrect: boolean; correctionMessage: string }[];
   };
+  gauge?: {
+    question: string;
+    value: number;
+  };
+  chooseAnOrder?: {
+    question: string;
+    sentences: { sentence: string; value: number }[];
+  };
 };
 
 export class CreateGameModuleUseCase
@@ -42,6 +50,10 @@ export class CreateGameModuleUseCase
     if (!updatedLesson) {
       throw new LessonNotFoundError(lesson.id);
     }
+
+    const modules = await this.gameModuleRepository.findByLessonId(lesson.id);
+    updatedLesson.modules = modules;
+    
     return updatedLesson;
   }
 }
