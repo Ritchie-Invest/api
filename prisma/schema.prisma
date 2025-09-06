@@ -27,6 +27,11 @@ enum Currency {
   GBP
 }
 
+enum TransactionType {
+  BUY
+  SELL
+}
+
 model User {
   id               String             @id @default(cuid())
   email            String             @unique
@@ -38,6 +43,7 @@ model User {
   LessonCompletion LessonCompletion[]
   LessonAttempt    LessonAttempt[]
   ModuleAttempt    ModuleAttempt[]
+  UserPortfolio    UserPortfolio[]
 }
 
 model RefreshToken {
@@ -134,12 +140,13 @@ model ModuleAttempt {
 }
 
 model Ticker {
-  id       String     @id @default(cuid())
-  name     String
-  symbol   String     @unique
-  type     TickerType
-  currency Currency
-  history  DailyBar[]
+  id          String        @id @default(cuid())
+  name        String
+  symbol      String        @unique
+  type        TickerType
+  currency    Currency
+  history     DailyBar[]
+  Transaction Transaction[]
 }
 
 model DailyBar {
@@ -155,4 +162,34 @@ model DailyBar {
   ticker Ticker @relation(fields: [tickerId], references: [id])
 
   @@unique([tickerId, date])
+}
+
+model UserPortfolio {
+  id          String           @id @default(cuid())
+  userId      String
+  currency    Currency
+  history     PortfolioValue[]
+  user        User             @relation(fields: [userId], references: [id])
+  Transaction Transaction[]
+}
+
+model PortfolioValue {
+  id          String        @id @default(cuid())
+  portfolioId String
+  cash        Int
+  investments Int
+  date        DateTime
+  portfolio   UserPortfolio @relation(fields: [portfolioId], references: [id])
+}
+
+model Transaction {
+  id                 String          @id @default(cuid())
+  portfolioId        String
+  tickerId           String
+  type               TransactionType
+  amount             Float
+  volume             Int
+  currentTickerPrice Float
+  portfolio          UserPortfolio   @relation(fields: [portfolioId], references: [id])
+  ticker             Ticker          @relation(fields: [tickerId], references: [id])
 }

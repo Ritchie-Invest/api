@@ -2,6 +2,7 @@ import { UseCase } from '../base/use-case';
 import { UserNotFoundError } from '../domain/error/UserNotFoundError';
 import { RefreshTokenRepository } from '../domain/repository/refresh-token.repository';
 import { UserRepository } from '../domain/repository/user.repository';
+import { UserPortfolioRepository } from '../domain/repository/user-portfolio.repository';
 import { TokenService } from '../domain/service/token.service';
 import * as bcrypt from 'bcryptjs';
 
@@ -19,6 +20,7 @@ export class LoginUseCase implements UseCase<LoginCommand, LoginResult> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly refreshTokenRepository: RefreshTokenRepository,
+    private readonly userPortfolioRepository: UserPortfolioRepository,
     private readonly tokenService: TokenService,
   ) {}
 
@@ -35,16 +37,23 @@ export class LoginUseCase implements UseCase<LoginCommand, LoginResult> {
       throw new UserNotFoundError(email);
     }
 
+    const portfolio = await this.userPortfolioRepository.findByUserId(user.id);
+    if (!portfolio) {
+      throw new UserNotFoundError(`Portfolio not found for user ${user.id}`);
+    }
+
     const accessToken = this.tokenService.generateAccessToken({
       id: user.id,
       email: user.email,
       type: user.type,
+      portfolioId: portfolio.id,
     });
 
     const refreshToken = this.tokenService.generateRefreshToken({
       id: user.id,
       email: user.email,
       type: user.type,
+      portfolioId: portfolio.id,
     });
 
     await this.refreshTokenRepository.create({

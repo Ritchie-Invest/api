@@ -40,11 +40,13 @@ export class RefreshUseCase implements UseCase<RefreshCommand, RefreshResult> {
       id: payload.id,
       email: payload.email,
       type: payload.type,
+      portfolioId: payload.portfolioId,
     });
     const refreshToken = this.tokenService.generateRefreshToken({
       id: payload.id,
       email: payload.email,
       type: payload.type,
+      portfolioId: payload.portfolioId,
     });
     await this.refreshTokenRepository.create({
       userId: payload.id,
