@@ -53,6 +53,10 @@ import { LessonAttemptRepository } from './core/domain/repository/lesson-attempt
 import { PrismaModuleAttemptRepository } from './adapters/prisma/prisma-module-attempt.repository';
 import { PrismaLessonCompletionRepository } from './adapters/prisma/prisma-lesson-completion.repository';
 import { ModuleAttemptRepository } from './core/domain/repository/module-attempt.repository';
+import { TickerRepository } from './core/domain/repository/ticker.repository';
+import { PrismaTickerRepository } from './adapters/prisma/prisma-ticker.repository';
+import { GetTickersWithPriceUseCase } from './core/usecases/get-tickers-with-price.use-case';
+import { TickerController } from './adapters/api/controller/ticker.controller';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -62,6 +66,7 @@ import { ModuleAttemptRepository } from './core/domain/repository/module-attempt
     ChapterController,
     LessonController,
     GameModuleController,
+    TickerController,
   ],
   providers: [
     PrismaService,
@@ -135,6 +140,11 @@ import { ModuleAttemptRepository } from './core/domain/repository/module-attempt
       provide: 'LessonCompletionRepository',
       useFactory: (prisma: PrismaService) =>
         new PrismaLessonCompletionRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: TickerRepository,
+      useFactory: (prisma: PrismaService) => new PrismaTickerRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -316,6 +326,12 @@ import { ModuleAttemptRepository } from './core/domain/repository/module-attempt
         'LessonAttemptRepository',
         'ModuleAttemptRepository',
       ],
+    },
+    {
+      provide: GetTickersWithPriceUseCase,
+      useFactory: (tickerRepository: TickerRepository) =>
+        new GetTickersWithPriceUseCase(tickerRepository),
+      inject: [TickerRepository],
     },
   ],
 })
