@@ -1,4 +1,4 @@
-export class McqChoice {
+export class GameChoice {
   id: string;
   text: string;
   isCorrect: boolean;

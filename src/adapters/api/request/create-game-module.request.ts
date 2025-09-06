@@ -4,7 +4,7 @@ import { IsEnum } from 'class-validator';
 
 export class CreateGameModuleContract {}
 
-export class CreateMcqChoice {
+export class CreateGameChoice {
   @ApiProperty()
   text: string;
 
@@ -25,24 +25,56 @@ export class CreateMcqGameModuleContract extends CreateGameModuleContract {
   @ApiProperty()
   question: string;
 
-  @ApiProperty({ type: [CreateMcqChoice] })
-  choices: CreateMcqChoice[];
+  @ApiProperty({ type: [CreateGameChoice] })
+  choices: CreateGameChoice[];
 
-  constructor(question: string, choices: CreateMcqChoice[]) {
+  constructor(question: string, choices: CreateGameChoice[]) {
     super();
     this.question = question;
     this.choices = choices;
   }
 }
 
-@ApiExtraModels(CreateMcqGameModuleContract)
+export class CreateFillInTheBlankGameModuleContract extends CreateGameModuleContract {
+  @ApiProperty()
+  firstText: string;
+  
+  @ApiProperty()
+  secondText: string;
+
+  @ApiProperty({ type: [CreateGameChoice] })
+  blanks: CreateGameChoice[];
+
+  constructor(firstText: string, secondText: string, blanks: CreateGameChoice[]) {
+    super();
+    this.firstText = firstText;
+    this.secondText = secondText;
+    this.blanks = blanks;
+  }
+}
+
+export class CreateTrueOrFalseGameModuleContract extends CreateGameModuleContract {
+  @ApiProperty({ type: [CreateGameChoice] })
+  questions: CreateGameChoice[];
+
+  constructor(questions: CreateGameChoice[]) {
+    super();
+    this.questions = questions;
+  }
+}
+
+@ApiExtraModels(CreateMcqGameModuleContract, CreateFillInTheBlankGameModuleContract, CreateTrueOrFalseGameModuleContract)
 export class CreateGameModuleRequest {
   @ApiProperty({ enum: GameType })
   @IsEnum(GameType)
   gameType: GameType;
 
   @ApiProperty({
-    oneOf: [{ $ref: getSchemaPath(CreateMcqGameModuleContract) }],
+    oneOf: [
+      { $ref: getSchemaPath(CreateMcqGameModuleContract) },
+      { $ref: getSchemaPath(CreateFillInTheBlankGameModuleContract) },
+      { $ref: getSchemaPath(CreateTrueOrFalseGameModuleContract) },
+    ],
   })
   contract: CreateGameModuleContract;
 

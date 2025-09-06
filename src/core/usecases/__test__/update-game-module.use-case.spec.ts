@@ -12,6 +12,12 @@ import {
   UpdateGameModuleUseCase,
 } from '../update-game-module.use-case';
 import { GameModuleNotFoundError } from '../../domain/error/GameModuleNotFoundError';
+import { FillInTheBlankModuleStrategy } from '../strategies/fill-in-the-blanks-module-strategy';
+import { TrueOrFalseModuleStrategy } from '../strategies/true-or-false-module-strategy';
+import { FillInTheBlankModule } from '../../domain/model/FillInTheBlankModule';
+import { TrueOrFalseModule } from '../../domain/model/TrueOrFalseModule';
+import { FillInTheBlankModuleInvalidDataError } from '../../domain/error/FillInTheBlankModuleInvalidDataError';
+import { GameChoice } from '../../domain/model/GameChoice';
 
 describe('UpdateGameModuleUseCase', () => {
   let lessonRepository: InMemoryLessonRepository;
@@ -22,8 +28,12 @@ describe('UpdateGameModuleUseCase', () => {
     lessonRepository = new InMemoryLessonRepository();
     gameModuleRepository = new InMemoryGameModuleRepository();
     const mcqStrategy = new McqModuleStrategy();
+    const fillInTheBlankStrategy = new FillInTheBlankModuleStrategy();
+    const trueOrFalseStrategy = new TrueOrFalseModuleStrategy();
     const strategyFactory = new MapGameModuleStrategyFactory([
       { type: GameType.MCQ, strategy: mcqStrategy },
+      { type: GameType.FILL_IN_THE_BLANK, strategy: fillInTheBlankStrategy },
+      { type: GameType.TRUE_OR_FALSE, strategy: trueOrFalseStrategy },
     ]);
     useCase = new UpdateGameModuleUseCase(
       lessonRepository,
@@ -52,18 +62,18 @@ describe('UpdateGameModuleUseCase', () => {
       lessonId: lesson.id,
       question: 'What is 1+1?',
       choices: [
-        {
+        new GameChoice({
           id: 'choice-1',
           text: '2',
           isCorrect: true,
           correctionMessage: 'Yes',
-        },
-        {
+        }),
+        new GameChoice({
           id: 'choice-2',
           text: '3',
           isCorrect: false,
           correctionMessage: 'No',
-        },
+        }),
       ],
     });
     gameModuleRepository.create(mcqModule);
@@ -84,6 +94,113 @@ describe('UpdateGameModuleUseCase', () => {
     // Then
     const module = gameModuleRepository.findById('module-1');
     expect((module as McqModule).question).toBe('What is 2+2?');
+  });
+
+  it('should update a Fill in the Blank module', async () => {
+    // Given
+    const lesson = new Lesson(
+      'lesson-1',
+      'title',
+      'desc',
+      'chapter-1',
+      1,
+      false,
+      GameType.FILL_IN_THE_BLANK,
+      [],
+    );
+    lessonRepository.create(lesson);
+    const fillInTheBlankModule = new FillInTheBlankModule({
+      id: 'module-1',
+      lessonId: lesson.id,
+      firstText: 'The capital of France is',
+      secondText: 'city.',
+      blanks: [
+        new GameChoice({
+          id: 'blank-1',
+          text: 'Paris',
+          isCorrect: true,
+          correctionMessage: 'Correct!',
+        }),
+        new GameChoice({
+          id: 'blank-2',
+          text: 'London',
+          isCorrect: false,
+          correctionMessage: 'Wrong',
+        }),
+      ],
+    });
+    gameModuleRepository.create(fillInTheBlankModule);
+    const command: UpdateGameModuleCommand = {
+      gameModuleId: 'module-1',
+      fillInTheBlank: {
+        firstText: 'The largest city in France is',
+        secondText: 'and it is amazing.',
+        blanks: [
+          { text: 'Paris', isCorrect: true, correctionMessage: 'Yes!' },
+          { text: 'Lyon', isCorrect: false, correctionMessage: 'No' },
+        ],
+      },
+    };
+
+    // When
+    await useCase.execute(command);
+
+    // Then
+    const module = gameModuleRepository.findById('module-1');
+    expect((module as FillInTheBlankModule).firstText).toBe('The largest city in France is');
+    expect((module as FillInTheBlankModule).secondText).toBe('and it is amazing.');
+  });
+
+  it('should update a True or False module', async () => {
+    // Given
+    const lesson = new Lesson(
+      'lesson-1',
+      'title',
+      'desc',
+      'chapter-1',
+      1,
+      false,
+      GameType.TRUE_OR_FALSE,
+      [],
+    );
+    lessonRepository.create(lesson);
+    const trueOrFalseModule = new TrueOrFalseModule({
+      id: 'module-1',
+      lessonId: lesson.id,
+      questions: [
+        new GameChoice({
+          id: 'question-1',
+          text: 'The earth is flat',
+          isCorrect: false,
+          correctionMessage: 'Wrong!',
+        }),
+        new GameChoice({
+          id: 'question-2',
+          text: 'The sun is hot',
+          isCorrect: true,
+          correctionMessage: 'Correct!',
+        }),
+      ],
+    });
+    gameModuleRepository.create(trueOrFalseModule);
+    const command: UpdateGameModuleCommand = {
+      gameModuleId: 'module-1',
+      trueOrFalse: {
+        questions: [
+          { text: 'The earth is round', isCorrect: true, correctionMessage: 'Correct!' },
+          { text: 'The sun is cold', isCorrect: false, correctionMessage: 'Wrong!' },
+        ],
+      },
+    };
+
+    // When
+    await useCase.execute(command);
+
+    // Then
+    const module = gameModuleRepository.findById('module-1');
+    expect((module as TrueOrFalseModule).questions).toHaveLength(2);
+    expect((module as TrueOrFalseModule).questions[0]?.text).toBe('The earth is round');
+    expect((module as TrueOrFalseModule).questions[0]?.isCorrect).toBe(true);
   });
 
   it('should throw if game module not found', async () => {
@@ -109,18 +226,18 @@ describe('UpdateGameModuleUseCase', () => {
       lessonId: 'non-existing-lesson',
       question: 'What is 1+1?',
       choices: [
-        {
+        new GameChoice({
           id: 'choice-1',
           text: '2',
           isCorrect: true,
           correctionMessage: 'Yes',
-        },
-        {
+        }),
+        new GameChoice({
           id: 'choice-2',
           text: '3',
           isCorrect: false,
           correctionMessage: 'No',
-        },
+        }),
       ],
     });
     gameModuleRepository.create(mcqModule);
@@ -157,18 +274,18 @@ describe('UpdateGameModuleUseCase', () => {
       lessonId: lesson.id,
       question: 'What is 1+1?',
       choices: [
-        {
+        new GameChoice({
           id: 'choice-1',
           text: '2',
           isCorrect: true,
           correctionMessage: 'Yes',
-        },
-        {
+        }),
+        new GameChoice({
           id: 'choice-2',
           text: '3',
           isCorrect: false,
           correctionMessage: 'No',
-        },
+        }),
       ],
     });
     gameModuleRepository.create(mcqModule);
@@ -179,6 +296,50 @@ describe('UpdateGameModuleUseCase', () => {
     // When / Then
     await expect(useCase.execute(command)).rejects.toThrow(
       McqModuleInvalidDataError,
+    );
+  });
+
+  it('should throw if Fill in the Blank data is missing', async () => {
+    // Given
+    const lesson = new Lesson(
+      'lesson-4',
+      'title',
+      'desc',
+      'chapter-1',
+      1,
+      false,
+      GameType.FILL_IN_THE_BLANK,
+      [],
+    );
+    lessonRepository.create(lesson);
+    const fillInTheBlankModule = new FillInTheBlankModule({
+      id: 'module-1',
+      lessonId: lesson.id,
+      firstText: 'The capital is',
+      secondText: 'city.',
+      blanks: [
+        new GameChoice({
+          id: 'blank-1',
+          text: 'Paris',
+          isCorrect: true,
+          correctionMessage: 'Correct!',
+        }),
+        new GameChoice({
+          id: 'blank-2',
+          text: 'London',
+          isCorrect: false,
+          correctionMessage: 'Wrong',
+        }),
+      ],
+    });
+    gameModuleRepository.create(fillInTheBlankModule);
+    const command: UpdateGameModuleCommand = {
+      gameModuleId: 'module-1',
+    };
+
+    // When / Then
+    await expect(useCase.execute(command)).rejects.toThrow(
+      FillInTheBlankModuleInvalidDataError,
     );
   });
 });

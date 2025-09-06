@@ -19,7 +19,7 @@ import {
   McqAnswerRequest,
 } from '../../request/complete-game-module.request';
 import { McqModule } from '../../../../core/domain/model/McqModule';
-import { McqChoice } from '../../../../core/domain/model/McqChoice';
+import { GameChoice } from '../../../../core/domain/model/GameChoice';
 import { CompleteGameModuleResponse } from '../../response/complete-game-module.response';
 import { AppModule } from '../../../../app.module';
 import { UpdateGameModuleRequest } from '../../request/update-game-module.request';
@@ -102,13 +102,13 @@ describe('GameModuleControllerIT', () => {
       });
       await lessonRepository.create(lesson);
       const choices = [
-        new McqChoice({
+        new GameChoice({
           id: 'choice-1',
           text: 'Choice 1',
           isCorrect: true,
           correctionMessage: 'Correct!',
         }),
-        new McqChoice({
+        new GameChoice({
           id: 'choice-2',
           text: 'Choice 2',
           isCorrect: false,
@@ -168,13 +168,13 @@ describe('GameModuleControllerIT', () => {
         });
         await lessonRepository.create(lesson);
         const choices = [
-          new McqChoice({
+          new GameChoice({
             id: 'choice-1',
             text: 'Choice 1',
             isCorrect: true,
             correctionMessage: 'Correct!',
           }),
-          new McqChoice({
+          new GameChoice({
             id: 'choice-2',
             text: 'Choice 2',
             isCorrect: false,
@@ -233,13 +233,13 @@ describe('GameModuleControllerIT', () => {
         });
         await lessonRepository.create(lesson);
         const choices = [
-          new McqChoice({
+          new GameChoice({
             id: 'choice-1',
             text: 'Choice 1',
             isCorrect: true,
             correctionMessage: 'Correct!',
           }),
-          new McqChoice({
+          new GameChoice({
             id: 'choice-2',
             text: 'Choice 2',
             isCorrect: false,
@@ -330,13 +330,13 @@ describe('GameModuleControllerIT', () => {
         lessonId: lesson.id,
         question: 'What is 2 + 2?',
         choices: [
-          new McqChoice({
+          new GameChoice({
             id: 'choice-1',
             text: '4',
             isCorrect: true,
             correctionMessage: 'Correct!',
           }),
-          new McqChoice({
+          new GameChoice({
             id: 'choice-2',
             text: '5',
             isCorrect: false,
@@ -495,13 +495,13 @@ describe('GameModuleControllerIT', () => {
         lessonId: lesson.id,
         question: 'What is 2 + 2?',
         choices: [
-          new McqChoice({
+          new GameChoice({
             id: 'choice-1',
             text: 'Correct answer',
             isCorrect: true,
             correctionMessage: 'Well done!',
           }),
-          new McqChoice({
+          new GameChoice({
             id: 'choice-2',
             text: 'Wrong answer',
             isCorrect: false,
@@ -549,13 +549,13 @@ describe('GameModuleControllerIT', () => {
         lessonId: lesson.id,
         question: 'What is 2 + 2?',
         choices: [
-          new McqChoice({
+          new GameChoice({
             id: 'choice-1',
             text: 'Correct answer',
             isCorrect: true,
             correctionMessage: 'Well done!',
           }),
-          new McqChoice({
+          new GameChoice({
             id: 'choice-2',
             text: 'Wrong answer',
             isCorrect: false,
@@ -625,13 +625,13 @@ describe('GameModuleControllerIT', () => {
         lessonId: lesson.id,
         question: 'What is 2 + 2?',
         choices: [
-          new McqChoice({
+          new GameChoice({
             id: 'choice-1',
             text: 'Correct answer',
             isCorrect: true,
             correctionMessage: 'Well done!',
           }),
-          new McqChoice({
+          new GameChoice({
             id: 'choice-2',
             text: 'Wrong answer',
             isCorrect: false,
@@ -692,13 +692,13 @@ describe('GameModuleControllerIT', () => {
         lessonId: lesson.id,
         question: 'What is 2 + 2?',
         choices: [
-          new McqChoice({
+          new GameChoice({
             id: 'choice-1',
             text: 'Correct answer',
             isCorrect: true,
             correctionMessage: 'Well done!',
           }),
-          new McqChoice({
+          new GameChoice({
             id: 'choice-2',
             text: 'Wrong answer',
             isCorrect: false,
@@ -745,13 +745,13 @@ describe('GameModuleControllerIT', () => {
         lessonId: lesson.id,
         question: 'What is 2 + 2?',
         choices: [
-          new McqChoice({
+          new GameChoice({
             id: 'choice-1',
             text: 'Correct answer',
             isCorrect: true,
             correctionMessage: 'Well done!',
           }),
-          new McqChoice({
+          new GameChoice({
             id: 'choice-2',
             text: 'Wrong answer',
             isCorrect: false,
