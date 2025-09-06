@@ -9,8 +9,8 @@ import { InsufficientCashError } from '../domain/error/InsufficientCashError';
 import { InsufficientHoldingsError } from '../domain/error/InsufficientHoldingsError';
 import { PortfolioNotFoundError } from '../domain/error/PortfolioNotFoundError';
 import { TickerNotFoundError } from '../domain/error/TickerNotFoundError';
-import { PortfolioValueNotFoundError } from '../domain/error/PortfolioValueNotFoundError';
-import { PortfolioValueRepository } from '../domain/repository/portfolio-value.repository';
+import { PortfolioPositionNotFoundError } from '../domain/error/PortfolioPositionNotFoundError';
+import { PortfolioPositionRepository } from '../domain/repository/portfolio-position.repository';
 
 export type ExecuteTransactionCommand = {
   portfolioId: string;
@@ -32,7 +32,7 @@ export class ExecuteTransactionUseCase
     private readonly userPortfolioRepository: UserPortfolioRepository,
     private readonly tickerRepository: TickerRepository,
     private readonly dailyBarRepository: DailyBarRepository,
-    private readonly portfolioValueRepository: PortfolioValueRepository,
+    private readonly PortfolioPositionRepository: PortfolioPositionRepository,
     private readonly transactionRepository: TransactionRepository,
   ) {}
 
@@ -65,13 +65,13 @@ export class ExecuteTransactionUseCase
       );
     }
 
-    const portfolioValue =
-      await this.portfolioValueRepository.findByPortfolioIdAndDate(
+    const PortfolioPosition =
+      await this.PortfolioPositionRepository.findByPortfolioIdAndDate(
         portfolioId,
         today,
       );
-    if (!portfolioValue) {
-      throw new PortfolioValueNotFoundError(
+    if (!PortfolioPosition) {
+      throw new PortfolioPositionNotFoundError(
         `Portfolio amount not found for portfolio ${portfolioId} on date ${today.toISOString()}`,
       );
     }
@@ -107,21 +107,19 @@ export class ExecuteTransactionUseCase
     );
 
     if (type === TransactionType.BUY) {
-      if (portfolioValue.cash < amount) {
+      if (PortfolioPosition.cash < amount) {
         throw new InsufficientCashError(
-          `Insufficient cash: required ${amount}, available ${portfolioValue.cash}`,
+          `Insufficient cash: required ${amount}, available ${PortfolioPosition.cash}`,
         );
       }
 
-      const updatedPortfolioValue = await this.portfolioValueRepository.update(
-        portfolioValue.id,
-        {
-          cash: portfolioValue.cash - amount,
-          investments: portfolioValue.investments + amount,
-        },
-      );
+      const updatedPortfolioPosition =
+        await this.PortfolioPositionRepository.update(PortfolioPosition.id, {
+          cash: PortfolioPosition.cash - amount,
+          investments: PortfolioPosition.investments + amount,
+        });
 
-      if (!updatedPortfolioValue) {
+      if (!updatedPortfolioPosition) {
         throw new Error('Failed to update portfolio value');
       }
 
@@ -135,8 +133,8 @@ export class ExecuteTransactionUseCase
       });
 
       return {
-        cash: updatedPortfolioValue.cash,
-        investments: updatedPortfolioValue.investments,
+        cash: updatedPortfolioPosition.cash,
+        investments: updatedPortfolioPosition.investments,
         tickerHoldings: currentHoldings + amount,
       };
     } else {
@@ -146,15 +144,13 @@ export class ExecuteTransactionUseCase
         );
       }
 
-      const updatedPortfolioValue = await this.portfolioValueRepository.update(
-        portfolioValue.id,
-        {
-          cash: portfolioValue.cash + amount,
-          investments: portfolioValue.investments - amount,
-        },
-      );
+      const updatedPortfolioPosition =
+        await this.PortfolioPositionRepository.update(PortfolioPosition.id, {
+          cash: PortfolioPosition.cash + amount,
+          investments: PortfolioPosition.investments - amount,
+        });
 
-      if (!updatedPortfolioValue) {
+      if (!updatedPortfolioPosition) {
         throw new Error('Failed to update portfolio value');
       }
 
@@ -168,8 +164,8 @@ export class ExecuteTransactionUseCase
       });
 
       return {
-        cash: updatedPortfolioValue.cash,
-        investments: updatedPortfolioValue.investments,
+        cash: updatedPortfolioPosition.cash,
+        investments: updatedPortfolioPosition.investments,
         tickerHoldings: currentHoldings - amount,
       };
     }

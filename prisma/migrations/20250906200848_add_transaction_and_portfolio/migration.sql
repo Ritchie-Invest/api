@@ -11,14 +11,14 @@ CREATE TABLE "UserPortfolio" (
 );
 
 -- CreateTable
-CREATE TABLE "PortfolioValue" (
+CREATE TABLE "PortfolioPosition" (
     "id" TEXT NOT NULL,
     "portfolioId" TEXT NOT NULL,
     "cash" INTEGER NOT NULL,
     "investments" INTEGER NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "PortfolioValue_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "PortfolioPosition_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -38,7 +38,7 @@ CREATE TABLE "Transaction" (
 ALTER TABLE "UserPortfolio" ADD CONSTRAINT "UserPortfolio_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PortfolioValue" ADD CONSTRAINT "PortfolioValue_portfolioId_fkey" FOREIGN KEY ("portfolioId") REFERENCES "UserPortfolio"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PortfolioPosition" ADD CONSTRAINT "PortfolioPosition_portfolioId_fkey" FOREIGN KEY ("portfolioId") REFERENCES "UserPortfolio"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_portfolioId_fkey" FOREIGN KEY ("portfolioId") REFERENCES "UserPortfolio"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

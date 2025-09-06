@@ -168,12 +168,12 @@ model UserPortfolio {
   id          String           @id @default(cuid())
   userId      String
   currency    Currency
-  history     PortfolioValue[]
+  history     PortfolioPosition[]
   user        User             @relation(fields: [userId], references: [id])
   Transaction Transaction[]
 }
 
-model PortfolioValue {
+model PortfolioPosition {
   id          String        @id @default(cuid())
   portfolioId String
   cash        Int
