@@ -15,7 +15,22 @@ export class PrismaLessonRepository implements LessonRepository {
 
   async create(lesson: Lesson): Promise<Lesson> {
     const entity = this.mapper.fromDomain(lesson);
-    const createdEntity = await this.prisma.lesson.create({ data: entity });
+    const createdEntity = await this.prisma.lesson.create({ 
+      data: entity,
+      include: {
+        modules: {
+          select: {
+            id: true,
+            lessonId: true,
+            mcq: true,
+            match: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
     return this.mapper.toDomain(createdEntity);
   }
 
@@ -28,6 +43,7 @@ export class PrismaLessonRepository implements LessonRepository {
             id: true,
             lessonId: true,
             mcq: true,
+            match: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -44,6 +60,19 @@ export class PrismaLessonRepository implements LessonRepository {
   async findByChapter(chapterId: string): Promise<Lesson[]> {
     const entities = await this.prisma.lesson.findMany({
       where: { chapterId },
+      include: {
+        modules: {
+          select: {
+            id: true,
+            lessonId: true,
+            mcq: true,
+            match: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
     });
     return entities.map((entity) => this.mapper.toDomain(entity));
   }
@@ -53,6 +82,19 @@ export class PrismaLessonRepository implements LessonRepository {
     const updatedEntity = await this.prisma.lesson.update({
       where: { id },
       data: entity,
+      include: {
+        modules: {
+          select: {
+            id: true,
+            lessonId: true,
+            mcq: true,
+            match: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
     });
     if (!updatedEntity) {
       return null;

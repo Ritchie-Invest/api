@@ -14,6 +14,10 @@ export type CreateGameModuleCommand = {
     question: string;
     choices: { text: string; isCorrect: boolean; correctionMessage: string }[];
   };
+  match?: {
+    instruction: string;
+    matches: { value1: string; value2: string }[];
+  };
 };
 
 export class CreateGameModuleUseCase

@@ -4,8 +4,11 @@ import { GameType } from '../../domain/type/GameType';
 import { Lesson } from '../../domain/model/Lesson';
 import { LessonNotFoundError } from '../../domain/error/LessonNotFoundError';
 import { McqModuleStrategy } from '../strategies/mcq-module-strategy';
+import { MatchModuleStrategy } from '../strategies/match-module-strategy';
 import { MapGameModuleStrategyFactory } from '../strategies/game-module-strategy-factory';
 import { McqModule } from '../../domain/model/McqModule';
+import { MatchModule } from '../../domain/model/MatchModule';
+import { MatchChoice } from '../../domain/model/MatchChoice';
 import { McqModuleInvalidDataError } from '../../domain/error/McqModuleInvalidDataError';
 import {
   UpdateGameModuleCommand,
@@ -22,8 +25,10 @@ describe('UpdateGameModuleUseCase', () => {
     lessonRepository = new InMemoryLessonRepository();
     gameModuleRepository = new InMemoryGameModuleRepository();
     const mcqStrategy = new McqModuleStrategy();
+    const matchStrategy = new MatchModuleStrategy();
     const strategyFactory = new MapGameModuleStrategyFactory([
       { type: GameType.MCQ, strategy: mcqStrategy },
+      { type: GameType.MATCH, strategy: matchStrategy },
     ]);
     useCase = new UpdateGameModuleUseCase(
       lessonRepository,
@@ -179,6 +184,83 @@ describe('UpdateGameModuleUseCase', () => {
     // When / Then
     await expect(useCase.execute(command)).rejects.toThrow(
       McqModuleInvalidDataError,
+    );
+  });
+
+  it('should update a Match module', async () => {
+    // Given
+    const lesson = new Lesson(
+      'lesson-5',
+      'title',
+      'desc',
+      'chapter-1',
+      1,
+      false,
+      GameType.MATCH,
+      [],
+    );
+    lessonRepository.create(lesson);
+    const matchModule = new MatchModule({
+      id: 'module-5',
+      lessonId: lesson.id,
+      instruction: 'Original instruction',
+      matches: [
+        new MatchChoice({ id: 'match-1', value1: 'Cat', value2: 'Animal' }),
+        new MatchChoice({ id: 'match-2', value1: 'Blue', value2: 'Color' }),
+      ],
+    });
+    gameModuleRepository.create(matchModule);
+    const command: UpdateGameModuleCommand = {
+      gameModuleId: 'module-5',
+      match: {
+        instruction: 'Updated instruction',
+        matches: [
+          { value1: 'Dog', value2: 'Pet' },
+          { value1: 'Red', value2: 'Color' },
+        ],
+      },
+    };
+
+    // When
+    const result = await useCase.execute(command);
+
+    // Then
+    expect(result).toBeDefined();
+    const updatedModule = gameModuleRepository.findById('module-5') as MatchModule;
+    expect(updatedModule.instruction).toBe('Updated instruction');
+    expect(updatedModule.matches.length).toBe(2);
+  });
+
+  it('should throw if Match data is missing during update', async () => {
+    // Given
+    const lesson = new Lesson(
+      'lesson-6',
+      'title',
+      'desc',
+      'chapter-1',
+      1,
+      false,
+      GameType.MATCH,
+      [],
+    );
+    lessonRepository.create(lesson);
+    const matchModule = new MatchModule({
+      id: 'module-6',
+      lessonId: lesson.id,
+      instruction: 'Original instruction',
+      matches: [
+        new MatchChoice({ id: 'match-1', value1: 'Cat', value2: 'Animal' }),
+        new MatchChoice({ id: 'match-2', value1: 'Blue', value2: 'Color' }),
+      ],
+    });
+    gameModuleRepository.create(matchModule);
+    const command: UpdateGameModuleCommand = {
+      gameModuleId: 'module-6',
+    };
+
+    // When / Then
+    await expect(useCase.execute(command)).rejects.toThrow(
+      'Match contract is missing',
     );
   });
 });
