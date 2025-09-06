@@ -121,6 +121,10 @@ export class ExecuteTransactionUseCase
         },
       );
 
+      if (!updatedPortfolioValue) {
+        throw new Error('Failed to update portfolio value');
+      }
+
       await this.transactionRepository.create({
         portfolioId,
         tickerId,
@@ -149,6 +153,10 @@ export class ExecuteTransactionUseCase
           investments: portfolioValue.investments - amount,
         },
       );
+
+      if (!updatedPortfolioValue) {
+        throw new Error('Failed to update portfolio value');
+      }
 
       await this.transactionRepository.create({
         portfolioId,
