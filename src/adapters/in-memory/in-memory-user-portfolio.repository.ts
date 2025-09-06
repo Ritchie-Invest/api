@@ -3,7 +3,9 @@ import { UserPortfolio } from '../../core/domain/model/UserPortfolio';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class InMemoryUserPortfolioRepository implements UserPortfolioRepository {
+export class InMemoryUserPortfolioRepository
+  implements UserPortfolioRepository
+{
   private portfolios: Map<string, UserPortfolio> = new Map();
 
   create(data: Partial<UserPortfolio>): UserPortfolio {
@@ -32,7 +34,7 @@ export class InMemoryUserPortfolioRepository implements UserPortfolioRepository 
   findAll(filter?: Partial<UserPortfolio>): UserPortfolio[] {
     let result = Array.from(this.portfolios.values());
     if (filter?.userId) {
-      result = result.filter(p => p.userId === filter.userId);
+      result = result.filter((p) => p.userId === filter.userId);
     }
     return result;
   }

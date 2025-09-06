@@ -1,10 +1,13 @@
-import { ExecuteTransactionCommand, ExecuteTransactionUseCase } from '../ExecuteTransactionUseCase';
+import {
+  ExecuteTransactionCommand,
+  ExecuteTransactionUseCase,
+} from '../ExecuteTransactionUseCase';
 import { TransactionType } from '../../domain/type/TransactionType';
 import { Currency } from '../../domain/type/Currency';
 import { TickerType } from '../../domain/type/TickerType';
-import { UserPortfolio } from '../../domain/model/UserPortfolio';
 import { Ticker } from '../../domain/model/Ticker';
 import { DailyBar } from '../../domain/model/DailyBar';
+import { UserPortfolio } from '../../domain/model/UserPortfolio';
 import { PortfolioValue } from '../../domain/model/PortfolioValue';
 import { PortfolioTicker } from '../../domain/model/PortfolioTicker';
 import { InsufficientCashError } from '../../domain/error/InsufficientCashError';
@@ -69,33 +72,39 @@ describe('ExecuteTransactionUseCase', () => {
   });
 
   const setupTestData = () => {
-    const portfolio = userPortfolioRepository.create({
-      id: DEFAULT_PORTFOLIO_ID,
-      userId: 'user-1',
-      currency: Currency.USD,
-    });
+    const portfolio = userPortfolioRepository.create(
+      new UserPortfolio({
+        id: DEFAULT_PORTFOLIO_ID,
+        userId: 'user-1',
+        currency: Currency.USD,
+      }),
+    );
 
-    const ticker = tickerRepository.create({
-      id: DEFAULT_TICKER_ID,
-      name: 'Test Ticker',
-      symbol: 'TEST',
-      type: TickerType.ETF,
-      currency: Currency.USD,
-    });
+    const ticker = tickerRepository.create(
+      new Ticker({
+        id: DEFAULT_TICKER_ID,
+        name: 'Test Ticker',
+        symbol: 'TEST',
+        type: TickerType.ETF,
+        currency: Currency.USD,
+      }),
+    );
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const dailyBar = dailyBarRepository.create({
-      id: 'dailybar-1',
-      tickerId: DEFAULT_TICKER_ID,
-      timestamp: today,
-      open: DEFAULT_SHARE_PRICE,
-      high: DEFAULT_SHARE_PRICE,
-      low: DEFAULT_SHARE_PRICE,
-      close: DEFAULT_SHARE_PRICE,
-      volume: 1000,
-    });
+    const dailyBar = dailyBarRepository.create(
+      new DailyBar({
+        id: 'dailybar-1',
+        tickerId: DEFAULT_TICKER_ID,
+        timestamp: today,
+        open: DEFAULT_SHARE_PRICE,
+        high: DEFAULT_SHARE_PRICE,
+        low: DEFAULT_SHARE_PRICE,
+        close: DEFAULT_SHARE_PRICE,
+        volume: 1000,
+      }),
+    );
 
     return { portfolio, ticker, dailyBar, today };
   };
@@ -105,22 +114,26 @@ describe('ExecuteTransactionUseCase', () => {
     const { today } = setupTestData();
     const command = makeExecuteTransactionCommand();
 
-    const portfolioValue = portfolioValueRepository.create({
-      id: 'portfoliovalue-1',
-      portfolioId: DEFAULT_PORTFOLIO_ID,
-      cash: 5000,
-      investments: 2000,
-      date: today,
-    });
+    portfolioValueRepository.create(
+      new PortfolioValue({
+        id: 'portfoliovalue-1',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        cash: 5000,
+        investments: 2000,
+        date: today,
+      }),
+    );
 
-    const portfolioTicker = portfolioTickerRepository.create({
-      id: 'portfolioticker-1',
-      portfolioId: DEFAULT_PORTFOLIO_ID,
-      tickerId: DEFAULT_TICKER_ID,
-      value: 500,
-      shares: 5,
-      date: today,
-    });
+    portfolioTickerRepository.create(
+      new PortfolioTicker({
+        id: 'portfolioticker-1',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        tickerId: DEFAULT_TICKER_ID,
+        value: 500,
+        shares: 5,
+        date: today,
+      }),
+    );
 
     // When
     const result = await executeTransactionUseCase.execute(command);
@@ -149,44 +162,62 @@ describe('ExecuteTransactionUseCase', () => {
     const { today } = setupTestData();
     const command = makeExecuteTransactionCommand();
 
-    portfolioValueRepository.create({
-      portfolioId: DEFAULT_PORTFOLIO_ID,
-      cash: 500,
-      investments: 2000,
-      date: today,
-    });
+    portfolioValueRepository.create(
+      new PortfolioValue({
+        id: 'portfoliovalue-2',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        cash: 500,
+        investments: 2000,
+        date: today,
+      }),
+    );
 
-    portfolioTickerRepository.create({
-      portfolioId: DEFAULT_PORTFOLIO_ID,
-      tickerId: DEFAULT_TICKER_ID,
-      value: 500,
-      shares: 5,
-      date: today,
-    });
+    portfolioTickerRepository.create(
+      new PortfolioTicker({
+        id: 'portfolioticker-2',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        tickerId: DEFAULT_TICKER_ID,
+        value: 500,
+        shares: 5,
+        date: today,
+      }),
+    );
 
     // When & Then
-    await expect(executeTransactionUseCase.execute(command)).rejects.toThrow(InsufficientCashError);
+    await expect(executeTransactionUseCase.execute(command)).rejects.toThrow(
+      InsufficientCashError,
+    );
   });
 
   it('should execute sell transaction with sufficient holdings', async () => {
     // Given
     const { today } = setupTestData();
-    const command = makeExecuteTransactionCommand(DEFAULT_PORTFOLIO_ID, DEFAULT_TICKER_ID, TransactionType.Sell);
+    const command = makeExecuteTransactionCommand(
+      DEFAULT_PORTFOLIO_ID,
+      DEFAULT_TICKER_ID,
+      TransactionType.Sell,
+    );
 
-    portfolioValueRepository.create({
-      portfolioId: DEFAULT_PORTFOLIO_ID,
-      cash: 3000,
-      investments: 4000,
-      date: today,
-    });
+    portfolioValueRepository.create(
+      new PortfolioValue({
+        id: 'portfoliovalue-3',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        cash: 3000,
+        investments: 4000,
+        date: today,
+      }),
+    );
 
-    portfolioTickerRepository.create({
-      portfolioId: DEFAULT_PORTFOLIO_ID,
-      tickerId: DEFAULT_TICKER_ID,
-      value: 2000,
-      shares: 20,
-      date: today,
-    });
+    portfolioTickerRepository.create(
+      new PortfolioTicker({
+        id: 'portfolioticker-3',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        tickerId: DEFAULT_TICKER_ID,
+        value: 2000,
+        shares: 20,
+        date: today,
+      }),
+    );
 
     // When
     const result = await executeTransactionUseCase.execute(command);
@@ -202,25 +233,38 @@ describe('ExecuteTransactionUseCase', () => {
   it('should throw InsufficientHoldingsError when selling with insufficient holdings', async () => {
     // Given
     const { today } = setupTestData();
-    const command = makeExecuteTransactionCommand(DEFAULT_PORTFOLIO_ID, DEFAULT_TICKER_ID, TransactionType.Sell, 2000);
+    const command = makeExecuteTransactionCommand(
+      DEFAULT_PORTFOLIO_ID,
+      DEFAULT_TICKER_ID,
+      TransactionType.Sell,
+      2000,
+    );
 
-    portfolioValueRepository.create({
-      portfolioId: DEFAULT_PORTFOLIO_ID,
-      cash: 3000,
-      investments: 4000,
-      date: today,
-    });
+    portfolioValueRepository.create(
+      new PortfolioValue({
+        id: 'portfoliovalue-4',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        cash: 3000,
+        investments: 4000,
+        date: today,
+      }),
+    );
 
-    portfolioTickerRepository.create({
-      portfolioId: DEFAULT_PORTFOLIO_ID,
-      tickerId: DEFAULT_TICKER_ID,
-      value: 500,
-      shares: 5,
-      date: today,
-    });
+    portfolioTickerRepository.create(
+      new PortfolioTicker({
+        id: 'portfolioticker-4',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        tickerId: DEFAULT_TICKER_ID,
+        value: 500,
+        shares: 5,
+        date: today,
+      }),
+    );
 
     // When & Then
-    await expect(executeTransactionUseCase.execute(command)).rejects.toThrow(InsufficientHoldingsError);
+    await expect(executeTransactionUseCase.execute(command)).rejects.toThrow(
+      InsufficientHoldingsError,
+    );
   });
 
   it('should throw DailyBarNotFoundError when daily bar is missing', async () => {
@@ -229,22 +273,30 @@ describe('ExecuteTransactionUseCase', () => {
     dailyBarRepository.removeAll();
     const command = makeExecuteTransactionCommand();
 
-    portfolioValueRepository.create({
-      portfolioId: DEFAULT_PORTFOLIO_ID,
-      cash: 5000,
-      investments: 2000,
-      date: today,
-    });
+    portfolioValueRepository.create(
+      new PortfolioValue({
+        id: 'portfoliovalue-5',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        cash: 5000,
+        investments: 2000,
+        date: today,
+      }),
+    );
 
-    portfolioTickerRepository.create({
-      portfolioId: DEFAULT_PORTFOLIO_ID,
-      tickerId: DEFAULT_TICKER_ID,
-      value: 500,
-      shares: 5,
-      date: today,
-    });
+    portfolioTickerRepository.create(
+      new PortfolioTicker({
+        id: 'portfolioticker-5',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        tickerId: DEFAULT_TICKER_ID,
+        value: 500,
+        shares: 5,
+        date: today,
+      }),
+    );
 
     // When & Then
-    await expect(executeTransactionUseCase.execute(command)).rejects.toThrow(DailyBarNotFoundError);
+    await expect(executeTransactionUseCase.execute(command)).rejects.toThrow(
+      DailyBarNotFoundError,
+    );
   });
 });

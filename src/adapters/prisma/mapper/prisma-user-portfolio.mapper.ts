@@ -5,7 +5,9 @@ import { Injectable } from '@nestjs/common';
 import { Currency } from '../../../core/domain/type/Currency';
 
 @Injectable()
-export class PrismaUserPortfolioMapper implements EntityMapper<UserPortfolio, UserPortfolioEntity> {
+export class PrismaUserPortfolioMapper
+  implements EntityMapper<UserPortfolio, UserPortfolioEntity>
+{
   fromDomain(model: UserPortfolio): UserPortfolioEntity {
     return {
       id: model.id,

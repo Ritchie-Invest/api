@@ -6,7 +6,10 @@ import { TransactionType } from '../../../../core/domain/type/TransactionType';
 describe('PrismaTransactionMapper', () => {
   const mapper = new PrismaTransactionMapper();
 
-  const transactionTypeMappings: { domain: TransactionType; prisma: $Enums.TransactionType }[] = [
+  const transactionTypeMappings: {
+    domain: TransactionType;
+    prisma: $Enums.TransactionType;
+  }[] = [
     { domain: TransactionType.Buy, prisma: $Enums.TransactionType.Buy },
     { domain: TransactionType.Sell, prisma: $Enums.TransactionType.Sell },
   ];

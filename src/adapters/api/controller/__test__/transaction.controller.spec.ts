@@ -16,13 +16,9 @@ import { DailyBarRepository } from '../../../../core/domain/repository/daily-bar
 import { PortfolioValueRepository } from '../../../../core/domain/repository/portfolio-value.repository';
 import { PortfolioTickerRepository } from '../../../../core/domain/repository/portfolio-ticker.repository';
 import { TransactionRepository } from '../../../../core/domain/repository/transaction.repository';
-import { UserPortfolio } from '../../../../core/domain/model/UserPortfolio';
 import { Currency } from '../../../../core/domain/type/Currency';
 import { Ticker } from '../../../../core/domain/model/Ticker';
 import { TickerType } from '../../../../core/domain/type/TickerType';
-import { DailyBar } from '../../../../core/domain/model/DailyBar';
-import { PortfolioValue } from '../../../../core/domain/model/PortfolioValue';
-import { PortfolioTicker } from '../../../../core/domain/model/PortfolioTicker';
 
 describe('TransactionControllerIT', () => {
   let app: INestApplication<App>;
@@ -95,19 +91,21 @@ describe('TransactionControllerIT', () => {
       type: UserType.STUDENT,
     });
 
-    const portfolio = await userPortfolioRepository.create({
+    await userPortfolioRepository.create({
       id: 'portfolio-1',
       userId: user.id,
       currency: Currency.USD,
     });
 
-    const ticker = await tickerRepository.create(new Ticker({
-      id: 'ticker-1',
-      name: 'Test ETF',
-      symbol: 'TEST',
-      type: TickerType.ETF,
-      currency: Currency.USD,
-    }));
+    await tickerRepository.create(
+      new Ticker({
+        id: 'ticker-1',
+        name: 'Test ETF',
+        symbol: 'TEST',
+        type: TickerType.ETF,
+        currency: Currency.USD,
+      }),
+    );
 
     await dailyBarRepository.create({
       id: 'dailybar-1',
@@ -183,13 +181,15 @@ describe('TransactionControllerIT', () => {
       currency: Currency.USD,
     });
 
-    await tickerRepository.create(new Ticker({
-      id: 'ticker-1',
-      name: 'Test ETF',
-      symbol: 'TEST',
-      type: TickerType.ETF,
-      currency: Currency.USD,
-    }));
+    await tickerRepository.create(
+      new Ticker({
+        id: 'ticker-1',
+        name: 'Test ETF',
+        symbol: 'TEST',
+        type: TickerType.ETF,
+        currency: Currency.USD,
+      }),
+    );
 
     await dailyBarRepository.create({
       tickerId: 'ticker-1',

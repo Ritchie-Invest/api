@@ -27,8 +27,10 @@ export class InMemoryDailyBarRepository implements DailyBarRepository {
 
   findByTickerIdAndDate(tickerId: string, date: Date): DailyBar | null {
     for (const dailyBar of this.dailyBars.values()) {
-      if (dailyBar.tickerId === tickerId && 
-          dailyBar.timestamp.getTime() === date.getTime()) {
+      if (
+        dailyBar.tickerId === tickerId &&
+        dailyBar.timestamp.getTime() === date.getTime()
+      ) {
         return dailyBar;
       }
     }
@@ -38,7 +40,7 @@ export class InMemoryDailyBarRepository implements DailyBarRepository {
   findAll(filter?: Partial<DailyBar>): DailyBar[] {
     let result = Array.from(this.dailyBars.values());
     if (filter?.tickerId) {
-      result = result.filter(db => db.tickerId === filter.tickerId);
+      result = result.filter((db) => db.tickerId === filter.tickerId);
     }
     return result;
   }

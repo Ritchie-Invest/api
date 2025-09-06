@@ -25,10 +25,10 @@ export class InMemoryTransactionRepository implements TransactionRepository {
   findAll(filter?: Partial<Transaction>): Transaction[] {
     let result = Array.from(this.transactions.values());
     if (filter?.portfolioId) {
-      result = result.filter(t => t.portfolioId === filter.portfolioId);
+      result = result.filter((t) => t.portfolioId === filter.portfolioId);
     }
     if (filter?.tickerId) {
-      result = result.filter(t => t.tickerId === filter.tickerId);
+      result = result.filter((t) => t.tickerId === filter.tickerId);
     }
     return result;
   }

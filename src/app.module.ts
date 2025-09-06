@@ -162,27 +162,32 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
     },
     {
       provide: 'UserPortfolioRepository',
-      useFactory: (prisma: PrismaService) => new PrismaUserPortfolioRepository(prisma),
+      useFactory: (prisma: PrismaService) =>
+        new PrismaUserPortfolioRepository(prisma),
       inject: [PrismaService],
     },
     {
       provide: 'PortfolioValueRepository',
-      useFactory: (prisma: PrismaService) => new PrismaPortfolioValueRepository(prisma),
+      useFactory: (prisma: PrismaService) =>
+        new PrismaPortfolioValueRepository(prisma),
       inject: [PrismaService],
     },
     {
       provide: 'PortfolioTickerRepository',
-      useFactory: (prisma: PrismaService) => new PrismaPortfolioTickerRepository(prisma),
+      useFactory: (prisma: PrismaService) =>
+        new PrismaPortfolioTickerRepository(prisma),
       inject: [PrismaService],
     },
     {
       provide: 'DailyBarRepository',
-      useFactory: (prisma: PrismaService) => new PrismaDailyBarRepository(prisma),
+      useFactory: (prisma: PrismaService) =>
+        new PrismaDailyBarRepository(prisma),
       inject: [PrismaService],
     },
     {
       provide: 'TransactionRepository',
-      useFactory: (prisma: PrismaService) => new PrismaTransactionRepository(prisma),
+      useFactory: (prisma: PrismaService) =>
+        new PrismaTransactionRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -192,8 +197,16 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
         userPortfolioRepository: UserPortfolioRepository,
         portfolioValueRepository: PortfolioValueRepository,
       ) =>
-        new CreateUserUseCase(userRepository, userPortfolioRepository, portfolioValueRepository),
-      inject: [UserRepository, 'UserPortfolioRepository', 'PortfolioValueRepository'],
+        new CreateUserUseCase(
+          userRepository,
+          userPortfolioRepository,
+          portfolioValueRepository,
+        ),
+      inject: [
+        UserRepository,
+        'UserPortfolioRepository',
+        'PortfolioValueRepository',
+      ],
     },
     {
       provide: UpdateUserTypeUseCase,
@@ -209,8 +222,18 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
         userPortfolioRepository: UserPortfolioRepository,
         tokenService: TokenService,
       ) =>
-        new LoginUseCase(userRepository, refreshTokenRepository, userPortfolioRepository, tokenService),
-      inject: [UserRepository, RefreshTokenRepository, 'UserPortfolioRepository', 'TokenService'],
+        new LoginUseCase(
+          userRepository,
+          refreshTokenRepository,
+          userPortfolioRepository,
+          tokenService,
+        ),
+      inject: [
+        UserRepository,
+        RefreshTokenRepository,
+        'UserPortfolioRepository',
+        'TokenService',
+      ],
     },
     {
       provide: LogoutUseCase,

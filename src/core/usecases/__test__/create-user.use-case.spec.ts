@@ -113,7 +113,7 @@ describe('CreateUserUseCase', () => {
     // Then
     const portfolios = await userPortfolioRepository.findAll();
     expect(portfolios).toHaveLength(1);
-    
+
     const portfolio = portfolios[0];
     expect(portfolio).toBeDefined();
     expect(portfolio!.userId).toEqual(user.id);
@@ -128,16 +128,16 @@ describe('CreateUserUseCase', () => {
     };
 
     // When
-    const user = await createUserUseCase.execute(command);
+    await createUserUseCase.execute(command);
 
     // Then
     const portfolios = await userPortfolioRepository.findAll();
     const portfolio = portfolios[0];
     expect(portfolio).toBeDefined();
-    
+
     const portfolioValues = await portfolioValueRepository.findAll();
     expect(portfolioValues).toHaveLength(1);
-    
+
     const portfolioValue = portfolioValues[0];
     expect(portfolioValue).toBeDefined();
     expect(portfolioValue!.portfolioId).toEqual(portfolio!.id);

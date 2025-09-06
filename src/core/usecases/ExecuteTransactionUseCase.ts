@@ -27,7 +27,9 @@ export type ExecuteTransactionResult = {
   tickerHoldings: number;
 };
 
-export class ExecuteTransactionUseCase implements UseCase<ExecuteTransactionCommand, ExecuteTransactionResult> {
+export class ExecuteTransactionUseCase
+  implements UseCase<ExecuteTransactionCommand, ExecuteTransactionResult>
+{
   constructor(
     private readonly userPortfolioRepository: UserPortfolioRepository,
     private readonly tickerRepository: TickerRepository,
@@ -37,14 +39,18 @@ export class ExecuteTransactionUseCase implements UseCase<ExecuteTransactionComm
     private readonly transactionRepository: TransactionRepository,
   ) {}
 
-  async execute(command: ExecuteTransactionCommand): Promise<ExecuteTransactionResult> {
+  async execute(
+    command: ExecuteTransactionCommand,
+  ): Promise<ExecuteTransactionResult> {
     const { portfolioId, tickerId, type, value } = command;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const portfolio = await this.userPortfolioRepository.findById(portfolioId);
     if (!portfolio) {
-      throw new PortfolioNotFoundError(`Portfolio with id ${portfolioId} not found`);
+      throw new PortfolioNotFoundError(
+        `Portfolio with id ${portfolioId} not found`,
+      );
     }
 
     const ticker = await this.tickerRepository.findById(tickerId);
@@ -52,19 +58,37 @@ export class ExecuteTransactionUseCase implements UseCase<ExecuteTransactionComm
       throw new TickerNotFoundError(`Ticker with id ${tickerId} not found`);
     }
 
-    const dailyBar = await this.dailyBarRepository.findByTickerIdAndDate(tickerId, today);
+    const dailyBar = await this.dailyBarRepository.findByTickerIdAndDate(
+      tickerId,
+      today,
+    );
     if (!dailyBar) {
-      throw new DailyBarNotFoundError(`Daily bar not found for ticker ${tickerId} on date ${today.toISOString()}`);
+      throw new DailyBarNotFoundError(
+        `Daily bar not found for ticker ${tickerId} on date ${today.toISOString()}`,
+      );
     }
 
-    const portfolioValue = await this.portfolioValueRepository.findByPortfolioIdAndDate(portfolioId, today);
+    const portfolioValue =
+      await this.portfolioValueRepository.findByPortfolioIdAndDate(
+        portfolioId,
+        today,
+      );
     if (!portfolioValue) {
-      throw new PortfolioValueNotFoundError(`Portfolio value not found for portfolio ${portfolioId} on date ${today.toISOString()}`);
+      throw new PortfolioValueNotFoundError(
+        `Portfolio value not found for portfolio ${portfolioId} on date ${today.toISOString()}`,
+      );
     }
 
-    const portfolioTicker = await this.portfolioTickerRepository.findByPortfolioIdTickerIdAndDate(portfolioId, tickerId, today);
+    const portfolioTicker =
+      await this.portfolioTickerRepository.findByPortfolioIdTickerIdAndDate(
+        portfolioId,
+        tickerId,
+        today,
+      );
     if (!portfolioTicker) {
-      throw new PortfolioTickerNotFoundError(`Portfolio ticker not found for portfolio ${portfolioId} and ticker ${tickerId} on date ${today.toISOString()}`);
+      throw new PortfolioTickerNotFoundError(
+        `Portfolio ticker not found for portfolio ${portfolioId} and ticker ${tickerId} on date ${today.toISOString()}`,
+      );
     }
 
     const sharePrice = dailyBar.close;
@@ -72,18 +96,24 @@ export class ExecuteTransactionUseCase implements UseCase<ExecuteTransactionComm
 
     if (type === TransactionType.Buy) {
       if (portfolioValue.cash < value) {
-        throw new InsufficientCashError(`Insufficient cash: required ${value}, available ${portfolioValue.cash}`);
+        throw new InsufficientCashError(
+          `Insufficient cash: required ${value}, available ${portfolioValue.cash}`,
+        );
       }
 
-      const updatedPortfolioValue = await this.portfolioValueRepository.update(portfolioValue.id, {
-        cash: portfolioValue.cash - value,
-        investments: portfolioValue.investments + value,
-      });
+      const updatedPortfolioValue = await this.portfolioValueRepository.update(
+        portfolioValue.id,
+        {
+          cash: portfolioValue.cash - value,
+          investments: portfolioValue.investments + value,
+        },
+      );
 
-      const updatedPortfolioTicker = await this.portfolioTickerRepository.update(portfolioTicker.id, {
-        value: portfolioTicker.value + value,
-        shares: portfolioTicker.shares + sharesToTrade,
-      });
+      const updatedPortfolioTicker =
+        await this.portfolioTickerRepository.update(portfolioTicker.id, {
+          value: portfolioTicker.value + value,
+          shares: portfolioTicker.shares + sharesToTrade,
+        });
 
       await this.transactionRepository.create({
         portfolioId,
@@ -99,18 +129,24 @@ export class ExecuteTransactionUseCase implements UseCase<ExecuteTransactionComm
       };
     } else {
       if (portfolioTicker.shares < sharesToTrade) {
-        throw new InsufficientHoldingsError(`Insufficient shares for ${ticker.symbol}: required ${sharesToTrade}, available ${portfolioTicker.shares}`);
+        throw new InsufficientHoldingsError(
+          `Insufficient shares for ${ticker.symbol}: required ${sharesToTrade}, available ${portfolioTicker.shares}`,
+        );
       }
 
-      const updatedPortfolioValue = await this.portfolioValueRepository.update(portfolioValue.id, {
-        cash: portfolioValue.cash + value,
-        investments: portfolioValue.investments - value,
-      });
+      const updatedPortfolioValue = await this.portfolioValueRepository.update(
+        portfolioValue.id,
+        {
+          cash: portfolioValue.cash + value,
+          investments: portfolioValue.investments - value,
+        },
+      );
 
-      const updatedPortfolioTicker = await this.portfolioTickerRepository.update(portfolioTicker.id, {
-        value: portfolioTicker.value - value,
-        shares: portfolioTicker.shares - sharesToTrade,
-      });
+      const updatedPortfolioTicker =
+        await this.portfolioTickerRepository.update(portfolioTicker.id, {
+          value: portfolioTicker.value - value,
+          shares: portfolioTicker.shares - sharesToTrade,
+        });
 
       await this.transactionRepository.create({
         portfolioId,

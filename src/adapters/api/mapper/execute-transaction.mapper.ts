@@ -1,4 +1,7 @@
-import { ExecuteTransactionCommand, ExecuteTransactionResult } from '../../../core/usecases/ExecuteTransactionUseCase';
+import {
+  ExecuteTransactionCommand,
+  ExecuteTransactionResult,
+} from '../../../core/usecases/ExecuteTransactionUseCase';
 import { ExecuteTransactionRequest } from '../request/execute-transaction.request';
 import { ExecuteTransactionResponse } from '../response/execute-transaction.response';
 import { TokenPayload } from '../../jwt/jwt.service';
@@ -16,7 +19,9 @@ export class ExecuteTransactionMapper {
     };
   }
 
-  static fromDomain(result: ExecuteTransactionResult): ExecuteTransactionResponse {
+  static fromDomain(
+    result: ExecuteTransactionResult,
+  ): ExecuteTransactionResponse {
     return new ExecuteTransactionResponse(
       result.cash,
       result.investments,

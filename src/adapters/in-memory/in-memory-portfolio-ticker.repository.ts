@@ -3,7 +3,9 @@ import { PortfolioTicker } from '../../core/domain/model/PortfolioTicker';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class InMemoryPortfolioTickerRepository implements PortfolioTickerRepository {
+export class InMemoryPortfolioTickerRepository
+  implements PortfolioTickerRepository
+{
   private portfolioTickers: Map<string, PortfolioTicker> = new Map();
 
   create(data: Partial<PortfolioTicker>): PortfolioTicker {
@@ -23,11 +25,17 @@ export class InMemoryPortfolioTickerRepository implements PortfolioTickerReposit
     return this.portfolioTickers.get(id) || null;
   }
 
-  findByPortfolioIdTickerIdAndDate(portfolioId: string, tickerId: string, date: Date): PortfolioTicker | null {
+  findByPortfolioIdTickerIdAndDate(
+    portfolioId: string,
+    tickerId: string,
+    date: Date,
+  ): PortfolioTicker | null {
     for (const portfolioTicker of this.portfolioTickers.values()) {
-      if (portfolioTicker.portfolioId === portfolioId && 
-          portfolioTicker.tickerId === tickerId &&
-          portfolioTicker.date.getTime() === date.getTime()) {
+      if (
+        portfolioTicker.portfolioId === portfolioId &&
+        portfolioTicker.tickerId === tickerId &&
+        portfolioTicker.date.getTime() === date.getTime()
+      ) {
         return portfolioTicker;
       }
     }
@@ -37,10 +45,10 @@ export class InMemoryPortfolioTickerRepository implements PortfolioTickerReposit
   findAll(filter?: Partial<PortfolioTicker>): PortfolioTicker[] {
     let result = Array.from(this.portfolioTickers.values());
     if (filter?.portfolioId) {
-      result = result.filter(pt => pt.portfolioId === filter.portfolioId);
+      result = result.filter((pt) => pt.portfolioId === filter.portfolioId);
     }
     if (filter?.tickerId) {
-      result = result.filter(pt => pt.tickerId === filter.tickerId);
+      result = result.filter((pt) => pt.tickerId === filter.tickerId);
     }
     return result;
   }

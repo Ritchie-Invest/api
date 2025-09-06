@@ -4,7 +4,9 @@ import { PortfolioValue as PortfolioValueEntity } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class PrismaPortfolioValueMapper implements EntityMapper<PortfolioValue, PortfolioValueEntity> {
+export class PrismaPortfolioValueMapper
+  implements EntityMapper<PortfolioValue, PortfolioValueEntity>
+{
   fromDomain(model: PortfolioValue): PortfolioValueEntity {
     return {
       id: model.id,

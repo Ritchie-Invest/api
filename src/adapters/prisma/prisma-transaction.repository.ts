@@ -29,16 +29,24 @@ export class PrismaTransactionRepository implements TransactionRepository {
   }
 
   async findAll(filter?: Partial<Transaction>): Promise<Transaction[]> {
-    const where: any = {};
+    const where: {
+      portfolioId?: string;
+      tickerId?: string;
+    } = {};
     if (filter?.portfolioId) where.portfolioId = filter.portfolioId;
     if (filter?.tickerId) where.tickerId = filter.tickerId;
 
     const entities = await this.prisma.transaction.findMany({ where });
-    return entities.map(entity => this.mapper.toDomain(entity));
+    return entities.map((entity) => this.mapper.toDomain(entity));
   }
 
-  async update(id: string, data: Partial<Transaction>): Promise<Transaction | null> {
-    const updateData: any = {};
+  async update(
+    id: string,
+    data: Partial<Transaction>,
+  ): Promise<Transaction | null> {
+    const updateData: {
+      value?: number;
+    } = {};
     if (data.value !== undefined) updateData.value = data.value;
 
     const updated = await this.prisma.transaction.update({

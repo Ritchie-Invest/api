@@ -56,7 +56,6 @@ export class CreateUserUseCase implements UseCase<CreateUserCommand, User> {
 
     await this.userRepository.create(user);
 
-    // Create portfolio for the user
     const portfolio = new UserPortfolio({
       id: this.generateId(),
       userId: user.id,
@@ -64,7 +63,6 @@ export class CreateUserUseCase implements UseCase<CreateUserCommand, User> {
     });
     await this.userPortfolioRepository.create(portfolio);
 
-    // Create initial portfolio value with $10,000 cash
     const portfolioValue = new PortfolioValue({
       id: this.generateId(),
       portfolioId: portfolio.id,

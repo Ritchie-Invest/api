@@ -5,7 +5,9 @@ import { PortfolioTicker } from '../../core/domain/model/PortfolioTicker';
 import { PrismaPortfolioTickerMapper } from './mapper/prisma-portfolio-ticker.mapper';
 
 @Injectable()
-export class PrismaPortfolioTickerRepository implements PortfolioTickerRepository {
+export class PrismaPortfolioTickerRepository
+  implements PortfolioTickerRepository
+{
   private readonly mapper = new PrismaPortfolioTickerMapper();
 
   constructor(private readonly prisma: PrismaService) {}
@@ -24,12 +26,18 @@ export class PrismaPortfolioTickerRepository implements PortfolioTickerRepositor
   }
 
   async findById(id: string): Promise<PortfolioTicker | null> {
-    const entity = await this.prisma.portfolioTicker.findUnique({ where: { id } });
+    const entity = await this.prisma.portfolioTicker.findUnique({
+      where: { id },
+    });
     if (!entity) return null;
     return this.mapper.toDomain(entity);
   }
 
-  async findByPortfolioIdTickerIdAndDate(portfolioId: string, tickerId: string, date: Date): Promise<PortfolioTicker | null> {
+  async findByPortfolioIdTickerIdAndDate(
+    portfolioId: string,
+    tickerId: string,
+    date: Date,
+  ): Promise<PortfolioTicker | null> {
     const entity = await this.prisma.portfolioTicker.findFirst({
       where: {
         portfolioId,
@@ -45,16 +53,25 @@ export class PrismaPortfolioTickerRepository implements PortfolioTickerRepositor
   }
 
   async findAll(filter?: Partial<PortfolioTicker>): Promise<PortfolioTicker[]> {
-    const where: any = {};
+    const where: {
+      portfolioId?: string;
+      tickerId?: string;
+    } = {};
     if (filter?.portfolioId) where.portfolioId = filter.portfolioId;
     if (filter?.tickerId) where.tickerId = filter.tickerId;
 
     const entities = await this.prisma.portfolioTicker.findMany({ where });
-    return entities.map(entity => this.mapper.toDomain(entity));
+    return entities.map((entity) => this.mapper.toDomain(entity));
   }
 
-  async update(id: string, data: Partial<PortfolioTicker>): Promise<PortfolioTicker | null> {
-    const updateData: any = {};
+  async update(
+    id: string,
+    data: Partial<PortfolioTicker>,
+  ): Promise<PortfolioTicker | null> {
+    const updateData: {
+      value?: number;
+      shares?: number;
+    } = {};
     if (data.value !== undefined) updateData.value = data.value;
     if (data.shares !== undefined) updateData.shares = data.shares;
 

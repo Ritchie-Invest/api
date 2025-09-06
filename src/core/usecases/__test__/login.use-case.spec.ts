@@ -17,6 +17,8 @@ describe('LoginUseCase', () => {
   let tokenService: TokenService;
   let refreshTokenRepositoryMock: RefreshTokenRepository;
   let userPortfolioRepository: UserPortfolioRepository;
+  let mockGenerateAccessToken: jest.Mock;
+  let mockGenerateRefreshToken: jest.Mock;
 
   const DEFAULT_EMAIL = 'john.doe@example.com';
   const DEFAULT_PASSWORD = 'password123';
@@ -24,10 +26,20 @@ describe('LoginUseCase', () => {
   beforeEach(() => {
     userRepository = new InMemoryUserRepository();
     userPortfolioRepository = new InMemoryUserPortfolioRepository();
+
+    mockGenerateAccessToken = jest.fn().mockReturnValue('mocked-access-token');
+    mockGenerateRefreshToken = jest
+      .fn()
+      .mockReturnValue('mocked-refresh-token');
+    const mockVerifyAccessToken = jest.fn();
+    const mockVerifyRefreshToken = jest.fn();
+
     tokenService = {
-      generateAccessToken: jest.fn().mockReturnValue('mocked-access-token'),
-      generateRefreshToken: jest.fn().mockReturnValue('mocked-refresh-token'),
-    } as unknown as TokenService;
+      generateAccessToken: mockGenerateAccessToken,
+      generateRefreshToken: mockGenerateRefreshToken,
+      verifyAccessToken: mockVerifyAccessToken,
+      verifyRefreshToken: mockVerifyRefreshToken,
+    } as TokenService;
 
     refreshTokenRepositoryMock = new InMemoryRefreshTokenRepository();
 
@@ -52,20 +64,15 @@ describe('LoginUseCase', () => {
     rawPassword: string,
   ): Promise<User> => {
     const hashedPassword: string = await bcrypt.hash(rawPassword, 10);
-    const user = new User(
-      'user-1',
-      email, 
-      hashedPassword,
-      UserType.STUDENT,
-    );
+    const user = new User('user-1', email, hashedPassword, UserType.STUDENT);
     const createdUser = await userRepository.create(user);
-    
+
     await userPortfolioRepository.create({
       id: `portfolio-${createdUser.id}`,
       userId: createdUser.id,
       currency: Currency.USD,
     });
-    
+
     return createdUser;
   };
 
@@ -86,22 +93,20 @@ describe('LoginUseCase', () => {
       accessToken: 'mocked-access-token',
       refreshToken: 'mocked-refresh-token',
     });
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(tokenService.generateAccessToken as jest.Mock).toHaveBeenCalledWith({
+
+    expect(mockGenerateAccessToken).toHaveBeenCalledWith({
       id: user.id,
       email: user.email,
       type: user.type,
-      portfolioId: expect.any(String),
+      portfolioId: `portfolio-${user.id}`,
     });
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(tokenService.generateRefreshToken as jest.Mock).toHaveBeenCalledWith(
-      {
-        id: user.id,
-        email: user.email,
-        type: user.type,
-        portfolioId: expect.any(String),
-      },
-    );
+
+    expect(mockGenerateRefreshToken).toHaveBeenCalledWith({
+      id: user.id,
+      email: user.email,
+      type: user.type,
+      portfolioId: `portfolio-${user.id}`,
+    });
   });
 
   it('should throw an error When user is not found', async () => {

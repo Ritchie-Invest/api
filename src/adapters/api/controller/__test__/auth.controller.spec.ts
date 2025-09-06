@@ -140,13 +140,13 @@ describe('AuthControllerIT', () => {
           '$2b$10$uKniZFGl/gr6.SWpifzq1ebJLN79UjKw0UcQjv.0oe6jyedaxTNqK',
       });
       await userRepository.create(user);
-      
+
       await userPortfolioRepository.create({
         id: `portfolio-${user.id}`,
         userId: user.id,
         currency: Currency.USD,
       });
-      
+
       const loginRequest = new LoginRequest('test@example.com', 'password123');
 
       // When

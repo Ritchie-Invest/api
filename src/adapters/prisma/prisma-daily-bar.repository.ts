@@ -31,7 +31,10 @@ export class PrismaDailyBarRepository implements DailyBarRepository {
     return this.mapper.toDomain(entity);
   }
 
-  async findByTickerIdAndDate(tickerId: string, date: Date): Promise<DailyBar | null> {
+  async findByTickerIdAndDate(
+    tickerId: string,
+    date: Date,
+  ): Promise<DailyBar | null> {
     const entity = await this.prisma.dailyBar.findFirst({
       where: {
         tickerId,
@@ -48,11 +51,17 @@ export class PrismaDailyBarRepository implements DailyBarRepository {
   async findAll(filter?: Partial<DailyBar>): Promise<DailyBar[]> {
     const where = filter?.tickerId ? { tickerId: filter.tickerId } : {};
     const entities = await this.prisma.dailyBar.findMany({ where });
-    return entities.map(entity => this.mapper.toDomain(entity));
+    return entities.map((entity) => this.mapper.toDomain(entity));
   }
 
   async update(id: string, data: Partial<DailyBar>): Promise<DailyBar | null> {
-    const updateData: any = {};
+    const updateData: {
+      open?: number;
+      high?: number;
+      low?: number;
+      close?: number;
+      volume?: number;
+    } = {};
     if (data.open !== undefined) updateData.open = data.open;
     if (data.high !== undefined) updateData.high = data.high;
     if (data.low !== undefined) updateData.low = data.low;

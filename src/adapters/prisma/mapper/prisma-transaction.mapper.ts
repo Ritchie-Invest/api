@@ -5,7 +5,9 @@ import { Injectable } from '@nestjs/common';
 import { TransactionType } from '../../../core/domain/type/TransactionType';
 
 @Injectable()
-export class PrismaTransactionMapper implements EntityMapper<Transaction, TransactionEntity> {
+export class PrismaTransactionMapper
+  implements EntityMapper<Transaction, TransactionEntity>
+{
   fromDomain(model: Transaction): TransactionEntity {
     return {
       id: model.id,

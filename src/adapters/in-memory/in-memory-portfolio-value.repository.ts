@@ -3,7 +3,9 @@ import { PortfolioValue } from '../../core/domain/model/PortfolioValue';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class InMemoryPortfolioValueRepository implements PortfolioValueRepository {
+export class InMemoryPortfolioValueRepository
+  implements PortfolioValueRepository
+{
   private portfolioValues: Map<string, PortfolioValue> = new Map();
 
   create(data: Partial<PortfolioValue>): PortfolioValue {
@@ -22,10 +24,15 @@ export class InMemoryPortfolioValueRepository implements PortfolioValueRepositor
     return this.portfolioValues.get(id) || null;
   }
 
-  findByPortfolioIdAndDate(portfolioId: string, date: Date): PortfolioValue | null {
+  findByPortfolioIdAndDate(
+    portfolioId: string,
+    date: Date,
+  ): PortfolioValue | null {
     for (const portfolioValue of this.portfolioValues.values()) {
-      if (portfolioValue.portfolioId === portfolioId && 
-          portfolioValue.date.getTime() === date.getTime()) {
+      if (
+        portfolioValue.portfolioId === portfolioId &&
+        portfolioValue.date.getTime() === date.getTime()
+      ) {
         return portfolioValue;
       }
     }
@@ -35,7 +42,7 @@ export class InMemoryPortfolioValueRepository implements PortfolioValueRepositor
   findAll(filter?: Partial<PortfolioValue>): PortfolioValue[] {
     let result = Array.from(this.portfolioValues.values());
     if (filter?.portfolioId) {
-      result = result.filter(pv => pv.portfolioId === filter.portfolioId);
+      result = result.filter((pv) => pv.portfolioId === filter.portfolioId);
     }
     return result;
   }
