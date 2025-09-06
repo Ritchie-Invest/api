@@ -20,6 +20,12 @@ export type CompleteGameModuleCommand = {
   mcq?: {
     choiceId: string;
   };
+  gauge?: {
+    selectedValue: number;
+  };
+  chooseAnOrder?: {
+    orderedSentenceValues: number[];
+  };
 };
 
 export type CompleteGameModuleResult = {
