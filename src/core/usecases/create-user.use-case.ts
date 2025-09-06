@@ -3,8 +3,13 @@ import { UserAlreadyExistsError } from '../domain/error/UserAlreadyExistsError';
 import { WrongEmailFormatError } from '../domain/error/WrongEmailFormatError';
 import { WrongPasswordFormatError } from '../domain/error/WrongPasswordFormatError';
 import { User } from '../domain/model/User';
+import { UserPortfolio } from '../domain/model/UserPortfolio';
+import { PortfolioValue } from '../domain/model/PortfolioValue';
 import { UserRepository } from '../domain/repository/user.repository';
+import { UserPortfolioRepository } from '../domain/repository/user-portfolio.repository';
+import { PortfolioValueRepository } from '../domain/repository/portfolio-value.repository';
 import { UserType } from '../domain/type/UserType';
+import { Currency } from '../domain/type/Currency';
 import * as bcrypt from 'bcryptjs';
 
 export type CreateUserCommand = {
@@ -15,8 +20,13 @@ export type CreateUserCommand = {
 export class CreateUserUseCase implements UseCase<CreateUserCommand, User> {
   private readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   private readonly PASSWORD_LENGTH = 8;
+  private readonly INITIAL_CASH = 10000;
 
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly userPortfolioRepository: UserPortfolioRepository,
+    private readonly portfolioValueRepository: PortfolioValueRepository,
+  ) {}
 
   async execute(command: CreateUserCommand): Promise<User> {
     const { email, password } = command;
@@ -45,6 +55,25 @@ export class CreateUserUseCase implements UseCase<CreateUserCommand, User> {
     );
 
     await this.userRepository.create(user);
+
+    // Create portfolio for the user
+    const portfolio = new UserPortfolio({
+      id: this.generateId(),
+      userId: user.id,
+      currency: Currency.USD,
+    });
+    await this.userPortfolioRepository.create(portfolio);
+
+    // Create initial portfolio value with $10,000 cash
+    const portfolioValue = new PortfolioValue({
+      id: this.generateId(),
+      portfolioId: portfolio.id,
+      cash: this.INITIAL_CASH,
+      investments: 0,
+      date: new Date(),
+    });
+    await this.portfolioValueRepository.create(portfolioValue);
+
     return user;
   }
 

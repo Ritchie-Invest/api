@@ -57,6 +57,18 @@ import { TickerRepository } from './core/domain/repository/ticker.repository';
 import { PrismaTickerRepository } from './adapters/prisma/prisma-ticker.repository';
 import { GetTickersWithPriceUseCase } from './core/usecases/get-tickers-with-price.use-case';
 import { TickerController } from './adapters/api/controller/ticker.controller';
+import { TransactionController } from './adapters/api/controller/transaction.controller';
+import { ExecuteTransactionUseCase } from './core/usecases/ExecuteTransactionUseCase';
+import { UserPortfolioRepository } from './core/domain/repository/user-portfolio.repository';
+import { PrismaUserPortfolioRepository } from './adapters/prisma/prisma-user-portfolio.repository';
+import { PortfolioValueRepository } from './core/domain/repository/portfolio-value.repository';
+import { PrismaPortfolioValueRepository } from './adapters/prisma/prisma-portfolio-value.repository';
+import { PortfolioTickerRepository } from './core/domain/repository/portfolio-ticker.repository';
+import { PrismaPortfolioTickerRepository } from './adapters/prisma/prisma-portfolio-ticker.repository';
+import { DailyBarRepository } from './core/domain/repository/daily-bar.repository';
+import { PrismaDailyBarRepository } from './adapters/prisma/prisma-daily-bar.repository';
+import { TransactionRepository } from './core/domain/repository/transaction.repository';
+import { PrismaTransactionRepository } from './adapters/prisma/prisma-transaction.repository';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -67,6 +79,7 @@ import { TickerController } from './adapters/api/controller/ticker.controller';
     LessonController,
     GameModuleController,
     TickerController,
+    TransactionController,
   ],
   providers: [
     PrismaService,
@@ -148,10 +161,39 @@ import { TickerController } from './adapters/api/controller/ticker.controller';
       inject: [PrismaService],
     },
     {
+      provide: 'UserPortfolioRepository',
+      useFactory: (prisma: PrismaService) => new PrismaUserPortfolioRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'PortfolioValueRepository',
+      useFactory: (prisma: PrismaService) => new PrismaPortfolioValueRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'PortfolioTickerRepository',
+      useFactory: (prisma: PrismaService) => new PrismaPortfolioTickerRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'DailyBarRepository',
+      useFactory: (prisma: PrismaService) => new PrismaDailyBarRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'TransactionRepository',
+      useFactory: (prisma: PrismaService) => new PrismaTransactionRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
       provide: CreateUserUseCase,
-      useFactory: (userRepository: UserRepository) =>
-        new CreateUserUseCase(userRepository),
-      inject: [UserRepository],
+      useFactory: (
+        userRepository: UserRepository,
+        userPortfolioRepository: UserPortfolioRepository,
+        portfolioValueRepository: PortfolioValueRepository,
+      ) =>
+        new CreateUserUseCase(userRepository, userPortfolioRepository, portfolioValueRepository),
+      inject: [UserRepository, 'UserPortfolioRepository', 'PortfolioValueRepository'],
     },
     {
       provide: UpdateUserTypeUseCase,
@@ -164,10 +206,11 @@ import { TickerController } from './adapters/api/controller/ticker.controller';
       useFactory: (
         userRepository: UserRepository,
         refreshTokenRepository: RefreshTokenRepository,
+        userPortfolioRepository: UserPortfolioRepository,
         tokenService: TokenService,
       ) =>
-        new LoginUseCase(userRepository, refreshTokenRepository, tokenService),
-      inject: [UserRepository, RefreshTokenRepository, 'TokenService'],
+        new LoginUseCase(userRepository, refreshTokenRepository, userPortfolioRepository, tokenService),
+      inject: [UserRepository, RefreshTokenRepository, 'UserPortfolioRepository', 'TokenService'],
     },
     {
       provide: LogoutUseCase,
@@ -332,6 +375,33 @@ import { TickerController } from './adapters/api/controller/ticker.controller';
       useFactory: (tickerRepository: TickerRepository) =>
         new GetTickersWithPriceUseCase(tickerRepository),
       inject: [TickerRepository],
+    },
+    {
+      provide: ExecuteTransactionUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        tickerRepository: TickerRepository,
+        dailyBarRepository: DailyBarRepository,
+        portfolioValueRepository: PortfolioValueRepository,
+        portfolioTickerRepository: PortfolioTickerRepository,
+        transactionRepository: TransactionRepository,
+      ) =>
+        new ExecuteTransactionUseCase(
+          userPortfolioRepository,
+          tickerRepository,
+          dailyBarRepository,
+          portfolioValueRepository,
+          portfolioTickerRepository,
+          transactionRepository,
+        ),
+      inject: [
+        'UserPortfolioRepository',
+        TickerRepository,
+        'DailyBarRepository',
+        'PortfolioValueRepository',
+        'PortfolioTickerRepository',
+        'TransactionRepository',
+      ],
     },
   ],
 })

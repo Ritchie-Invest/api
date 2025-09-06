@@ -4,20 +4,26 @@ import { InMemoryUserRepository } from '../../../adapters/in-memory/in-memory-us
 import { TokenService } from '../../domain/service/token.service';
 import { User } from '../../domain/model/User';
 import { RefreshTokenRepository } from '../../domain/repository/refresh-token.repository';
+import { UserPortfolioRepository } from '../../domain/repository/user-portfolio.repository';
+import { InMemoryUserPortfolioRepository } from '../../../adapters/in-memory/in-memory-user-portfolio.repository';
 import bcrypt from 'bcryptjs';
 import { InMemoryRefreshTokenRepository } from '../../../adapters/in-memory/in-memory-refresh-token.repository';
+import { Currency } from '../../domain/type/Currency';
+import { UserType } from '../../domain/type/UserType';
 
 describe('LoginUseCase', () => {
   let userRepository: UserRepository;
   let loginUseCase: LoginUseCase;
   let tokenService: TokenService;
   let refreshTokenRepositoryMock: RefreshTokenRepository;
+  let userPortfolioRepository: UserPortfolioRepository;
 
   const DEFAULT_EMAIL = 'john.doe@example.com';
   const DEFAULT_PASSWORD = 'password123';
 
   beforeEach(() => {
     userRepository = new InMemoryUserRepository();
+    userPortfolioRepository = new InMemoryUserPortfolioRepository();
     tokenService = {
       generateAccessToken: jest.fn().mockReturnValue('mocked-access-token'),
       generateRefreshToken: jest.fn().mockReturnValue('mocked-refresh-token'),
@@ -28,6 +34,7 @@ describe('LoginUseCase', () => {
     loginUseCase = new LoginUseCase(
       userRepository,
       refreshTokenRepositoryMock,
+      userPortfolioRepository,
       tokenService,
     );
   });
@@ -45,7 +52,21 @@ describe('LoginUseCase', () => {
     rawPassword: string,
   ): Promise<User> => {
     const hashedPassword: string = await bcrypt.hash(rawPassword, 10);
-    return userRepository.create({ email, password: hashedPassword });
+    const user = new User(
+      'user-1',
+      email, 
+      hashedPassword,
+      UserType.STUDENT,
+    );
+    const createdUser = await userRepository.create(user);
+    
+    await userPortfolioRepository.create({
+      id: `portfolio-${createdUser.id}`,
+      userId: createdUser.id,
+      currency: Currency.USD,
+    });
+    
+    return createdUser;
   };
 
   it('should be defined', () => {
@@ -70,6 +91,7 @@ describe('LoginUseCase', () => {
       id: user.id,
       email: user.email,
       type: user.type,
+      portfolioId: expect.any(String),
     });
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(tokenService.generateRefreshToken as jest.Mock).toHaveBeenCalledWith(
@@ -77,6 +99,7 @@ describe('LoginUseCase', () => {
         id: user.id,
         email: user.email,
         type: user.type,
+        portfolioId: expect.any(String),
       },
     );
   });

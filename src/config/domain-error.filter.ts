@@ -27,6 +27,13 @@ import { LessonNotFullyAttemptedError } from '../core/domain/error/LessonNotFull
 import { LessonAlreadyCompletedError } from '../core/domain/error/LessonAlreadyCompletedError';
 import { LessonAttemptNotFoundError } from '../core/domain/error/LessonAttemptNotFoundError';
 import { LessonAttemptAlreadyFinishedError } from '../core/domain/error/LessonAttemptAlreadyFinishedError';
+import { InsufficientCashError } from '../core/domain/error/InsufficientCashError';
+import { InsufficientHoldingsError } from '../core/domain/error/InsufficientHoldingsError';
+import { DailyBarNotFoundError } from '../core/domain/error/DailyBarNotFoundError';
+import { PortfolioNotFoundError } from '../core/domain/error/PortfolioNotFoundError';
+import { TickerNotFoundError } from '../core/domain/error/TickerNotFoundError';
+import { PortfolioValueNotFoundError } from '../core/domain/error/PortfolioValueNotFoundError';
+import { PortfolioTickerNotFoundError } from '../core/domain/error/PortfolioTickerNotFoundError';
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
@@ -55,7 +62,9 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof GameModuleStrategyNotFoundError ||
       exception instanceof InvalidAnswerError ||
       exception instanceof McqModuleInvalidDataError ||
-      exception instanceof LessonNotFullyAttemptedError
+      exception instanceof LessonNotFullyAttemptedError ||
+      exception instanceof InsufficientCashError ||
+      exception instanceof InsufficientHoldingsError
     ) {
       return HttpStatus.BAD_REQUEST;
     }
@@ -64,7 +73,12 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof ChapterNotFoundError ||
       exception instanceof LessonNotFoundError ||
       exception instanceof GameModuleNotFoundError ||
-      exception instanceof LessonAttemptNotFoundError
+      exception instanceof LessonAttemptNotFoundError ||
+      exception instanceof DailyBarNotFoundError ||
+      exception instanceof PortfolioNotFoundError ||
+      exception instanceof TickerNotFoundError ||
+      exception instanceof PortfolioValueNotFoundError ||
+      exception instanceof PortfolioTickerNotFoundError
     ) {
       return HttpStatus.NOT_FOUND;
     }
