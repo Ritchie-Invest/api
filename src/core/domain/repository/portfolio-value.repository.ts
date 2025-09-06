@@ -6,4 +6,8 @@ export abstract class PortfolioValueRepository extends Repository<PortfolioValue
     portfolioId: string,
     date: Date,
   ): Promise<PortfolioValue | null> | PortfolioValue | null;
+
+  abstract findLatestByPortfolioId(
+    portfolioId: string,
+  ): Promise<PortfolioValue | null> | PortfolioValue | null;
 }

@@ -67,6 +67,8 @@ import { DailyBarRepository } from './core/domain/repository/daily-bar.repositor
 import { PrismaDailyBarRepository } from './adapters/prisma/prisma-daily-bar.repository';
 import { TransactionRepository } from './core/domain/repository/transaction.repository';
 import { PrismaTransactionRepository } from './adapters/prisma/prisma-transaction.repository';
+import { GetPortfolioUseCase } from './core/usecases/get-portfolio.use-case';
+import { PortfolioController } from './adapters/api/controller/portfolio.controller';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -78,6 +80,7 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
     GameModuleController,
     TickerController,
     TransactionController,
+    PortfolioController,
   ],
   providers: [
     PrismaService,
@@ -414,6 +417,18 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
         'PortfolioValueRepository',
         'TransactionRepository',
       ],
+    },
+    {
+      provide: GetPortfolioUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        portfolioValueRepository: PortfolioValueRepository,
+      ) =>
+        new GetPortfolioUseCase(
+          userPortfolioRepository,
+          portfolioValueRepository,
+        ),
+      inject: ['UserPortfolioRepository', 'PortfolioValueRepository'],
     },
   ],
 })

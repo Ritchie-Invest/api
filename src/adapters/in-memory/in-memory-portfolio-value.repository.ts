@@ -39,6 +39,18 @@ export class InMemoryPortfolioValueRepository
     return null;
   }
 
+  findLatestByPortfolioId(portfolioId: string): PortfolioValue | null {
+    let latest: PortfolioValue | null = null;
+    for (const portfolioValue of this.portfolioValues.values()) {
+      if (portfolioValue.portfolioId === portfolioId) {
+        if (!latest || portfolioValue.date > latest.date) {
+          latest = portfolioValue;
+        }
+      }
+    }
+    return latest;
+  }
+
   findAll(filter?: Partial<PortfolioValue>): PortfolioValue[] {
     let result = Array.from(this.portfolioValues.values());
     if (filter?.portfolioId) {

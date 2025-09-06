@@ -49,6 +49,17 @@ export class PrismaPortfolioValueRepository
     return this.mapper.toDomain(entity);
   }
 
+  async findLatestByPortfolioId(
+    portfolioId: string,
+  ): Promise<PortfolioValue | null> {
+    const entity = await this.prisma.portfolioValue.findFirst({
+      where: { portfolioId },
+      orderBy: { date: 'desc' },
+    });
+    if (!entity) return null;
+    return this.mapper.toDomain(entity);
+  }
+
   async findAll(filter?: Partial<PortfolioValue>): Promise<PortfolioValue[]> {
     const where = filter?.portfolioId
       ? { portfolioId: filter.portfolioId }
