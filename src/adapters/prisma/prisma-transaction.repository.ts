@@ -3,6 +3,10 @@ import { PrismaService } from './prisma.service';
 import { TransactionRepository } from '../../core/domain/repository/transaction.repository';
 import { Transaction } from '../../core/domain/model/Transaction';
 import { PrismaTransactionMapper } from './mapper/prisma-transaction.mapper';
+import {
+  TransactionType as PrismaTransactionType,
+  Prisma,
+} from '@prisma/client';
 
 @Injectable()
 export class PrismaTransactionRepository implements TransactionRepository {
@@ -12,12 +16,15 @@ export class PrismaTransactionRepository implements TransactionRepository {
 
   async create(data: Partial<Transaction>): Promise<Transaction> {
     const entity = {
-      id: data.id,
       portfolioId: data.portfolioId!,
       tickerId: data.tickerId!,
-      type: data.type!,
-      value: data.value!,
+      type: data.type! as PrismaTransactionType,
+      amount: data.amount!,
+      volume: data.volume!,
+      currentTickerPrice: data.currentTickerPrice!,
+      ...(data.id && { id: data.id }),
     };
+
     const created = await this.prisma.transaction.create({ data: entity });
     return this.mapper.toDomain(created);
   }
@@ -44,16 +51,27 @@ export class PrismaTransactionRepository implements TransactionRepository {
     id: string,
     data: Partial<Transaction>,
   ): Promise<Transaction | null> {
-    const updateData: {
-      value?: number;
-    } = {};
-    if (data.value !== undefined) updateData.value = data.value;
+    const updateData: Prisma.TransactionUncheckedUpdateInput = {};
+    if (data.amount !== undefined) updateData.amount = data.amount;
+    if (data.volume !== undefined) updateData.volume = data.volume;
+    if (data.currentTickerPrice !== undefined)
+      updateData.currentTickerPrice = data.currentTickerPrice;
 
     const updated = await this.prisma.transaction.update({
       where: { id },
       data: updateData,
     });
     return this.mapper.toDomain(updated);
+  }
+
+  async findByPortfolioIdAndTickerId(
+    portfolioId: string,
+    tickerId: string,
+  ): Promise<Transaction[]> {
+    const entities = await this.prisma.transaction.findMany({
+      where: { portfolioId, tickerId },
+    });
+    return entities.map((entity) => this.mapper.toDomain(entity));
   }
 
   async remove(id: string): Promise<void> {

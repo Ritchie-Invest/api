@@ -12,7 +12,9 @@ export class InMemoryTransactionRepository implements TransactionRepository {
       portfolioId: data.portfolioId!,
       tickerId: data.tickerId!,
       type: data.type!,
-      value: data.value!,
+      amount: data.amount!,
+      volume: data.volume!,
+      currentTickerPrice: data.currentTickerPrice!,
     });
     this.transactions.set(transaction.id, transaction);
     return transaction;
@@ -43,10 +45,22 @@ export class InMemoryTransactionRepository implements TransactionRepository {
       portfolioId: existing.portfolioId,
       tickerId: existing.tickerId,
       type: existing.type,
-      value: data.value ?? existing.value,
+      amount: data.amount ?? existing.amount,
+      volume: data.volume ?? existing.volume,
+      currentTickerPrice:
+        data.currentTickerPrice ?? existing.currentTickerPrice,
     });
     this.transactions.set(id, updated);
     return updated;
+  }
+
+  findByPortfolioIdAndTickerId(
+    portfolioId: string,
+    tickerId: string,
+  ): Transaction[] {
+    return Array.from(this.transactions.values()).filter(
+      (t) => t.portfolioId === portfolioId && t.tickerId === tickerId,
+    );
   }
 
   remove(id: string): void {

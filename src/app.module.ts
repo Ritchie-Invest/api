@@ -58,13 +58,11 @@ import { PrismaTickerRepository } from './adapters/prisma/prisma-ticker.reposito
 import { GetTickersWithPriceUseCase } from './core/usecases/get-tickers-with-price.use-case';
 import { TickerController } from './adapters/api/controller/ticker.controller';
 import { TransactionController } from './adapters/api/controller/transaction.controller';
-import { ExecuteTransactionUseCase } from './core/usecases/ExecuteTransactionUseCase';
+import { ExecuteTransactionUseCase } from './core/usecases/execute-transaction.use-case';
 import { UserPortfolioRepository } from './core/domain/repository/user-portfolio.repository';
 import { PrismaUserPortfolioRepository } from './adapters/prisma/prisma-user-portfolio.repository';
 import { PortfolioValueRepository } from './core/domain/repository/portfolio-value.repository';
 import { PrismaPortfolioValueRepository } from './adapters/prisma/prisma-portfolio-value.repository';
-import { PortfolioTickerRepository } from './core/domain/repository/portfolio-ticker.repository';
-import { PrismaPortfolioTickerRepository } from './adapters/prisma/prisma-portfolio-ticker.repository';
 import { DailyBarRepository } from './core/domain/repository/daily-bar.repository';
 import { PrismaDailyBarRepository } from './adapters/prisma/prisma-daily-bar.repository';
 import { TransactionRepository } from './core/domain/repository/transaction.repository';
@@ -170,12 +168,6 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
       provide: 'PortfolioValueRepository',
       useFactory: (prisma: PrismaService) =>
         new PrismaPortfolioValueRepository(prisma),
-      inject: [PrismaService],
-    },
-    {
-      provide: 'PortfolioTickerRepository',
-      useFactory: (prisma: PrismaService) =>
-        new PrismaPortfolioTickerRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -406,7 +398,6 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
         tickerRepository: TickerRepository,
         dailyBarRepository: DailyBarRepository,
         portfolioValueRepository: PortfolioValueRepository,
-        portfolioTickerRepository: PortfolioTickerRepository,
         transactionRepository: TransactionRepository,
       ) =>
         new ExecuteTransactionUseCase(
@@ -414,7 +405,6 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
           tickerRepository,
           dailyBarRepository,
           portfolioValueRepository,
-          portfolioTickerRepository,
           transactionRepository,
         ),
       inject: [
@@ -422,7 +412,6 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
         TickerRepository,
         'DailyBarRepository',
         'PortfolioValueRepository',
-        'PortfolioTickerRepository',
         'TransactionRepository',
       ],
     },

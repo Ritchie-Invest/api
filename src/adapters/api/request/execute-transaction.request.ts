@@ -14,11 +14,11 @@ export class ExecuteTransactionRequest {
   @ApiProperty()
   @IsNumber()
   @Min(1)
-  value: number;
+  amount: number;
 
-  constructor(tickerId: string, type: TransactionType, value: number) {
+  constructor(tickerId: string, type: TransactionType, amount: number) {
     this.tickerId = tickerId;
     this.type = type;
-    this.value = value;
+    this.amount = amount;
   }
 }

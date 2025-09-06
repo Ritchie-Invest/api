@@ -8,7 +8,7 @@ import {
   ApiOperation,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { ExecuteTransactionUseCase } from '../../../core/usecases/ExecuteTransactionUseCase';
+import { ExecuteTransactionUseCase } from '../../../core/usecases/execute-transaction.use-case';
 import { ExecuteTransactionRequest } from '../request/execute-transaction.request';
 import { ExecuteTransactionResponse } from '../response/execute-transaction.response';
 import { ExecuteTransactionMapper } from '../mapper/execute-transaction.mapper';

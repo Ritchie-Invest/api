@@ -1,7 +1,7 @@
 import {
   ExecuteTransactionCommand,
   ExecuteTransactionResult,
-} from '../../../core/usecases/ExecuteTransactionUseCase';
+} from '../../../core/usecases/execute-transaction.use-case';
 import { ExecuteTransactionRequest } from '../request/execute-transaction.request';
 import { ExecuteTransactionResponse } from '../response/execute-transaction.response';
 import { TokenPayload } from '../../jwt/jwt.service';
@@ -15,7 +15,7 @@ export class ExecuteTransactionMapper {
       portfolioId: currentUser.portfolioId,
       tickerId: request.tickerId,
       type: request.type,
-      value: request.value,
+      amount: request.amount,
     };
   }
 

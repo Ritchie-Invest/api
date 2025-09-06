@@ -14,7 +14,6 @@ import { UserRepository } from '../../../../core/domain/repository/user.reposito
 import { TickerRepository } from '../../../../core/domain/repository/ticker.repository';
 import { DailyBarRepository } from '../../../../core/domain/repository/daily-bar.repository';
 import { PortfolioValueRepository } from '../../../../core/domain/repository/portfolio-value.repository';
-import { PortfolioTickerRepository } from '../../../../core/domain/repository/portfolio-ticker.repository';
 import { TransactionRepository } from '../../../../core/domain/repository/transaction.repository';
 import { Currency } from '../../../../core/domain/type/Currency';
 import { Ticker } from '../../../../core/domain/model/Ticker';
@@ -28,7 +27,6 @@ describe('TransactionControllerIT', () => {
   let tickerRepository: TickerRepository;
   let dailyBarRepository: DailyBarRepository;
   let portfolioValueRepository: PortfolioValueRepository;
-  let portfolioTickerRepository: PortfolioTickerRepository;
   let transactionRepository: TransactionRepository;
 
   beforeAll(async () => {
@@ -53,7 +51,6 @@ describe('TransactionControllerIT', () => {
     tickerRepository = app.get(TickerRepository);
     dailyBarRepository = app.get('DailyBarRepository');
     portfolioValueRepository = app.get('PortfolioValueRepository');
-    portfolioTickerRepository = app.get('PortfolioTickerRepository');
     transactionRepository = app.get('TransactionRepository');
 
     await userRepository.removeAll();
@@ -61,7 +58,6 @@ describe('TransactionControllerIT', () => {
     await tickerRepository.removeAll();
     await dailyBarRepository.removeAll();
     await portfolioValueRepository.removeAll();
-    await portfolioTickerRepository.removeAll();
     await transactionRepository.removeAll();
   });
 
@@ -71,7 +67,6 @@ describe('TransactionControllerIT', () => {
     await tickerRepository.removeAll();
     await dailyBarRepository.removeAll();
     await portfolioValueRepository.removeAll();
-    await portfolioTickerRepository.removeAll();
     await transactionRepository.removeAll();
   });
 
@@ -126,15 +121,6 @@ describe('TransactionControllerIT', () => {
       date: today,
     });
 
-    await portfolioTickerRepository.create({
-      id: 'portfolioticker-1',
-      portfolioId: 'portfolio-1',
-      tickerId: 'ticker-1',
-      value: 500,
-      shares: 5,
-      date: today,
-    });
-
     const accessToken = tokenService.generateAccessToken({
       id: 'user-1',
       email: 'test@example.com',
@@ -144,8 +130,8 @@ describe('TransactionControllerIT', () => {
 
     const requestBody = {
       tickerId: 'ticker-1',
-      type: TransactionType.Buy,
-      value: 1000,
+      type: TransactionType.BUY,
+      amount: 1000,
     };
 
     // When
@@ -159,7 +145,7 @@ describe('TransactionControllerIT', () => {
     expect(response.body).toEqual({
       cash: 4000,
       investments: 3000,
-      tickerHoldings: 1500,
+      tickerHoldings: 1000,
     });
   });
 
@@ -192,6 +178,7 @@ describe('TransactionControllerIT', () => {
     );
 
     await dailyBarRepository.create({
+      id: 'dailybar-1',
       tickerId: 'ticker-1',
       timestamp: today,
       open: 100,
@@ -202,17 +189,10 @@ describe('TransactionControllerIT', () => {
     });
 
     await portfolioValueRepository.create({
+      id: 'portfoliovalue-1',
       portfolioId: 'portfolio-1',
       cash: 500,
       investments: 2000,
-      date: today,
-    });
-
-    await portfolioTickerRepository.create({
-      portfolioId: 'portfolio-1',
-      tickerId: 'ticker-1',
-      value: 500,
-      shares: 5,
       date: today,
     });
 
@@ -225,8 +205,8 @@ describe('TransactionControllerIT', () => {
 
     const requestBody = {
       tickerId: 'ticker-1',
-      type: TransactionType.Buy,
-      value: 1000,
+      type: TransactionType.BUY,
+      amount: 1000,
     };
 
     // When
@@ -242,8 +222,8 @@ describe('TransactionControllerIT', () => {
   it('should return 401 when no token is provided', async () => {
     const requestBody = {
       tickerId: 'ticker-1',
-      type: TransactionType.Buy,
-      value: 1000,
+      type: TransactionType.BUY,
+      amount: 1000,
     };
 
     const response = await request(app.getHttpServer())

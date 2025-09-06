@@ -5,19 +5,25 @@ export class Transaction extends DomainModel {
   portfolioId: string;
   tickerId: string;
   type: TransactionType;
-  value: number;
+  amount: number;
+  volume: number;
+  currentTickerPrice: number;
 
   constructor(params: {
     id: string;
     portfolioId: string;
     tickerId: string;
     type: TransactionType;
-    value: number;
+    amount: number;
+    volume: number;
+    currentTickerPrice: number;
   }) {
     super(params.id);
     this.portfolioId = params.portfolioId;
     this.tickerId = params.tickerId;
     this.type = params.type;
-    this.value = params.value;
+    this.amount = params.amount;
+    this.volume = params.volume;
+    this.currentTickerPrice = params.currentTickerPrice;
   }
 }

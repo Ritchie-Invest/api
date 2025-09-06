@@ -14,7 +14,9 @@ export class PrismaTransactionMapper
       portfolioId: model.portfolioId,
       tickerId: model.tickerId,
       type: model.type,
-      value: model.value,
+      amount: model.amount,
+      volume: model.volume,
+      currentTickerPrice: model.currentTickerPrice,
     };
   }
 
@@ -24,7 +26,9 @@ export class PrismaTransactionMapper
       portfolioId: entity.portfolioId,
       tickerId: entity.tickerId,
       type: entity.type as TransactionType,
-      value: entity.value,
+      amount: entity.amount,
+      volume: entity.volume,
+      currentTickerPrice: entity.currentTickerPrice,
     });
   }
 }

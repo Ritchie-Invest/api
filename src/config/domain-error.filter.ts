@@ -33,7 +33,6 @@ import { DailyBarNotFoundError } from '../core/domain/error/DailyBarNotFoundErro
 import { PortfolioNotFoundError } from '../core/domain/error/PortfolioNotFoundError';
 import { TickerNotFoundError } from '../core/domain/error/TickerNotFoundError';
 import { PortfolioValueNotFoundError } from '../core/domain/error/PortfolioValueNotFoundError';
-import { PortfolioTickerNotFoundError } from '../core/domain/error/PortfolioTickerNotFoundError';
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
@@ -77,8 +76,7 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof DailyBarNotFoundError ||
       exception instanceof PortfolioNotFoundError ||
       exception instanceof TickerNotFoundError ||
-      exception instanceof PortfolioValueNotFoundError ||
-      exception instanceof PortfolioTickerNotFoundError
+      exception instanceof PortfolioValueNotFoundError
     ) {
       return HttpStatus.NOT_FOUND;
     }

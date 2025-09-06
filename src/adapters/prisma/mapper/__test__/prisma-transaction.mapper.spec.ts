@@ -10,8 +10,8 @@ describe('PrismaTransactionMapper', () => {
     domain: TransactionType;
     prisma: $Enums.TransactionType;
   }[] = [
-    { domain: TransactionType.Buy, prisma: $Enums.TransactionType.Buy },
-    { domain: TransactionType.Sell, prisma: $Enums.TransactionType.Sell },
+    { domain: TransactionType.BUY, prisma: $Enums.TransactionType.BUY },
+    { domain: TransactionType.SELL, prisma: $Enums.TransactionType.SELL },
   ];
 
   describe('fromDomain', () => {
@@ -24,7 +24,9 @@ describe('PrismaTransactionMapper', () => {
           portfolioId: 'portfolio-1',
           tickerId: 'ticker-1',
           type: domain,
-          value: 1000,
+          amount: 1000,
+          volume: 10,
+          currentTickerPrice: 100,
         });
 
         // When
@@ -36,7 +38,9 @@ describe('PrismaTransactionMapper', () => {
           portfolioId: 'portfolio-1',
           tickerId: 'ticker-1',
           type: prisma,
-          value: 1000,
+          amount: 1000,
+          volume: 10,
+          currentTickerPrice: 100,
         });
       },
     );
@@ -52,7 +56,9 @@ describe('PrismaTransactionMapper', () => {
           portfolioId: 'portfolio-1',
           tickerId: 'ticker-1',
           type: prisma,
-          value: 1000,
+          amount: 1000,
+          volume: 10,
+          currentTickerPrice: 100,
         };
 
         // When
@@ -64,7 +70,9 @@ describe('PrismaTransactionMapper', () => {
         expect(transaction.portfolioId).toBe('portfolio-1');
         expect(transaction.tickerId).toBe('ticker-1');
         expect(transaction.type).toBe(domain);
-        expect(transaction.value).toBe(1000);
+        expect(transaction.amount).toBe(1000);
+        expect(transaction.volume).toBe(10);
+        expect(transaction.currentTickerPrice).toBe(100);
       },
     );
   });

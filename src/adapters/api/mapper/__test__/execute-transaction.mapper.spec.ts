@@ -16,8 +16,8 @@ describe('ExecuteTransactionMapper', () => {
       };
       const request: ExecuteTransactionRequest = {
         tickerId: 'ticker-1',
-        type: TransactionType.Buy,
-        value: 1000,
+        type: TransactionType.BUY,
+        amount: 1000,
       };
 
       // When
@@ -27,8 +27,8 @@ describe('ExecuteTransactionMapper', () => {
       expect(command).toEqual({
         portfolioId: 'portfolio-1',
         tickerId: 'ticker-1',
-        type: TransactionType.Buy,
-        value: 1000,
+        type: TransactionType.BUY,
+        amount: 1000,
       });
     });
   });
