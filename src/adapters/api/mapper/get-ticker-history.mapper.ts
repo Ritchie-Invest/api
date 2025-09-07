@@ -15,6 +15,9 @@ export class GetTickerHistoryMapper {
         close: dailyBar.close,
         volume: dailyBar.volume,
       })),
+      variation: useCaseResult.variation,
+      variationPercent: useCaseResult.variationPercent,
+      variationDirection: useCaseResult.variationDirection,
     };
   }
 }

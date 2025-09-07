@@ -1,6 +1,7 @@
 import { GetTickerHistoryMapper } from '../get-ticker-history.mapper';
 import { DailyBar } from '../../../../core/domain/model/DailyBar';
 import { GetTickerHistoryResult as UseCaseResult } from '../../../../core/usecases/get-ticker-history.use-case';
+import { VariationDirection } from '../../../../core/domain/type/VariationDirection';
 
 describe('GetTickerHistoryMapper', () => {
   describe('fromDomain', () => {
@@ -31,6 +32,9 @@ describe('GetTickerHistoryMapper', () => {
 
       const useCaseResult: UseCaseResult = {
         history: dailyBars,
+        variation: 3.6,
+        variationPercent: 3.58,
+        variationDirection: VariationDirection.UP,
       };
 
       // When
@@ -60,6 +64,9 @@ describe('GetTickerHistoryMapper', () => {
             volume: 1200000,
           },
         ],
+        variation: 3.6,
+        variationPercent: 3.58,
+        variationDirection: VariationDirection.UP,
       });
     });
 
@@ -67,6 +74,9 @@ describe('GetTickerHistoryMapper', () => {
       // Given
       const useCaseResult: UseCaseResult = {
         history: [],
+        variation: 0,
+        variationPercent: 0,
+        variationDirection: VariationDirection.FLAT,
       };
 
       // When
@@ -75,6 +85,9 @@ describe('GetTickerHistoryMapper', () => {
       // Then
       expect(result).toEqual({
         history: [],
+        variation: 0,
+        variationPercent: 0,
+        variationDirection: VariationDirection.FLAT,
       });
     });
   });

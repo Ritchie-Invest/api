@@ -56,4 +56,23 @@ export class GetTickerHistoryResponse {
     type: [DailyBarResponse],
   })
   history!: DailyBarResponse[];
+
+  @ApiProperty({
+    description: 'Price variation between oldest and newest data points',
+    example: 5.2,
+  })
+  variation!: number;
+
+  @ApiProperty({
+    description: 'Percentage variation between oldest and newest data points',
+    example: 2.5,
+  })
+  variationPercent!: number;
+
+  @ApiProperty({
+    description: 'Direction of the variation',
+    example: 'UP',
+    enum: ['UP', 'DOWN', 'FLAT'],
+  })
+  variationDirection!: string;
 }
