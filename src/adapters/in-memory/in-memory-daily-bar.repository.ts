@@ -71,4 +71,11 @@ export class InMemoryDailyBarRepository implements DailyBarRepository {
   removeAll(): void {
     this.dailyBars.clear();
   }
+
+  findByTickerIdWithLimit(tickerId: string, limit: number): DailyBar[] {
+    return Array.from(this.dailyBars.values())
+      .filter((db) => db.tickerId === tickerId)
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()) // Sort by date descending
+      .slice(0, limit);
+  }
 }

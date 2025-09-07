@@ -1,4 +1,11 @@
-import { Controller, Get, Param, UseGuards, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  UseGuards,
+  Inject,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -6,6 +13,7 @@ import {
   ApiOperation,
   ApiUnauthorizedResponse,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { GetTickersWithPriceUseCase } from '../../../core/usecases/get-tickers-with-price.use-case';
 import { GetTickersResponse } from '../response/get-tickers.response';
@@ -21,6 +29,9 @@ import { GetUserTickersMapper } from '../mapper/get-user-tickers.mapper';
 import { UserPortfolioRepository } from '../../../core/domain/repository/user-portfolio.repository';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import { TokenPayload } from '../../jwt/jwt.service';
+import { GetTickerHistoryUseCase } from '../../../core/usecases/get-ticker-history.use-case';
+import { GetTickerHistoryResponse } from '../response/get-ticker-history.response';
+import { GetTickerHistoryMapper } from '../mapper/get-ticker-history.mapper';
 
 @Controller('/tickers')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -30,6 +41,7 @@ export class TickerController {
     private readonly getTickersWithPriceUseCase: GetTickersWithPriceUseCase,
     private readonly getTickerPossessedValueUseCase: GetTickerPossessedValueUseCase,
     private readonly getUserTickersUseCase: GetUserTickersUseCase,
+    private readonly getTickerHistoryUseCase: GetTickerHistoryUseCase,
     @Inject('UserPortfolioRepository')
     private readonly userPortfolioRepository: UserPortfolioRepository,
   ) {}
@@ -94,5 +106,41 @@ export class TickerController {
       portfolioId: userPortfolio.id,
     });
     return GetUserTickersMapper.fromDomain(result);
+  }
+
+  @Get('/:tickerId/history')
+  @ApiOperation({ summary: 'Get historical data for a specific ticker' })
+  @ApiParam({
+    name: 'tickerId',
+    description: 'ID of the ticker',
+    type: 'string',
+  })
+  @ApiQuery({
+    name: 'limit',
+    description: 'Number of days to retrieve (max 365)',
+    type: 'number',
+    example: 30,
+  })
+  @ApiCreatedResponse({
+    description: 'Ticker history successfully retrieved',
+    type: GetTickerHistoryResponse,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized access' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  async getTickerHistory(
+    @Param('tickerId') tickerId: string,
+    @Query('limit') limit: string,
+  ): Promise<GetTickerHistoryResponse> {
+    const parsedLimit = parseInt(limit);
+
+    if (isNaN(parsedLimit)) {
+      throw new Error('Limit must be a valid number');
+    }
+
+    const result = await this.getTickerHistoryUseCase.execute({
+      tickerId,
+      limit: parsedLimit,
+    });
+    return GetTickerHistoryMapper.fromDomain(result);
   }
 }
