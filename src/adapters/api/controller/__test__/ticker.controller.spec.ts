@@ -180,7 +180,6 @@ describe('TickerControllerIT', () => {
   it('should return 401 when no token is provided', async () => {
     const response = await request(app.getHttpServer()).get('/tickers');
     expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(response.body.message).toBe('No token provided');
   });
 
@@ -320,7 +319,153 @@ describe('TickerControllerIT', () => {
       '/tickers/ticker-1/possessed-value',
     );
     expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(response.body.message).toBe('No token provided');
+  });
+
+  it('GET /tickers/owned should return user owned ETFs', async () => {
+    // Given
+    const userId = 'user-1';
+    const portfolioId = 'portfolio-1';
+
+    const user = await userRepository.create({
+      id: userId,
+      email: 'test@example.com',
+      password: 'hashedpassword',
+      type: UserType.STUDENT,
+    });
+
+    const portfolio = new UserPortfolio({
+      id: portfolioId,
+      userId: user.id,
+      currency: Currency.USD,
+    });
+
+    const ticker1 = new Ticker({
+      id: 'ticker-1',
+      name: 'S&P 500 ETF',
+      symbol: 'SPY',
+      type: TickerType.ETF,
+      currency: Currency.USD,
+    });
+
+    const ticker2 = new Ticker({
+      id: 'ticker-2',
+      name: 'NASDAQ ETF',
+      symbol: 'QQQ',
+      type: TickerType.ETF,
+      currency: Currency.USD,
+    });
+
+    const buyTransaction1 = new Transaction({
+      id: 'transaction-1',
+      portfolioId,
+      tickerId: 'ticker-1',
+      type: TransactionType.BUY,
+      amount: 1000,
+      volume: 10,
+      currentTickerPrice: 100,
+    });
+
+    const buyTransaction2 = new Transaction({
+      id: 'transaction-2',
+      portfolioId,
+      tickerId: 'ticker-1',
+      type: TransactionType.BUY,
+      amount: 550,
+      volume: 5,
+      currentTickerPrice: 110,
+    });
+
+    const buyTransaction3 = new Transaction({
+      id: 'transaction-3',
+      portfolioId,
+      tickerId: 'ticker-2',
+      type: TransactionType.BUY,
+      amount: 4000,
+      volume: 20,
+      currentTickerPrice: 200,
+    });
+
+    await userPortfolioRepository.create(portfolio);
+    await tickerRepository.create(ticker1);
+    await tickerRepository.create(ticker2);
+    await transactionRepository.create(buyTransaction1);
+    await transactionRepository.create(buyTransaction2);
+    await transactionRepository.create(buyTransaction3);
+
+    const accessToken = tokenService.generateAccessToken({
+      id: userId,
+      email: 'test@ritchie-invest.com',
+      type: UserType.STUDENT,
+    });
+
+    // When
+    const response = await request(app.getHttpServer())
+      .get('/tickers/owned')
+      .set('Authorization', `Bearer ${accessToken}`);
+
+    // Then
+    expect(response.status).toBe(HttpStatus.OK);
+    expect(response.body).toEqual({
+      tickers: expect.arrayContaining([
+        {
+          id: 'ticker-1',
+          name: 'S&P 500 ETF',
+          symbol: 'SPY',
+          shares: 15,
+          amount: 1550,
+        },
+        {
+          id: 'ticker-2',
+          name: 'NASDAQ ETF',
+          symbol: 'QQQ',
+          shares: 20,
+          amount: 4000,
+        },
+      ]),
+    });
+  });
+
+  it('GET /tickers/owned should return empty array when user has no ETFs', async () => {
+    // Given
+    const userId = 'user-1';
+    const portfolioId = 'portfolio-1';
+
+    const user = await userRepository.create({
+      id: userId,
+      email: 'test@example.com',
+      password: 'hashedpassword',
+      type: UserType.STUDENT,
+    });
+
+    const portfolio = new UserPortfolio({
+      id: portfolioId,
+      userId: user.id,
+      currency: Currency.USD,
+    });
+
+    await userPortfolioRepository.create(portfolio);
+
+    const accessToken = tokenService.generateAccessToken({
+      id: userId,
+      email: 'test@ritchie-invest.com',
+      type: UserType.STUDENT,
+    });
+
+    // When
+    const response = await request(app.getHttpServer())
+      .get('/tickers/owned')
+      .set('Authorization', `Bearer ${accessToken}`);
+
+    // Then
+    expect(response.status).toBe(HttpStatus.OK);
+    expect(response.body).toEqual({
+      tickers: [],
+    });
+  });
+
+  it('GET /tickers/owned should return 401 when no token provided', async () => {
+    const response = await request(app.getHttpServer()).get('/tickers/owned');
+    expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
   });
 });

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Inject } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -15,6 +15,10 @@ import { RolesGuard } from '../guards/roles.guard';
 import { GetTickerPossessedValueUseCase } from '../../../core/usecases/get-ticker-possessed-value.use-case';
 import { GetTickerPossessedValueResponse } from '../response/get-ticker-possessed-value.response';
 import { GetTickerPossessedValueMapper } from '../mapper/get-ticker-possessed-value.mapper';
+import { GetUserTickersUseCase } from '../../../core/usecases/get-user-tickers.use-case';
+import { GetUserTickersResponse } from '../response/get-user-tickers.response';
+import { GetUserTickersMapper } from '../mapper/get-user-tickers.mapper';
+import { UserPortfolioRepository } from '../../../core/domain/repository/user-portfolio.repository';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import { TokenPayload } from '../../jwt/jwt.service';
 
@@ -25,6 +29,9 @@ export class TickerController {
   constructor(
     private readonly getTickersWithPriceUseCase: GetTickersWithPriceUseCase,
     private readonly getTickerPossessedValueUseCase: GetTickerPossessedValueUseCase,
+    private readonly getUserTickersUseCase: GetUserTickersUseCase,
+    @Inject('UserPortfolioRepository')
+    private readonly userPortfolioRepository: UserPortfolioRepository,
   ) {}
 
   @Get('/')
@@ -62,5 +69,30 @@ export class TickerController {
       tickerId,
     });
     return GetTickerPossessedValueMapper.fromDomain(result);
+  }
+
+  @Get('/owned')
+  @ApiOperation({ summary: 'Get ETFs owned by the current user' })
+  @ApiCreatedResponse({
+    description: 'User ETFs successfully retrieved',
+    type: GetUserTickersResponse,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized access' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  async getUserTickers(
+    @CurrentUser() currentUser: TokenPayload,
+  ): Promise<GetUserTickersResponse> {
+    const userPortfolio = await this.userPortfolioRepository.findByUserId(
+      currentUser.id,
+    );
+
+    if (!userPortfolio) {
+      throw new Error('Portfolio not found for user');
+    }
+
+    const result = await this.getUserTickersUseCase.execute({
+      portfolioId: userPortfolio.id,
+    });
+    return GetUserTickersMapper.fromDomain(result);
   }
 }
