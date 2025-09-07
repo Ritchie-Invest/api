@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UseCase } from '../base/use-case';
 import { UserPortfolioRepository } from '../domain/repository/user-portfolio.repository';
-import { PortfolioValueRepository } from '../domain/repository/portfolio-value.repository';
+import { PortfolioPositionRepository } from '../domain/repository/portfolio-position.repository';
 import { InvalidUserError } from '../domain/error/InvalidUserError';
 import { Currency } from '../domain/type/Currency';
 
@@ -22,7 +22,7 @@ export class GetPortfolioUseCase
 {
   constructor(
     private readonly userPortfolioRepository: UserPortfolioRepository,
-    private readonly portfolioValueRepository: PortfolioValueRepository,
+    private readonly PortfolioPositionRepository: PortfolioPositionRepository,
   ) {}
 
   async execute(command: GetPortfolioCommand): Promise<GetPortfolioResult> {
@@ -39,21 +39,21 @@ export class GetPortfolioUseCase
     }
 
     const today = new Date();
-    let latestPortfolioValue =
-      await this.portfolioValueRepository.findByPortfolioIdAndDate(
+    let latestPortfolioPosition =
+      await this.PortfolioPositionRepository.findByPortfolioIdAndDate(
         userPortfolio.id,
         today,
       );
 
-    if (!latestPortfolioValue) {
-      latestPortfolioValue =
-        await this.portfolioValueRepository.findLatestByPortfolioId(
+    if (!latestPortfolioPosition) {
+      latestPortfolioPosition =
+        await this.PortfolioPositionRepository.findLatestByPortfolioId(
           userPortfolio.id,
         );
     }
 
-    const cash = latestPortfolioValue?.cash || 0;
-    const investments = latestPortfolioValue?.investments || 0;
+    const cash = latestPortfolioPosition?.cash || 0;
+    const investments = latestPortfolioPosition?.investments || 0;
     const totalValue = cash + investments;
 
     return {

@@ -3,30 +3,30 @@ import {
   GetPortfolioCommand,
 } from '../get-portfolio.use-case';
 import { InMemoryUserPortfolioRepository } from '../../../adapters/in-memory/in-memory-user-portfolio.repository';
-import { InMemoryPortfolioValueRepository } from '../../../adapters/in-memory/in-memory-portfolio-value.repository';
+import { InMemoryPortfolioPositionRepository } from '../../../adapters/in-memory/in-memory-portfolio-position.repository';
 import { UserPortfolio } from '../../domain/model/UserPortfolio';
-import { PortfolioValue } from '../../domain/model/PortfolioValue';
+import { PortfolioPosition } from '../../domain/model/PortfolioPosition';
 import { Currency } from '../../domain/type/Currency';
 
 describe('GetPortfolioUseCase', () => {
   let getPortfolioUseCase: GetPortfolioUseCase;
   let userPortfolioRepository: InMemoryUserPortfolioRepository;
-  let portfolioValueRepository: InMemoryPortfolioValueRepository;
+  let PortfolioPositionRepository: InMemoryPortfolioPositionRepository;
 
   const DEFAULT_USER_ID = 'user-1';
   const DEFAULT_PORTFOLIO_ID = 'portfolio-1';
 
   beforeEach(() => {
     userPortfolioRepository = new InMemoryUserPortfolioRepository();
-    portfolioValueRepository = new InMemoryPortfolioValueRepository();
+    PortfolioPositionRepository = new InMemoryPortfolioPositionRepository();
 
     getPortfolioUseCase = new GetPortfolioUseCase(
       userPortfolioRepository,
-      portfolioValueRepository,
+      PortfolioPositionRepository,
     );
 
     userPortfolioRepository.removeAll();
-    portfolioValueRepository.removeAll();
+    PortfolioPositionRepository.removeAll();
   });
 
   describe('execute', () => {
@@ -58,14 +58,14 @@ describe('GetPortfolioUseCase', () => {
       userPortfolioRepository.create(userPortfolio);
 
       const today = new Date();
-      const portfolioValue = new PortfolioValue({
+      const portfolioPosition = new PortfolioPosition({
         id: 'value-1',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 1000,
         investments: 2000,
         date: today,
       });
-      portfolioValueRepository.create(portfolioValue);
+      PortfolioPositionRepository.create(portfolioPosition);
 
       const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
 
@@ -92,25 +92,25 @@ describe('GetPortfolioUseCase', () => {
 
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const portfolioValue = new PortfolioValue({
+      const portfolioPosition1 = new PortfolioPosition({
         id: 'value-1',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 1500,
         investments: 2500,
         date: yesterday,
       });
-      portfolioValueRepository.create(portfolioValue);
+      PortfolioPositionRepository.create(portfolioPosition1);
 
       const twoDaysAgo = new Date();
       twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-      const olderPortfolioValue = new PortfolioValue({
+      const olderPortfolioPosition = new PortfolioPosition({
         id: 'value-2',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 1000,
         investments: 2000,
         date: twoDaysAgo,
       });
-      portfolioValueRepository.create(olderPortfolioValue);
+      PortfolioPositionRepository.create(olderPortfolioPosition);
 
       const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
 
@@ -158,14 +158,14 @@ describe('GetPortfolioUseCase', () => {
       });
       userPortfolioRepository.create(userPortfolio);
 
-      const unrelatedPortfolioValue = new PortfolioValue({
+      const unrelatedPortfolioPosition = new PortfolioPosition({
         id: 'value-3',
         portfolioId: 'other-portfolio',
         cash: 999,
         investments: 999,
         date: new Date(),
       });
-      portfolioValueRepository.create(unrelatedPortfolioValue);
+      PortfolioPositionRepository.create(unrelatedPortfolioPosition);
 
       const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
 
@@ -191,22 +191,22 @@ describe('GetPortfolioUseCase', () => {
       userPortfolioRepository.create(userPortfolio);
 
       const today = new Date();
-      const portfolioValue1 = new PortfolioValue({
+      const PortfolioPosition1 = new PortfolioPosition({
         id: 'value-1',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 100,
         investments: 200,
         date: today,
       });
-      const portfolioValue2 = new PortfolioValue({
+      const PortfolioPosition2 = new PortfolioPosition({
         id: 'value-2',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 300,
         investments: 400,
         date: today,
       });
-      portfolioValueRepository.create(portfolioValue1);
-      portfolioValueRepository.create(portfolioValue2);
+      PortfolioPositionRepository.create(PortfolioPosition1);
+      PortfolioPositionRepository.create(PortfolioPosition2);
 
       const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
 
@@ -260,14 +260,14 @@ describe('GetPortfolioUseCase', () => {
       userPortfolioRepository.create(userPortfolio);
 
       const today = new Date();
-      const portfolioValue = new PortfolioValue({
+      const portfolioPosition = new PortfolioPosition({
         id: 'value-1',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: -500,
         investments: 1000,
         date: today,
       });
-      portfolioValueRepository.create(portfolioValue);
+      PortfolioPositionRepository.create(portfolioPosition);
 
       const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
 
@@ -294,36 +294,36 @@ describe('GetPortfolioUseCase', () => {
 
       const threeDaysAgo = new Date();
       threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-      const value1 = new PortfolioValue({
+      const value1 = new PortfolioPosition({
         id: 'value-1',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 100,
         investments: 200,
         date: threeDaysAgo,
       });
-      portfolioValueRepository.create(value1);
+      PortfolioPositionRepository.create(value1);
 
       const twoDaysAgo = new Date();
       twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-      const value2 = new PortfolioValue({
+      const value2 = new PortfolioPosition({
         id: 'value-2',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 300,
         investments: 400,
         date: twoDaysAgo,
       });
-      portfolioValueRepository.create(value2);
+      PortfolioPositionRepository.create(value2);
 
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const value3 = new PortfolioValue({
+      const value3 = new PortfolioPosition({
         id: 'value-3',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 500,
         investments: 600,
         date: yesterday,
       });
-      portfolioValueRepository.create(value3);
+      PortfolioPositionRepository.create(value3);
 
       const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
 

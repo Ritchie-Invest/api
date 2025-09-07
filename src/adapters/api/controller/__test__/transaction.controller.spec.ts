@@ -13,7 +13,7 @@ import { UserPortfolioRepository } from '../../../../core/domain/repository/user
 import { UserRepository } from '../../../../core/domain/repository/user.repository';
 import { TickerRepository } from '../../../../core/domain/repository/ticker.repository';
 import { DailyBarRepository } from '../../../../core/domain/repository/daily-bar.repository';
-import { PortfolioValueRepository } from '../../../../core/domain/repository/portfolio-value.repository';
+import { PortfolioPositionRepository } from '../../../../core/domain/repository/portfolio-position.repository';
 import { TransactionRepository } from '../../../../core/domain/repository/transaction.repository';
 import { Currency } from '../../../../core/domain/type/Currency';
 import { Ticker } from '../../../../core/domain/model/Ticker';
@@ -26,7 +26,7 @@ describe('TransactionControllerIT', () => {
   let userPortfolioRepository: UserPortfolioRepository;
   let tickerRepository: TickerRepository;
   let dailyBarRepository: DailyBarRepository;
-  let portfolioValueRepository: PortfolioValueRepository;
+  let PortfolioPositionRepository: PortfolioPositionRepository;
   let transactionRepository: TransactionRepository;
 
   beforeAll(async () => {
@@ -50,14 +50,14 @@ describe('TransactionControllerIT', () => {
     userPortfolioRepository = app.get('UserPortfolioRepository');
     tickerRepository = app.get(TickerRepository);
     dailyBarRepository = app.get('DailyBarRepository');
-    portfolioValueRepository = app.get('PortfolioValueRepository');
+    PortfolioPositionRepository = app.get('PortfolioPositionRepository');
     transactionRepository = app.get('TransactionRepository');
 
     await userRepository.removeAll();
     await userPortfolioRepository.removeAll();
     await tickerRepository.removeAll();
     await dailyBarRepository.removeAll();
-    await portfolioValueRepository.removeAll();
+    await PortfolioPositionRepository.removeAll();
     await transactionRepository.removeAll();
   });
 
@@ -66,7 +66,7 @@ describe('TransactionControllerIT', () => {
     await userPortfolioRepository.removeAll();
     await tickerRepository.removeAll();
     await dailyBarRepository.removeAll();
-    await portfolioValueRepository.removeAll();
+    await PortfolioPositionRepository.removeAll();
     await transactionRepository.removeAll();
   });
 
@@ -113,8 +113,8 @@ describe('TransactionControllerIT', () => {
       volume: 1000,
     });
 
-    await portfolioValueRepository.create({
-      id: 'portfoliovalue-1',
+    await PortfolioPositionRepository.create({
+      id: 'PortfolioPosition-1',
       portfolioId: 'portfolio-1',
       cash: 5000,
       investments: 2000,
@@ -188,8 +188,8 @@ describe('TransactionControllerIT', () => {
       volume: 1000,
     });
 
-    await portfolioValueRepository.create({
-      id: 'portfoliovalue-1',
+    await PortfolioPositionRepository.create({
+      id: 'PortfolioPosition-1',
       portfolioId: 'portfolio-1',
       cash: 500,
       investments: 2000,
