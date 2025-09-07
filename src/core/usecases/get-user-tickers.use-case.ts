@@ -40,7 +40,10 @@ export class GetUserTickersUseCase
       portfolioId: command.portfolioId,
     });
 
-    const tickerPositions = new Map<string, { shares: number; amount: number }>();
+    const tickerPositions = new Map<
+      string,
+      { shares: number; amount: number }
+    >();
 
     for (const transaction of transactions) {
       const existing = tickerPositions.get(transaction.tickerId) || {

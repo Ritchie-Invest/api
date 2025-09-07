@@ -27,7 +27,7 @@ export class UserTickerDto {
 
   @ApiProperty({
     description: 'Total amount invested in the currency',
-    example: 1000.50,
+    example: 1000.5,
   })
   amount!: number;
 }

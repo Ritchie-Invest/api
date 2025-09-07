@@ -1,3 +1,1 @@
-export class GetUserTickersRequest {
-  
-}
+export class GetUserTickersRequest {}

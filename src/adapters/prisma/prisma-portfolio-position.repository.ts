@@ -62,7 +62,9 @@ export class PrismaPortfolioPositionRepository
     return this.mapper.toDomain(entity);
   }
 
-  async findAll(filter?: Partial<PortfolioPosition>): Promise<PortfolioPosition[]> {
+  async findAll(
+    filter?: Partial<PortfolioPosition>,
+  ): Promise<PortfolioPosition[]> {
     const where: { portfolioId?: string } = {};
     if (filter?.portfolioId) where.portfolioId = filter.portfolioId;
     const entities = await this.prisma.portfolioPosition.findMany({ where });

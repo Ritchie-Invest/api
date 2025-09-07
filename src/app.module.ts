@@ -430,15 +430,8 @@ import { PortfolioController } from './adapters/api/controller/portfolio.control
       useFactory: (
         transactionRepository: TransactionRepository,
         tickerRepository: TickerRepository,
-      ) =>
-        new GetUserTickersUseCase(
-          transactionRepository,
-          tickerRepository,
-        ),
-      inject: [
-        'TransactionRepository',
-        TickerRepository,
-      ],
+      ) => new GetUserTickersUseCase(transactionRepository, tickerRepository),
+      inject: ['TransactionRepository', TickerRepository],
     },
     {
       provide: ExecuteTransactionUseCase,

@@ -13,12 +13,7 @@ export class PortfolioPositionResponse {
   @ApiProperty()
   date: Date;
 
-  constructor(
-    id: string,
-    cash: number,
-    investments: number,
-    date: Date,
-  ) {
+  constructor(id: string, cash: number, investments: number, date: Date) {
     this.id = id;
     this.cash = cash;
     this.investments = investments;

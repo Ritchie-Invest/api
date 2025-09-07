@@ -1,10 +1,18 @@
-import { GetUserTickersResult, UserTickerResult } from '../../../core/usecases/get-user-tickers.use-case';
-import { GetUserTickersResponse, UserTickerDto } from '../response/get-user-tickers.response';
+import {
+  GetUserTickersResult,
+  UserTickerResult,
+} from '../../../core/usecases/get-user-tickers.use-case';
+import {
+  GetUserTickersResponse,
+  UserTickerDto,
+} from '../response/get-user-tickers.response';
 
 export class GetUserTickersMapper {
   static fromDomain(result: GetUserTickersResult): GetUserTickersResponse {
     return {
-      tickers: result.tickers.map(GetUserTickersMapper.mapUserTicker),
+      tickers: result.tickers.map((ticker) =>
+        GetUserTickersMapper.mapUserTicker(ticker),
+      ),
     };
   }
 

@@ -88,15 +88,15 @@ describe('GetUserTickersUseCase', () => {
 
     // Then
     expect(result.tickers).toHaveLength(2);
-    
-    const spy = result.tickers.find(t => t.symbol === 'SPY');
+
+    const spy = result.tickers.find((t) => t.symbol === 'SPY');
     expect(spy).toBeDefined();
     expect(spy!.id).toBe('ticker-1');
     expect(spy!.name).toBe('S&P 500 ETF');
-    expect(spy!.shares).toBe(15); 
+    expect(spy!.shares).toBe(15);
     expect(spy!.amount).toBe(1550);
 
-    const qqq = result.tickers.find(t => t.symbol === 'QQQ');
+    const qqq = result.tickers.find((t) => t.symbol === 'QQQ');
     expect(qqq).toBeDefined();
     expect(qqq!.id).toBe('ticker-2');
     expect(qqq!.name).toBe('NASDAQ ETF');
@@ -146,8 +146,8 @@ describe('GetUserTickersUseCase', () => {
     // Then
     expect(result.tickers).toHaveLength(1);
     const userTicker = result.tickers[0]!;
-    expect(userTicker.shares).toBe(15); 
-    expect(userTicker.amount).toBe(1450); 
+    expect(userTicker.shares).toBe(15);
+    expect(userTicker.amount).toBe(1450);
   });
 
   it('should not return tickers with zero or negative shares', async () => {

@@ -70,20 +70,25 @@ export class ExecuteTransactionUseCase
         portfolioId,
         today,
       );
-      if (!PortfolioPosition) {
-        const lastPosition = await this.PortfolioPositionRepository.findLatestByPortfolioId(portfolioId);
-        
-        if (!lastPosition) {
-          throw new PortfolioPositionNotFoundError(`No portfolio position found for portfolio ${portfolioId}`);
-        }
-        
-        PortfolioPosition = await this.PortfolioPositionRepository.create({
+    if (!PortfolioPosition) {
+      const lastPosition =
+        await this.PortfolioPositionRepository.findLatestByPortfolioId(
           portfolioId,
-          date: today,
-          cash: lastPosition.cash,
-          investments: lastPosition.investments,
-        });
+        );
+
+      if (!lastPosition) {
+        throw new PortfolioPositionNotFoundError(
+          `No portfolio position found for portfolio ${portfolioId}`,
+        );
       }
+
+      PortfolioPosition = await this.PortfolioPositionRepository.create({
+        portfolioId,
+        date: today,
+        cash: lastPosition.cash,
+        investments: lastPosition.investments,
+      });
+    }
 
     const sharePrice = dailyBar.close;
     const sharesToTrade = amount / sharePrice;

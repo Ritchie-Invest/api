@@ -180,7 +180,9 @@ describe('TickerControllerIT', () => {
   it('should return 401 when no token is provided', async () => {
     const response = await request(app.getHttpServer()).get('/tickers');
     expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
-    expect((response.body as { message: string }).message).toBe('No token provided');
+    expect((response.body as { message: string }).message).toBe(
+      'No token provided',
+    );
   });
 
   it('GET /tickers/:tickerId/possessed-value should return possessed value for a ticker', async () => {
@@ -319,7 +321,9 @@ describe('TickerControllerIT', () => {
       '/tickers/ticker-1/possessed-value',
     );
     expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
-    expect((response.body as { message: string }).message).toBe('No token provided');
+    expect((response.body as { message: string }).message).toBe(
+      'No token provided',
+    );
   });
 
   it('GET /tickers/owned should return user owned ETFs', async () => {
@@ -422,7 +426,7 @@ describe('TickerControllerIT', () => {
           shares: 20,
           amount: 4000,
         },
-      ]),
+      ]) as unknown[],
     });
   });
 
