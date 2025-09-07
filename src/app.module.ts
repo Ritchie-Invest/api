@@ -57,21 +57,28 @@ import { ModuleAttemptRepository } from './core/domain/repository/module-attempt
 import { TickerRepository } from './core/domain/repository/ticker.repository';
 import { PrismaTickerRepository } from './adapters/prisma/prisma-ticker.repository';
 import { GetTickersWithPriceUseCase } from './core/usecases/get-tickers-with-price.use-case';
+import { GetTickerPossessedValueUseCase } from './core/usecases/get-ticker-possessed-value.use-case';
 import { TickerController } from './adapters/api/controller/ticker.controller';
 import { TransactionController } from './adapters/api/controller/transaction.controller';
 import { ExecuteTransactionUseCase } from './core/usecases/execute-transaction.use-case';
 import { UserPortfolioRepository } from './core/domain/repository/user-portfolio.repository';
 import { PrismaUserPortfolioRepository } from './adapters/prisma/prisma-user-portfolio.repository';
-import { PortfolioValueRepository } from './core/domain/repository/portfolio-value.repository';
-import { PrismaPortfolioValueRepository } from './adapters/prisma/prisma-portfolio-value.repository';
+import { PortfolioPositionRepository } from './core/domain/repository/portfolio-position.repository';
+import { PrismaPortfolioPositionRepository } from './adapters/prisma/prisma-portfolio-position.repository';
 import { DailyBarRepository } from './core/domain/repository/daily-bar.repository';
 import { PrismaDailyBarRepository } from './adapters/prisma/prisma-daily-bar.repository';
 import { TransactionRepository } from './core/domain/repository/transaction.repository';
 import { PrismaTransactionRepository } from './adapters/prisma/prisma-transaction.repository';
+<<<<<<< HEAD
 import { MarketService } from './core/domain/service/market.service';
 import { AlphaVantageMarketServiceAdapter } from './adapters/alpha-vantage/alpha-vantage-market-service-adapter.service';
 import { UpdateTickersHistoryUseCase } from './core/usecases/update-tickers-history-use.case';
 import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cron';
+=======
+import { GetPortfolioUseCase } from './core/usecases/get-portfolio.use-case';
+import { GetPortfolioPositionsUseCase } from './core/usecases/get-portfolio-positions.use-case';
+import { PortfolioController } from './adapters/api/controller/portfolio.controller';
+>>>>>>> 2ceeb351f0b65caf0d13599f0d2cbdf6348a3b69
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -83,6 +90,7 @@ import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cr
     GameModuleController,
     TickerController,
     TransactionController,
+    PortfolioController,
   ],
   providers: [
     PrismaService,
@@ -175,9 +183,9 @@ import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cr
       inject: [PrismaService],
     },
     {
-      provide: 'PortfolioValueRepository',
+      provide: 'PortfolioPositionRepository',
       useFactory: (prisma: PrismaService) =>
-        new PrismaPortfolioValueRepository(prisma),
+        new PrismaPortfolioPositionRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -197,17 +205,17 @@ import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cr
       useFactory: (
         userRepository: UserRepository,
         userPortfolioRepository: UserPortfolioRepository,
-        portfolioValueRepository: PortfolioValueRepository,
+        PortfolioPositionRepository: PortfolioPositionRepository,
       ) =>
         new CreateUserUseCase(
           userRepository,
           userPortfolioRepository,
-          portfolioValueRepository,
+          PortfolioPositionRepository,
         ),
       inject: [
         UserRepository,
         'UserPortfolioRepository',
-        'PortfolioValueRepository',
+        'PortfolioPositionRepository',
       ],
     },
     {
@@ -402,36 +410,79 @@ import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cr
       inject: [TickerRepository],
     },
     {
+      provide: GetTickerPossessedValueUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        transactionRepository: TransactionRepository,
+        tickerRepository: TickerRepository,
+      ) =>
+        new GetTickerPossessedValueUseCase(
+          userPortfolioRepository,
+          transactionRepository,
+          tickerRepository,
+        ),
+      inject: [
+        'UserPortfolioRepository',
+        'TransactionRepository',
+        TickerRepository,
+      ],
+    },
+    {
       provide: ExecuteTransactionUseCase,
       useFactory: (
         userPortfolioRepository: UserPortfolioRepository,
         tickerRepository: TickerRepository,
         dailyBarRepository: DailyBarRepository,
-        portfolioValueRepository: PortfolioValueRepository,
+        PortfolioPositionRepository: PortfolioPositionRepository,
         transactionRepository: TransactionRepository,
       ) =>
         new ExecuteTransactionUseCase(
           userPortfolioRepository,
           tickerRepository,
           dailyBarRepository,
-          portfolioValueRepository,
+          PortfolioPositionRepository,
           transactionRepository,
         ),
       inject: [
         'UserPortfolioRepository',
         TickerRepository,
         'DailyBarRepository',
-        'PortfolioValueRepository',
+        'PortfolioPositionRepository',
         'TransactionRepository',
       ],
     },
     {
+<<<<<<< HEAD
       provide: UpdateTickersHistoryUseCase,
       useFactory: (
         tickerRepository: TickerRepository,
         marketService: MarketService,
       ) => new UpdateTickersHistoryUseCase(tickerRepository, marketService),
       inject: [TickerRepository, 'MarketService'],
+=======
+      provide: GetPortfolioUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        PortfolioPositionRepository: PortfolioPositionRepository,
+      ) =>
+        new GetPortfolioUseCase(
+          userPortfolioRepository,
+          PortfolioPositionRepository,
+        ),
+      inject: ['UserPortfolioRepository', 'PortfolioPositionRepository'],
+    },
+    {
+      provide: GetPortfolioPositionsUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
+      ) =>
+        new GetPortfolioPositionsUseCase(
+          userPortfolioRepository,
+          portfolioPositionRepository,
+        ),
+      inject: ['UserPortfolioRepository', 'PortfolioPositionRepository'],
+>>>>>>> 2ceeb351f0b65caf0d13599f0d2cbdf6348a3b69
     },
   ],
 })

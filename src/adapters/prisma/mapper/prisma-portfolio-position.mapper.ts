@@ -1,13 +1,13 @@
 import { EntityMapper } from '../../../core/base/entity-mapper';
-import { PortfolioValue } from '../../../core/domain/model/PortfolioValue';
-import { PortfolioValue as PortfolioValueEntity } from '@prisma/client';
+import { PortfolioPosition } from '../../../core/domain/model/PortfolioPosition';
+import { PortfolioPosition as PortfolioPositionEntity } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class PrismaPortfolioValueMapper
-  implements EntityMapper<PortfolioValue, PortfolioValueEntity>
+export class PrismaPortfolioPositionMapper
+  implements EntityMapper<PortfolioPosition, PortfolioPositionEntity>
 {
-  fromDomain(model: PortfolioValue): PortfolioValueEntity {
+  fromDomain(model: PortfolioPosition): PortfolioPositionEntity {
     return {
       id: model.id,
       portfolioId: model.portfolioId,
@@ -17,8 +17,8 @@ export class PrismaPortfolioValueMapper
     };
   }
 
-  toDomain(entity: PortfolioValueEntity): PortfolioValue {
-    return new PortfolioValue({
+  toDomain(entity: PortfolioPositionEntity): PortfolioPosition {
+    return new PortfolioPosition({
       id: entity.id,
       portfolioId: entity.portfolioId,
       cash: entity.cash,

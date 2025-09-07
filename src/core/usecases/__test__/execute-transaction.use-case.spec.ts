@@ -8,14 +8,14 @@ import { TickerType } from '../../domain/type/TickerType';
 import { Ticker } from '../../domain/model/Ticker';
 import { DailyBar } from '../../domain/model/DailyBar';
 import { UserPortfolio } from '../../domain/model/UserPortfolio';
-import { PortfolioValue } from '../../domain/model/PortfolioValue';
+import { PortfolioPosition } from '../../domain/model/PortfolioPosition';
 import { InsufficientCashError } from '../../domain/error/InsufficientCashError';
 import { InsufficientHoldingsError } from '../../domain/error/InsufficientHoldingsError';
 import { DailyBarNotFoundError } from '../../domain/error/DailyBarNotFoundError';
 import { InMemoryUserPortfolioRepository } from '../../../adapters/in-memory/in-memory-user-portfolio.repository';
 import { InMemoryTickerRepository } from '../../../adapters/in-memory/in-memory-ticker.repository';
 import { InMemoryDailyBarRepository } from '../../../adapters/in-memory/in-memory-daily-bar.repository';
-import { InMemoryPortfolioValueRepository } from '../../../adapters/in-memory/in-memory-portfolio-value.repository';
+import { InMemoryPortfolioPositionRepository } from '../../../adapters/in-memory/in-memory-portfolio-position.repository';
 import { InMemoryTransactionRepository } from '../../../adapters/in-memory/in-memory-transaction.repository';
 
 describe('ExecuteTransactionUseCase', () => {
@@ -23,7 +23,7 @@ describe('ExecuteTransactionUseCase', () => {
   let userPortfolioRepository: InMemoryUserPortfolioRepository;
   let tickerRepository: InMemoryTickerRepository;
   let dailyBarRepository: InMemoryDailyBarRepository;
-  let portfolioValueRepository: InMemoryPortfolioValueRepository;
+  let PortfolioPositionRepository: InMemoryPortfolioPositionRepository;
   let transactionRepository: InMemoryTransactionRepository;
 
   const DEFAULT_PORTFOLIO_ID = 'portfolio-1';
@@ -35,21 +35,21 @@ describe('ExecuteTransactionUseCase', () => {
     userPortfolioRepository = new InMemoryUserPortfolioRepository();
     tickerRepository = new InMemoryTickerRepository();
     dailyBarRepository = new InMemoryDailyBarRepository();
-    portfolioValueRepository = new InMemoryPortfolioValueRepository();
+    PortfolioPositionRepository = new InMemoryPortfolioPositionRepository();
     transactionRepository = new InMemoryTransactionRepository();
 
     executeTransactionUseCase = new ExecuteTransactionUseCase(
       userPortfolioRepository,
       tickerRepository,
       dailyBarRepository,
-      portfolioValueRepository,
+      PortfolioPositionRepository,
       transactionRepository,
     );
 
     userPortfolioRepository.removeAll();
     tickerRepository.removeAll();
     dailyBarRepository.removeAll();
-    portfolioValueRepository.removeAll();
+    PortfolioPositionRepository.removeAll();
     transactionRepository.removeAll();
   });
 
@@ -108,9 +108,9 @@ describe('ExecuteTransactionUseCase', () => {
     const { today } = setupTestData();
     const command = makeExecuteTransactionCommand();
 
-    portfolioValueRepository.create(
-      new PortfolioValue({
-        id: 'portfoliovalue-1',
+    PortfolioPositionRepository.create(
+      new PortfolioPosition({
+        id: 'PortfolioPosition-1',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 5000,
         investments: 2000,
@@ -147,9 +147,9 @@ describe('ExecuteTransactionUseCase', () => {
     const { today } = setupTestData();
     const command = makeExecuteTransactionCommand();
 
-    portfolioValueRepository.create(
-      new PortfolioValue({
-        id: 'portfoliovalue-2',
+    PortfolioPositionRepository.create(
+      new PortfolioPosition({
+        id: 'PortfolioPosition-2',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 500,
         investments: 2000,
@@ -172,9 +172,9 @@ describe('ExecuteTransactionUseCase', () => {
       TransactionType.SELL,
     );
 
-    portfolioValueRepository.create(
-      new PortfolioValue({
-        id: 'portfoliovalue-3',
+    PortfolioPositionRepository.create(
+      new PortfolioPosition({
+        id: 'PortfolioPosition-3',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 3000,
         investments: 4000,
@@ -213,9 +213,9 @@ describe('ExecuteTransactionUseCase', () => {
       2000,
     );
 
-    portfolioValueRepository.create(
-      new PortfolioValue({
-        id: 'portfoliovalue-4',
+    PortfolioPositionRepository.create(
+      new PortfolioPosition({
+        id: 'PortfolioPosition-4',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 3000,
         investments: 4000,
@@ -245,9 +245,9 @@ describe('ExecuteTransactionUseCase', () => {
     dailyBarRepository.removeAll();
     const command = makeExecuteTransactionCommand();
 
-    portfolioValueRepository.create(
-      new PortfolioValue({
-        id: 'portfoliovalue-5',
+    PortfolioPositionRepository.create(
+      new PortfolioPosition({
+        id: 'PortfolioPosition-5',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 5000,
         investments: 2000,

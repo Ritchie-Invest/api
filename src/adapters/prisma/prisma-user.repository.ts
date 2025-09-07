@@ -57,7 +57,7 @@ export class PrismaUserRepository implements UserRepository {
 
   async removeAll(): Promise<void> {
     await this.prisma.transaction.deleteMany();
-    await this.prisma.portfolioValue.deleteMany();
+    await this.prisma.portfolioPosition.deleteMany();
     await this.prisma.userPortfolio.deleteMany();
     await this.prisma.refreshToken.deleteMany();
     await this.prisma.lessonCompletion.deleteMany();

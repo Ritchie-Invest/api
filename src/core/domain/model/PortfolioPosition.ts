@@ -1,6 +1,6 @@
 import { DomainModel } from '../../base/domain-model';
 
-export class PortfolioValue extends DomainModel {
+export class PortfolioPosition extends DomainModel {
   portfolioId: string;
   cash: number;
   investments: number;
