@@ -62,12 +62,15 @@ import { TransactionController } from './adapters/api/controller/transaction.con
 import { ExecuteTransactionUseCase } from './core/usecases/execute-transaction.use-case';
 import { UserPortfolioRepository } from './core/domain/repository/user-portfolio.repository';
 import { PrismaUserPortfolioRepository } from './adapters/prisma/prisma-user-portfolio.repository';
-import { PortfolioValueRepository } from './core/domain/repository/portfolio-value.repository';
-import { PrismaPortfolioValueRepository } from './adapters/prisma/prisma-portfolio-value.repository';
+import { PortfolioPositionRepository } from './core/domain/repository/portfolio-position.repository';
+import { PrismaPortfolioPositionRepository } from './adapters/prisma/prisma-portfolio-position.repository';
 import { DailyBarRepository } from './core/domain/repository/daily-bar.repository';
 import { PrismaDailyBarRepository } from './adapters/prisma/prisma-daily-bar.repository';
 import { TransactionRepository } from './core/domain/repository/transaction.repository';
 import { PrismaTransactionRepository } from './adapters/prisma/prisma-transaction.repository';
+import { GetPortfolioUseCase } from './core/usecases/get-portfolio.use-case';
+import { GetPortfolioPositionsUseCase } from './core/usecases/get-portfolio-positions.use-case';
+import { PortfolioController } from './adapters/api/controller/portfolio.controller';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -79,6 +82,7 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
     GameModuleController,
     TickerController,
     TransactionController,
+    PortfolioController,
   ],
   providers: [
     PrismaService,
@@ -166,9 +170,9 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
       inject: [PrismaService],
     },
     {
-      provide: 'PortfolioValueRepository',
+      provide: 'PortfolioPositionRepository',
       useFactory: (prisma: PrismaService) =>
-        new PrismaPortfolioValueRepository(prisma),
+        new PrismaPortfolioPositionRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -188,17 +192,17 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
       useFactory: (
         userRepository: UserRepository,
         userPortfolioRepository: UserPortfolioRepository,
-        portfolioValueRepository: PortfolioValueRepository,
+        PortfolioPositionRepository: PortfolioPositionRepository,
       ) =>
         new CreateUserUseCase(
           userRepository,
           userPortfolioRepository,
-          portfolioValueRepository,
+          PortfolioPositionRepository,
         ),
       inject: [
         UserRepository,
         'UserPortfolioRepository',
-        'PortfolioValueRepository',
+        'PortfolioPositionRepository',
       ],
     },
     {
@@ -416,23 +420,47 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
         userPortfolioRepository: UserPortfolioRepository,
         tickerRepository: TickerRepository,
         dailyBarRepository: DailyBarRepository,
-        portfolioValueRepository: PortfolioValueRepository,
+        PortfolioPositionRepository: PortfolioPositionRepository,
         transactionRepository: TransactionRepository,
       ) =>
         new ExecuteTransactionUseCase(
           userPortfolioRepository,
           tickerRepository,
           dailyBarRepository,
-          portfolioValueRepository,
+          PortfolioPositionRepository,
           transactionRepository,
         ),
       inject: [
         'UserPortfolioRepository',
         TickerRepository,
         'DailyBarRepository',
-        'PortfolioValueRepository',
+        'PortfolioPositionRepository',
         'TransactionRepository',
       ],
+    },
+    {
+      provide: GetPortfolioUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        PortfolioPositionRepository: PortfolioPositionRepository,
+      ) =>
+        new GetPortfolioUseCase(
+          userPortfolioRepository,
+          PortfolioPositionRepository,
+        ),
+      inject: ['UserPortfolioRepository', 'PortfolioPositionRepository'],
+    },
+    {
+      provide: GetPortfolioPositionsUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
+      ) =>
+        new GetPortfolioPositionsUseCase(
+          userPortfolioRepository,
+          portfolioPositionRepository,
+        ),
+      inject: ['UserPortfolioRepository', 'PortfolioPositionRepository'],
     },
   ],
 })

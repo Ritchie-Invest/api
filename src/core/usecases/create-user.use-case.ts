@@ -4,10 +4,10 @@ import { WrongEmailFormatError } from '../domain/error/WrongEmailFormatError';
 import { WrongPasswordFormatError } from '../domain/error/WrongPasswordFormatError';
 import { User } from '../domain/model/User';
 import { UserPortfolio } from '../domain/model/UserPortfolio';
-import { PortfolioValue } from '../domain/model/PortfolioValue';
+import { PortfolioPosition } from '../domain/model/PortfolioPosition';
 import { UserRepository } from '../domain/repository/user.repository';
 import { UserPortfolioRepository } from '../domain/repository/user-portfolio.repository';
-import { PortfolioValueRepository } from '../domain/repository/portfolio-value.repository';
+import { PortfolioPositionRepository } from '../domain/repository/portfolio-position.repository';
 import { UserType } from '../domain/type/UserType';
 import { Currency } from '../domain/type/Currency';
 import * as bcrypt from 'bcryptjs';
@@ -25,7 +25,7 @@ export class CreateUserUseCase implements UseCase<CreateUserCommand, User> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly userPortfolioRepository: UserPortfolioRepository,
-    private readonly portfolioValueRepository: PortfolioValueRepository,
+    private readonly PortfolioPositionRepository: PortfolioPositionRepository,
   ) {}
 
   async execute(command: CreateUserCommand): Promise<User> {
@@ -63,14 +63,14 @@ export class CreateUserUseCase implements UseCase<CreateUserCommand, User> {
     });
     await this.userPortfolioRepository.create(portfolio);
 
-    const portfolioValue = new PortfolioValue({
+    const portfolioPosition = new PortfolioPosition({
       id: this.generateId(),
       portfolioId: portfolio.id,
       cash: this.INITIAL_CASH,
       investments: 0,
       date: new Date(),
     });
-    await this.portfolioValueRepository.create(portfolioValue);
+    await this.PortfolioPositionRepository.create(portfolioPosition);
 
     return user;
   }
