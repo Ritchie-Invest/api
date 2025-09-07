@@ -4,7 +4,7 @@ import { GetUserTickersResponse, UserTickerDto } from '../response/get-user-tick
 export class GetUserTickersMapper {
   static fromDomain(result: GetUserTickersResult): GetUserTickersResponse {
     return {
-      tickers: result.tickers.map(this.mapUserTicker),
+      tickers: result.tickers.map(GetUserTickersMapper.mapUserTicker),
     };
   }
 
