@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { ScheduleModule } from '@nestjs/schedule';
 import { CreateUserUseCase } from './core/usecases/create-user.use-case';
 import { JwtServiceAdapter } from './adapters/jwt/jwt.service';
 import { LoginUseCase } from './core/usecases/login.use-case';
@@ -67,9 +68,13 @@ import { DailyBarRepository } from './core/domain/repository/daily-bar.repositor
 import { PrismaDailyBarRepository } from './adapters/prisma/prisma-daily-bar.repository';
 import { TransactionRepository } from './core/domain/repository/transaction.repository';
 import { PrismaTransactionRepository } from './adapters/prisma/prisma-transaction.repository';
+import { MarketService } from './core/domain/service/market.service';
+import { AlphaVantageMarketServiceAdapter } from './adapters/alpha-vantage/alpha-vantage-market-service-adapter.service';
+import { UpdateTickersHistoryUseCase } from './core/usecases/update-tickers-history-use.case';
+import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cron';
 
 @Module({
-  imports: [JwtModule.register({})],
+  imports: [JwtModule.register({}), ScheduleModule.forRoot()],
   controllers: [
     AuthController,
     UserController,
@@ -82,10 +87,15 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
   providers: [
     PrismaService,
     JwtService,
+    TickerHistoryCronService,
     {
       provide: 'TokenService',
       useFactory: (jwtService: JwtService) => new JwtServiceAdapter(jwtService),
       inject: [JwtService],
+    },
+    {
+      provide: 'MarketService',
+      useFactory: () => new AlphaVantageMarketServiceAdapter(),
     },
     {
       provide: 'GameModuleStrategyFactory',
@@ -414,6 +424,14 @@ import { PrismaTransactionRepository } from './adapters/prisma/prisma-transactio
         'PortfolioValueRepository',
         'TransactionRepository',
       ],
+    },
+    {
+      provide: UpdateTickersHistoryUseCase,
+      useFactory: (
+        tickerRepository: TickerRepository,
+        marketService: MarketService,
+      ) => new UpdateTickersHistoryUseCase(tickerRepository, marketService),
+      inject: [TickerRepository, 'MarketService'],
     },
   ],
 })

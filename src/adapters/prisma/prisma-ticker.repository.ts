@@ -4,6 +4,7 @@ import { TickerRepository } from '../../core/domain/repository/ticker.repository
 import { Ticker } from '../../core/domain/model/Ticker';
 import { PrismaTickerMapper } from './mapper/prisma-ticker.mapper';
 import { PrismaDailyBarMapper } from './mapper/prisma-daily-bar.mapper';
+import { DailyBar } from '../../core/domain/model/DailyBar';
 
 @Injectable()
 export class PrismaTickerRepository implements TickerRepository {
@@ -21,7 +22,10 @@ export class PrismaTickerRepository implements TickerRepository {
         const e = this.dailyBarMapper.fromDomain(h);
         return { ...e, tickerId: created.id };
       });
-      await this.prisma.dailyBar.createMany({ data: bars });
+      await this.prisma.dailyBar.createMany({
+        data: bars,
+        skipDuplicates: true,
+      });
     }
 
     const withHistory = await this.prisma.ticker.findUnique({
@@ -79,5 +83,24 @@ export class PrismaTickerRepository implements TickerRepository {
   async removeAll(): Promise<void> {
     await this.prisma.dailyBar.deleteMany();
     await this.prisma.ticker.deleteMany();
+  }
+
+  async addDailyBars(tickerId: string, bars: DailyBar[]): Promise<void> {
+    if (!bars || bars.length === 0) {
+      return;
+    }
+    const data = bars.map((b) => ({
+      tickerId,
+      date: b.timestamp,
+      open: b.open,
+      high: b.high,
+      low: b.low,
+      close: b.close,
+      volume: b.volume,
+    }));
+    await this.prisma.dailyBar.createMany({
+      data,
+      skipDuplicates: true,
+    });
   }
 }
