@@ -49,10 +49,6 @@ export class GetTickersWithPriceUseCase
                 : delta < 0
                   ? VariationDirection.DOWN
                   : VariationDirection.FLAT;
-          } else if (history.length === 1) {
-            variation = 0;
-            variationPercent = 0;
-            variationDirection = VariationDirection.FLAT;
           }
           return {
             id: t.id,
