@@ -33,6 +33,7 @@ import { DailyBarNotFoundError } from '../core/domain/error/DailyBarNotFoundErro
 import { PortfolioNotFoundError } from '../core/domain/error/PortfolioNotFoundError';
 import { TickerNotFoundError } from '../core/domain/error/TickerNotFoundError';
 import { PortfolioPositionNotFoundError } from '../core/domain/error/PortfolioPositionNotFoundError';
+import { InvalidHistoryLimitError } from '../core/domain/error/InvalidHistoryLimitError';
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
@@ -63,7 +64,8 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof McqModuleInvalidDataError ||
       exception instanceof LessonNotFullyAttemptedError ||
       exception instanceof InsufficientCashError ||
-      exception instanceof InsufficientHoldingsError
+      exception instanceof InsufficientHoldingsError ||
+      exception instanceof InvalidHistoryLimitError
     ) {
       return HttpStatus.BAD_REQUEST;
     }

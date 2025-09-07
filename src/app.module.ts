@@ -59,6 +59,7 @@ import { PrismaTickerRepository } from './adapters/prisma/prisma-ticker.reposito
 import { GetTickersWithPriceUseCase } from './core/usecases/get-tickers-with-price.use-case';
 import { GetTickerPossessedValueUseCase } from './core/usecases/get-ticker-possessed-value.use-case';
 import { GetUserTickersUseCase } from './core/usecases/get-user-tickers.use-case';
+import { GetTickerHistoryUseCase } from './core/usecases/get-ticker-history.use-case';
 import { TickerController } from './adapters/api/controller/ticker.controller';
 import { TransactionController } from './adapters/api/controller/transaction.controller';
 import { ExecuteTransactionUseCase } from './core/usecases/execute-transaction.use-case';
@@ -432,6 +433,12 @@ import { PortfolioController } from './adapters/api/controller/portfolio.control
         tickerRepository: TickerRepository,
       ) => new GetUserTickersUseCase(transactionRepository, tickerRepository),
       inject: ['TransactionRepository', TickerRepository],
+    },
+    {
+      provide: GetTickerHistoryUseCase,
+      useFactory: (dailyBarRepository: DailyBarRepository) =>
+        new GetTickerHistoryUseCase(dailyBarRepository),
+      inject: ['DailyBarRepository'],
     },
     {
       provide: ExecuteTransactionUseCase,

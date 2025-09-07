@@ -12,6 +12,7 @@ import { TickerRepository } from '../../../../core/domain/repository/ticker.repo
 import { UserRepository } from '../../../../core/domain/repository/user.repository';
 import { UserPortfolioRepository } from '../../../../core/domain/repository/user-portfolio.repository';
 import { TransactionRepository } from '../../../../core/domain/repository/transaction.repository';
+import { DailyBarRepository } from '../../../../core/domain/repository/daily-bar.repository';
 import { Ticker } from '../../../../core/domain/model/Ticker';
 import { UserPortfolio } from '../../../../core/domain/model/UserPortfolio';
 import { Transaction } from '../../../../core/domain/model/Transaction';
@@ -471,5 +472,100 @@ describe('TickerControllerIT', () => {
   it('GET /tickers/owned should return 401 when no token provided', async () => {
     const response = await request(app.getHttpServer()).get('/tickers/owned');
     expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+  });
+
+  it('GET /tickers/:tickerId/history should return ticker history', async () => {
+    // Given
+    const ticker = new Ticker({
+      id: 'ticker-1',
+      name: 'Test ETF',
+      symbol: 'TEST',
+      type: TickerType.ETF,
+      currency: Currency.USD,
+      history: [],
+    });
+
+    await tickerRepository.create(ticker);
+
+    const dailyBars = [
+      new DailyBar({
+        id: 'bar-1',
+        tickerId: 'ticker-1',
+        timestamp: new Date('2024-01-03'),
+        open: 100,
+        high: 105,
+        low: 99,
+        close: 104,
+        volume: 1000,
+      }),
+      new DailyBar({
+        id: 'bar-2',
+        tickerId: 'ticker-1',
+        timestamp: new Date('2024-01-02'),
+        open: 95,
+        high: 101,
+        low: 94,
+        close: 100,
+        volume: 1200,
+      }),
+      new DailyBar({
+        id: 'bar-3',
+        tickerId: 'ticker-1',
+        timestamp: new Date('2024-01-01'),
+        open: 90,
+        high: 96,
+        low: 89,
+        close: 95,
+        volume: 1500,
+      }),
+    ];
+
+    const dailyBarRepository =
+      app.get<DailyBarRepository>('DailyBarRepository');
+    for (const dailyBar of dailyBars) {
+      await dailyBarRepository.create(dailyBar);
+    }
+
+    const accessToken = tokenService.generateAccessToken({
+      id: 'user-1',
+      email: 'test@ritchie-invest.com',
+      type: UserType.STUDENT,
+    });
+
+    // When
+    const response = await request(app.getHttpServer())
+      .get('/tickers/ticker-1/history?limit=2')
+      .set('Authorization', `Bearer ${accessToken}`);
+
+    // Then
+    expect(response.status).toBe(HttpStatus.OK);
+    const responseBody = response.body as {
+      history: Array<{ tickerId: string; close: number }>;
+    };
+    expect(responseBody.history).toHaveLength(2);
+    expect(responseBody.history[0]?.tickerId).toBe('ticker-1');
+    expect(responseBody.history[0]?.close).toBe(104);
+    expect(responseBody.history[1]?.close).toBe(100);
+  });
+
+  it('GET /tickers/:tickerId/history should return 401 when no token provided', async () => {
+    const response = await request(app.getHttpServer()).get(
+      '/tickers/ticker-1/history?limit=30',
+    );
+    expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+  });
+
+  it('GET /tickers/:tickerId/history should return 400 when limit is invalid', async () => {
+    const accessToken = tokenService.generateAccessToken({
+      id: 'user-1',
+      email: 'test@ritchie-invest.com',
+      type: UserType.STUDENT,
+    });
+
+    const response = await request(app.getHttpServer())
+      .get('/tickers/ticker-1/history?limit=500')
+      .set('Authorization', `Bearer ${accessToken}`);
+
+    expect(response.status).toBe(HttpStatus.BAD_REQUEST);
   });
 });

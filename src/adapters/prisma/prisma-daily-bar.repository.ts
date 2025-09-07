@@ -82,4 +82,16 @@ export class PrismaDailyBarRepository implements DailyBarRepository {
   async removeAll(): Promise<void> {
     await this.prisma.dailyBar.deleteMany();
   }
+
+  async findByTickerIdWithLimit(
+    tickerId: string,
+    limit: number,
+  ): Promise<DailyBar[]> {
+    const entities = await this.prisma.dailyBar.findMany({
+      where: { tickerId },
+      orderBy: { date: 'desc' },
+      take: limit,
+    });
+    return entities.map((entity) => this.mapper.toDomain(entity));
+  }
 }
