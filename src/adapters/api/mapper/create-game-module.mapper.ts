@@ -1,6 +1,8 @@
 import {
   CreateGameModuleRequest,
   CreateMcqGameModuleContract,
+  CreateGaugeGameModuleContract,
+  CreateChooseAnOrderGameModuleContract,
 } from '../request/create-game-module.request';
 import { CreateGameModuleCommand } from '../../../core/usecases/create-game-module.use-case';
 import { GameType } from '../../../core/domain/type/GameType';
@@ -21,6 +23,31 @@ export class CreateGameModuleMapper {
           mcq: {
             question: contract?.question,
             choices: contract?.choices,
+          },
+        };
+      }
+      case GameType.GAUGE: {
+        const contract = request.contract as CreateGaugeGameModuleContract;
+        return {
+          lessonId,
+          gameType: request.gameType,
+          gauge: {
+            question: contract?.question,
+            value: contract?.value,
+          },
+        };
+      }
+      case GameType.ORDER: {
+        const contract = request.contract as CreateChooseAnOrderGameModuleContract;
+        return {
+          lessonId,
+          gameType: request.gameType,
+          chooseAnOrder: {
+            question: contract?.question,
+            sentences: contract?.sentences?.map(s => ({
+              sentence: s.sentence,
+              value: s.value,
+            })) || [],
           },
         };
       }

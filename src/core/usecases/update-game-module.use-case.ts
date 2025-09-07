@@ -12,6 +12,14 @@ export type UpdateGameModuleCommand = {
     question: string;
     choices: { text: string; isCorrect: boolean; correctionMessage: string }[];
   };
+  gauge?: {
+    question: string;
+    value: number;
+  };
+  chooseAnOrder?: {
+    question: string;
+    sentences: { sentence: string; value: number }[];
+  };
 };
 
 export class UpdateGameModuleUseCase
