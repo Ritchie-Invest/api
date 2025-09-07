@@ -5,12 +5,15 @@ import {
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { McqModule } from '../../domain/model/McqModule';
+import { MatchModule } from '../../domain/model/MatchModule';
 import { McqChoice } from '../../domain/model/McqChoice';
+import { MatchChoice } from '../../domain/model/MatchChoice';
 import { GameModuleNotFoundError } from '../../domain/error/GameModuleNotFoundError';
 import { InvalidAnswerError } from '../../domain/error/InvalidAnswerError';
 import { GameType } from '../../domain/type/GameType';
 import { MapCompleteGameModuleStrategyFactory } from '../strategies/complete-game-module-strategy-factory';
 import { McqCompleteGameModuleStrategy } from '../strategies/mcq-complete-game-module-strategy';
+import { MatchCompleteGameModuleStrategy } from '../strategies/match-complete-game-module-strategy';
 import { Lesson } from '../../domain/model/Lesson';
 import { InMemoryModuleAttemptRepository } from '../../../adapters/in-memory/in-memory-module-attempt.repository';
 import { InMemoryLessonAttemptRepository } from '../../../adapters/in-memory/in-memory-lesson-attempt.repository';
@@ -32,6 +35,10 @@ describe('CompleteGameModuleUseCase', () => {
       {
         type: GameType.MCQ,
         strategy: new McqCompleteGameModuleStrategy(),
+      },
+      {
+        type: GameType.MATCH,
+        strategy: new MatchCompleteGameModuleStrategy(),
       },
     ]);
 
@@ -393,4 +400,110 @@ describe('CompleteGameModuleUseCase', () => {
       `Module with id question-1 has already been attempted in lesson attempt ${lessonAttempt?.id}`,
     );
   });
+
+  it('should complete a Match module with correct answers', async () => {
+    // Given
+    createTestMatchLesson();
+    const matchModule = new MatchModule({
+      id: 'match-1',
+      lessonId: 'lesson-match',
+      instruction: 'Match the animals with their types',
+      matches: [
+        new MatchChoice({ id: 'match-1', value1: 'Cat', value2: 'Mammal' }),
+        new MatchChoice({ id: 'match-2', value1: 'Eagle', value2: 'Bird' }),
+      ],
+    });
+    gameModuleRepository.create(matchModule);
+    const command: CompleteGameModuleCommand = {
+      userId: 'user-1',
+      moduleId: 'match-1',
+      gameType: GameType.MATCH,
+      match: {
+        answers: [
+          { value1: 'Cat', value2: 'Mammal' },
+          { value1: 'Eagle', value2: 'Bird' },
+        ],
+      },
+    };
+
+    // When
+    const result = await useCase.execute(command);
+
+    // Then
+    expect(result.isCorrect).toBe(true);
+    expect(result.feedback).toBe('Toutes les correspondances sont correctes !');
+    expect(result.correctChoiceId).toBe('match-1');
+  });
+
+  it('should complete a Match module with incorrect answers', async () => {
+    // Given
+    createTestMatchLesson();
+    const matchModule = new MatchModule({
+      id: 'match-2',
+      lessonId: 'lesson-match',
+      instruction: 'Match the animals with their types',
+      matches: [
+        new MatchChoice({ id: 'match-1', value1: 'Cat', value2: 'Mammal' }),
+        new MatchChoice({ id: 'match-2', value1: 'Eagle', value2: 'Bird' }),
+      ],
+    });
+    gameModuleRepository.create(matchModule);
+    const command: CompleteGameModuleCommand = {
+      userId: 'user-1',
+      moduleId: 'match-2',
+      gameType: GameType.MATCH,
+      match: {
+        answers: [
+          { value1: 'Cat', value2: 'Bird' },
+          { value1: 'Eagle', value2: 'Mammal' },
+        ],
+      },
+    };
+
+    // When
+    const result = await useCase.execute(command);
+
+    // Then
+    expect(result.isCorrect).toBe(false);
+    expect(result.feedback).toContain('Correspondances incorrectes');
+  });
+
+  it('should throw if Match answers are missing', async () => {
+    // Given
+    createTestMatchLesson();
+    const matchModule = new MatchModule({
+      id: 'match-3',
+      lessonId: 'lesson-match',
+      instruction: 'Match the animals with their types',
+      matches: [
+        new MatchChoice({ id: 'match-1', value1: 'Cat', value2: 'Mammal' }),
+        new MatchChoice({ id: 'match-2', value1: 'Eagle', value2: 'Bird' }),
+      ],
+    });
+    gameModuleRepository.create(matchModule);
+    const command: CompleteGameModuleCommand = {
+      userId: 'user-1',
+      moduleId: 'match-3',
+      gameType: GameType.MATCH,
+    };
+
+    // When & Then
+    await expect(useCase.execute(command)).rejects.toThrow(
+      'Match answers are required',
+    );
+  });
+
+  function createTestMatchLesson() {
+    const lesson = new Lesson(
+      'lesson-match',
+      'Match Lesson',
+      'A lesson for matching',
+      'chapter-1',
+      1,
+      true,
+      GameType.MATCH,
+      [],
+    );
+    lessonRepository.create(lesson);
+  }
 });

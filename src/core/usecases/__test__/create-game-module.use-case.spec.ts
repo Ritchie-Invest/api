@@ -9,9 +9,11 @@ import { Lesson } from '../../domain/model/Lesson';
 import { LessonNotFoundError } from '../../domain/error/LessonNotFoundError';
 import { GameModuleTypeMismatchError } from '../../domain/error/GameModuleTypeMismatchError';
 import { McqModuleStrategy } from '../strategies/mcq-module-strategy';
+import { MatchModuleStrategy } from '../strategies/match-module-strategy';
 import { MapGameModuleStrategyFactory } from '../strategies/game-module-strategy-factory';
 import { GameModuleStrategyNotFoundError } from '../../domain/error/GameModuleStrategyNotFoundError';
 import { McqModule } from '../../domain/model/McqModule';
+import { MatchModule } from '../../domain/model/MatchModule';
 import { McqModuleInvalidDataError } from '../../domain/error/McqModuleInvalidDataError';
 
 describe('CreateGameModuleUseCase', () => {
@@ -23,8 +25,10 @@ describe('CreateGameModuleUseCase', () => {
     lessonRepository = new InMemoryLessonRepository();
     gameModuleRepository = new InMemoryGameModuleRepository();
     const mcqStrategy = new McqModuleStrategy();
+    const matchStrategy = new MatchModuleStrategy();
     const strategyFactory = new MapGameModuleStrategyFactory([
       { type: GameType.MCQ, strategy: mcqStrategy },
+      { type: GameType.MATCH, strategy: matchStrategy },
     ]);
     useCase = new CreateGameModuleUseCase(
       lessonRepository,
@@ -160,6 +164,65 @@ describe('CreateGameModuleUseCase', () => {
     // When / Then
     await expect(useCase.execute(command)).rejects.toThrow(
       McqModuleInvalidDataError,
+    );
+  });
+
+  it('should create a Match module for a lesson', async () => {
+    // Given
+    const lesson = new Lesson(
+      'lesson-5',
+      'title',
+      'desc',
+      'chapter-1',
+      1,
+      false,
+      GameType.MATCH,
+      [],
+    );
+    lessonRepository.create(lesson);
+    const command: CreateGameModuleCommand = {
+      lessonId: lesson.id,
+      gameType: GameType.MATCH,
+      match: {
+        instruction: 'Match the words with their meanings',
+        matches: [
+          { value1: 'Cat', value2: 'Animal' },
+          { value1: 'Blue', value2: 'Color' },
+        ],
+      },
+    };
+
+    // When
+    await useCase.execute(command);
+    const modules = gameModuleRepository.findAll();
+
+    // Then
+    expect(modules.length).toBe(1);
+    expect((modules[0] as MatchModule).instruction).toBe('Match the words with their meanings');
+    expect((modules[0] as MatchModule).matches.length).toBe(2);
+  });
+
+  it('should throw if Match data is missing', async () => {
+    // Given
+    const lesson = new Lesson(
+      'lesson-6',
+      'title',
+      'desc',
+      'chapter-1',
+      1,
+      false,
+      GameType.MATCH,
+      [],
+    );
+    lessonRepository.create(lesson);
+    const command: CreateGameModuleCommand = {
+      lessonId: lesson.id,
+      gameType: GameType.MATCH,
+    };
+
+    // When / Then
+    await expect(useCase.execute(command)).rejects.toThrow(
+      'Match contract is missing',
     );
   });
 });

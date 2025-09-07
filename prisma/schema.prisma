@@ -15,6 +15,7 @@ enum UserType {
 
 enum GameType {
   MCQ
+  MATCH
 }
 
 enum TickerType {
@@ -84,6 +85,7 @@ model GameModule {
 
   lesson        Lesson          @relation(fields: [lessonId], references: [id])
   mcq           McqModule?
+  match         MatchModule?
   moduleAttempt ModuleAttempt[]
 }
 
@@ -91,6 +93,14 @@ model McqModule {
   id           String     @id @default(cuid())
   question     String
   choices      Json
+  gameModuleId String     @unique
+  gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
+}
+
+model MatchModule {
+  id           String     @id @default(cuid())
+  instruction  String
+  matches      Json
   gameModuleId String     @unique
   gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
 }

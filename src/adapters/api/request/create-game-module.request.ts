@@ -20,6 +20,18 @@ export class CreateMcqChoice {
     this.correctionMessage = correctionMessage;
   }
 }
+export class CreateMatchChoice {
+  @ApiProperty()
+  value1: string;
+
+  @ApiProperty()
+  value2: string;
+  constructor(value1: string, value2: string) {
+    this.value1 = value1;
+    this.value2 = value2;
+  }
+}
+
 
 export class CreateMcqGameModuleContract extends CreateGameModuleContract {
   @ApiProperty()

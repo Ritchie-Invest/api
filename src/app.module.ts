@@ -38,6 +38,7 @@ import {
 } from './core/usecases/strategies/game-module-strategy-factory';
 import { GameType } from './core/domain/type/GameType';
 import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strategy';
+import { MatchModuleStrategy } from './core/usecases/strategies/match-module-strategy';
 import { CompleteGameModuleUseCase } from './core/usecases/complete-game-module.use-case';
 import { GameModuleController } from './adapters/api/controller/game-module.controller';
 import {
@@ -45,6 +46,7 @@ import {
   MapCompleteGameModuleStrategyFactory,
 } from './core/usecases/strategies/complete-game-module-strategy-factory';
 import { McqCompleteGameModuleStrategy } from './core/usecases/strategies/mcq-complete-game-module-strategy';
+import { MatchCompleteGameModuleStrategy } from './core/usecases/strategies/match-complete-game-module-strategy';
 import { GetUserChaptersUseCase } from './core/usecases/get-user-chapters.use-case';
 import { GetGameModuleByIdUseCase } from './core/usecases/get-game-module-by-id.use-case';
 import { UpdateGameModuleUseCase } from './core/usecases/update-game-module.use-case';
@@ -94,6 +96,10 @@ import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cr
             type: GameType.MCQ,
             strategy: new McqModuleStrategy(),
           },
+          {
+            type: GameType.MATCH,
+            strategy: new MatchModuleStrategy(),
+          },
         ]),
     },
     {
@@ -103,6 +109,10 @@ import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cr
           {
             type: GameType.MCQ,
             strategy: new McqCompleteGameModuleStrategy(),
+          },
+          {
+            type: GameType.MATCH,
+            strategy: new MatchCompleteGameModuleStrategy(),
           },
         ]),
     },

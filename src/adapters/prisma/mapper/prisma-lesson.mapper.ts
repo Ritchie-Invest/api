@@ -5,10 +5,12 @@ import {
   Lesson as LessonEntity,
   GameModule as GameModuleEntity,
   McqModule as McqModuleEntity,
+  MatchModule as MatchModuleEntity,
 } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { GameType } from '../../../core/domain/type/GameType';
 import { McqModule } from '../../../core/domain/model/McqModule';
+import { MatchModule } from '../../../core/domain/model/MatchModule';
 import { PrismaGameModuleMapper } from './prisma-game-module.mapper';
 
 @Injectable()
@@ -31,7 +33,10 @@ export class PrismaLessonMapper implements EntityMapper<Lesson, LessonEntity> {
 
   toDomain(
     entity: LessonEntity & {
-      modules?: (GameModuleEntity & { mcq: McqModuleEntity | null })[];
+      modules?: (GameModuleEntity & { 
+        mcq: McqModuleEntity | null; 
+        match: MatchModuleEntity | null;
+      })[];
     },
   ): Lesson {
     return {
@@ -48,7 +53,15 @@ export class PrismaLessonMapper implements EntityMapper<Lesson, LessonEntity> {
             return this.mcqModuleMapper.toDomain({
               ...module,
               mcq: module.mcq,
-            }) as McqModule;
+              match: null,
+            } as any) as McqModule;
+          }
+          if (module.match) {
+            return this.mcqModuleMapper.toDomain({
+              ...module,
+              mcq: null,
+              match: module.match,
+            } as any) as MatchModule;
           }
           throw new Error('Unsupported module type in lesson');
         }) || [],

@@ -8,6 +8,6 @@ export interface CompleteGameModuleStrategy {
   ): {
     isCorrect: boolean;
     feedback: string;
-    correctChoiceId: string; // id de la bonne réponse (MCQ)
+    correctChoiceId: string; 
   };
 }
