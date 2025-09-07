@@ -243,7 +243,6 @@ describe('PortfolioController', () => {
       expect(result.positions[0]).toEqual(
         expect.objectContaining({
           id: 'position-1',
-          portfolioId: 'portfolio-1',
           cash: 1000,
           investments: 2000,
           date: new Date('2024-01-01'),

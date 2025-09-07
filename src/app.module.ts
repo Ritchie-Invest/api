@@ -69,16 +69,13 @@ import { DailyBarRepository } from './core/domain/repository/daily-bar.repositor
 import { PrismaDailyBarRepository } from './adapters/prisma/prisma-daily-bar.repository';
 import { TransactionRepository } from './core/domain/repository/transaction.repository';
 import { PrismaTransactionRepository } from './adapters/prisma/prisma-transaction.repository';
-<<<<<<< HEAD
 import { MarketService } from './core/domain/service/market.service';
 import { AlphaVantageMarketServiceAdapter } from './adapters/alpha-vantage/alpha-vantage-market-service-adapter.service';
 import { UpdateTickersHistoryUseCase } from './core/usecases/update-tickers-history-use.case';
 import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cron';
-=======
 import { GetPortfolioUseCase } from './core/usecases/get-portfolio.use-case';
 import { GetPortfolioPositionsUseCase } from './core/usecases/get-portfolio-positions.use-case';
 import { PortfolioController } from './adapters/api/controller/portfolio.controller';
->>>>>>> 2ceeb351f0b65caf0d13599f0d2cbdf6348a3b69
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -452,14 +449,14 @@ import { PortfolioController } from './adapters/api/controller/portfolio.control
       ],
     },
     {
-<<<<<<< HEAD
       provide: UpdateTickersHistoryUseCase,
       useFactory: (
         tickerRepository: TickerRepository,
         marketService: MarketService,
       ) => new UpdateTickersHistoryUseCase(tickerRepository, marketService),
       inject: [TickerRepository, 'MarketService'],
-=======
+    },
+    {
       provide: GetPortfolioUseCase,
       useFactory: (
         userPortfolioRepository: UserPortfolioRepository,
@@ -482,7 +479,6 @@ import { PortfolioController } from './adapters/api/controller/portfolio.control
           portfolioPositionRepository,
         ),
       inject: ['UserPortfolioRepository', 'PortfolioPositionRepository'],
->>>>>>> 2ceeb351f0b65caf0d13599f0d2cbdf6348a3b69
     },
   ],
 })

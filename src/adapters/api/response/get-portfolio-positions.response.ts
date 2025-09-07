@@ -5,9 +5,6 @@ export class PortfolioPositionResponse {
   id: string;
 
   @ApiProperty()
-  portfolioId: string;
-
-  @ApiProperty()
   cash: number;
 
   @ApiProperty()
@@ -18,13 +15,11 @@ export class PortfolioPositionResponse {
 
   constructor(
     id: string,
-    portfolioId: string,
     cash: number,
     investments: number,
     date: Date,
   ) {
     this.id = id;
-    this.portfolioId = portfolioId;
     this.cash = cash;
     this.investments = investments;
     this.date = date;

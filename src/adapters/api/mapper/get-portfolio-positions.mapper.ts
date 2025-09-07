@@ -21,7 +21,6 @@ export class GetPortfolioPositionsMapper {
   ): PortfolioPositionResponse {
     return new PortfolioPositionResponse(
       position.id,
-      position.portfolioId,
       position.cash,
       position.investments,
       position.date,
