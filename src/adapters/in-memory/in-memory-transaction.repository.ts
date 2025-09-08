@@ -6,6 +6,12 @@ import { Injectable } from '@nestjs/common';
 export class InMemoryTransactionRepository implements TransactionRepository {
   private transactions: Map<string, Transaction> = new Map();
 
+  findByPortfolioId(portfolioId: string): Transaction[] {
+    return Array.from(this.transactions.values()).filter(
+      (t) => t.portfolioId === portfolioId,
+    );
+  }
+
   create(data: Partial<Transaction>): Transaction {
     const transaction = new Transaction({
       id: data.id || `transaction-${Date.now()}`,
@@ -15,6 +21,7 @@ export class InMemoryTransactionRepository implements TransactionRepository {
       amount: data.amount!,
       volume: data.volume!,
       currentTickerPrice: data.currentTickerPrice!,
+      timestamp: new Date(),
     });
     this.transactions.set(transaction.id, transaction);
     return transaction;
@@ -49,6 +56,7 @@ export class InMemoryTransactionRepository implements TransactionRepository {
       volume: data.volume ?? existing.volume,
       currentTickerPrice:
         data.currentTickerPrice ?? existing.currentTickerPrice,
+      timestamp: existing.timestamp,
     });
     this.transactions.set(id, updated);
     return updated;

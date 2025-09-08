@@ -14,6 +14,13 @@ export class PrismaTransactionRepository implements TransactionRepository {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  async findByPortfolioId(portfolioId: string): Promise<Transaction[]> {
+    const entities = await this.prisma.transaction.findMany({
+      where: { portfolioId },
+    });
+    return entities.map((entity) => this.mapper.toDomain(entity));
+  }
+
   async create(data: Partial<Transaction>): Promise<Transaction> {
     const entity = {
       portfolioId: data.portfolioId!,

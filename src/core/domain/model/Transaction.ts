@@ -8,6 +8,7 @@ export class Transaction extends DomainModel {
   amount: number;
   volume: number;
   currentTickerPrice: number;
+  timestamp: Date;
 
   constructor(params: {
     id: string;
@@ -17,6 +18,7 @@ export class Transaction extends DomainModel {
     amount: number;
     volume: number;
     currentTickerPrice: number;
+    timestamp: Date;
   }) {
     super(params.id);
     this.portfolioId = params.portfolioId;
@@ -25,5 +27,6 @@ export class Transaction extends DomainModel {
     this.amount = params.amount;
     this.volume = params.volume;
     this.currentTickerPrice = params.currentTickerPrice;
+    this.timestamp = params.timestamp;
   }
 }
