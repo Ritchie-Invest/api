@@ -1,30 +1,30 @@
 import { GameModule } from './GameModule';
-import { GameChoice } from './GameChoice';
 import { TrueOrFalseModuleInvalidDataError } from '../error/TrueOrFalseModuleInvalidDataError';
 
 export class TrueOrFalseModule extends GameModule {
-  questions: GameChoice[];
+  sentence: string;
+  isTrue: boolean;
 
   constructor(params: {
     id: string;
     lessonId: string;
-    questions: GameChoice[];
+    sentence: string;
+    isTrue: boolean;
     updatedAt?: Date;
     createdAt?: Date;
   }) {
     super({ id: params.id, lessonId: params.lessonId });
-    
-    if (!Array.isArray(params.questions) || params.questions.length === 0) {
-      throw new TrueOrFalseModuleInvalidDataError('At least one question is required');
+
+    if (!params.sentence || params.sentence.trim().length === 0) {
+      throw new TrueOrFalseModuleInvalidDataError('Sentence is required');
     }
-    
-    for (const question of params.questions) {
-      if (typeof question.isCorrect !== 'boolean') {
-        throw new TrueOrFalseModuleInvalidDataError('Each question must have a valid boolean answer');
-      }
+
+    if (typeof params.isTrue !== 'boolean') {
+      throw new TrueOrFalseModuleInvalidDataError('isTrue must be a boolean');
     }
-    
-    this.questions = params.questions;
+
+    this.sentence = params.sentence;
+    this.isTrue = params.isTrue;
     this.updatedAt = params.updatedAt || new Date();
     this.createdAt = params.createdAt || new Date();
   }

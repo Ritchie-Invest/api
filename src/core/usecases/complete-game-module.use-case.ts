@@ -23,16 +23,13 @@ export type CompleteGameModuleCommand = {
   fillInTheBlank?: {
     blankId: string;
   };
-  trueOrFalse?: {
-    questionId: string;
-    answer: boolean;
-  };
+  trueOrFalse?: boolean;
 };
 
 export type CompleteGameModuleResult = {
   isCorrect: boolean;
   feedback: string;
-  correctChoiceId: string; // id de la bonne réponse pour le module
+  correctChoiceId: string;
   nextGameModuleId: string | null;
   currentGameModuleIndex: number;
   totalGameModules: number;

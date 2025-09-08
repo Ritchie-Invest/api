@@ -26,7 +26,8 @@ export class UpdateGameModuleMapper {
         };
       }
       case GameType.FILL_IN_THE_BLANK: {
-        const contract = request.contract as UpdateFillInTheBlankGameModuleContract;
+        const contract =
+          request.contract as UpdateFillInTheBlankGameModuleContract;
         return {
           gameModuleId,
           fillInTheBlank: {
@@ -37,11 +38,13 @@ export class UpdateGameModuleMapper {
         };
       }
       case GameType.TRUE_OR_FALSE: {
-        const contract = request.contract as UpdateTrueOrFalseGameModuleContract;
+        const contract =
+          request.contract as UpdateTrueOrFalseGameModuleContract;
         return {
           gameModuleId,
           trueOrFalse: {
-            questions: contract?.questions,
+            sentence: contract?.sentence,
+            isTrue: contract?.isTrue,
           },
         };
       }

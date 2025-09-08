@@ -17,7 +17,8 @@ import { TrueOrFalseModuleStrategy } from '../strategies/true-or-false-module-st
 import { FillInTheBlankModule } from '../../domain/model/FillInTheBlankModule';
 import { TrueOrFalseModule } from '../../domain/model/TrueOrFalseModule';
 import { FillInTheBlankModuleInvalidDataError } from '../../domain/error/FillInTheBlankModuleInvalidDataError';
-import { GameChoice } from '../../domain/model/GameChoice';
+import { McqChoice } from '../../domain/model/McqChoice';
+import { FillInTheBlankChoice } from '../../domain/model/FillInTheBlankChoice';
 
 describe('UpdateGameModuleUseCase', () => {
   let lessonRepository: InMemoryLessonRepository;
@@ -62,13 +63,13 @@ describe('UpdateGameModuleUseCase', () => {
       lessonId: lesson.id,
       question: 'What is 1+1?',
       choices: [
-        new GameChoice({
+        new McqChoice({
           id: 'choice-1',
           text: '2',
           isCorrect: true,
           correctionMessage: 'Yes',
         }),
-        new GameChoice({
+        new McqChoice({
           id: 'choice-2',
           text: '3',
           isCorrect: false,
@@ -115,17 +116,17 @@ describe('UpdateGameModuleUseCase', () => {
       firstText: 'The capital of France is',
       secondText: 'city.',
       blanks: [
-        new GameChoice({
+        new FillInTheBlankChoice({
           id: 'blank-1',
           text: 'Paris',
           isCorrect: true,
           correctionMessage: 'Correct!',
         }),
-        new GameChoice({
+        new FillInTheBlankChoice({
           id: 'blank-2',
-          text: 'London',
+          text: 'Lyon',
           isCorrect: false,
-          correctionMessage: 'Wrong',
+          correctionMessage: 'Incorrect.',
         }),
       ],
     });
@@ -147,8 +148,15 @@ describe('UpdateGameModuleUseCase', () => {
 
     // Then
     const module = gameModuleRepository.findById('module-1');
-    expect((module as FillInTheBlankModule).firstText).toBe('The largest city in France is');
-    expect((module as FillInTheBlankModule).secondText).toBe('and it is amazing.');
+    expect((module as FillInTheBlankModule).firstText).toBe(
+      'The largest city in France is',
+    );
+    expect((module as FillInTheBlankModule).secondText).toBe(
+      'and it is amazing.',
+    );
+    expect((module as FillInTheBlankModule).blanks).toHaveLength(2);
+    expect((module as FillInTheBlankModule).blanks[0]?.text).toBe('Paris');
+    expect((module as FillInTheBlankModule).blanks[0]?.isCorrect).toBe(true);
   });
 
   it('should update a True or False module', async () => {
@@ -167,29 +175,15 @@ describe('UpdateGameModuleUseCase', () => {
     const trueOrFalseModule = new TrueOrFalseModule({
       id: 'module-1',
       lessonId: lesson.id,
-      questions: [
-        new GameChoice({
-          id: 'question-1',
-          text: 'The earth is flat',
-          isCorrect: false,
-          correctionMessage: 'Wrong!',
-        }),
-        new GameChoice({
-          id: 'question-2',
-          text: 'The sun is hot',
-          isCorrect: true,
-          correctionMessage: 'Correct!',
-        }),
-      ],
+      sentence: 'The earth is flat',
+      isTrue: false,
     });
     gameModuleRepository.create(trueOrFalseModule);
     const command: UpdateGameModuleCommand = {
       gameModuleId: 'module-1',
       trueOrFalse: {
-        questions: [
-          { text: 'The earth is round', isCorrect: true, correctionMessage: 'Correct!' },
-          { text: 'The sun is cold', isCorrect: false, correctionMessage: 'Wrong!' },
-        ],
+        sentence: 'The earth is round',
+        isTrue: true,
       },
     };
 
@@ -198,9 +192,8 @@ describe('UpdateGameModuleUseCase', () => {
 
     // Then
     const module = gameModuleRepository.findById('module-1');
-    expect((module as TrueOrFalseModule).questions).toHaveLength(2);
-    expect((module as TrueOrFalseModule).questions[0]?.text).toBe('The earth is round');
-    expect((module as TrueOrFalseModule).questions[0]?.isCorrect).toBe(true);
+    expect((module as TrueOrFalseModule).sentence).toBe('The earth is round');
+    expect((module as TrueOrFalseModule).isTrue).toBe(true);
   });
 
   it('should throw if game module not found', async () => {
@@ -226,13 +219,13 @@ describe('UpdateGameModuleUseCase', () => {
       lessonId: 'non-existing-lesson',
       question: 'What is 1+1?',
       choices: [
-        new GameChoice({
+        new McqChoice({
           id: 'choice-1',
           text: '2',
           isCorrect: true,
           correctionMessage: 'Yes',
         }),
-        new GameChoice({
+        new McqChoice({
           id: 'choice-2',
           text: '3',
           isCorrect: false,
@@ -274,13 +267,13 @@ describe('UpdateGameModuleUseCase', () => {
       lessonId: lesson.id,
       question: 'What is 1+1?',
       choices: [
-        new GameChoice({
+        new McqChoice({
           id: 'choice-1',
           text: '2',
           isCorrect: true,
           correctionMessage: 'Yes',
         }),
-        new GameChoice({
+        new McqChoice({
           id: 'choice-2',
           text: '3',
           isCorrect: false,
@@ -318,17 +311,17 @@ describe('UpdateGameModuleUseCase', () => {
       firstText: 'The capital is',
       secondText: 'city.',
       blanks: [
-        new GameChoice({
+        new FillInTheBlankChoice({
           id: 'blank-1',
           text: 'Paris',
           isCorrect: true,
           correctionMessage: 'Correct!',
         }),
-        new GameChoice({
+        new FillInTheBlankChoice({
           id: 'blank-2',
-          text: 'London',
+          text: 'Lyon',
           isCorrect: false,
-          correctionMessage: 'Wrong',
+          correctionMessage: 'Incorrect.',
         }),
       ],
     });

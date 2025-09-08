@@ -99,8 +99,16 @@ describe('CreateGameModuleUseCase', () => {
         firstText: 'The capital of France is',
         secondText: 'and it is beautiful.',
         blanks: [
-          { text: 'Paris', isCorrect: true, correctionMessage: 'Correct!' },
-          { text: 'London', isCorrect: false, correctionMessage: 'Wrong city' },
+          {
+            text: 'Paris',
+            isCorrect: true,
+            correctionMessage: 'Correct! Paris is the capital of France.',
+          },
+          {
+            text: 'London',
+            isCorrect: false,
+            correctionMessage: 'Incorrect. London is the capital of the UK.',
+          },
         ],
       },
     };
@@ -111,8 +119,15 @@ describe('CreateGameModuleUseCase', () => {
 
     // Then
     expect(modules.length).toBe(1);
-    expect((modules[0] as FillInTheBlankModule).firstText).toBe('The capital of France is');
-    expect((modules[0] as FillInTheBlankModule).secondText).toBe('and it is beautiful.');
+    expect((modules[0] as FillInTheBlankModule).firstText).toBe(
+      'The capital of France is',
+    );
+    expect((modules[0] as FillInTheBlankModule).secondText).toBe(
+      'and it is beautiful.',
+    );
+    expect((modules[0] as FillInTheBlankModule).blanks).toHaveLength(2);
+    expect((modules[0] as FillInTheBlankModule).blanks[0].text).toBe('Paris');
+    expect((modules[0] as FillInTheBlankModule).blanks[0].isCorrect).toBe(true);
   });
 
   it('should create a True or False module for a lesson', async () => {
@@ -132,10 +147,8 @@ describe('CreateGameModuleUseCase', () => {
       lessonId: lesson.id,
       gameType: GameType.TRUE_OR_FALSE,
       trueOrFalse: {
-        questions: [
-          { text: 'The earth is round', isCorrect: true, correctionMessage: 'Correct!' },
-          { text: 'The sun is cold', isCorrect: false, correctionMessage: 'Wrong! The sun is hot' },
-        ],
+        sentence: 'The earth is round',
+        isTrue: true,
       },
     };
     // When
@@ -144,9 +157,10 @@ describe('CreateGameModuleUseCase', () => {
 
     // Then
     expect(modules.length).toBe(1);
-    expect((modules[0] as TrueOrFalseModule).questions).toHaveLength(2);
-    expect((modules[0] as TrueOrFalseModule).questions[0]?.text).toBe('The earth is round');
-    expect((modules[0] as TrueOrFalseModule).questions[0]?.isCorrect).toBe(true);
+    expect((modules[0] as TrueOrFalseModule).sentence).toBe(
+      'The earth is round',
+    );
+    expect((modules[0] as TrueOrFalseModule).isTrue).toBe(true);
   });
 
   it('should throw if lesson not found', async () => {

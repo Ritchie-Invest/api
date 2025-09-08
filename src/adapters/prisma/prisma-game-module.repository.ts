@@ -120,9 +120,8 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
           },
         },
       },
-      include: { mcq: true, fillBlank: true, trueOrFalse: true},
+      include: { mcq: true, fillBlank: true, trueOrFalse: true },
     });
-    
 
     if (!updatedEntity) {
       return null;
@@ -131,7 +130,9 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
     return this.mapper.toDomain(updatedEntity) as McqModule;
   }
 
-  private async createFillInTheBlankModule(data: FillInTheBlankModule): Promise<FillInTheBlankModule> {
+  private async createFillInTheBlankModule(
+    data: FillInTheBlankModule,
+  ): Promise<FillInTheBlankModule> {
     const createdEntity = await this.prisma.gameModule.create({
       data: {
         id: data.id,
@@ -184,19 +185,17 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
     return this.mapper.toDomain(updatedEntity) as FillInTheBlankModule;
   }
 
-  private async createTrueOrFalseModule(data: TrueOrFalseModule): Promise<TrueOrFalseModule> {
+  private async createTrueOrFalseModule(
+    data: TrueOrFalseModule,
+  ): Promise<TrueOrFalseModule> {
     const createdEntity = await this.prisma.gameModule.create({
       data: {
         id: data.id,
         lessonId: data.lessonId,
         trueOrFalse: {
           create: {
-            questions: data.questions.map((question) => ({
-              id: question.id,
-              text: question.text,
-              isCorrect: question.isCorrect,
-              correctionMessage: question.correctionMessage,
-            })),
+            sentence: data.sentence,
+            isTrue: data.isTrue,
           },
         },
       },
@@ -214,12 +213,8 @@ export class PrismaGameModuleRepository implements GameModuleRepository {
       data: {
         trueOrFalse: {
           update: {
-            questions: data.questions.map((question) => ({
-              id: question.id,
-              text: question.text,
-              isCorrect: question.isCorrect,
-              correctionMessage: question.correctionMessage,
-            })),
+            sentence: data.sentence,
+            isTrue: data.isTrue,
           },
         },
       },

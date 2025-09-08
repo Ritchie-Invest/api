@@ -38,13 +38,17 @@ export class UpdateMcqGameModuleContract extends UpdateGameModuleContract {
 export class UpdateFillInTheBlankGameModuleContract extends UpdateGameModuleContract {
   @ApiProperty()
   firstText: string;
-  
+
   @ApiProperty()
   secondText: string;
-  
+
   @ApiProperty({ type: [UpdateGameChoice] })
   blanks: UpdateGameChoice[];
-  constructor(firstText: string, secondText: string, blanks: UpdateGameChoice[]) {
+  constructor(
+    firstText: string,
+    secondText: string,
+    blanks: UpdateGameChoice[],
+  ) {
     super();
     this.firstText = firstText;
     this.secondText = secondText;
@@ -53,16 +57,24 @@ export class UpdateFillInTheBlankGameModuleContract extends UpdateGameModuleCont
 }
 
 export class UpdateTrueOrFalseGameModuleContract extends UpdateGameModuleContract {
-  @ApiProperty({ type: [UpdateGameChoice] })
-  questions: UpdateGameChoice[];
+  @ApiProperty()
+  sentence: string;
 
-  constructor(questions: UpdateGameChoice[]) {
+  @ApiProperty()
+  isTrue: boolean;
+
+  constructor(sentence: string, isTrue: boolean) {
     super();
-    this.questions = questions;
+    this.sentence = sentence;
+    this.isTrue = isTrue;
   }
 }
 
-@ApiExtraModels(UpdateMcqGameModuleContract, UpdateFillInTheBlankGameModuleContract, UpdateTrueOrFalseGameModuleContract)
+@ApiExtraModels(
+  UpdateMcqGameModuleContract,
+  UpdateFillInTheBlankGameModuleContract,
+  UpdateTrueOrFalseGameModuleContract,
+)
 export class UpdateGameModuleRequest {
   @ApiProperty({ enum: GameType })
   @IsEnum(GameType)

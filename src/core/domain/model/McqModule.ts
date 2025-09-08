@@ -1,16 +1,16 @@
 import { GameModule } from './GameModule';
-import { GameChoice } from './GameChoice';
+import { McqChoice } from './McqChoice';
 import { McqModuleInvalidDataError } from '../error/McqModuleInvalidDataError';
 
 export class McqModule extends GameModule {
   question: string;
-  choices: GameChoice[];
+  choices: McqChoice[];
 
   constructor(params: {
     id: string;
     lessonId: string;
     question: string;
-    choices: GameChoice[];
+    choices: McqChoice[];
     updatedAt?: Date;
     createdAt?: Date;
   }) {

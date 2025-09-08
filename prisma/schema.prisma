@@ -108,7 +108,9 @@ model FillInTheBlankModule {
 }
 
 model TrueOrFalseModule {
-  questions    Json
+  id           String     @id @default(cuid())
+  sentence     String
+  isTrue       Boolean
   gameModuleId String     @unique
   gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
 }

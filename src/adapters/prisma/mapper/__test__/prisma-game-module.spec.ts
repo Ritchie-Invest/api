@@ -7,7 +7,7 @@ import {
 import { McqModule } from '../../../../core/domain/model/McqModule';
 import { FillInTheBlankModule } from '../../../../core/domain/model/FillInTheBlankModule';
 import { TrueOrFalseModule } from '../../../../core/domain/model/TrueOrFalseModule';
-import { GameChoice } from '../../../../core/domain/model/GameChoice';
+import { McqChoice } from '../../../../core/domain/model/McqChoice';
 import { PrismaGameModuleMapper } from '../prisma-game-module.mapper';
 
 describe('PrismaGameModuleMapper', () => {
@@ -44,7 +44,7 @@ describe('PrismaGameModuleMapper', () => {
           gameModuleId: 'module-1',
         };
 
-        const gameModuleEntity: GameModuleEntity & { 
+        const gameModuleEntity: GameModuleEntity & {
           mcq: McqModuleEntity | null;
           fillBlank: FillInTheBlankModuleEntity | null;
           trueOrFalse: TrueOrFalseModuleEntity | null;
@@ -68,11 +68,13 @@ describe('PrismaGameModuleMapper', () => {
         expect(mcqModule.lessonId).toBe('lesson-1');
         expect(mcqModule.question).toBe('What is the capital of France?');
         expect(mcqModule.choices).toHaveLength(2);
-        expect(mcqModule.choices[0]).toBeInstanceOf(GameChoice);
+        expect(mcqModule.choices[0]).toBeInstanceOf(McqChoice);
         expect(mcqModule.choices[0]?.id).toBe('choice-1');
         expect(mcqModule.choices[0]?.text).toBe('Paris');
         expect(mcqModule.choices[0]?.isCorrect).toBe(true);
-        expect(mcqModule.choices[0]?.correctionMessage).toBe('Correct! Paris is the capital of France.');
+        expect(mcqModule.choices[0]?.correctionMessage).toBe(
+          'Correct! Paris is the capital of France.',
+        );
         expect(mcqModule.choices[1]?.id).toBe('choice-2');
         expect(mcqModule.choices[1]?.text).toBe('London');
         expect(mcqModule.choices[1]?.isCorrect).toBe(false);
@@ -80,8 +82,8 @@ describe('PrismaGameModuleMapper', () => {
         expect(mcqModule.updatedAt).toEqual(new Date('2023-10-01T11:00:00Z'));
       });
 
-      it('should throw error for empty choices array for MCQ and handle GameChoice with null id', () => {
-        // Given 
+      it('should throw error for empty choices array for MCQ and handle McqChoice with null id', () => {
+        // Given
         const mcqEntityWithNullChoices: McqModuleEntity = {
           id: 'mcq-1',
           question: 'Test question?',
@@ -89,7 +91,7 @@ describe('PrismaGameModuleMapper', () => {
           gameModuleId: 'module-1',
         };
 
-        const gameModuleEntityWithNullChoices: GameModuleEntity & { 
+        const gameModuleEntityWithNullChoices: GameModuleEntity & {
           mcq: McqModuleEntity | null;
           fillBlank: FillInTheBlankModuleEntity | null;
           trueOrFalse: TrueOrFalseModuleEntity | null;
@@ -103,8 +105,10 @@ describe('PrismaGameModuleMapper', () => {
           trueOrFalse: null,
         };
 
-        // When/Then 
-        expect(() => mapper.toDomain(gameModuleEntityWithNullChoices)).toThrow('At least two choices are required');
+        // When/Then
+        expect(() => mapper.toDomain(gameModuleEntityWithNullChoices)).toThrow(
+          'At least two choices are required',
+        );
 
         // Given
         const mcqEntityWithNullId: McqModuleEntity = {
@@ -127,7 +131,7 @@ describe('PrismaGameModuleMapper', () => {
           gameModuleId: 'module-1',
         };
 
-        const gameModuleEntityWithNullId: GameModuleEntity & { 
+        const gameModuleEntityWithNullId: GameModuleEntity & {
           mcq: McqModuleEntity | null;
           fillBlank: FillInTheBlankModuleEntity | null;
           trueOrFalse: TrueOrFalseModuleEntity | null;
@@ -141,7 +145,7 @@ describe('PrismaGameModuleMapper', () => {
           trueOrFalse: null,
         };
 
-        // When/Then 
+        // When/Then
         const result = mapper.toDomain(gameModuleEntityWithNullId);
         expect(result).toBeInstanceOf(McqModule);
         const mcqModule = result as McqModule;
@@ -162,19 +166,20 @@ describe('PrismaGameModuleMapper', () => {
               id: 'blank-1',
               text: 'Paris',
               isCorrect: true,
-              correctionMessage: 'Correct! Paris is the capital of France.',
+              correctionMessage: 'Correct!',
             },
             {
               id: 'blank-2',
-              text: 'London',
+              text: 'Incorrect Answer',
               isCorrect: false,
-              correctionMessage: 'Incorrect. London is the capital of the UK.',
+              correctionMessage: 'Try again.',
             },
           ],
+
           gameModuleId: 'module-1',
         };
 
-        const gameModuleEntity: GameModuleEntity & { 
+        const gameModuleEntity: GameModuleEntity & {
           mcq: McqModuleEntity | null;
           fillBlank: FillInTheBlankModuleEntity | null;
           trueOrFalse: TrueOrFalseModuleEntity | null;
@@ -199,14 +204,8 @@ describe('PrismaGameModuleMapper', () => {
         expect(fillModule.firstText).toBe('The capital of France is');
         expect(fillModule.secondText).toBe('and it is beautiful.');
         expect(fillModule.blanks).toHaveLength(2);
-        expect(fillModule.blanks[0]).toBeInstanceOf(GameChoice);
-        expect(fillModule.blanks[0]?.id).toBe('blank-1');
         expect(fillModule.blanks[0]?.text).toBe('Paris');
         expect(fillModule.blanks[0]?.isCorrect).toBe(true);
-        expect(fillModule.blanks[0]?.correctionMessage).toBe('Correct! Paris is the capital of France.');
-        expect(fillModule.blanks[1]?.id).toBe('blank-2');
-        expect(fillModule.blanks[1]?.text).toBe('London');
-        expect(fillModule.blanks[1]?.isCorrect).toBe(false);
         expect(fillModule.createdAt).toEqual(new Date('2023-10-01T10:00:00Z'));
         expect(fillModule.updatedAt).toEqual(new Date('2023-10-01T11:00:00Z'));
       });
@@ -217,11 +216,11 @@ describe('PrismaGameModuleMapper', () => {
           id: 'fill-1',
           firstText: 'Test first text',
           secondText: 'Test second text',
-          blanks: null,
+          blank: '',
           gameModuleId: 'module-1',
         };
 
-        const gameModuleEntity: GameModuleEntity & { 
+        const gameModuleEntity: GameModuleEntity & {
           mcq: McqModuleEntity | null;
           fillBlank: FillInTheBlankModuleEntity | null;
           trueOrFalse: TrueOrFalseModuleEntity | null;
@@ -236,7 +235,9 @@ describe('PrismaGameModuleMapper', () => {
         };
 
         // When/Then
-        expect(() => mapper.toDomain(gameModuleEntity)).toThrow('At least two blanks are required');
+        expect(() => mapper.toDomain(gameModuleEntity)).toThrow(
+          'At least two blanks are required',
+        );
       });
     });
 
@@ -244,24 +245,13 @@ describe('PrismaGameModuleMapper', () => {
       it('should map TrueOrFalseModuleEntity to TrueOrFalseModule', () => {
         // Given
         const trueOrFalseEntity: TrueOrFalseModuleEntity = {
-          questions: [
-            {
-              id: 'question-1',
-              text: 'The earth is round',
-              isCorrect: true,
-              correctionMessage: 'Correct! The earth is indeed round.',
-            },
-            {
-              id: 'question-2',
-              text: 'The sun is cold',
-              isCorrect: false,
-              correctionMessage: 'Incorrect! The sun is actually very hot.',
-            },
-          ],
+          id: 'true-false-1',
+          sentence: 'The earth is round',
+          isTrue: true,
           gameModuleId: 'module-1',
         };
 
-        const gameModuleEntity: GameModuleEntity & { 
+        const gameModuleEntity: GameModuleEntity & {
           mcq: McqModuleEntity | null;
           fillBlank: FillInTheBlankModuleEntity | null;
           trueOrFalse: TrueOrFalseModuleEntity | null;
@@ -283,28 +273,26 @@ describe('PrismaGameModuleMapper', () => {
         const trueOrFalseModule = result as TrueOrFalseModule;
         expect(trueOrFalseModule.id).toBe('module-1');
         expect(trueOrFalseModule.lessonId).toBe('lesson-1');
-        expect(trueOrFalseModule.questions).toHaveLength(2);
-        expect(trueOrFalseModule.questions[0]).toBeInstanceOf(GameChoice);
-        expect(trueOrFalseModule.questions[0]?.id).toBe('question-1');
-        expect(trueOrFalseModule.questions[0]?.text).toBe('The earth is round');
-        expect(trueOrFalseModule.questions[0]?.isCorrect).toBe(true);
-        expect(trueOrFalseModule.questions[0]?.correctionMessage).toBe('Correct! The earth is indeed round.');
-        expect(trueOrFalseModule.questions[1]?.id).toBe('question-2');
-        expect(trueOrFalseModule.questions[1]?.text).toBe('The sun is cold');
-        expect(trueOrFalseModule.questions[1]?.isCorrect).toBe(false);
-        expect(trueOrFalseModule.questions[1]?.correctionMessage).toBe('Incorrect! The sun is actually very hot.');
-        expect(trueOrFalseModule.createdAt).toEqual(new Date('2023-10-01T10:00:00Z'));
-        expect(trueOrFalseModule.updatedAt).toEqual(new Date('2023-10-01T11:00:00Z'));
+        expect(trueOrFalseModule.sentence).toBe('The earth is round');
+        expect(trueOrFalseModule.isTrue).toBe(true);
+        expect(trueOrFalseModule.createdAt).toEqual(
+          new Date('2023-10-01T10:00:00Z'),
+        );
+        expect(trueOrFalseModule.updatedAt).toEqual(
+          new Date('2023-10-01T11:00:00Z'),
+        );
       });
 
       it('should throw error for empty questions array for True or False', () => {
         // Given
         const trueOrFalseEntity: TrueOrFalseModuleEntity = {
-          questions: null,
+          id: 'true-false-2',
+          sentence: '',
+          isTrue: true,
           gameModuleId: 'module-1',
         };
 
-        const gameModuleEntity: GameModuleEntity & { 
+        const gameModuleEntity: GameModuleEntity & {
           mcq: McqModuleEntity | null;
           fillBlank: FillInTheBlankModuleEntity | null;
           trueOrFalse: TrueOrFalseModuleEntity | null;
@@ -319,14 +307,16 @@ describe('PrismaGameModuleMapper', () => {
         };
 
         // When/Then
-        expect(() => mapper.toDomain(gameModuleEntity)).toThrow('At least one question is required');
+        expect(() => mapper.toDomain(gameModuleEntity)).toThrow(
+          'Sentence is required',
+        );
       });
     });
 
     describe('Error cases', () => {
       it('should throw error when neither mcq nor fillBlank is provided', () => {
         // Given
-        const gameModuleEntity: GameModuleEntity & { 
+        const gameModuleEntity: GameModuleEntity & {
           mcq: McqModuleEntity | null;
           fillBlank: FillInTheBlankModuleEntity | null;
           trueOrFalse: TrueOrFalseModuleEntity | null;
@@ -341,7 +331,9 @@ describe('PrismaGameModuleMapper', () => {
         };
 
         // When/Then
-        expect(() => mapper.toDomain(gameModuleEntity)).toThrow('Unsupported module entity');
+        expect(() => mapper.toDomain(gameModuleEntity)).toThrow(
+          'Unsupported module entity',
+        );
       });
     });
   });

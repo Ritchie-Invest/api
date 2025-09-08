@@ -4,7 +4,9 @@ import { TrueOrFalseModule } from '../../domain/model/TrueOrFalseModule';
 import { CompleteGameModuleCommand } from '../complete-game-module.use-case';
 import { InvalidAnswerError } from '../../domain/error/InvalidAnswerError';
 
-export class TrueOrFalseCompleteGameModuleStrategy implements CompleteGameModuleStrategy {
+export class TrueOrFalseCompleteGameModuleStrategy
+  implements CompleteGameModuleStrategy
+{
   validate(
     gameModule: GameModule,
     command: CompleteGameModuleCommand,
@@ -17,23 +19,20 @@ export class TrueOrFalseCompleteGameModuleStrategy implements CompleteGameModule
       throw new InvalidAnswerError('Game module is not a true or false module');
     }
 
-    if (!command.trueOrFalse) {
+    if (command.trueOrFalse === undefined) {
       throw new InvalidAnswerError('True or false answer is required');
     }
 
-    const { questionId, answer } = command.trueOrFalse;
-    
-    const question = gameModule.questions.find(q => q.id === questionId);
-    if (!question) {
-      throw new InvalidAnswerError('Question not found');
-    }
+    const userAnswer = command.trueOrFalse;
+    const correctAnswer = gameModule.isTrue;
+    const isCorrect = userAnswer === correctAnswer;
 
-    const isCorrect = question.isCorrect === answer;
-    
     return {
       isCorrect,
-      feedback: question.correctionMessage,
-      correctChoiceId: question.id,
+      feedback: isCorrect
+        ? 'Correct! Well done.'
+        : `Incorrect. The correct answer is: ${correctAnswer ? 'True' : 'False'}`,
+      correctChoiceId: gameModule.id,
     };
   }
 }

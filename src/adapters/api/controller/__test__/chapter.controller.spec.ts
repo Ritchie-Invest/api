@@ -1,6 +1,6 @@
 import { ChapterRepository } from '../../../../core/domain/repository/chapter.repository';
 import { McqModule } from '../../../../core/domain/model/McqModule';
-import { GameChoice } from '../../../../core/domain/model/GameChoice';
+import { McqChoice } from '../../../../core/domain/model/McqChoice';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
@@ -479,13 +479,13 @@ describe('ChapterControllerIT', () => {
         lessonId: lesson1.id,
         question: 'What is 2+2?',
         choices: [
-          new GameChoice({
+          new McqChoice({
             id: 'choice-1',
             text: '4',
             isCorrect: true,
             correctionMessage: 'Correct!',
           }),
-          new GameChoice({
+          new McqChoice({
             id: 'choice-2',
             text: '5',
             isCorrect: false,
@@ -499,13 +499,13 @@ describe('ChapterControllerIT', () => {
         lessonId: lesson1.id,
         question: 'What is 3+3?',
         choices: [
-          new GameChoice({
+          new McqChoice({
             id: 'choice-3',
             text: '6',
             isCorrect: true,
             correctionMessage: 'Correct!',
           }),
-          new GameChoice({
+          new McqChoice({
             id: 'choice-8',
             text: '7',
             isCorrect: false,
@@ -519,13 +519,13 @@ describe('ChapterControllerIT', () => {
         lessonId: lesson2.id,
         question: 'What is 5+5?',
         choices: [
-          new GameChoice({
+          new McqChoice({
             id: 'choice-4',
             text: '10',
             isCorrect: true,
             correctionMessage: 'Correct!',
           }),
-          new GameChoice({
+          new McqChoice({
             id: 'choice-7',
             text: '11',
             isCorrect: false,
@@ -539,13 +539,13 @@ describe('ChapterControllerIT', () => {
         lessonId: lesson3.id,
         question: 'What is 7+7?',
         choices: [
-          new GameChoice({
+          new McqChoice({
             id: 'choice-5',
             text: '14',
             isCorrect: true,
             correctionMessage: 'Correct!',
           }),
-          new GameChoice({
+          new McqChoice({
             id: 'choice-6',
             text: '15',
             isCorrect: false,

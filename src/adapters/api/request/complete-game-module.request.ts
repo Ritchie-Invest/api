@@ -32,7 +32,7 @@ export class FillInTheBlankAnswerRequest {
   @IsNotEmpty()
   @IsString()
   blankId: string;
-  
+
   constructor(blankId: string) {
     this.blankId = blankId;
   }
@@ -53,7 +53,7 @@ export class TrueOrFalseAnswerRequest {
   })
   @IsBoolean()
   answer: boolean;
-  
+
   constructor(questionId: string, answer: boolean) {
     this.questionId = questionId;
     this.answer = answer;
@@ -80,7 +80,8 @@ export class CompleteGameModuleRequest {
   mcq?: McqAnswerRequest;
 
   @ApiProperty({
-    description: 'Fill in the blank answer details (required when gameType is FILL_IN_THE_BLANK)',
+    description:
+      'Fill in the blank answer details (required when gameType is FILL_IN_THE_BLANK)',
     type: FillInTheBlankAnswerRequest,
     required: false,
   })
@@ -90,7 +91,8 @@ export class CompleteGameModuleRequest {
   fillInTheBlank?: FillInTheBlankAnswerRequest;
 
   @ApiProperty({
-    description: 'True or False answer details (required when gameType is TRUE_OR_FALSE)',
+    description:
+      'True or False answer details (required when gameType is TRUE_OR_FALSE)',
     type: TrueOrFalseAnswerRequest,
     required: false,
   })

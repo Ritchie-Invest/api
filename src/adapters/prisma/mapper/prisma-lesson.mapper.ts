@@ -35,7 +35,7 @@ export class PrismaLessonMapper implements EntityMapper<Lesson, LessonEntity> {
 
   toDomain(
     entity: LessonEntity & {
-      modules?: (GameModuleEntity & { 
+      modules?: (GameModuleEntity & {
         mcq: McqModuleEntity | null;
         fillBlank: FillInTheBlankModuleEntity | null;
         trueOrFalse: TrueOrFalseModuleEntity | null;

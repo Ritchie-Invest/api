@@ -7,8 +7,9 @@ import {
 } from '@prisma/client';
 import { GameModule } from '../../../core/domain/model/GameModule';
 import { EntityMapper } from '../../../core/base/entity-mapper';
-import { GameChoice } from '../../../core/domain/model/GameChoice';
+import { McqChoice } from '../../../core/domain/model/McqChoice';
 import { FillInTheBlankModule } from '../../../core/domain/model/FillInTheBlankModule';
+import { FillInTheBlankChoice } from '../../../core/domain/model/FillInTheBlankChoice';
 import { TrueOrFalseModule } from '../../../core/domain/model/TrueOrFalseModule';
 
 export class PrismaGameModuleMapper
@@ -19,7 +20,7 @@ export class PrismaGameModuleMapper
   }
 
   toDomain(
-    entity: GameModuleEntity & { 
+    entity: GameModuleEntity & {
       mcq: McqModuleEntity | null;
       fillBlank: FillInTheBlankModuleEntity | null;
       trueOrFalse: TrueOrFalseModuleEntity | null;
@@ -31,8 +32,8 @@ export class PrismaGameModuleMapper
         lessonId: entity.lessonId,
         question: entity.mcq.question,
         choices: ((entity.mcq.choices as any[]) || []).map(
-          (choice: GameChoice) =>
-            new GameChoice({
+          (choice: McqChoice) =>
+            new McqChoice({
               id: choice.id ?? '',
               text: choice.text,
               isCorrect: choice.isCorrect,
@@ -50,8 +51,8 @@ export class PrismaGameModuleMapper
         firstText: entity.fillBlank.firstText,
         secondText: entity.fillBlank.secondText,
         blanks: ((entity.fillBlank.blanks as any[]) || []).map(
-          (blank: GameChoice) =>
-            new GameChoice({
+          (blank: FillInTheBlankChoice) =>
+            new FillInTheBlankChoice({
               id: blank.id ?? '',
               text: blank.text,
               isCorrect: blank.isCorrect,
@@ -66,15 +67,8 @@ export class PrismaGameModuleMapper
       return new TrueOrFalseModule({
         id: entity.id,
         lessonId: entity.lessonId,
-        questions: ((entity.trueOrFalse.questions as any[]) || []).map(
-          (question: GameChoice) =>
-            new GameChoice({
-              id: question.id ?? '',
-              text: question.text,
-              isCorrect: question.isCorrect,
-              correctionMessage: question.correctionMessage,
-            }),
-        ),
+        sentence: entity.trueOrFalse.sentence,
+        isTrue: entity.trueOrFalse.isTrue,
         createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
       });

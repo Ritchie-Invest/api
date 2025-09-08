@@ -25,12 +25,7 @@ export class CompleteGameModuleMapper {
             blankId: request.fillInTheBlank.blankId,
           }
         : undefined,
-      trueOrFalse: request.trueOrFalse
-        ? {
-            questionId: request.trueOrFalse.questionId,
-            answer: request.trueOrFalse.answer,
-          }
-        : undefined,
+      trueOrFalse: request.trueOrFalse?.answer,
     };
   }
 

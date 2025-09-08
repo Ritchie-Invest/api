@@ -2,6 +2,7 @@ import { CompleteGameModuleMapper } from '../complete-game-module.mapper';
 import {
   CompleteGameModuleRequest,
   McqAnswerRequest,
+  TrueOrFalseAnswerRequest,
 } from '../../request/complete-game-module.request';
 import { CompleteGameModuleResult } from '../../../../core/usecases/complete-game-module.use-case';
 import { GameType } from '../../../../core/domain/type/GameType';
@@ -32,6 +33,33 @@ describe('CompleteGameModuleMapper', () => {
         mcq: {
           choiceId: 'choice-1',
         },
+      });
+    });
+
+    it('should map request parameters to CompleteGameModuleCommand for true or false game', () => {
+      // Given
+      const userId = 'user-123';
+      const moduleId = 'module-456';
+      const request = new CompleteGameModuleRequest(
+        GameType.TRUE_OR_FALSE,
+        undefined,
+        undefined,
+        new TrueOrFalseAnswerRequest('question-1', true),
+      );
+
+      // When
+      const command = CompleteGameModuleMapper.toDomain(
+        userId,
+        moduleId,
+        request,
+      );
+
+      // Then
+      expect(command).toEqual({
+        userId: 'user-123',
+        moduleId: 'module-456',
+        gameType: GameType.TRUE_OR_FALSE,
+        trueOrFalse: true,
       });
     });
   });

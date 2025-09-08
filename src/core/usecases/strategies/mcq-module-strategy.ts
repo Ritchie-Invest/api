@@ -1,5 +1,5 @@
 import { GameModuleStrategy } from './game-module-strategy';
-import { GameChoice } from '../../domain/model/GameChoice';
+import { McqChoice } from '../../domain/model/McqChoice';
 import { CreateGameModuleCommand } from '../create-game-module.use-case';
 import { McqModule } from '../../domain/model/McqModule';
 import { McqModuleInvalidDataError } from '../../domain/error/McqModuleInvalidDataError';
@@ -17,7 +17,7 @@ export class McqModuleStrategy implements GameModuleStrategy {
       question: command.mcq.question,
       choices: command.mcq.choices.map(
         (c) =>
-          new GameChoice({
+          new McqChoice({
             id: crypto.randomUUID(),
             text: c.text,
             isCorrect: c.isCorrect,
@@ -40,7 +40,7 @@ export class McqModuleStrategy implements GameModuleStrategy {
       question: command.mcq.question,
       choices: command.mcq.choices.map(
         (c) =>
-          new GameChoice({
+          new McqChoice({
             id: crypto.randomUUID(),
             text: c.text,
             isCorrect: c.isCorrect,

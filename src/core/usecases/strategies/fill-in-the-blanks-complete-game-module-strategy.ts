@@ -17,7 +17,7 @@ export class FillInTheBlankCompleteGameModuleStrategy
   } {
     const fillInTheBlankModule = gameModule as FillInTheBlankModule;
     if (!command.fillInTheBlank?.blankId) {
-      throw new InvalidAnswerError('Fill in the blank option is required');
+      throw new InvalidAnswerError('Fill in the blank choice ID is required');
     }
 
     const selectedBlank = fillInTheBlankModule.blanks.find(
@@ -25,10 +25,9 @@ export class FillInTheBlankCompleteGameModuleStrategy
     );
 
     if (!selectedBlank) {
-      throw new InvalidAnswerError('Invalid answer: option not found');
+      throw new InvalidAnswerError('Invalid blank choice ID');
     }
 
-    // Trouver le blank correct pour retourner son ID
     const correctBlank = fillInTheBlankModule.blanks.find(
       (blank) => blank.isCorrect,
     );

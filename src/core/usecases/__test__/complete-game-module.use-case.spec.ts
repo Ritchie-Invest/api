@@ -5,7 +5,7 @@ import {
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { McqModule } from '../../domain/model/McqModule';
-import { GameChoice } from '../../domain/model/GameChoice';
+import { McqChoice } from '../../domain/model/McqChoice';
 import { GameModuleNotFoundError } from '../../domain/error/GameModuleNotFoundError';
 import { InvalidAnswerError } from '../../domain/error/InvalidAnswerError';
 import { GameType } from '../../domain/type/GameType';
@@ -15,6 +15,7 @@ import { Lesson } from '../../domain/model/Lesson';
 import { FillInTheBlankCompleteGameModuleStrategy } from '../strategies/fill-in-the-blanks-complete-game-module-strategy';
 import { TrueOrFalseCompleteGameModuleStrategy } from '../strategies/true-or-false-complete-game-module-strategy';
 import { FillInTheBlankModule } from '../../domain/model/FillInTheBlankModule';
+import { FillInTheBlankChoice } from '../../domain/model/FillInTheBlankChoice';
 import { TrueOrFalseModule } from '../../domain/model/TrueOrFalseModule';
 import { InMemoryModuleAttemptRepository } from '../../../adapters/in-memory/in-memory-module-attempt.repository';
 import { InMemoryLessonAttemptRepository } from '../../../adapters/in-memory/in-memory-lesson-attempt.repository';
@@ -77,14 +78,14 @@ describe('CompleteGameModuleUseCase', () => {
     // Given
     createTestLesson();
 
-    const correctChoice = new GameChoice({
+    const correctChoice = new McqChoice({
       id: 'choice-1',
       text: 'Paris',
       isCorrect: true,
       correctionMessage: 'Correct! Paris is indeed the capital of France.',
     });
 
-    const incorrectChoice = new GameChoice({
+    const incorrectChoice = new McqChoice({
       id: 'choice-2',
       text: 'Lyon',
       isCorrect: false,
@@ -137,14 +138,14 @@ describe('CompleteGameModuleUseCase', () => {
     // Given
     createTestLesson();
 
-    const correctChoice = new GameChoice({
+    const correctChoice = new McqChoice({
       id: 'choice-1',
       text: 'Paris',
       isCorrect: true,
       correctionMessage: 'Correct! Paris is indeed the capital of France.',
     });
 
-    const incorrectChoice = new GameChoice({
+    const incorrectChoice = new McqChoice({
       id: 'choice-2',
       text: 'Lyon',
       isCorrect: false,
@@ -197,18 +198,19 @@ describe('CompleteGameModuleUseCase', () => {
       // Given
       createTestLesson();
 
-      const correctBlank = new GameChoice({
+      const correctBlank = new FillInTheBlankChoice({
         id: 'blank-1',
         text: 'Paris',
         isCorrect: true,
         correctionMessage: 'Correct! Paris is indeed the capital of France.',
       });
 
-      const incorrectBlank = new GameChoice({
+      const incorrectBlank = new FillInTheBlankChoice({
         id: 'blank-2',
         text: 'Lyon',
         isCorrect: false,
-        correctionMessage: 'Incorrect. Lyon is a major city but not the capital.',
+        correctionMessage:
+          'Incorrect. Lyon is a major city but not the capital.',
       });
 
       const fillInTheBlankModule = new FillInTheBlankModule({
@@ -235,25 +237,28 @@ describe('CompleteGameModuleUseCase', () => {
 
       // Then
       expect(result.isCorrect).toBe(true);
-      expect(result.feedback).toBe('Correct! Paris is indeed the capital of France.');
+      expect(result.feedback).toBe(
+        'Correct! Paris is indeed the capital of France.',
+      );
     });
 
     it('should return incorrect answer and feedback when answer is wrong', async () => {
       // Given
       createTestLesson();
 
-      const correctBlank = new GameChoice({
+      const correctBlank = new FillInTheBlankChoice({
         id: 'blank-1',
         text: 'Paris',
         isCorrect: true,
         correctionMessage: 'Correct! Paris is indeed the capital of France.',
       });
 
-      const incorrectBlank = new GameChoice({
+      const incorrectBlank = new FillInTheBlankChoice({
         id: 'blank-2',
         text: 'Lyon',
         isCorrect: false,
-        correctionMessage: 'Incorrect. Lyon is a major city but not the capital.',
+        correctionMessage:
+          'Incorrect. Lyon is a major city but not the capital.',
       });
 
       const fillInTheBlankModule = new FillInTheBlankModule({
@@ -280,7 +285,9 @@ describe('CompleteGameModuleUseCase', () => {
 
       // Then
       expect(result.isCorrect).toBe(false);
-      expect(result.feedback).toBe('Incorrect. Lyon is a major city but not the capital.');
+      expect(result.feedback).toBe(
+        'Incorrect. Lyon is a major city but not the capital.',
+      );
     });
   });
 
@@ -289,14 +296,14 @@ describe('CompleteGameModuleUseCase', () => {
       // Given
       createTestLesson();
 
-      const correctBlank = new GameChoice({
+      const correctBlank = new FillInTheBlankChoice({
         id: 'blank-1',
         text: 'Paris',
         isCorrect: true,
         correctionMessage: 'Correct!',
       });
 
-      const incorrectBlank = new GameChoice({
+      const incorrectBlank = new FillInTheBlankChoice({
         id: 'blank-2',
         text: 'Lyon',
         isCorrect: false,
@@ -323,21 +330,23 @@ describe('CompleteGameModuleUseCase', () => {
       };
 
       // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
 
     it('should throw InvalidAnswerError when blankId is missing', async () => {
       // Given
       createTestLesson();
 
-      const correctBlank = new GameChoice({
+      const correctBlank = new FillInTheBlankChoice({
         id: 'blank-1',
         text: 'Paris',
         isCorrect: true,
         correctionMessage: 'Correct!',
       });
 
-      const incorrectBlank = new GameChoice({
+      const incorrectBlank = new FillInTheBlankChoice({
         id: 'blank-2',
         text: 'Lyon',
         isCorrect: false,
@@ -362,21 +371,23 @@ describe('CompleteGameModuleUseCase', () => {
       } as CompleteGameModuleCommand;
 
       // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
 
     it('should throw InvalidAnswerError when fillInTheBlank is missing', async () => {
       // Given
       createTestLesson();
 
-      const correctBlank = new GameChoice({
+      const correctBlank = new FillInTheBlankChoice({
         id: 'blank-1',
         text: 'Paris',
         isCorrect: true,
         correctionMessage: 'Correct!',
       });
 
-      const incorrectBlank = new GameChoice({
+      const incorrectBlank = new FillInTheBlankChoice({
         id: 'blank-2',
         text: 'Lyon',
         isCorrect: false,
@@ -400,21 +411,23 @@ describe('CompleteGameModuleUseCase', () => {
       } as CompleteGameModuleCommand;
 
       // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
 
     it('should throw InvalidAnswerError when blankId does not exist in question', async () => {
       // Given
       createTestLesson();
 
-      const correctBlank = new GameChoice({
+      const correctBlank = new FillInTheBlankChoice({
         id: 'blank-1',
         text: 'Paris',
         isCorrect: true,
         correctionMessage: 'Correct!',
       });
 
-      const otherBlank = new GameChoice({
+      const otherBlank = new FillInTheBlankChoice({
         id: 'blank-2',
         text: 'Lyon',
         isCorrect: false,
@@ -441,7 +454,9 @@ describe('CompleteGameModuleUseCase', () => {
       };
 
       // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
   });
 
@@ -450,24 +465,11 @@ describe('CompleteGameModuleUseCase', () => {
       // Given
       createTestLesson();
 
-      const trueQuestion = new GameChoice({
-        id: 'question-1',
-        text: 'The earth is round',
-        isCorrect: true,
-        correctionMessage: 'Correct! The earth is indeed round.',
-      });
-
-      const falseQuestion = new GameChoice({
-        id: 'question-2',
-        text: 'The sun is cold',
-        isCorrect: false,
-        correctionMessage: 'Incorrect. The sun is actually very hot.',
-      });
-
       const trueOrFalseModule = new TrueOrFalseModule({
         id: 'question-1',
         lessonId: 'lesson-1',
-        questions: [trueQuestion, falseQuestion],
+        sentence: 'Paris is the capital of France',
+        isTrue: true,
       });
 
       gameModuleRepository.create(trueOrFalseModule);
@@ -476,10 +478,7 @@ describe('CompleteGameModuleUseCase', () => {
         userId: 'user-1',
         moduleId: 'question-1',
         gameType: GameType.TRUE_OR_FALSE,
-        trueOrFalse: {
-          questionId: 'question-1',
-          answer: true,
-        },
+        trueOrFalse: true,
       };
 
       // When
@@ -487,31 +486,18 @@ describe('CompleteGameModuleUseCase', () => {
 
       // Then
       expect(result.isCorrect).toBe(true);
-      expect(result.feedback).toBe('Correct! The earth is indeed round.');
+      expect(result.feedback).toBe('Correct! Well done.');
     });
 
     it('should return incorrect answer and feedback when answer is wrong', async () => {
       // Given
       createTestLesson();
 
-      const trueQuestion = new GameChoice({
-        id: 'question-1',
-        text: 'The earth is round',
-        isCorrect: true,
-        correctionMessage: 'Correct! The earth is indeed round.',
-      });
-
-      const falseQuestion = new GameChoice({
-        id: 'question-2',
-        text: 'The sun is cold',
-        isCorrect: false,
-        correctionMessage: 'Incorrect. The sun is actually very hot.',
-      });
-
       const trueOrFalseModule = new TrueOrFalseModule({
         id: 'question-1',
         lessonId: 'lesson-1',
-        questions: [trueQuestion, falseQuestion],
+        sentence: 'Paris is the capital of France',
+        isTrue: true,
       });
 
       gameModuleRepository.create(trueOrFalseModule);
@@ -520,10 +506,7 @@ describe('CompleteGameModuleUseCase', () => {
         userId: 'user-1',
         moduleId: 'question-1',
         gameType: GameType.TRUE_OR_FALSE,
-        trueOrFalse: {
-          questionId: 'question-2',
-          answer: true,
-        },
+        trueOrFalse: false,
       };
 
       // When
@@ -531,26 +514,20 @@ describe('CompleteGameModuleUseCase', () => {
 
       // Then
       expect(result.isCorrect).toBe(false);
-      expect(result.feedback).toBe('Incorrect. The sun is actually very hot.');
+      expect(result.feedback).toBe('Incorrect. The correct answer is: True');
     });
   });
 
   describe('Scenario 7: True or False invalid or empty answer', () => {
-    it('should throw InvalidAnswerError when questionId is empty', async () => {
+    it('should throw InvalidAnswerError when trueOrFalse answer is undefined', async () => {
       // Given
       createTestLesson();
-
-      const trueQuestion = new GameChoice({
-        id: 'question-1',
-        text: 'The earth is round',
-        isCorrect: true,
-        correctionMessage: 'Correct!',
-      });
 
       const trueOrFalseModule = new TrueOrFalseModule({
         id: 'question-1',
         lessonId: 'lesson-1',
-        questions: [trueQuestion],
+        sentence: 'Paris is the capital of France',
+        isTrue: true,
       });
 
       gameModuleRepository.create(trueOrFalseModule);
@@ -562,40 +539,9 @@ describe('CompleteGameModuleUseCase', () => {
       } as CompleteGameModuleCommand;
 
       // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
-    });
-
-    it('should throw InvalidAnswerError when questionId does not exist in module', async () => {
-      // Given
-      createTestLesson();
-
-      const trueQuestion = new GameChoice({
-        id: 'question-1',
-        text: 'The earth is round',
-        isCorrect: true,
-        correctionMessage: 'Correct!',
-      });
-
-      const trueOrFalseModule = new TrueOrFalseModule({
-        id: 'question-1',
-        lessonId: 'lesson-1',
-        questions: [trueQuestion],
-      });
-
-      gameModuleRepository.create(trueOrFalseModule);
-
-      const command: CompleteGameModuleCommand = {
-        userId: 'user-1',
-        moduleId: 'question-1',
-        gameType: GameType.TRUE_OR_FALSE,
-        trueOrFalse: {
-          questionId: 'non-existent-question',
-          answer: true,
-        },
-      };
-
-      // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
   });
 
@@ -623,14 +569,14 @@ describe('CompleteGameModuleUseCase', () => {
       // Given
       createTestLesson();
 
-      const correctChoice = new GameChoice({
+      const correctChoice = new McqChoice({
         id: 'choice-1',
         text: 'Paris',
         isCorrect: true,
         correctionMessage: 'Correct!',
       });
 
-      const incorrectChoice = new GameChoice({
+      const incorrectChoice = new McqChoice({
         id: 'choice-2',
         text: 'Lyon',
         isCorrect: false,
@@ -656,21 +602,23 @@ describe('CompleteGameModuleUseCase', () => {
       };
 
       // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
 
     it('should throw InvalidAnswerError when choiceId is missing', async () => {
       // Given
       createTestLesson();
 
-      const correctChoice = new GameChoice({
+      const correctChoice = new McqChoice({
         id: 'choice-1',
         text: 'Paris',
         isCorrect: true,
         correctionMessage: 'Correct!',
       });
 
-      const incorrectChoice = new GameChoice({
+      const incorrectChoice = new McqChoice({
         id: 'choice-2',
         text: 'Lyon',
         isCorrect: false,
@@ -694,21 +642,23 @@ describe('CompleteGameModuleUseCase', () => {
       } as CompleteGameModuleCommand;
 
       // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
 
     it('should throw InvalidAnswerError when mcq is missing', async () => {
       // Given
       createTestLesson();
 
-      const correctChoice = new GameChoice({
+      const correctChoice = new McqChoice({
         id: 'choice-1',
         text: 'Paris',
         isCorrect: true,
         correctionMessage: 'Correct!',
       });
 
-      const incorrectChoice = new GameChoice({
+      const incorrectChoice = new McqChoice({
         id: 'choice-2',
         text: 'Lyon',
         isCorrect: false,
@@ -731,21 +681,23 @@ describe('CompleteGameModuleUseCase', () => {
       } as CompleteGameModuleCommand;
 
       // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
 
     it('should throw InvalidAnswerError when choiceId does not exist in question', async () => {
       // Given
       createTestLesson();
 
-      const correctChoice = new GameChoice({
+      const correctChoice = new McqChoice({
         id: 'choice-1',
         text: 'Paris',
         isCorrect: true,
         correctionMessage: 'Correct!',
       });
 
-      const otherChoice = new GameChoice({
+      const otherChoice = new McqChoice({
         id: 'choice-2',
         text: 'Lyon',
         isCorrect: false,
@@ -771,7 +723,9 @@ describe('CompleteGameModuleUseCase', () => {
       };
 
       // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(InvalidAnswerError);
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
 
     it('should throw GameModuleNotFoundError when moduleId does not exist', async () => {
@@ -795,13 +749,13 @@ describe('CompleteGameModuleUseCase', () => {
   it('should not allow retrying a module for the same lesson attempt', async () => {
     // Given
     createTestLesson();
-    const correctChoice = new GameChoice({
+    const correctChoice = new McqChoice({
       id: 'choice-1',
       text: 'Paris',
       isCorrect: true,
       correctionMessage: 'Correct! Paris is indeed the capital of France.',
     });
-    const incorrectChoice = new GameChoice({
+    const incorrectChoice = new McqChoice({
       id: 'choice-2',
       text: 'Lyon',
       isCorrect: false,

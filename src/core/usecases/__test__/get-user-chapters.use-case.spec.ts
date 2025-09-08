@@ -8,7 +8,7 @@ import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-mem
 import { InMemoryLessonCompletionRepository } from '../../../adapters/in-memory/in-memory-lesson-completion.repository';
 import { GameType } from '../../domain/type/GameType';
 import { McqModule } from '../../domain/model/McqModule';
-import { GameChoice } from '../../domain/model/GameChoice';
+import { McqChoice } from '../../domain/model/McqChoice';
 import { LessonCompletion } from '../../domain/model/LessonCompletion';
 import { ChapterStatus } from '../../domain/type/ChapterStatus';
 import { LessonStatus } from '../../domain/type/LessonStatus';
@@ -23,14 +23,14 @@ describe('GetUserChaptersUseCase', () => {
   const userId = 'user-123';
 
   const createMcqModule = (id: string, lessonId: string) => {
-    const correctChoice = new GameChoice({
+    const correctChoice = new McqChoice({
       id: `${id}-choice-1`,
       text: 'Paris',
       isCorrect: true,
       correctionMessage: 'Correct!',
     });
 
-    const incorrectChoice = new GameChoice({
+    const incorrectChoice = new McqChoice({
       id: `${id}-choice-2`,
       text: 'Lyon',
       isCorrect: false,

@@ -38,14 +38,18 @@ export class CreateMcqGameModuleContract extends CreateGameModuleContract {
 export class CreateFillInTheBlankGameModuleContract extends CreateGameModuleContract {
   @ApiProperty()
   firstText: string;
-  
+
   @ApiProperty()
   secondText: string;
 
   @ApiProperty({ type: [CreateGameChoice] })
   blanks: CreateGameChoice[];
 
-  constructor(firstText: string, secondText: string, blanks: CreateGameChoice[]) {
+  constructor(
+    firstText: string,
+    secondText: string,
+    blanks: CreateGameChoice[],
+  ) {
     super();
     this.firstText = firstText;
     this.secondText = secondText;
@@ -54,16 +58,24 @@ export class CreateFillInTheBlankGameModuleContract extends CreateGameModuleCont
 }
 
 export class CreateTrueOrFalseGameModuleContract extends CreateGameModuleContract {
-  @ApiProperty({ type: [CreateGameChoice] })
-  questions: CreateGameChoice[];
+  @ApiProperty()
+  sentence: string;
 
-  constructor(questions: CreateGameChoice[]) {
+  @ApiProperty()
+  isTrue: boolean;
+
+  constructor(sentence: string, isTrue: boolean) {
     super();
-    this.questions = questions;
+    this.sentence = sentence;
+    this.isTrue = isTrue;
   }
 }
 
-@ApiExtraModels(CreateMcqGameModuleContract, CreateFillInTheBlankGameModuleContract, CreateTrueOrFalseGameModuleContract)
+@ApiExtraModels(
+  CreateMcqGameModuleContract,
+  CreateFillInTheBlankGameModuleContract,
+  CreateTrueOrFalseGameModuleContract,
+)
 export class CreateGameModuleRequest {
   @ApiProperty({ enum: GameType })
   @IsEnum(GameType)

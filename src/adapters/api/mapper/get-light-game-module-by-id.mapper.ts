@@ -3,7 +3,7 @@ import { GetGameModuleByIdCommand } from '../../../core/usecases/get-game-module
 import { McqModule } from '../../../core/domain/model/McqModule';
 import {
   GetLightGameModuleByIdResponse,
-  LightGameChoice,
+  LightMcqChoice,
   McqModuleDetails,
 } from '../response/get-light-game-module-by-id.response';
 
@@ -22,7 +22,7 @@ export class GetLightGameModuleByIdMapper {
         new McqModuleDetails(
           gameModule.question,
           gameModule.choices.map(
-            (choice) => new LightGameChoice(choice.id, choice.text),
+            (choice) => new LightMcqChoice(choice.id, choice.text),
           ),
         ),
         gameModule.updatedAt,

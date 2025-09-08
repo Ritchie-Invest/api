@@ -1,18 +1,18 @@
 import { GameModule } from './GameModule';
-import { GameChoice } from './GameChoice';
 import { FillInTheBlankModuleInvalidDataError } from '../error/FillInTheBlankModuleInvalidDataError';
+import { FillInTheBlankChoice } from './FillInTheBlankChoice';
 
 export class FillInTheBlankModule extends GameModule {
   firstText: string;
   secondText: string;
-  blanks: GameChoice[];
+  blanks: FillInTheBlankChoice[];
 
   constructor(params: {
     id: string;
     lessonId: string;
     firstText: string;
     secondText: string;
-    blanks: GameChoice[];
+    blanks: FillInTheBlankChoice[];
     updatedAt?: Date;
     createdAt?: Date;
   }) {
@@ -23,12 +23,9 @@ export class FillInTheBlankModule extends GameModule {
     if (!params.secondText || params.secondText.trim().length === 0) {
       throw new FillInTheBlankModuleInvalidDataError('Second text is required');
     }
-    if (!Array.isArray(params.blanks) || params.blanks.length < 2) {
-      throw new FillInTheBlankModuleInvalidDataError('At least two blanks are required');
-    }
-    if (params.blanks.filter((blank) => blank.isCorrect).length !== 1) {
+    if (!params.blanks || params.blanks.length < 2) {
       throw new FillInTheBlankModuleInvalidDataError(
-        'Exactly one option must be marked as correct',
+        'At least two blanks are required',
       );
     }
     this.firstText = params.firstText;

@@ -2,7 +2,7 @@ import { GameModule } from '../../../core/domain/model/GameModule';
 import { GetGameModuleByIdCommand } from '../../../core/usecases/get-game-module-by-id.use-case';
 import {
   GetGameModuleByIdResponse,
-  GameChoice,
+  McqChoice,
   McqModuleDetails,
 } from '../response/get-game-module-by-id.response';
 import { McqModule } from '../../../core/domain/model/McqModule';
@@ -23,7 +23,7 @@ export class GetGameModuleByIdMapper {
           gameModule.question,
           gameModule.choices.map(
             (choice) =>
-              new GameChoice(
+              new McqChoice(
                 choice.id,
                 choice.text,
                 choice.isCorrect,

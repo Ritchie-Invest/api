@@ -2,7 +2,7 @@ import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 
 export class GameModuleDetails {}
 
-export class LightGameChoice {
+export class LightMcqChoice {
   @ApiProperty()
   id: string;
 
@@ -19,10 +19,10 @@ export class McqModuleDetails extends GameModuleDetails {
   @ApiProperty()
   question: string;
 
-  @ApiProperty({ type: [LightGameChoice] })
-  choices: LightGameChoice[];
+  @ApiProperty({ type: [LightMcqChoice] })
+  choices: LightMcqChoice[];
 
-  constructor(question: string, choices: LightGameChoice[]) {
+  constructor(question: string, choices: LightMcqChoice[]) {
     super();
     this.question = question;
     this.choices = choices;
