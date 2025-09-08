@@ -44,7 +44,10 @@ export class CreateLessonUseCase
   }
 
   private canExecute(currentUser: Pick<User, 'id' | 'type'>): boolean {
-    return currentUser.type === UserType.ADMIN;
+    return (
+      currentUser.type === UserType.ADMIN ||
+      currentUser.type === UserType.SUPERADMIN
+    );
   }
 
   private generateId(): string {
