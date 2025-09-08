@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../app.module';
+import { AppCliModule } from './app-cli.module';
 import { CreateSuperadminUseCase } from '../core/usecases/create-superadmin.use-case';
 
 async function bootstrap() {
@@ -15,7 +15,7 @@ async function bootstrap() {
     return;
   }
 
-  const appContext = await NestFactory.createApplicationContext(AppModule, {
+  const appContext = await NestFactory.createApplicationContext(AppCliModule, {
     logger: ['error', 'warn', 'log'],
   });
   try {
