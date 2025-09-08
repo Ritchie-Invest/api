@@ -19,6 +19,16 @@ enum GameType {
   TRUE_OR_FALSE
 }
 
+enum TickerType {
+  ETF
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+}
+
 model User {
   id               String             @id @default(cuid())
   email            String             @unique
@@ -139,4 +149,28 @@ model ModuleAttempt {
   user          User          @relation(fields: [userId], references: [id])
   gameModule    GameModule    @relation(fields: [gameModuleId], references: [id])
   lessonAttempt LessonAttempt @relation(fields: [lessonAttemptId], references: [id])
+}
+
+model Ticker {
+  id       String     @id @default(cuid())
+  name     String
+  symbol   String     @unique
+  type     TickerType
+  currency Currency
+  history  DailyBar[]
+}
+
+model DailyBar {
+  id       String   @id @default(cuid())
+  tickerId String
+  date     DateTime
+  open     Float
+  high     Float
+  low      Float
+  close    Float
+  volume   Int
+
+  ticker Ticker @relation(fields: [tickerId], references: [id])
+
+  @@unique([tickerId, date])
 }
