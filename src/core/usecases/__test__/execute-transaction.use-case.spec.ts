@@ -131,14 +131,14 @@ describe('ExecuteTransactionUseCase', () => {
     const transactions = transactionRepository.findAll();
     expect(transactions).toHaveLength(1);
     expect(transactions[0]).toEqual({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      id: expect.any(String),
+      id: expect.any(String) as string,
       portfolioId: DEFAULT_PORTFOLIO_ID,
       tickerId: DEFAULT_TICKER_ID,
       type: TransactionType.BUY,
       amount: DEFAULT_AMOUNT,
       volume: 10,
       currentTickerPrice: DEFAULT_SHARE_PRICE,
+      timestamp: expect.any(Date) as Date,
     });
   });
 
@@ -190,6 +190,7 @@ describe('ExecuteTransactionUseCase', () => {
       amount: 2000,
       volume: 20, // 2000 / 100 = 20 shares
       currentTickerPrice: DEFAULT_SHARE_PRICE,
+      timestamp: new Date(),
     });
 
     // When
@@ -231,6 +232,7 @@ describe('ExecuteTransactionUseCase', () => {
       amount: 500,
       volume: 5, // 500 / 100 = 5 shares
       currentTickerPrice: DEFAULT_SHARE_PRICE,
+      timestamp: new Date(),
     });
 
     // When & Then

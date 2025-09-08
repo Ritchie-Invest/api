@@ -78,6 +78,7 @@ import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cr
 import { GetPortfolioUseCase } from './core/usecases/get-portfolio.use-case';
 import { GetPortfolioPositionsUseCase } from './core/usecases/get-portfolio-positions.use-case';
 import { PortfolioController } from './adapters/api/controller/portfolio.controller';
+import { GetUserTransactionsUseCase } from './core/usecases/get-user-transactions.use-case';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -92,6 +93,12 @@ import { PortfolioController } from './adapters/api/controller/portfolio.control
     PortfolioController,
   ],
   providers: [
+    {
+      provide: GetUserTransactionsUseCase,
+      useFactory: (transactionRepository: TransactionRepository) =>
+        new GetUserTransactionsUseCase(transactionRepository),
+      inject: ['TransactionRepository'],
+    },
     PrismaService,
     JwtService,
     TickerHistoryCronService,

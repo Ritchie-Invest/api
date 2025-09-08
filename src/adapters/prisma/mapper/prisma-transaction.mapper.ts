@@ -17,6 +17,7 @@ export class PrismaTransactionMapper
       amount: model.amount,
       volume: model.volume,
       currentTickerPrice: model.currentTickerPrice,
+      timestamp: model.timestamp,
     };
   }
 
@@ -29,6 +30,7 @@ export class PrismaTransactionMapper
       amount: entity.amount,
       volume: entity.volume,
       currentTickerPrice: entity.currentTickerPrice,
+      timestamp: entity.timestamp,
     });
   }
 }

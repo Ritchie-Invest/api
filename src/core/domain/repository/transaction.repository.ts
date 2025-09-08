@@ -6,4 +6,7 @@ export abstract class TransactionRepository extends Repository<Transaction> {
     portfolioId: string,
     tickerId: string,
   ): Promise<Transaction[]> | Transaction[];
+  abstract findByPortfolioId(
+    portfolioId: string,
+  ): Promise<Transaction[]> | Transaction[];
 }
