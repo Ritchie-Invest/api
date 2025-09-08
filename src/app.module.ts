@@ -62,6 +62,7 @@ import { MarketService } from './core/domain/service/market.service';
 import { AlphaVantageMarketServiceAdapter } from './adapters/alpha-vantage/alpha-vantage-market-service-adapter.service';
 import { UpdateTickersHistoryUseCase } from './core/usecases/update-tickers-history-use.case';
 import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cron';
+import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-case';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -350,6 +351,12 @@ import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cr
         marketService: MarketService,
       ) => new UpdateTickersHistoryUseCase(tickerRepository, marketService),
       inject: [TickerRepository, 'MarketService'],
+    },
+    {
+      provide: CreateSuperadminUseCase,
+      useFactory: (userRepository: UserRepository) =>
+        new CreateSuperadminUseCase(userRepository),
+      inject: [UserRepository],
     },
   ],
 })
