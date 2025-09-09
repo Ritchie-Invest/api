@@ -53,7 +53,7 @@ export class ChapterController {
   ) {}
 
   @Get('/')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Get all chapters' })
   @ApiCreatedResponse({
     description: 'Chapters successfully retrieved',
@@ -80,7 +80,7 @@ export class ChapterController {
   }
 
   @Post('/')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Create a new chapter' })
   @ApiCreatedResponse({
     description: 'Chapter successfully created',
@@ -108,7 +108,7 @@ export class ChapterController {
   }
 
   @Get('/:chapterId')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Get chapter by ID' })
   @ApiCreatedResponse({
     description: 'Chapter successfully retrieved',
@@ -136,7 +136,7 @@ export class ChapterController {
   }
 
   @Patch('/:chapterId')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Update an existing chapter' })
   @ApiCreatedResponse({
     description: 'Chapter successfully updated',
