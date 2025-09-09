@@ -125,7 +125,7 @@ describe('GetPortfolioPositionsUseCase', () => {
       expect(result.positions[2]?.id).toBe('position-3');
     });
 
-    it('should handle pagination with limit and offset', async () => {
+    it('should handle pagination with limit', async () => {
       // Given
       const userPortfolio = new UserPortfolio({
         id: DEFAULT_PORTFOLIO_ID,
@@ -151,7 +151,6 @@ describe('GetPortfolioPositionsUseCase', () => {
       const command: GetPortfolioPositionsCommand = {
         userId: DEFAULT_USER_ID,
         limit: 2,
-        offset: 1,
       };
 
       // When
@@ -160,8 +159,8 @@ describe('GetPortfolioPositionsUseCase', () => {
       // Then
       expect(result.total).toBe(5);
       expect(result.positions).toHaveLength(2);
-      expect(result.positions[0]?.id).toBe('position-1'); // Second most recent
-      expect(result.positions[1]?.id).toBe('position-2');
+      expect(result.positions[0]?.id).toBe('position-0');
+      expect(result.positions[1]?.id).toBe('position-1');
     });
 
     it('should only return positions for the correct portfolio', async () => {
@@ -203,7 +202,7 @@ describe('GetPortfolioPositionsUseCase', () => {
       expect(result.positions[0]?.id).toBe('correct-position');
     });
 
-    it('should handle limit without offset', async () => {
+    it('should handle limit', async () => {
       // Given
       const userPortfolio = new UserPortfolio({
         id: DEFAULT_PORTFOLIO_ID,

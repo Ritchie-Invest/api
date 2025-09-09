@@ -523,8 +523,8 @@ import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-c
           portfolioPositionRepository,
         ),
       inject: ['UserPortfolioRepository', 'PortfolioPositionRepository'],
-     },
-     {
+    },
+    {
       provide: CreateSuperadminUseCase,
       useFactory: (userRepository: UserRepository) =>
         new CreateSuperadminUseCase(userRepository),

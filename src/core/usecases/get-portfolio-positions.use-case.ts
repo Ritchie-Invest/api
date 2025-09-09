@@ -9,7 +9,6 @@ import { PortfolioNotFoundError } from '../domain/error/PortfolioNotFoundError';
 export type GetPortfolioPositionsCommand = {
   userId: string;
   limit?: number;
-  offset?: number;
 };
 
 export type GetPortfolioPositionsResult = {
@@ -45,7 +44,6 @@ export class GetPortfolioPositionsUseCase
       await this.portfolioPositionRepository.findAllByPortfolioId(
         userPortfolio.id,
         command.limit,
-        command.offset,
       );
 
     const total = await this.portfolioPositionRepository.countByPortfolioId(

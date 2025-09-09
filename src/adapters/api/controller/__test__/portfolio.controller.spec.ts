@@ -235,7 +235,6 @@ describe('PortfolioController', () => {
       expect(getPortfolioPositionsUseCase.execute).toHaveBeenCalledWith({
         userId: mockUser.id,
         limit: undefined,
-        offset: undefined,
       });
 
       expect(result.positions).toHaveLength(2);
@@ -250,7 +249,7 @@ describe('PortfolioController', () => {
       );
     });
 
-    it('should return portfolio positions with limit and offset', async () => {
+    it('should return portfolio positions with limit', async () => {
       // when
       const expectedResult = {
         positions: [mockPositions[0]],
@@ -259,13 +258,12 @@ describe('PortfolioController', () => {
       getPortfolioPositionsUseCase.execute.mockResolvedValue(expectedResult);
 
       // then
-      const result = await controller.getPortfolioPositions(mockUser, 1, 0);
+      const result = await controller.getPortfolioPositions(mockUser, 1);
 
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(getPortfolioPositionsUseCase.execute).toHaveBeenCalledWith({
         userId: mockUser.id,
         limit: 1,
-        offset: 0,
       });
 
       expect(result.positions).toHaveLength(1);
@@ -303,7 +301,6 @@ describe('PortfolioController', () => {
       expect(getPortfolioPositionsUseCase.execute).toHaveBeenCalledWith({
         userId: mockUser.id,
         limit: undefined,
-        offset: undefined,
       });
     });
 
@@ -340,13 +337,12 @@ describe('PortfolioController', () => {
       getPortfolioPositionsUseCase.execute.mockResolvedValue(expectedResult);
 
       // then
-      const result = await controller.getPortfolioPositions(mockUser, 10, 0);
+      const result = await controller.getPortfolioPositions(mockUser, 10);
 
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(getPortfolioPositionsUseCase.execute).toHaveBeenCalledWith({
         userId: mockUser.id,
         limit: 10,
-        offset: 0,
       });
 
       expect(result.positions).toHaveLength(10);

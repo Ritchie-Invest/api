@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, ParseIntPipe } from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiNotFoundResponse,
@@ -56,21 +56,13 @@ export class PortfolioController {
     type: Number,
     description: 'Number of positions to return',
   })
-  @ApiQuery({
-    name: 'offset',
-    required: false,
-    type: Number,
-    description: 'Number of positions to skip',
-  })
   async getPortfolioPositions(
     @CurrentUser() user: User,
-    @Query('limit') limit?: number,
-    @Query('offset') offset?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ): Promise<GetPortfolioPositionsResponse> {
     const result = await this.getPortfolioPositionsUseCase.execute({
       userId: user.id,
       limit,
-      offset,
     });
 
     return GetPortfolioPositionsMapper.toResponse(result);

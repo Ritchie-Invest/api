@@ -17,16 +17,8 @@ export class GetPortfolioPositionsRequest {
   @Type(() => Number)
   limit?: number;
 
-  @ApiProperty({ required: false, description: 'Number of positions to skip' })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Type(() => Number)
-  offset?: number;
-
-  constructor(userId: string, limit?: number, offset?: number) {
+  constructor(userId: string, limit?: number) {
     this.userId = userId;
     this.limit = limit;
-    this.offset = offset;
   }
 }

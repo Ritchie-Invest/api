@@ -54,15 +54,11 @@ export class InMemoryPortfolioPositionRepository
   findAllByPortfolioId(
     portfolioId: string,
     limit?: number,
-    offset?: number,
   ): PortfolioPosition[] {
     let result = Array.from(this.portfolioPositions.values())
       .filter((position) => position.portfolioId === portfolioId)
       .sort((a, b) => b.date.getTime() - a.date.getTime()); // Tri par date descendante
 
-    if (offset) {
-      result = result.slice(offset);
-    }
     if (limit) {
       result = result.slice(0, limit);
     }

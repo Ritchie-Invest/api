@@ -14,7 +14,6 @@ export abstract class PortfolioPositionRepository extends Repository<PortfolioPo
   abstract findAllByPortfolioId(
     portfolioId: string,
     limit?: number,
-    offset?: number,
   ): Promise<PortfolioPosition[]> | PortfolioPosition[];
 
   abstract countByPortfolioId(portfolioId: string): Promise<number> | number;

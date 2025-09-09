@@ -74,13 +74,11 @@ export class PrismaPortfolioPositionRepository
   async findAllByPortfolioId(
     portfolioId: string,
     limit?: number,
-    offset?: number,
   ): Promise<PortfolioPosition[]> {
     const entities = await this.prisma.portfolioPosition.findMany({
       where: { portfolioId },
       orderBy: { date: 'desc' },
       take: limit,
-      skip: offset,
     });
     return entities.map((entity) => this.mapper.toDomain(entity));
   }
