@@ -235,12 +235,12 @@ import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-c
       useFactory: (
         userRepository: UserRepository,
         userPortfolioRepository: UserPortfolioRepository,
-        PortfolioPositionRepository: PortfolioPositionRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
       ) =>
         new CreateUserUseCase(
           userRepository,
           userPortfolioRepository,
-          PortfolioPositionRepository,
+          portfolioPositionRepository,
         ),
       inject: [
         UserRepository,
@@ -507,11 +507,11 @@ import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-c
       provide: GetPortfolioUseCase,
       useFactory: (
         userPortfolioRepository: UserPortfolioRepository,
-        PortfolioPositionRepository: PortfolioPositionRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
       ) =>
         new GetPortfolioUseCase(
           userPortfolioRepository,
-          PortfolioPositionRepository,
+          portfolioPositionRepository,
         ),
       inject: ['UserPortfolioRepository', 'PortfolioPositionRepository'],
     },

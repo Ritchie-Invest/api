@@ -59,11 +59,19 @@ export class ExecuteTransactionUseCase
       tickerId,
       today,
     );
-    if (!dailyBar) {
-      throw new DailyBarNotFoundError(
-        `Daily bar not found for ticker ${tickerId} on date ${today.toISOString()}`,
-      );
+    let sharePrice: number;
+    if (dailyBar) {
+      sharePrice = dailyBar.close;
+    } else {
+      const latestDailyBar = await this.dailyBarRepository.findLatestByTickerId(tickerId);
+      if (!latestDailyBar) {
+        throw new DailyBarNotFoundError(
+          `No daily bar found for ticker ${tickerId}`,
+        );
+      }
+      sharePrice = latestDailyBar.close;
     }
+    const sharesToTrade = amount / sharePrice;
 
     let PortfolioPosition =
       await this.PortfolioPositionRepository.findByPortfolioIdAndDate(
@@ -89,9 +97,6 @@ export class ExecuteTransactionUseCase
         investments: lastPosition.investments,
       });
     }
-
-    const sharePrice = dailyBar.close;
-    const sharesToTrade = amount / sharePrice;
 
     const calculateCurrentHoldings = async (
       portfolioId: string,

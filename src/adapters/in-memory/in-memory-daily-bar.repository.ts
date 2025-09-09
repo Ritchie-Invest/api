@@ -78,4 +78,9 @@ export class InMemoryDailyBarRepository implements DailyBarRepository {
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()) // Sort by date descending
       .slice(0, limit);
   }
+
+  findLatestByTickerId(tickerId: string): DailyBar | null {
+    const dailyBars = this.findByTickerIdWithLimit(tickerId, 1);
+    return dailyBars[0] ?? null;
+  }
 }

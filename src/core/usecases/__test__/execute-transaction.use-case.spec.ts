@@ -241,7 +241,7 @@ describe('ExecuteTransactionUseCase', () => {
     );
   });
 
-  it('should throw DailyBarNotFoundError when daily bar is missing', async () => {
+  it('should throw DailyBarNotFoundError when no daily bar is available', async () => {
     // Given
     const { today } = setupTestData();
     dailyBarRepository.removeAll();

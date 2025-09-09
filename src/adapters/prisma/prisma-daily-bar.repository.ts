@@ -94,4 +94,14 @@ export class PrismaDailyBarRepository implements DailyBarRepository {
     });
     return entities.map((entity) => this.mapper.toDomain(entity));
   }
+
+  async findLatestByTickerId(tickerId: string): Promise<DailyBar | null> {
+    const entities = await this.prisma.dailyBar.findMany({
+      where: { tickerId },
+      orderBy: { date: 'desc' },
+      take: 1,
+    });
+    if (entities.length === 0) return null;
+    return this.mapper.toDomain(entities[0]!);
+  }
 }
