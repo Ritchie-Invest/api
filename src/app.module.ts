@@ -49,6 +49,10 @@ import { GetUserChaptersUseCase } from './core/usecases/get-user-chapters.use-ca
 import { GetGameModuleByIdUseCase } from './core/usecases/get-game-module-by-id.use-case';
 import { UpdateGameModuleUseCase } from './core/usecases/update-game-module.use-case';
 import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case';
+import { FillInTheBlankModuleStrategy } from './core/usecases/strategies/fill-in-the-blanks-module-strategy';
+import { FillInTheBlankCompleteGameModuleStrategy } from './core/usecases/strategies/fill-in-the-blanks-complete-game-module-strategy';
+import { TrueOrFalseModuleStrategy } from './core/usecases/strategies/true-or-false-module-strategy';
+import { TrueOrFalseCompleteGameModuleStrategy } from './core/usecases/strategies/true-or-false-complete-game-module-strategy';
 import { PrismaLessonAttemptRepository } from './adapters/prisma/prisma-lesson-attempt.repository';
 import { LessonAttemptRepository } from './core/domain/repository/lesson-attempt.repository';
 import { PrismaModuleAttemptRepository } from './adapters/prisma/prisma-module-attempt.repository';
@@ -79,6 +83,7 @@ import { GetPortfolioUseCase } from './core/usecases/get-portfolio.use-case';
 import { GetPortfolioPositionsUseCase } from './core/usecases/get-portfolio-positions.use-case';
 import { PortfolioController } from './adapters/api/controller/portfolio.controller';
 import { GetUserTransactionsUseCase } from './core/usecases/get-user-transactions.use-case';
+import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-case';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -119,6 +124,14 @@ import { GetUserTransactionsUseCase } from './core/usecases/get-user-transaction
             type: GameType.MCQ,
             strategy: new McqModuleStrategy(),
           },
+          {
+            type: GameType.FILL_IN_THE_BLANK,
+            strategy: new FillInTheBlankModuleStrategy(),
+          },
+          {
+            type: GameType.TRUE_OR_FALSE,
+            strategy: new TrueOrFalseModuleStrategy(),
+          },
         ]),
     },
     {
@@ -128,6 +141,14 @@ import { GetUserTransactionsUseCase } from './core/usecases/get-user-transaction
           {
             type: GameType.MCQ,
             strategy: new McqCompleteGameModuleStrategy(),
+          },
+          {
+            type: GameType.FILL_IN_THE_BLANK,
+            strategy: new FillInTheBlankCompleteGameModuleStrategy(),
+          },
+          {
+            type: GameType.TRUE_OR_FALSE,
+            strategy: new TrueOrFalseCompleteGameModuleStrategy(),
           },
         ]),
     },
@@ -502,6 +523,12 @@ import { GetUserTransactionsUseCase } from './core/usecases/get-user-transaction
           portfolioPositionRepository,
         ),
       inject: ['UserPortfolioRepository', 'PortfolioPositionRepository'],
+     },
+     {
+      provide: CreateSuperadminUseCase,
+      useFactory: (userRepository: UserRepository) =>
+        new CreateSuperadminUseCase(userRepository),
+      inject: [UserRepository],
     },
   ],
 })

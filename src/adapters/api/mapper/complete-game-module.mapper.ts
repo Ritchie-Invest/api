@@ -20,6 +20,12 @@ export class CompleteGameModuleMapper {
             choiceId: request.mcq.choiceId,
           }
         : undefined,
+      fillInTheBlank: request.fillInTheBlank
+        ? {
+            blankId: request.fillInTheBlank.blankId,
+          }
+        : undefined,
+      trueOrFalse: request.trueOrFalse?.answer,
     };
   }
 

@@ -12,6 +12,15 @@ export type UpdateGameModuleCommand = {
     question: string;
     choices: { text: string; isCorrect: boolean; correctionMessage: string }[];
   };
+  fillInTheBlank?: {
+    firstText: string;
+    secondText: string;
+    blanks: { text: string; isCorrect: boolean; correctionMessage: string }[];
+  };
+  trueOrFalse?: {
+    sentence: string;
+    isTrue: boolean;
+  };
 };
 
 export class UpdateGameModuleUseCase
