@@ -76,7 +76,8 @@ describe('CreateGameModuleUseCase', () => {
 
     // Then
     expect(modules.length).toBe(1);
-    expect((modules[0] as McqModule).question).toBe('What is 2+2?');
+    const mcqModule = modules[0] as McqModule;
+    expect(mcqModule.question).toBe('What is 2+2?');
   });
 
   it('should create a Fill in the Blank module for a lesson', async () => {
@@ -119,15 +120,12 @@ describe('CreateGameModuleUseCase', () => {
 
     // Then
     expect(modules.length).toBe(1);
-    expect((modules[0] as FillInTheBlankModule).firstText).toBe(
-      'The capital of France is',
-    );
-    expect((modules[0] as FillInTheBlankModule).secondText).toBe(
-      'and it is beautiful.',
-    );
-    expect((modules[0] as FillInTheBlankModule).blanks).toHaveLength(2);
-    expect((modules[0] as FillInTheBlankModule).blanks[0].text).toBe('Paris');
-    expect((modules[0] as FillInTheBlankModule).blanks[0].isCorrect).toBe(true);
+    const fillInTheBlankModule = modules[0] as FillInTheBlankModule;
+    expect(fillInTheBlankModule.firstText).toBe('The capital of France is');
+    expect(fillInTheBlankModule.secondText).toBe('and it is beautiful.');
+    expect(fillInTheBlankModule.blanks).toHaveLength(2);
+    expect(fillInTheBlankModule.blanks[0].text).toBe('Paris');
+    expect(fillInTheBlankModule.blanks[0].isCorrect).toBe(true);
   });
 
   it('should create a True or False module for a lesson', async () => {
@@ -157,10 +155,9 @@ describe('CreateGameModuleUseCase', () => {
 
     // Then
     expect(modules.length).toBe(1);
-    expect((modules[0] as TrueOrFalseModule).sentence).toBe(
-      'The earth is round',
-    );
-    expect((modules[0] as TrueOrFalseModule).isTrue).toBe(true);
+    const trueOrFalseModule = modules[0] as TrueOrFalseModule;
+    expect(trueOrFalseModule.sentence).toBe('The earth is round');
+    expect(trueOrFalseModule.isTrue).toBe(true);
   });
 
   it('should throw if lesson not found', async () => {

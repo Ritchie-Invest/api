@@ -40,22 +40,13 @@ export class FillInTheBlankAnswerRequest {
 
 export class TrueOrFalseAnswerRequest {
   @ApiProperty({
-    description: 'The ID of the selected question',
-    example: 'question-1',
-  })
-  @IsNotEmpty()
-  @IsString()
-  questionId: string;
-
-  @ApiProperty({
     description: 'The boolean answer for the true/false question',
     example: true,
   })
   @IsBoolean()
   answer: boolean;
 
-  constructor(questionId: string, answer: boolean) {
-    this.questionId = questionId;
+  constructor(answer: boolean) {
     this.answer = answer;
   }
 }

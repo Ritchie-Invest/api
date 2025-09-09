@@ -12,11 +12,10 @@ export class FillInTheBlankModuleStrategy implements GameModuleStrategy {
       !command.fillInTheBlank ||
       !command.fillInTheBlank.firstText ||
       !command.fillInTheBlank.secondText ||
-      !command.fillInTheBlank.blanks ||
-      command.fillInTheBlank.blanks.length < 2
+      !command.fillInTheBlank.blanks
     ) {
       throw new FillInTheBlankModuleInvalidDataError(
-        'Fill in the blank contract is missing or insufficient blanks (at least 2 required)',
+        'Fill in the blank contract is missing',
       );
     }
 

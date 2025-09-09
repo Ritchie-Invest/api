@@ -23,9 +23,9 @@ export class FillInTheBlankModule extends GameModule {
     if (!params.secondText || params.secondText.trim().length === 0) {
       throw new FillInTheBlankModuleInvalidDataError('Second text is required');
     }
-    if (!params.blanks || params.blanks.length < 2) {
+    if (params.blanks.filter((blank) => blank.isCorrect).length !== 1) {
       throw new FillInTheBlankModuleInvalidDataError(
-        'At least two blanks are required',
+        'Exactly one choice must be marked as correct',
       );
     }
     this.firstText = params.firstText;

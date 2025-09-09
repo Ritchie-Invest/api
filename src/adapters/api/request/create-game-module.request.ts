@@ -4,7 +4,7 @@ import { IsEnum } from 'class-validator';
 
 export class CreateGameModuleContract {}
 
-export class CreateGameChoice {
+export class CreateMcqChoice {
   @ApiProperty()
   text: string;
 
@@ -25,13 +25,30 @@ export class CreateMcqGameModuleContract extends CreateGameModuleContract {
   @ApiProperty()
   question: string;
 
-  @ApiProperty({ type: [CreateGameChoice] })
-  choices: CreateGameChoice[];
+  @ApiProperty({ type: [CreateMcqChoice] })
+  choices: CreateMcqChoice[];
 
-  constructor(question: string, choices: CreateGameChoice[]) {
+  constructor(question: string, choices: CreateMcqChoice[]) {
     super();
     this.question = question;
     this.choices = choices;
+  }
+}
+
+export class CreateFillInTheBlankChoice {
+  @ApiProperty()
+  text: string;
+
+  @ApiProperty()
+  isCorrect: boolean;
+
+  @ApiProperty()
+  correctionMessage: string;
+
+  constructor(text: string, isCorrect: boolean, correctionMessage: string) {
+    this.text = text;
+    this.isCorrect = isCorrect;
+    this.correctionMessage = correctionMessage;
   }
 }
 
@@ -42,13 +59,13 @@ export class CreateFillInTheBlankGameModuleContract extends CreateGameModuleCont
   @ApiProperty()
   secondText: string;
 
-  @ApiProperty({ type: [CreateGameChoice] })
-  blanks: CreateGameChoice[];
+  @ApiProperty({ type: [CreateFillInTheBlankChoice] })
+  blanks: CreateFillInTheBlankChoice[];
 
   constructor(
     firstText: string,
     secondText: string,
-    blanks: CreateGameChoice[],
+    blanks: CreateFillInTheBlankChoice[],
   ) {
     super();
     this.firstText = firstText;

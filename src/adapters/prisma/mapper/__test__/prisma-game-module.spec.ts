@@ -15,7 +15,7 @@ describe('PrismaGameModuleMapper', () => {
 
   describe('fromDomain', () => {
     it('should throw error - not implemented', () => {
-      // Given/When/Then
+      // When/Then
       expect(() => mapper.fromDomain()).toThrow('Not implemented.');
     });
   });
@@ -216,7 +216,7 @@ describe('PrismaGameModuleMapper', () => {
           id: 'fill-1',
           firstText: 'Test first text',
           secondText: 'Test second text',
-          blank: '',
+          blanks: '',
           gameModuleId: 'module-1',
         };
 
@@ -236,7 +236,7 @@ describe('PrismaGameModuleMapper', () => {
 
         // When/Then
         expect(() => mapper.toDomain(gameModuleEntity)).toThrow(
-          'At least two blanks are required',
+          'Exactly one choice must be marked as correct',
         );
       });
     });

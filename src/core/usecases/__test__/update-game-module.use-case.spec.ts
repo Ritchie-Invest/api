@@ -93,8 +93,8 @@ describe('UpdateGameModuleUseCase', () => {
     await useCase.execute(command);
 
     // Then
-    const module = gameModuleRepository.findById('module-1');
-    expect((module as McqModule).question).toBe('What is 2+2?');
+    const module = gameModuleRepository.findById('module-1') as McqModule;
+    expect(module.question).toBe('What is 2+2?');
   });
 
   it('should update a Fill in the Blank module', async () => {
@@ -147,16 +147,14 @@ describe('UpdateGameModuleUseCase', () => {
     await useCase.execute(command);
 
     // Then
-    const module = gameModuleRepository.findById('module-1');
-    expect((module as FillInTheBlankModule).firstText).toBe(
-      'The largest city in France is',
-    );
-    expect((module as FillInTheBlankModule).secondText).toBe(
-      'and it is amazing.',
-    );
-    expect((module as FillInTheBlankModule).blanks).toHaveLength(2);
-    expect((module as FillInTheBlankModule).blanks[0]?.text).toBe('Paris');
-    expect((module as FillInTheBlankModule).blanks[0]?.isCorrect).toBe(true);
+    const module = gameModuleRepository.findById(
+      'module-1',
+    ) as FillInTheBlankModule;
+    expect(module.firstText).toBe('The largest city in France is');
+    expect(module.secondText).toBe('and it is amazing.');
+    expect(module.blanks).toHaveLength(2);
+    expect(module.blanks[0]?.text).toBe('Paris');
+    expect(module.blanks[0]?.isCorrect).toBe(true);
   });
 
   it('should update a True or False module', async () => {
@@ -191,9 +189,11 @@ describe('UpdateGameModuleUseCase', () => {
     await useCase.execute(command);
 
     // Then
-    const module = gameModuleRepository.findById('module-1');
-    expect((module as TrueOrFalseModule).sentence).toBe('The earth is round');
-    expect((module as TrueOrFalseModule).isTrue).toBe(true);
+    const module = gameModuleRepository.findById(
+      'module-1',
+    ) as TrueOrFalseModule;
+    expect(module.sentence).toBe('The earth is round');
+    expect(module.isTrue).toBe(true);
   });
 
   it('should throw if game module not found', async () => {
