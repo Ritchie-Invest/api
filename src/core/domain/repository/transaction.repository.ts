@@ -8,5 +8,6 @@ export abstract class TransactionRepository extends Repository<Transaction> {
   ): Promise<Transaction[]> | Transaction[];
   abstract findByPortfolioId(
     portfolioId: string,
+    limit?: number,
   ): Promise<Transaction[]> | Transaction[];
 }

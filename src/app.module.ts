@@ -100,9 +100,12 @@ import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-c
   providers: [
     {
       provide: GetUserTransactionsUseCase,
-      useFactory: (transactionRepository: TransactionRepository) =>
-        new GetUserTransactionsUseCase(transactionRepository),
-      inject: ['TransactionRepository'],
+      useFactory: (
+        transactionRepository: TransactionRepository,
+        tickerRepository: TickerRepository,
+      ) =>
+        new GetUserTransactionsUseCase(transactionRepository, tickerRepository),
+      inject: ['TransactionRepository', TickerRepository],
     },
     PrismaService,
     JwtService,

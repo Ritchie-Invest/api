@@ -6,10 +6,16 @@ import { Injectable } from '@nestjs/common';
 export class InMemoryTransactionRepository implements TransactionRepository {
   private transactions: Map<string, Transaction> = new Map();
 
-  findByPortfolioId(portfolioId: string): Transaction[] {
-    return Array.from(this.transactions.values()).filter(
-      (t) => t.portfolioId === portfolioId,
-    );
+  findByPortfolioId(portfolioId: string, limit?: number): Transaction[] {
+    let result = Array.from(this.transactions.values())
+      .filter((t) => t.portfolioId === portfolioId)
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+    if (limit) {
+      result = result.slice(0, limit);
+    }
+
+    return result;
   }
 
   create(data: Partial<Transaction>): Transaction {

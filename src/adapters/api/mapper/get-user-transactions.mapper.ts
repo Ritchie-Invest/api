@@ -12,11 +12,12 @@ export class GetUserTransactionsMapper {
       result.transactions.map(
         (t) =>
           new GetUserTransactionItem({
-            tickerId: t.tickerId,
-            timestamp: t.timestamp,
+            tickerName: t.tickerName,
+            tickerSymbol: t.tickerSymbol,
             type: t.type,
             amount: t.amount,
             volume: t.volume,
+            timestamp: t.timestamp,
           }),
       ),
     );

@@ -1,4 +1,12 @@
-import { Body, Controller, Post, UseGuards, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Get,
+  Query,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import {
   ApiBadRequestResponse,
@@ -7,6 +15,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiOperation,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { ExecuteTransactionUseCase } from '../../../core/usecases/execute-transaction.use-case';
 import { GetUserTransactionsUseCase } from '../../../core/usecases/get-user-transactions.use-case';
@@ -34,12 +43,19 @@ export class TransactionController {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized access' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of transactions to return',
+  })
   async getUserTransactions(
     @CurrentUser() currentUser: TokenPayload,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ): Promise<GetUserTransactionsResponse> {
-    // On suppose que le portfolioId est dans le token
     const result = await this.getUserTransactionsUseCase.execute({
       portfolioId: currentUser.portfolioId,
+      limit,
     });
     return GetUserTransactionsMapper.fromDomain(result);
   }

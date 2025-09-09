@@ -3,10 +3,10 @@ import { TransactionType } from '../../../core/domain/type/TransactionType';
 
 export class GetUserTransactionItem {
   @ApiProperty()
-  tickerId!: string;
+  tickerName!: string;
 
   @ApiProperty()
-  timestamp!: Date;
+  tickerSymbol!: string;
 
   @ApiProperty({ enum: TransactionType })
   type!: TransactionType;
@@ -16,6 +16,9 @@ export class GetUserTransactionItem {
 
   @ApiProperty()
   volume!: number;
+
+  @ApiProperty()
+  timestamp!: Date;
 
   constructor(partial: Partial<GetUserTransactionItem>) {
     Object.assign(this, partial);
