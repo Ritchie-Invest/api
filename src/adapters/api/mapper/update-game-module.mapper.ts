@@ -4,6 +4,8 @@ import { Lesson } from '../../../core/domain/model/Lesson';
 import {
   UpdateGameModuleRequest,
   UpdateMcqGameModuleContract,
+  UpdateFillInTheBlankGameModuleContract,
+  UpdateTrueOrFalseGameModuleContract,
 } from '../request/update-game-module.request';
 import { UpdateGameModuleCommand } from '../../../core/usecases/update-game-module.use-case';
 
@@ -20,6 +22,29 @@ export class UpdateGameModuleMapper {
           mcq: {
             question: contract?.question,
             choices: contract?.choices,
+          },
+        };
+      }
+      case GameType.FILL_IN_THE_BLANK: {
+        const contract =
+          request.contract as UpdateFillInTheBlankGameModuleContract;
+        return {
+          gameModuleId,
+          fillInTheBlank: {
+            firstText: contract?.firstText,
+            secondText: contract?.secondText,
+            blanks: contract?.blanks,
+          },
+        };
+      }
+      case GameType.TRUE_OR_FALSE: {
+        const contract =
+          request.contract as UpdateTrueOrFalseGameModuleContract;
+        return {
+          gameModuleId,
+          trueOrFalse: {
+            sentence: contract?.sentence,
+            isTrue: contract?.isTrue,
           },
         };
       }
