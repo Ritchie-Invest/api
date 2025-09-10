@@ -67,6 +67,7 @@ import { AlphaVantageMarketServiceAdapter } from './adapters/alpha-vantage/alpha
 import { UpdateTickersHistoryUseCase } from './core/usecases/update-tickers-history-use.case';
 import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cron';
 import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-case';
+import { LevelingService } from './core/usecases/services/leveling.service';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -177,6 +178,12 @@ import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-c
       provide: TickerRepository,
       useFactory: (prisma: PrismaService) => new PrismaTickerRepository(prisma),
       inject: [PrismaService],
+    },
+    {
+      provide: LevelingService,
+      useFactory: (userRepository: UserRepository) =>
+        new LevelingService(userRepository),
+      inject: [UserRepository],
     },
     {
       provide: CreateUserUseCase,
@@ -344,18 +351,21 @@ import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-c
         lessonCompletionRepository: PrismaLessonCompletionRepository,
         lessonAttemptRepository: LessonAttemptRepository,
         moduleAttemptRepository: ModuleAttemptRepository,
+        levelingService: LevelingService,
       ) =>
         new CompleteLessonUseCase(
           lessonRepository,
           lessonCompletionRepository,
           lessonAttemptRepository,
           moduleAttemptRepository,
+          levelingService,
         ),
       inject: [
         LessonRepository,
         'LessonCompletionRepository',
         'LessonAttemptRepository',
         'ModuleAttemptRepository',
+        LevelingService,
       ],
     },
     {

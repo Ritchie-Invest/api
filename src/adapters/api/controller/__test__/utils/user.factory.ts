@@ -8,6 +8,7 @@ export class UserFactory {
       overrides?.email ?? 'user@example.com',
       overrides?.password ?? 'hashedPassword',
       overrides?.type ?? UserType.STUDENT,
+      overrides?.xp ?? 0,
       overrides?.createdAt ?? new Date(),
       overrides?.updatedAt ?? new Date(),
     );

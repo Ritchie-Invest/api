@@ -45,7 +45,10 @@ export class CreateUserUseCase implements UseCase<CreateUserCommand, User> {
     );
 
     await this.userRepository.create(user);
-    return user;
+    return {
+      ...user,
+      level: user.level,
+    };
   }
 
   private generateId(): string {
