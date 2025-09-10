@@ -4,14 +4,12 @@ import { UseCase } from '../base/use-case';
 import { User } from '../domain/model/User';
 import { UserType } from '../domain/type/UserType';
 import { UserNotAllowedError } from '../domain/error/UserNotAllowedError';
-import { GameType } from '../domain/type/GameType';
 
 export type CreateLessonCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
   title: string;
   description: string;
   chapterId: string;
-  gameType: GameType;
 };
 
 export class CreateLessonUseCase
@@ -25,7 +23,7 @@ export class CreateLessonUseCase
         'Unauthorized: Only admins can create lessons',
       );
     }
-    const { title, description, chapterId, gameType } = command;
+    const { title, description, chapterId } = command;
 
     const order = await this.lessonRepository.getNextOrderInChapter(chapterId);
     await this.lessonRepository.validateUniqueOrderInChapter(chapterId, order);
@@ -37,7 +35,6 @@ export class CreateLessonUseCase
       chapterId,
       order,
       false,
-      gameType,
     );
 
     return this.lessonRepository.create(lesson);

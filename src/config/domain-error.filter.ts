@@ -17,7 +17,6 @@ import { ChapterOrderConflictError } from '../core/domain/error/ChapterOrderConf
 import { LessonNotFoundError } from '../core/domain/error/LessonNotFoundError';
 import { LessonInvalidDataError } from '../core/domain/error/LessonInvalidDataError';
 import { LessonOrderConflictError } from '../core/domain/error/LessonOrderConflictError';
-import { GameModuleTypeMismatchError } from '../core/domain/error/GameModuleTypeMismatchError';
 import { GameModuleStrategyNotFoundError } from '../core/domain/error/GameModuleStrategyNotFoundError';
 import { GameModuleNotFoundError } from '../core/domain/error/GameModuleNotFoundError';
 import { InvalidAnswerError } from '../core/domain/error/InvalidAnswerError';
@@ -51,7 +50,6 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof WrongPasswordFormatError ||
       exception instanceof ChapterInvalidDataError ||
       exception instanceof LessonInvalidDataError ||
-      exception instanceof GameModuleTypeMismatchError ||
       exception instanceof GameModuleStrategyNotFoundError ||
       exception instanceof InvalidAnswerError ||
       exception instanceof McqModuleInvalidDataError ||

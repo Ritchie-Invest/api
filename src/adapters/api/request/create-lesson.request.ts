@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString } from 'class-validator';
-import { GameType } from '../../../core/domain/type/GameType';
+import { IsString } from 'class-validator';
 
 export class CreateLessonRequest {
   @ApiProperty()
@@ -15,19 +14,9 @@ export class CreateLessonRequest {
   @IsString()
   chapterId: string;
 
-  @ApiProperty()
-  @IsEnum(GameType)
-  gameType: GameType;
-
-  constructor(
-    title: string,
-    description: string,
-    chapterId: string,
-    gameType: GameType,
-  ) {
+  constructor(title: string, description: string, chapterId: string) {
     this.title = title;
     this.description = description;
     this.chapterId = chapterId;
-    this.gameType = gameType;
   }
 }

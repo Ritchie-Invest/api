@@ -7,7 +7,6 @@ import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-mem
 import { GameType } from '../../domain/type/GameType';
 import { Lesson } from '../../domain/model/Lesson';
 import { LessonNotFoundError } from '../../domain/error/LessonNotFoundError';
-import { GameModuleTypeMismatchError } from '../../domain/error/GameModuleTypeMismatchError';
 import { McqModuleStrategy } from '../strategies/mcq-module-strategy';
 import { MapGameModuleStrategyFactory } from '../strategies/game-module-strategy-factory';
 import { GameModuleStrategyNotFoundError } from '../../domain/error/GameModuleStrategyNotFoundError';
@@ -124,8 +123,8 @@ describe('CreateGameModuleUseCase', () => {
     expect(fillInTheBlankModule.firstText).toBe('The capital of France is');
     expect(fillInTheBlankModule.secondText).toBe('and it is beautiful.');
     expect(fillInTheBlankModule.blanks).toHaveLength(2);
-    expect(fillInTheBlankModule.blanks[0].text).toBe('Paris');
-    expect(fillInTheBlankModule.blanks[0].isCorrect).toBe(true);
+    expect(fillInTheBlankModule.blanks[0]!.text).toBe('Paris');
+    expect(fillInTheBlankModule.blanks[0]!.isCorrect).toBe(true);
   });
 
   it('should create a True or False module for a lesson', async () => {
@@ -173,37 +172,6 @@ describe('CreateGameModuleUseCase', () => {
       },
     };
     await expect(useCase.execute(command)).rejects.toThrow(LessonNotFoundError);
-  });
-
-  it('should throw if game type mismatch', async () => {
-    // Given
-    const lesson = new Lesson(
-      'lesson-2',
-      'title',
-      'desc',
-      'chapter-1',
-      1,
-      false,
-      GameType.MCQ,
-      [],
-    );
-    lessonRepository.create(lesson);
-    const command: CreateGameModuleCommand = {
-      lessonId: lesson.id,
-      gameType: 'OTHER' as GameType,
-      mcq: {
-        question: 'Q?',
-        choices: [
-          { text: 'A', isCorrect: true, correctionMessage: 'ok' },
-          { text: 'B', isCorrect: false, correctionMessage: 'no' },
-        ],
-      },
-    };
-
-    // When / Then
-    await expect(useCase.execute(command)).rejects.toThrow(
-      GameModuleTypeMismatchError,
-    );
   });
 
   it('should throw if no strategy for game type', async () => {

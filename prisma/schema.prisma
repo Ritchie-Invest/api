@@ -13,12 +13,6 @@ enum UserType {
   STUDENT
 }
 
-enum GameType {
-  MCQ
-  FILL_IN_THE_BLANK
-  TRUE_OR_FALSE
-}
-
 enum TickerType {
   ETF
 }
@@ -70,7 +64,6 @@ model Lesson {
   chapterId        String
   order            Int
   isPublished      Boolean
-  gameType         GameType           @default(MCQ)
   updatedAt        DateTime           @updatedAt
   createdAt        DateTime           @default(now())
   chapter          Chapter            @relation(fields: [chapterId], references: [id])
