@@ -17,7 +17,6 @@ export class CreateLessonMapper {
       title: request.title,
       description: request.description,
       chapterId: request.chapterId,
-      order: request.order,
       gameType: request.gameType,
     };
   }
