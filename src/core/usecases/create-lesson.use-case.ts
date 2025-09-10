@@ -11,7 +11,6 @@ export type CreateLessonCommand = {
   title: string;
   description: string;
   chapterId: string;
-  order: number;
   gameType: GameType;
 };
 
@@ -26,8 +25,9 @@ export class CreateLessonUseCase
         'Unauthorized: Only admins can create lessons',
       );
     }
-    const { title, description, chapterId, order, gameType } = command;
+    const { title, description, chapterId, gameType } = command;
 
+    const order = await this.lessonRepository.getNextOrderInChapter(chapterId);
     await this.lessonRepository.validateUniqueOrderInChapter(chapterId, order);
 
     const lesson = new Lesson(

@@ -254,7 +254,6 @@ describe('LessonControllerIT', () => {
         'New Lesson',
         'Description of New Lesson',
         chapter.id,
-        1,
         GameType.MCQ,
       );
 
@@ -281,7 +280,6 @@ describe('LessonControllerIT', () => {
         '',
         'Description of New Lesson',
         'chapter-id',
-        1,
         GameType.MCQ,
       );
 
@@ -303,7 +301,6 @@ describe('LessonControllerIT', () => {
         'New Lesson',
         'Description of New Lesson',
         'chapter-id',
-        1,
         GameType.MCQ,
       );
 
@@ -325,7 +322,6 @@ describe('LessonControllerIT', () => {
         'New Lesson',
         'Description of New Lesson',
         'chapter-id',
-        1,
         GameType.MCQ,
       );
 

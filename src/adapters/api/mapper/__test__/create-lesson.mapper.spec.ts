@@ -18,7 +18,6 @@ describe('CreateLessonMapper', () => {
         title: 'Lesson Title',
         description: 'Lesson Description',
         chapterId: 'chapter-1',
-        order: 1,
         gameType: GameType.MCQ,
       };
 
@@ -34,7 +33,6 @@ describe('CreateLessonMapper', () => {
         title: 'Lesson Title',
         description: 'Lesson Description',
         chapterId: 'chapter-1',
-        order: 1,
         gameType: GameType.MCQ,
       });
     });
