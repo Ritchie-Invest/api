@@ -61,7 +61,6 @@ export class UpdateGameModuleMapper {
       chapterId: lesson.chapterId,
       order: lesson.order !== undefined ? lesson.order : 0,
       isPublished: lesson.isPublished,
-      gameType: lesson.gameType,
       modules: lesson.modules,
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,

@@ -1,6 +1,5 @@
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
-import { GameType } from '../../domain/type/GameType';
 import { CompleteLessonUseCase } from '../complete-lesson.use-case';
 import { Lesson } from '../../domain/model/Lesson';
 import { McqModule } from '../../domain/model/McqModule';
@@ -120,7 +119,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1, gameModule2, gameModule3],
     );
     lessonRepository.create(lesson);
@@ -233,7 +231,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1, gameModule2],
     );
     lessonRepository.create(lesson);
@@ -338,7 +335,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1, gameModule2],
     );
     lessonRepository.create(lesson);
@@ -426,7 +422,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1],
     );
     lessonRepository.create(lesson);
@@ -472,7 +467,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1],
     );
     lessonRepository.create(lesson);
@@ -516,7 +510,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1],
     );
     lessonRepository.create(lesson);
@@ -584,7 +577,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1, gameModule2],
     );
     lessonRepository.create(lesson);

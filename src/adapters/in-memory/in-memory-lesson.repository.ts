@@ -39,13 +39,7 @@ export class InMemoryLessonRepository implements LessonRepository {
   create(
     data: Pick<
       Lesson,
-      | 'id'
-      | 'title'
-      | 'description'
-      | 'chapterId'
-      | 'order'
-      | 'gameType'
-      | 'modules'
+      'id' | 'title' | 'description' | 'chapterId' | 'order' | 'modules'
     >,
   ): Lesson {
     const lesson = new Lesson(
@@ -55,7 +49,6 @@ export class InMemoryLessonRepository implements LessonRepository {
       data.chapterId,
       data.order,
       false,
-      data.gameType,
       data.modules || [],
     );
     this.lessons.set(lesson.id, lesson);

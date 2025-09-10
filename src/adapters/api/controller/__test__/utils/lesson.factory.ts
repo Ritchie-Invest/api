@@ -1,5 +1,4 @@
 import { Lesson } from '../../../../../core/domain/model/Lesson';
-import { GameType } from '../../../../../core/domain/type/GameType';
 
 export class LessonFactory {
   static make(overrides?: Partial<Lesson>): Lesson {
@@ -10,7 +9,6 @@ export class LessonFactory {
       overrides?.chapterId ?? crypto.randomUUID(),
       overrides?.order ?? 0,
       overrides?.isPublished ?? true,
-      overrides?.gameType ?? GameType.MCQ,
     );
   }
 }

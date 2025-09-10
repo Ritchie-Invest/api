@@ -484,7 +484,6 @@ describe('LessonControllerIT', () => {
         isPublished: lesson.isPublished,
         chapterId: chapter.id,
         order: lesson.order,
-        gameType: GameType.MCQ,
         modules: [
           {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

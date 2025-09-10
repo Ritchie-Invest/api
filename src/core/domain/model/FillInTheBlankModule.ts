@@ -1,6 +1,7 @@
 import { GameModule } from './GameModule';
 import { FillInTheBlankModuleInvalidDataError } from '../error/FillInTheBlankModuleInvalidDataError';
 import { FillInTheBlankChoice } from './FillInTheBlankChoice';
+import { GameType } from '../type/GameType';
 
 export class FillInTheBlankModule extends GameModule {
   firstText: string;
@@ -16,7 +17,11 @@ export class FillInTheBlankModule extends GameModule {
     updatedAt?: Date;
     createdAt?: Date;
   }) {
-    super({ id: params.id, lessonId: params.lessonId });
+    super({
+      id: params.id,
+      lessonId: params.lessonId,
+      gameType: GameType.FILL_IN_THE_BLANK,
+    });
     if (!params.firstText || params.firstText.trim().length === 0) {
       throw new FillInTheBlankModuleInvalidDataError('First text is required');
     }
