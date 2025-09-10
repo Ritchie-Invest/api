@@ -94,11 +94,12 @@ export class CompleteLessonUseCase
         new Date(),
       );
       await this.lessonCompletionRepository.create(lessonCompletion);
-      await this.lessonAttemptRepository.finishAttempt(
-        lessonAttempt.id,
-        new Date(),
-      );
     }
+
+    await this.lessonAttemptRepository.finishAttempt(
+      lessonAttempt.id,
+      new Date(),
+    );
 
     return {
       completedGameModules: completedModules,
