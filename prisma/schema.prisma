@@ -36,6 +36,7 @@ model User {
   type             UserType           @default(STUDENT)
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
+  xp               Int                @default(0)
   refresh_tokens   RefreshToken[]
   LessonCompletion LessonCompletion[]
   LessonAttempt    LessonAttempt[]

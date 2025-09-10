@@ -671,6 +671,7 @@ describe('LessonControllerIT', () => {
         completedGameModules: 3,
         totalGameModules: 3,
         isCompleted: true,
+        xpWon: 25,
       });
     });
 

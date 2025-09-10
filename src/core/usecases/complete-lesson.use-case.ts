@@ -10,6 +10,7 @@ import { LessonAlreadyCompletedError } from '../domain/error/LessonAlreadyComple
 import { LessonCompletion } from '../domain/model/LessonCompletion';
 import { LessonAttemptNotFoundError } from '../domain/error/LessonAttemptNotFoundError';
 import { LessonAttemptAlreadyFinishedError } from '../domain/error/LessonAttemptAlreadyFinishedError';
+import { LevelingService } from './services/leveling.service';
 
 export type CompleteLessonCommand = {
   userId: string;
@@ -20,6 +21,7 @@ export type CompleteLessonResult = {
   completedGameModules: number;
   totalGameModules: number;
   isCompleted: boolean;
+  xpWon?: number;
 };
 
 @Injectable()
@@ -31,6 +33,7 @@ export class CompleteLessonUseCase
     private readonly lessonCompletionRepository: LessonCompletionRepository,
     private readonly lessonAttemptRepository: LessonAttemptRepository,
     private readonly moduleAttemptRepository: ModuleAttemptRepository,
+    private readonly levelingService: LevelingService,
   ) {}
 
   async execute(command: CompleteLessonCommand): Promise<CompleteLessonResult> {
@@ -84,16 +87,18 @@ export class CompleteLessonUseCase
       totalModules > 0 ? (completedModules / totalModules) * 100 : 0;
 
     let isCompleted = false;
+    const xpToAdd = this.computeXpFromScore(score);
     if (score >= 80) {
       isCompleted = true;
       const lessonCompletion = new LessonCompletion(
         crypto.randomUUID(),
         command.userId,
         command.lessonId,
-        completedModules,
+        score,
         new Date(),
       );
       await this.lessonCompletionRepository.create(lessonCompletion);
+      await this.levelingService.incrementXp(command.userId, xpToAdd);
     }
 
     await this.lessonAttemptRepository.finishAttempt(
@@ -105,6 +110,14 @@ export class CompleteLessonUseCase
       completedGameModules: completedModules,
       totalGameModules: totalModules,
       isCompleted,
+      xpWon: xpToAdd,
     };
+  }
+
+  private computeXpFromScore(score: number): number {
+    if (score >= 100) return 25;
+    if (score >= 90) return 10;
+    if (score >= 80) return 5;
+    return 0;
   }
 }
