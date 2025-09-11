@@ -14,7 +14,8 @@ export class TickerHistoryCronService implements OnModuleInit {
 
   onModuleInit(): void {
     const expr =
-      process.env.CRON_UPDATE_TICKERS_HISTORY || CronExpression.EVERY_MINUTE;
+      process.env.CRON_UPDATE_TICKERS_HISTORY ||
+      CronExpression.EVERY_DAY_AT_5AM;
 
     const job = new CronJob(expr, async () => {
       const startedAt = new Date();
