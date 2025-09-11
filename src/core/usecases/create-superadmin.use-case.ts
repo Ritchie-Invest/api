@@ -44,10 +44,7 @@ export class CreateSuperadminUseCase
         UserType.SUPERADMIN,
       );
       await this.userRepository.create(user);
-      return {
-        ...user,
-        level: user.level,
-      };
+      return user;
     }
 
     if (existingUser.type === UserType.SUPERADMIN) {
@@ -62,10 +59,7 @@ export class CreateSuperadminUseCase
     if (!updated) {
       throw new UserAlreadyExistsError('Unable to promote existing user');
     }
-    return {
-      ...updated,
-      level: updated.level,
-    };
+    return updated;
   }
 
   private generateId(): string {
