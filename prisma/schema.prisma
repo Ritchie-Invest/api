@@ -208,7 +208,7 @@ model Transaction {
   tickerId           String
   type               TransactionType
   amount             Float
-  volume             Int
+  volume             Float
   currentTickerPrice Float
   timestamp          DateTime        @default(now())
   portfolio          UserPortfolio   @relation(fields: [portfolioId], references: [id])

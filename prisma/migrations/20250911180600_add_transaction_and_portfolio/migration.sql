@@ -28,7 +28,7 @@ CREATE TABLE "public"."Transaction" (
     "tickerId" TEXT NOT NULL,
     "type" "public"."TransactionType" NOT NULL,
     "amount" DOUBLE PRECISION NOT NULL,
-    "volume" INTEGER NOT NULL,
+    "volume" DOUBLE PRECISION NOT NULL,
     "currentTickerPrice" DOUBLE PRECISION NOT NULL,
     "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
