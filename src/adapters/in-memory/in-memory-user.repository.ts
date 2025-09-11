@@ -6,12 +6,15 @@ import { Injectable } from '@nestjs/common';
 export class InMemoryUserRepository implements UserRepository {
   private users: Map<string, User> = new Map();
 
-  create(data: Pick<User, 'id' | 'email' | 'password' | 'type'>): User {
+  create(
+    data: Pick<User, 'id' | 'email' | 'password' | 'type' | 'totalXp'>,
+  ): User {
     const user = new User(
       data.id,
       data.email,
       data.password,
       data.type,
+      data.totalXp ?? 0,
       new Date(),
       new Date(),
     );
@@ -41,6 +44,16 @@ export class InMemoryUserRepository implements UserRepository {
       return null;
     }
     this.users.set(id, user);
+    return user;
+  }
+
+  incrementXp(userId: string, amount: number): User | null {
+    const user = this.users.get(userId);
+    if (!user) {
+      return null;
+    }
+    user.totalXp = (user.totalXp ?? 0) + amount;
+    this.users.set(userId, user);
     return user;
   }
 

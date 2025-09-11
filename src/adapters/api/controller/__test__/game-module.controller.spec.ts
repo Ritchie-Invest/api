@@ -400,7 +400,6 @@ describe('GameModuleControllerIT', () => {
         isPublished: lesson.isPublished,
         chapterId: chapter.id,
         order: lesson.order,
-        gameType: GameType.MCQ,
         modules: [
           {
             id: 'module-123',

@@ -17,6 +17,7 @@ export class CompleteLessonMapper {
       result.completedGameModules,
       result.totalGameModules,
       result.isCompleted,
+      result.xpWon,
     );
   }
 }

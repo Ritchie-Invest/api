@@ -69,7 +69,6 @@ describe('CompleteGameModuleUseCase', () => {
       'chapter-1',
       1,
       true,
-      GameType.MCQ,
     );
     lessonRepository.create(lesson);
   };

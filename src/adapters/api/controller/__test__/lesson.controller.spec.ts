@@ -254,7 +254,6 @@ describe('LessonControllerIT', () => {
         'New Lesson',
         'Description of New Lesson',
         chapter.id,
-        1,
         GameType.MCQ,
       );
 
@@ -281,7 +280,6 @@ describe('LessonControllerIT', () => {
         '',
         'Description of New Lesson',
         'chapter-id',
-        1,
         GameType.MCQ,
       );
 
@@ -303,7 +301,6 @@ describe('LessonControllerIT', () => {
         'New Lesson',
         'Description of New Lesson',
         'chapter-id',
-        1,
         GameType.MCQ,
       );
 
@@ -325,7 +322,6 @@ describe('LessonControllerIT', () => {
         'New Lesson',
         'Description of New Lesson',
         'chapter-id',
-        1,
         GameType.MCQ,
       );
 
@@ -488,7 +484,6 @@ describe('LessonControllerIT', () => {
         isPublished: lesson.isPublished,
         chapterId: chapter.id,
         order: lesson.order,
-        gameType: GameType.MCQ,
         modules: [
           {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -675,6 +670,7 @@ describe('LessonControllerIT', () => {
         completedGameModules: 3,
         totalGameModules: 3,
         isCompleted: true,
+        xpWon: 25,
       });
     });
 

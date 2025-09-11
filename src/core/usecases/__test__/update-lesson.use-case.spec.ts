@@ -6,7 +6,6 @@ import {
   UpdateLessonCommand,
   UpdateLessonUseCase,
 } from '../update-lesson.use-case';
-import { GameType } from '../../domain/type/GameType';
 import { LessonOrderConflictError } from '../../domain/error/LessonOrderConflictError';
 
 describe('UpdateLessonUseCase', () => {
@@ -51,7 +50,6 @@ describe('UpdateLessonUseCase', () => {
       chapterId: 'chapter-1',
       isPublished: true,
       order: 2,
-      gameType: GameType.MCQ,
       modules: [],
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,
@@ -64,7 +62,6 @@ describe('UpdateLessonUseCase', () => {
       chapterId: 'chapter-1',
       isPublished: true,
       order: 2,
-      gameType: GameType.MCQ,
       modules: [],
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,

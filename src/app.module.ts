@@ -84,6 +84,8 @@ import { GetPortfolioPositionsUseCase } from './core/usecases/get-portfolio-posi
 import { PortfolioController } from './adapters/api/controller/portfolio.controller';
 import { GetUserTransactionsUseCase } from './core/usecases/get-user-transactions.use-case';
 import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-case';
+import { LevelingService } from './core/usecases/services/leveling.service';
+import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -229,6 +231,13 @@ import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-c
       useFactory: (prisma: PrismaService) =>
         new PrismaTransactionRepository(prisma),
       inject: [PrismaService],
+    },
+    {
+      provide: LevelingService,
+      useFactory: (userRepository: UserRepository) =>
+        new LevelingService(userRepository),
+      inject: [UserRepository],
+
     },
     {
       provide: CreateUserUseCase,
@@ -419,18 +428,21 @@ import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-c
         lessonCompletionRepository: PrismaLessonCompletionRepository,
         lessonAttemptRepository: LessonAttemptRepository,
         moduleAttemptRepository: ModuleAttemptRepository,
+        levelingService: LevelingService,
       ) =>
         new CompleteLessonUseCase(
           lessonRepository,
           lessonCompletionRepository,
           lessonAttemptRepository,
           moduleAttemptRepository,
+          levelingService,
         ),
       inject: [
         LessonRepository,
         'LessonCompletionRepository',
         'LessonAttemptRepository',
         'ModuleAttemptRepository',
+        LevelingService,
       ],
     },
     {
@@ -531,6 +543,12 @@ import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-c
       provide: CreateSuperadminUseCase,
       useFactory: (userRepository: UserRepository) =>
         new CreateSuperadminUseCase(userRepository),
+      inject: [UserRepository],
+    },
+    {
+      provide: GetUserProfileUseCase,
+      useFactory: (userRepository: UserRepository) =>
+        new GetUserProfileUseCase(userRepository),
       inject: [UserRepository],
     },
   ],

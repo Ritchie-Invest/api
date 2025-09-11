@@ -51,6 +51,17 @@ export class PrismaUserRepository implements UserRepository {
     return this.mapper.toDomain(updatedEntity);
   }
 
+  async incrementXp(userId: string, amount: number): Promise<User | null> {
+    const updatedEntity = await this.prisma.user.update({
+      where: { id: userId },
+      data: { xp: { increment: amount } },
+    });
+    if (!updatedEntity) {
+      return null;
+    }
+    return this.mapper.toDomain(updatedEntity);
+  }
+
   async remove(id: string): Promise<void> {
     await this.prisma.user.delete({ where: { id } });
   }

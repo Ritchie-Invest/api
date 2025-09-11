@@ -19,9 +19,6 @@ export class CreateLessonResponse {
   @ApiProperty()
   isPublished: boolean;
 
-  @ApiProperty()
-  gameType: string;
-
   @ApiProperty({ type: [Object] })
   modules: unknown[];
 
@@ -38,7 +35,6 @@ export class CreateLessonResponse {
     chapterId: string,
     order: number,
     isPublished: boolean,
-    gameType: string,
     modules: unknown[],
     updatedAt: Date,
     createdAt: Date,
@@ -49,7 +45,6 @@ export class CreateLessonResponse {
     this.chapterId = chapterId;
     this.order = order;
     this.isPublished = isPublished;
-    this.gameType = gameType;
     this.modules = modules;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;

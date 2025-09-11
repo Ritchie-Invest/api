@@ -25,7 +25,6 @@ export class GetLessonsByChapterIdMapper {
         description: lesson.description,
         order: lesson.order !== undefined ? lesson.order : 0,
         isPublished: lesson.isPublished,
-        gameType: lesson.gameType,
         modules: lesson.modules,
         createdAt: lesson.createdAt,
         updatedAt: lesson.updatedAt,

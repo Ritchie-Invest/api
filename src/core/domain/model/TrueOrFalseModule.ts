@@ -1,5 +1,6 @@
 import { GameModule } from './GameModule';
 import { TrueOrFalseModuleInvalidDataError } from '../error/TrueOrFalseModuleInvalidDataError';
+import { GameType } from '../type/GameType';
 
 export class TrueOrFalseModule extends GameModule {
   sentence: string;
@@ -13,7 +14,11 @@ export class TrueOrFalseModule extends GameModule {
     updatedAt?: Date;
     createdAt?: Date;
   }) {
-    super({ id: params.id, lessonId: params.lessonId });
+    super({
+      id: params.id,
+      lessonId: params.lessonId,
+      gameType: GameType.TRUE_OR_FALSE,
+    });
 
     if (!params.sentence || params.sentence.trim().length === 0) {
       throw new TrueOrFalseModuleInvalidDataError('Sentence is required');

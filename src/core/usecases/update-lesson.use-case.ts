@@ -49,7 +49,6 @@ export class UpdateLessonUseCase
       currentLesson.chapterId,
       order ?? currentLesson.order,
       command.isPublished ?? currentLesson.isPublished,
-      currentLesson.gameType,
       currentLesson.modules,
       currentLesson.updatedAt,
       currentLesson.createdAt,
