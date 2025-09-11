@@ -9,6 +9,7 @@ export class UserFactory {
       overrides?.password ?? 'hashedPassword',
       overrides?.type ?? UserType.STUDENT,
       overrides?.totalXp ?? 0,
+      overrides?.isInvestmentUnlocked ?? false,
       overrides?.createdAt ?? new Date(),
       overrides?.updatedAt ?? new Date(),
     );

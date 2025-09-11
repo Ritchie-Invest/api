@@ -19,6 +19,16 @@ export class GetMeResponse {
   @ApiProperty({ description: 'XP already earned for the current level' })
   xpForThisLevel: number;
 
+  @ApiProperty({
+    description: 'Flag indicating if the investment simulator is unlocked',
+  })
+  isInvestmentUnlocked: boolean;
+
+  @ApiProperty({
+    description: 'Level required to unlock the investment simulator',
+  })
+  levelRequiredToUnlockInvestment: number;
+
   constructor(
     id: string,
     email: string,
@@ -26,6 +36,8 @@ export class GetMeResponse {
     level: number,
     xpRequiredForNextLevel: number,
     xpForThisLevel: number,
+    isInvestmentUnlocked: boolean,
+    levelRequiredToUnlockInvestment: number,
   ) {
     this.id = id;
     this.email = email;
@@ -33,5 +45,7 @@ export class GetMeResponse {
     this.level = level;
     this.xpRequiredForNextLevel = xpRequiredForNextLevel;
     this.xpForThisLevel = xpForThisLevel;
+    this.isInvestmentUnlocked = isInvestmentUnlocked;
+    this.levelRequiredToUnlockInvestment = levelRequiredToUnlockInvestment;
   }
 }

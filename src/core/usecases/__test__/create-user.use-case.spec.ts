@@ -36,6 +36,7 @@ describe('CreateUserUseCase', () => {
       password: expect.any(String),
       type: 'STUDENT',
       totalXp: 0,
+      isInvestmentUnlocked: false,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       createdAt: expect.any(Date),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
