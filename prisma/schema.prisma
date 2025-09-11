@@ -24,13 +24,15 @@ enum Currency {
 }
 
 model User {
-  id               String             @id @default(cuid())
-  email            String             @unique
-  password         String
-  type             UserType           @default(STUDENT)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  xp               Int                @default(0)
+  id                   String   @id @default(cuid())
+  email                String   @unique
+  password             String
+  type                 UserType @default(STUDENT)
+  xp                   Int      @default(0)
+  isInvestmentUnlocked Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
   refresh_tokens   RefreshToken[]
   LessonCompletion LessonCompletion[]
   LessonAttempt    LessonAttempt[]

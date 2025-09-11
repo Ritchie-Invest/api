@@ -13,11 +13,18 @@ export type GetUserProfileResult = {
   level: number;
   xpRequiredForNextLevel: number;
   xpForThisLevel: number;
+  isInvestmentUnlocked: boolean;
+  levelRequiredToUnlockInvestment: number;
 };
 
 export class GetUserProfileUseCase
   implements UseCase<GetUserProfileCommand, GetUserProfileResult>
 {
+  private readonly LEVEL_REQUIRED_TO_UNLOCK_INVESTMENT = process.env
+    .LEVEL_REQUIRED_TO_UNLOCK_INVESTMENT
+    ? parseInt(process.env.LEVEL_REQUIRED_TO_UNLOCK_INVESTMENT)
+    : 5;
+
   constructor(private readonly userRepository: UserRepository) {}
 
   async execute(command: GetUserProfileCommand): Promise<GetUserProfileResult> {
@@ -32,6 +39,8 @@ export class GetUserProfileUseCase
       level: user.level,
       xpRequiredForNextLevel: user.xpRequiredForNextLevel,
       xpForThisLevel: user.xpForThisLevel,
+      isInvestmentUnlocked: user.isInvestmentUnlocked,
+      levelRequiredToUnlockInvestment: this.LEVEL_REQUIRED_TO_UNLOCK_INVESTMENT,
     };
   }
 }

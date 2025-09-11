@@ -171,6 +171,8 @@ describe('UserControllerIT', () => {
         level: 3,
         xpRequiredForNextLevel: 25,
         xpForThisLevel: 17,
+        isInvestmentUnlocked: false,
+        levelRequiredToUnlockInvestment: 5,
       });
     });
 
