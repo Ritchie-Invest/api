@@ -68,6 +68,7 @@ import { UpdateTickersHistoryUseCase } from './core/usecases/update-tickers-hist
 import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cron';
 import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-case';
 import { LevelingService } from './core/usecases/services/leveling.service';
+import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -386,6 +387,12 @@ import { LevelingService } from './core/usecases/services/leveling.service';
       provide: CreateSuperadminUseCase,
       useFactory: (userRepository: UserRepository) =>
         new CreateSuperadminUseCase(userRepository),
+      inject: [UserRepository],
+    },
+    {
+      provide: GetUserProfileUseCase,
+      useFactory: (userRepository: UserRepository) =>
+        new GetUserProfileUseCase(userRepository),
       inject: [UserRepository],
     },
   ],

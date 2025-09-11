@@ -35,8 +35,7 @@ describe('CreateSuperadminUseCase', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       password: expect.any(String),
       type: UserType.SUPERADMIN,
-      xp: 0,
-      level: 1,
+      totalXp: 0,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       createdAt: expect.any(Date),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

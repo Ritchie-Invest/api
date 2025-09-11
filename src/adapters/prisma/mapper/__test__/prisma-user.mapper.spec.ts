@@ -68,7 +68,7 @@ describe('PrismaUserMapper', () => {
           email: 'user@example.com',
           password: 'securepassword123',
           type: domain,
-          xp: 0,
+          totalXp: 0,
           updatedAt: new Date('2023-10-01T10:00:00Z'),
           createdAt: new Date('2023-10-01T11:00:00Z'),
         });

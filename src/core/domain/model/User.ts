@@ -11,7 +11,7 @@ export class User extends DomainModel {
   type: UserType;
   updatedAt: Date;
   createdAt: Date;
-  xp: number;
+  totalXp: number;
 
   constructor(
     id: string,
@@ -26,21 +26,48 @@ export class User extends DomainModel {
     this.email = email;
     this.password = password;
     this.type = type;
-    this.xp = xp || User.INITIAL_XP;
+    this.totalXp = xp || User.INITIAL_XP;
     this.updatedAt = updatedAt || new Date();
     this.createdAt = createdAt || new Date();
   }
 
   get level(): number {
-    const currentXp = this.xp || User.INITIAL_XP;
-    if (currentXp < User.INITIAL_XP_THRESHOLD) return 1;
+    return this.computeProgress().levelIndex + 1;
+  }
 
-    const xpSinceLevel2 = currentXp - User.INITIAL_XP_THRESHOLD;
-    const discriminant = Math.sqrt(
-      1 + (8 * xpSinceLevel2) / User.PROGRESSION_STEP,
-    );
-    const levelIndex = Math.floor((discriminant - 1) / 2);
+  // Width needed to complete the current level segment (XP Needed For Next Level in table)
+  get xpRequiredForNextLevel(): number {
+    const { levelIndex } = this.computeProgress();
+    return User.widthForLevelIndex(levelIndex);
+  }
 
-    return levelIndex + 2;
+  // XP already accumulated in the current level segment (xpForThisLevel in table)
+  get xpForThisLevel(): number {
+    return this.computeProgress().xpInLevel;
+  }
+
+  // Remaining XP to reach the next level boundary
+  get xpToNextLevel(): number {
+    const { levelIndex, xpInLevel } = this.computeProgress();
+    const width = User.widthForLevelIndex(levelIndex);
+    return Math.max(0, width - xpInLevel);
+  }
+
+  private static widthForLevelIndex(index: number): number {
+    // width(0)=10, width(1)=15, width(2)=25, width(3)=40, ...
+    const t = (index * (index + 1)) / 2; // triangular number T(index)
+    return User.INITIAL_XP_THRESHOLD + User.PROGRESSION_STEP * t;
+  }
+
+  private computeProgress(): { levelIndex: number; xpInLevel: number } {
+    let idx = 0; // 0-based index for widths (table Level)
+    let remaining = this.totalXp || User.INITIAL_XP;
+
+    while (remaining >= User.widthForLevelIndex(idx)) {
+      remaining -= User.widthForLevelIndex(idx);
+      idx += 1;
+    }
+
+    return { levelIndex: idx, xpInLevel: remaining };
   }
 }

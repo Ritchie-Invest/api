@@ -13,7 +13,7 @@ export class PrismaUserMapper implements EntityMapper<User, UserEntity> {
       email: model.email,
       password: model.password,
       type: model.type,
-      xp: model.xp,
+      xp: model.totalXp,
       updatedAt: model.updatedAt,
       createdAt: model.createdAt,
     };

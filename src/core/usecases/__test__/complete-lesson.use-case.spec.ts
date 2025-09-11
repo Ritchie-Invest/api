@@ -180,7 +180,7 @@ describe('CompleteLessonUseCase', () => {
       email: 'user2@example.com',
       password: 'hashed',
       type: UserType.STUDENT,
-      xp: 0,
+      totalXp: 0,
     });
 
     const gameModule1 = new McqModule({
@@ -284,7 +284,7 @@ describe('CompleteLessonUseCase', () => {
       email: 'user2@example.com',
       password: 'hashed',
       type: UserType.STUDENT,
-      xp: 0,
+      totalXp: 0,
     });
 
     const gameModule1 = new McqModule({
