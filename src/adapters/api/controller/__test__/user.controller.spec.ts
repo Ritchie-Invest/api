@@ -146,6 +146,62 @@ describe('UserControllerIT', () => {
     });
   });
 
+  describe('getMe', () => {
+    it("should return current user's profile", async () => {
+      // Given
+      const accessToken = generateAccessToken(UserType.STUDENT);
+      const existingUser = UserFactory.make({
+        id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
+        email: 'test@ritchie-invest.com',
+        totalXp: 42,
+      });
+      await userRepository.create(existingUser);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .get('/users/me')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toEqual({
+        id: existingUser.id,
+        email: existingUser.email,
+        totalXp: 42,
+        level: 3,
+        xpRequiredForNextLevel: 25,
+        xpForThisLevel: 17,
+      });
+    });
+
+    it('should return 401 if no token provided', async () => {
+      // When
+      const response = await request(app.getHttpServer()).get('/users/me');
+
+      // Then
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe('No token provided');
+    });
+
+    it('should return 404 if user not found', async () => {
+      // Given
+      const accessToken = generateAccessToken(UserType.STUDENT);
+
+      // When
+      const response = await request(app.getHttpServer())
+        .get('/users/me')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Then
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(response.body.message).toBe(
+        'User with email be7cbc6d-782b-4939-8cff-e577dfe3e79a not found',
+      );
+    });
+  });
+
   afterAll(async () => {
     await app.close();
   });

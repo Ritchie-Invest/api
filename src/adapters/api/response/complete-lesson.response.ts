@@ -19,13 +19,21 @@ export class CompleteLessonResponse {
   })
   isCompleted: boolean;
 
+  @ApiProperty({
+    description: 'Experience points won from completing the lesson',
+    example: 10,
+  })
+  xpWon: number;
+
   constructor(
     completedGameModules: number,
     totalGameModules: number,
     isCompleted: boolean = false,
+    xpWon: number = 0,
   ) {
     this.completedGameModules = completedGameModules;
     this.totalGameModules = totalGameModules;
     this.isCompleted = isCompleted;
+    this.xpWon = xpWon;
   }
 }

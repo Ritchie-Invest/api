@@ -1,12 +1,14 @@
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
-import { GameType } from '../../domain/type/GameType';
 import { CompleteLessonUseCase } from '../complete-lesson.use-case';
 import { Lesson } from '../../domain/model/Lesson';
 import { McqModule } from '../../domain/model/McqModule';
 import { InMemoryLessonAttemptRepository } from '../../../adapters/in-memory/in-memory-lesson-attempt.repository';
 import { InMemoryModuleAttemptRepository } from '../../../adapters/in-memory/in-memory-module-attempt.repository';
 import { InMemoryLessonCompletionRepository } from '../../../adapters/in-memory/in-memory-lesson-completion.repository';
+import { InMemoryUserRepository } from '../../../adapters/in-memory/in-memory-user.repository';
+import { UserType } from '../../domain/type/UserType';
+import { LevelingService } from '../services/leveling.service';
 
 describe('CompleteLessonUseCase', () => {
   let gameModuleRepository: InMemoryGameModuleRepository;
@@ -14,6 +16,9 @@ describe('CompleteLessonUseCase', () => {
   let lessonCompletionRepository: InMemoryLessonCompletionRepository;
   let lessonAttemptRepository: InMemoryLessonAttemptRepository;
   let moduleAttemptRepository: InMemoryModuleAttemptRepository;
+  let userRepository: InMemoryUserRepository;
+
+  let levelingService: LevelingService;
   let useCase: CompleteLessonUseCase;
 
   beforeEach(() => {
@@ -22,18 +27,23 @@ describe('CompleteLessonUseCase', () => {
     lessonCompletionRepository = new InMemoryLessonCompletionRepository();
     lessonAttemptRepository = new InMemoryLessonAttemptRepository();
     moduleAttemptRepository = new InMemoryModuleAttemptRepository();
+    userRepository = new InMemoryUserRepository();
 
+    levelingService = new LevelingService(userRepository);
     useCase = new CompleteLessonUseCase(
       lessonRepository,
       lessonCompletionRepository,
       lessonAttemptRepository,
       moduleAttemptRepository,
+      levelingService,
     );
+
     moduleAttemptRepository.removeAll();
     lessonAttemptRepository.removeAll();
     lessonCompletionRepository.removeAll();
     gameModuleRepository.removeAll();
     lessonRepository.removeAll();
+    userRepository.removeAll();
   });
 
   it('should complete a lesson and return score and total game modules', async () => {
@@ -109,7 +119,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1, gameModule2, gameModule3],
     );
     lessonRepository.create(lesson);
@@ -157,6 +166,7 @@ describe('CompleteLessonUseCase', () => {
       completedGameModules: 2,
       totalGameModules: 3,
       isCompleted: false,
+      xpWon: 0,
     });
   });
 
@@ -164,6 +174,14 @@ describe('CompleteLessonUseCase', () => {
     // Given
     const userId = 'user-2';
     const lessonId = 'lesson-2';
+
+    userRepository.create({
+      id: userId,
+      email: 'user2@example.com',
+      password: 'hashed',
+      type: UserType.STUDENT,
+      totalXp: 0,
+    });
 
     const gameModule1 = new McqModule({
       id: 'module-1',
@@ -213,7 +231,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1, gameModule2],
     );
     lessonRepository.create(lesson);
@@ -253,6 +270,111 @@ describe('CompleteLessonUseCase', () => {
       completedGameModules: 2,
       totalGameModules: 2,
       isCompleted: true,
+      xpWon: 25,
+    });
+  });
+
+  it('should complete a lesson with less than 80% score', async () => {
+    // Given
+    const userId = 'user-2';
+    const lessonId = 'lesson-2';
+
+    userRepository.create({
+      id: userId,
+      email: 'user2@example.com',
+      password: 'hashed',
+      type: UserType.STUDENT,
+      totalXp: 0,
+    });
+
+    const gameModule1 = new McqModule({
+      id: 'module-1',
+      lessonId: lessonId,
+      question: 'What is 1+1?',
+      choices: [
+        {
+          id: 'choice-1',
+          text: '2',
+          isCorrect: true,
+          correctionMessage: 'Yes',
+        },
+        {
+          id: 'choice-2',
+          text: '3',
+          isCorrect: false,
+          correctionMessage: 'No',
+        },
+      ],
+    });
+    gameModuleRepository.create(gameModule1);
+    const gameModule2 = new McqModule({
+      id: 'module-2',
+      lessonId: lessonId,
+      question: 'What is 2+2?',
+      choices: [
+        {
+          id: 'choice-3',
+          text: '4',
+          isCorrect: true,
+          correctionMessage: 'Yes',
+        },
+        {
+          id: 'choice-4',
+          text: '5',
+          isCorrect: false,
+          correctionMessage: 'No',
+        },
+      ],
+    });
+    gameModuleRepository.create(gameModule2);
+
+    const lesson = new Lesson(
+      lessonId,
+      'Lesson 2',
+      'Description of Lesson 2',
+      'chapter-1',
+      1,
+      false,
+      [gameModule1, gameModule2],
+    );
+    lessonRepository.create(lesson);
+
+    lessonAttemptRepository.create({
+      id: 'attempt-2',
+      userId,
+      lessonId,
+      startedAt: new Date(),
+      finishedAt: undefined,
+    });
+    moduleAttemptRepository.create({
+      id: 'module-attempt-4',
+      userId,
+      gameModuleId: gameModule1.id,
+      lessonAttemptId: 'attempt-2',
+      isCorrect: true,
+      answeredAt: new Date(),
+    });
+    moduleAttemptRepository.create({
+      id: 'module-attempt-5',
+      userId,
+      gameModuleId: gameModule2.id,
+      lessonAttemptId: 'attempt-2',
+      isCorrect: false,
+      answeredAt: new Date(),
+    });
+
+    // When
+    const result = await useCase.execute({
+      userId,
+      lessonId: lesson.id,
+    });
+
+    // Then
+    expect(result).toEqual({
+      completedGameModules: 1,
+      totalGameModules: 2,
+      isCompleted: false,
+      xpWon: 0,
     });
   });
 
@@ -300,7 +422,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1],
     );
     lessonRepository.create(lesson);
@@ -346,7 +467,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1],
     );
     lessonRepository.create(lesson);
@@ -390,7 +510,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1],
     );
     lessonRepository.create(lesson);
@@ -458,7 +577,6 @@ describe('CompleteLessonUseCase', () => {
       'chapter-1',
       1,
       false,
-      GameType.MCQ,
       [gameModule1, gameModule2],
     );
     lessonRepository.create(lesson);

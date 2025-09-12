@@ -44,7 +44,7 @@ export class UpdateGameModuleUseCase
       throw new LessonNotFoundError(gameModule.lessonId);
     }
 
-    const strategy = this.strategyFactory.getStrategy(lesson.gameType);
+    const strategy = this.strategyFactory.getStrategy(gameModule.gameType);
     const module = strategy.updateModule(gameModule, command);
     await this.gameModuleRepository.update(gameModule.id, module);
 
