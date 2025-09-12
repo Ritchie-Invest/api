@@ -18,6 +18,8 @@ export class GetMeMapper {
       result.level,
       result.xpRequiredForNextLevel,
       result.xpForThisLevel,
+      result.isInvestmentUnlocked,
+      result.levelRequiredToUnlockInvestment,
     );
   }
 }

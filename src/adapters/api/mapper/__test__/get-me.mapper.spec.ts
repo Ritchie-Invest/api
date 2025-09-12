@@ -30,6 +30,8 @@ describe('GetMeMapper', () => {
         level: 3,
         xpRequiredForNextLevel: 0,
         xpForThisLevel: 0,
+        isInvestmentUnlocked: false,
+        levelRequiredToUnlockInvestment: 5,
       };
 
       // When
@@ -43,6 +45,8 @@ describe('GetMeMapper', () => {
         level: 3,
         xpRequiredForNextLevel: 0,
         xpForThisLevel: 0,
+        isInvestmentUnlocked: false,
+        levelRequiredToUnlockInvestment: 5,
       });
     });
   });

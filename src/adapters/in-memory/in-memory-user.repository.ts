@@ -7,7 +7,10 @@ export class InMemoryUserRepository implements UserRepository {
   private users: Map<string, User> = new Map();
 
   create(
-    data: Pick<User, 'id' | 'email' | 'password' | 'type' | 'totalXp'>,
+    data: Pick<
+      User,
+      'id' | 'email' | 'password' | 'type' | 'totalXp' | 'isInvestmentUnlocked'
+    >,
   ): User {
     const user = new User(
       data.id,
@@ -15,6 +18,7 @@ export class InMemoryUserRepository implements UserRepository {
       data.password,
       data.type,
       data.totalXp ?? 0,
+      data.isInvestmentUnlocked ?? false,
       new Date(),
       new Date(),
     );

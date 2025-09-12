@@ -9,16 +9,18 @@ export class User extends DomainModel {
   email: string;
   password: string;
   type: UserType;
+  totalXp: number;
+  isInvestmentUnlocked: boolean;
   updatedAt: Date;
   createdAt: Date;
-  totalXp: number;
 
   constructor(
     id: string,
     email: string,
     password: string,
     type: UserType,
-    xp?: number,
+    totalXp?: number,
+    isInvestmentUnlocked?: boolean,
     updatedAt?: Date,
     createdAt?: Date,
   ) {
@@ -26,7 +28,8 @@ export class User extends DomainModel {
     this.email = email;
     this.password = password;
     this.type = type;
-    this.totalXp = xp || User.INITIAL_XP;
+    this.totalXp = totalXp || User.INITIAL_XP;
+    this.isInvestmentUnlocked = isInvestmentUnlocked || false;
     this.updatedAt = updatedAt || new Date();
     this.createdAt = createdAt || new Date();
   }

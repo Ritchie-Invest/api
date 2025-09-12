@@ -36,6 +36,8 @@ describe('GetUserProfileUseCase', () => {
       level: existing.level,
       xpRequiredForNextLevel: existing.xpRequiredForNextLevel,
       xpForThisLevel: existing.xpForThisLevel,
+      isInvestmentUnlocked: existing.isInvestmentUnlocked,
+      levelRequiredToUnlockInvestment: 5,
     });
   });
 

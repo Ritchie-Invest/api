@@ -23,6 +23,7 @@ describe('PrismaUserMapper', () => {
           'securepassword123',
           domain,
           0,
+          false,
           new Date('2023-10-01T10:00:00Z'),
           new Date('2023-10-01T11:00:00Z'),
         );
@@ -37,6 +38,7 @@ describe('PrismaUserMapper', () => {
           password: 'securepassword123',
           type: prisma,
           xp: 0,
+          isInvestmentUnlocked: false,
           updatedAt: new Date('2023-10-01T10:00:00Z'),
           createdAt: new Date('2023-10-01T11:00:00Z'),
         });
@@ -55,6 +57,7 @@ describe('PrismaUserMapper', () => {
           password: 'securepassword123',
           type: prisma,
           xp: 0,
+          isInvestmentUnlocked: false,
           updatedAt: new Date('2023-10-01T10:00:00Z'),
           createdAt: new Date('2023-10-01T11:00:00Z'),
         };
@@ -69,6 +72,7 @@ describe('PrismaUserMapper', () => {
           password: 'securepassword123',
           type: domain,
           totalXp: 0,
+          isInvestmentUnlocked: false,
           updatedAt: new Date('2023-10-01T10:00:00Z'),
           createdAt: new Date('2023-10-01T11:00:00Z'),
         });
@@ -83,6 +87,7 @@ describe('PrismaUserMapper', () => {
         password: 'securepassword123',
         type: 'INVALID_TYPE' as $Enums.UserType,
         xp: 0,
+        isInvestmentUnlocked: false,
         updatedAt: new Date('2023-10-01T10:00:00Z'),
         createdAt: new Date('2023-10-01T11:00:00Z'),
       };
