@@ -519,12 +519,16 @@ import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case
       useFactory: (
         userPortfolioRepository: UserPortfolioRepository,
         portfolioPositionRepository: PortfolioPositionRepository,
+        transactionRepository: TransactionRepository,
+        dailyBarRepository: DailyBarRepository,
       ) =>
         new GetPortfolioUseCase(
           userPortfolioRepository,
           portfolioPositionRepository,
+          transactionRepository,
+          dailyBarRepository,
         ),
-      inject: ['UserPortfolioRepository', 'PortfolioPositionRepository'],
+      inject: ['UserPortfolioRepository', 'PortfolioPositionRepository', 'TransactionRepository', 'DailyBarRepository'],
     },
     {
       provide: GetPortfolioPositionsUseCase,
