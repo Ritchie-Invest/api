@@ -40,11 +40,17 @@ export class GetPortfolioPositionsUseCase
       throw new PortfolioNotFoundError('Portfolio not found for this user');
     }
 
-    const positions =
+    let positions =
       await this.portfolioPositionRepository.findAllByPortfolioId(
         userPortfolio.id,
         command.limit,
       );
+
+    if (command.limit && command.limit > 90) {
+      positions = this.aggregateMonthly(positions);
+    } else if (command.limit && command.limit > 30) {
+      positions = this.aggregateWeekly(positions);
+    }
 
     const total = await this.portfolioPositionRepository.countByPortfolioId(
       userPortfolio.id,
@@ -54,5 +60,44 @@ export class GetPortfolioPositionsUseCase
       positions,
       total,
     };
+  }
+
+  private aggregateWeekly(positions: PortfolioPosition[]): PortfolioPosition[] {
+    return this.aggregatePositions(positions, 7);
+  }
+
+  private aggregateMonthly(positions: PortfolioPosition[]): PortfolioPosition[] {
+    return this.aggregatePositions(positions, 30);
+  }
+
+  private aggregatePositions(positions: PortfolioPosition[], chunkSize: number): PortfolioPosition[] {
+    if (positions.length === 0) return [];
+
+    const reversed = [...positions].reverse();
+
+    const aggregated: PortfolioPosition[] = [];
+    for (let i = 0; i < reversed.length; i += chunkSize) {
+      const chunk = reversed.slice(i, i + chunkSize);
+      if (chunk.length > 0) {
+        const aggregatedPosition = this.aggregateChunk(chunk);
+        aggregated.push(aggregatedPosition);
+      }
+    }
+
+    return aggregated.reverse();
+  }
+
+  private aggregateChunk(chunk: PortfolioPosition[]): PortfolioPosition {
+    const last = chunk[chunk.length - 1]!;
+    const portfolioId = last.portfolioId;
+    const id = `agg-${last.date.getTime()}`;
+
+    return new PortfolioPosition({
+      id,
+      portfolioId,
+      cash: last.cash,
+      investments: last.investments,
+      date: last.date,
+    });
   }
 }
