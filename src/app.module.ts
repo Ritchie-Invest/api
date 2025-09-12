@@ -45,7 +45,7 @@ import {
   MapCompleteGameModuleStrategyFactory,
 } from './core/usecases/strategies/complete-game-module-strategy-factory';
 import { McqCompleteGameModuleStrategy } from './core/usecases/strategies/mcq-complete-game-module-strategy';
-import { GetUserChaptersUseCase } from './core/usecases/get-user-chapters.use-case';
+import { GetUserProgressUseCase } from './core/usecases/get-user-progress-use-case.service';
 import { GetGameModuleByIdUseCase } from './core/usecases/get-game-module-by-id.use-case';
 import { UpdateGameModuleUseCase } from './core/usecases/update-game-module.use-case';
 import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case';
@@ -251,9 +251,9 @@ import { LoggerMiddleware } from './config/logger.midleware';
       inject: [ChapterRepository],
     },
     {
-      provide: GetUserChaptersUseCase,
+      provide: GetUserProgressUseCase,
       useFactory: (chapterRepository: ChapterRepository) =>
-        new GetUserChaptersUseCase(chapterRepository),
+        new GetUserProgressUseCase(chapterRepository),
       inject: [ChapterRepository],
     },
     {

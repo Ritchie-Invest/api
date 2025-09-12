@@ -84,7 +84,7 @@ export class ChapterSummaryResponse {
   }
 }
 
-export class GetUserChaptersResponse {
+export class GetUserProgressResponse {
   @ApiProperty({ type: [ChapterSummaryResponse] })
   chapters: ChapterSummaryResponse[];
 

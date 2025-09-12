@@ -1,13 +1,13 @@
-import { GetUserChaptersMapper } from '../get-user-chapters.mapper';
+import { GetUserProgressMapper } from '../get-user-progress.mapper';
 import { ProfileRequest } from '../../request/profile.request';
 import { UserType } from '../../../../core/domain/type/UserType';
-import { GetUserChaptersResult } from '../../../../core/usecases/get-user-chapters.use-case';
+import { GetUserProgressResult } from '../../../../core/usecases/get-user-progress-use-case.service';
 import { ChapterStatus } from '../../../../core/domain/type/ChapterStatus';
 import { LessonStatus } from '../../../../core/domain/type/LessonStatus';
 
-describe('GetUserChaptersMapper', () => {
+describe('GetUserProgressMapper', () => {
   describe('toDomain', () => {
-    it('should map ProfileRequest to GetUserChaptersCommand', () => {
+    it('should map ProfileRequest to GetUserProgressCommand', () => {
       // Given
       const profileRequest: ProfileRequest = {
         id: 'user-123',
@@ -15,7 +15,7 @@ describe('GetUserChaptersMapper', () => {
         type: UserType.STUDENT,
       };
       // When
-      const result = GetUserChaptersMapper.toDomain(profileRequest);
+      const result = GetUserProgressMapper.toDomain(profileRequest);
       // Then
       expect(result).toStrictEqual({ userId: 'user-123' });
     });
@@ -24,7 +24,7 @@ describe('GetUserChaptersMapper', () => {
   describe('fromDomain', () => {
     it('should map a single chapter with multiple lessons', () => {
       // Given
-      const domainResult: GetUserChaptersResult = [
+      const domainResult: GetUserProgressResult = [
         {
           id: 'chapter-1',
           title: 'Chapter 1',
@@ -54,7 +54,7 @@ describe('GetUserChaptersMapper', () => {
         },
       ];
       // When
-      const response = GetUserChaptersMapper.fromDomain(domainResult);
+      const response = GetUserProgressMapper.fromDomain(domainResult);
       // Then
       expect(response).toEqual({
         chapters: [
@@ -91,7 +91,7 @@ describe('GetUserChaptersMapper', () => {
 
     it('should map lesson with null gameModuleId', () => {
       // Given
-      const domainResult: GetUserChaptersResult = [
+      const domainResult: GetUserProgressResult = [
         {
           id: 'chapter-1',
           title: 'Chapter 1',
@@ -113,7 +113,7 @@ describe('GetUserChaptersMapper', () => {
         },
       ];
       // When
-      const response = GetUserChaptersMapper.fromDomain(domainResult);
+      const response = GetUserProgressMapper.fromDomain(domainResult);
       // Then
       expect(response).toEqual({
         chapters: [
@@ -142,7 +142,7 @@ describe('GetUserChaptersMapper', () => {
 
     it('should map multiple chapters and lessons preserving order', () => {
       // Given
-      const domainResult: GetUserChaptersResult = [
+      const domainResult: GetUserProgressResult = [
         {
           id: 'chapter-1',
           title: 'Chapter 1',
@@ -191,7 +191,7 @@ describe('GetUserChaptersMapper', () => {
         },
       ];
       // When
-      const response = GetUserChaptersMapper.fromDomain(domainResult);
+      const response = GetUserProgressMapper.fromDomain(domainResult);
       // Then
       expect(response).toEqual({
         chapters: [
@@ -267,9 +267,9 @@ describe('GetUserChaptersMapper', () => {
             },
           ],
         },
-      ] as unknown as GetUserChaptersResult;
+      ] as unknown as GetUserProgressResult;
       // When
-      const response = GetUserChaptersMapper.fromDomain(domainResult);
+      const response = GetUserProgressMapper.fromDomain(domainResult);
       // Then
       expect(response).toEqual({
         chapters: [

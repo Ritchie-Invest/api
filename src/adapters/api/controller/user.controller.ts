@@ -15,17 +15,22 @@ import {
   ApiInternalServerErrorResponse,
   ApiOperation,
   ApiOkResponse,
+  ApiCreatedResponse,
 } from '@nestjs/swagger';
 import { UpdateUserTypeResponse } from '../response/update-user-type.response';
 import { GetUserProfileUseCase } from '../../../core/usecases/get-user-profile.use-case';
 import { GetMeMapper } from '../mapper/get-me.mapper';
 import { GetMeResponse } from '../response/get-me.response';
+import { GetUserProgressResponse } from '../response/get-user-progress.response';
+import { GetUserProgressMapper } from '../mapper/get-user-progress.mapper';
+import { GetUserProgressUseCase } from '../../../core/usecases/get-user-progress-use-case.service';
 
 @Controller('/users')
 export class UserController {
   constructor(
     private readonly updateUserTypeUseCase: UpdateUserTypeUseCase,
     private readonly getUserProfileUseCase: GetUserProfileUseCase,
+    private readonly getUserProgressUseCase: GetUserProgressUseCase,
   ) {}
 
   @Get('/me')
@@ -74,5 +79,28 @@ export class UserController {
     const command = UpdateUserTypeMapper.toDomain(currentUser, userId, body);
     const user = await this.updateUserTypeUseCase.execute(command);
     return UpdateUserTypeMapper.fromDomain(user);
+  }
+
+  @Get('/progress')
+  @ApiOperation({ summary: 'Get user chapters with progress' })
+  @ApiCreatedResponse({
+    description: 'User chapters with progress successfully retrieved',
+    type: GetUserProgressResponse,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid request or parameters',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized access',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error',
+  })
+  async getUserProgress(
+    @CurrentUser() currentUser: ProfileRequest,
+  ): Promise<GetUserProgressResponse> {
+    const command = GetUserProgressMapper.toDomain(currentUser);
+    const result = await this.getUserProgressUseCase.execute(command);
+    return GetUserProgressMapper.fromDomain(result);
   }
 }

@@ -1,22 +1,22 @@
 import { ProfileRequest } from '../request/profile.request';
 import {
-  GetUserChaptersCommand,
-  GetUserChaptersResult,
-} from '../../../core/usecases/get-user-chapters.use-case';
+  GetUserProgressCommand,
+  GetUserProgressResult,
+} from '../../../core/usecases/get-user-progress-use-case.service';
 import {
-  GetUserChaptersResponse,
+  GetUserProgressResponse,
   ChapterSummaryResponse,
   LessonSummaryResponse,
-} from '../response/get-user-chapters.response';
+} from '../response/get-user-progress.response';
 
-export class GetUserChaptersMapper {
-  static toDomain(currentUser: ProfileRequest): GetUserChaptersCommand {
+export class GetUserProgressMapper {
+  static toDomain(currentUser: ProfileRequest): GetUserProgressCommand {
     return {
       userId: currentUser.id,
     };
   }
 
-  static fromDomain(result: GetUserChaptersResult): GetUserChaptersResponse {
+  static fromDomain(result: GetUserProgressResult): GetUserProgressResponse {
     const chapters = result.map(
       (chapter) =>
         new ChapterSummaryResponse(
@@ -41,6 +41,6 @@ export class GetUserChaptersMapper {
         ),
     );
 
-    return new GetUserChaptersResponse(chapters);
+    return new GetUserProgressResponse(chapters);
   }
 }

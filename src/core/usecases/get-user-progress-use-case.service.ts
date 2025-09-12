@@ -7,7 +7,7 @@ import { LessonWithFirstGameModule } from '../domain/model/LessonWithFirstGameMo
 import { ChapterStatus } from '../domain/type/ChapterStatus';
 import { LessonStatus } from '../domain/type/LessonStatus';
 
-export type GetUserChaptersCommand = {
+export type GetUserProgressCommand = {
   userId: string;
 };
 
@@ -31,17 +31,17 @@ export type ChapterSummary = {
   lessons: LessonSummary[];
 };
 
-export type GetUserChaptersResult = ChapterSummary[];
+export type GetUserProgressResult = ChapterSummary[];
 
 @Injectable()
-export class GetUserChaptersUseCase
-  implements UseCase<GetUserChaptersCommand, GetUserChaptersResult>
+export class GetUserProgressUseCase
+  implements UseCase<GetUserProgressCommand, GetUserProgressResult>
 {
   constructor(private readonly chapterRepository: ChapterRepository) {}
 
   async execute(
-    command: GetUserChaptersCommand,
-  ): Promise<GetUserChaptersResult> {
+    command: GetUserProgressCommand,
+  ): Promise<GetUserProgressResult> {
     if (!command.userId) {
       throw new InvalidUserError('User ID is required');
     }
