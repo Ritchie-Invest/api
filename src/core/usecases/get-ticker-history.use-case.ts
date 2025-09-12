@@ -44,11 +44,11 @@ export class GetTickerHistoryUseCase
       limit,
     );
 
-    let processedHistory = history;
+    let processedHistory = history.reverse();
     if (limit > 90) {
-      processedHistory = this.aggregateMonthly(history);
+      processedHistory = this.aggregateMonthly(processedHistory);
     } else if (limit > 30) {
-      processedHistory = this.aggregateWeekly(history);
+      processedHistory = this.aggregateWeekly(processedHistory);
     }
 
     let variation = 0;
@@ -56,8 +56,8 @@ export class GetTickerHistoryUseCase
     let variationDirection: VariationDirection = VariationDirection.FLAT;
 
     if (processedHistory.length >= 2) {
-      const newest = processedHistory[0]!.close;
-      const oldest = processedHistory[processedHistory.length - 1]!.close;
+      const newest = processedHistory[processedHistory.length - 1]!.close;
+      const oldest = processedHistory[0]!.close;
       const delta = newest - oldest;
 
       variation = roundTo(delta, 2);
@@ -88,18 +88,16 @@ export class GetTickerHistoryUseCase
   private aggregateBars(history: DailyBar[], chunkSize: number): DailyBar[] {
     if (history.length === 0) return [];
 
-    const reversed = [...history].reverse();
-
     const aggregated: DailyBar[] = [];
-    for (let i = 0; i < reversed.length; i += chunkSize) {
-      const chunk = reversed.slice(i, i + chunkSize);
+    for (let i = 0; i < history.length; i += chunkSize) {
+      const chunk = history.slice(i, i + chunkSize);
       if (chunk.length > 0) {
         const aggregatedBar = this.aggregateChunk(chunk);
         aggregated.push(aggregatedBar);
       }
     }
 
-    return aggregated.reverse();
+    return aggregated;
   }
 
   private aggregateChunk(chunk: DailyBar[]): DailyBar {

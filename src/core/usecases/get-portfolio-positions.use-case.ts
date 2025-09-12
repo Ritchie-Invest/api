@@ -46,6 +46,8 @@ export class GetPortfolioPositionsUseCase
         command.limit,
       );
 
+    positions = positions.reverse();
+
     if (command.limit && command.limit > 90) {
       positions = this.aggregateMonthly(positions);
     } else if (command.limit && command.limit > 30) {
@@ -73,18 +75,16 @@ export class GetPortfolioPositionsUseCase
   private aggregatePositions(positions: PortfolioPosition[], chunkSize: number): PortfolioPosition[] {
     if (positions.length === 0) return [];
 
-    const reversed = [...positions].reverse();
-
     const aggregated: PortfolioPosition[] = [];
-    for (let i = 0; i < reversed.length; i += chunkSize) {
-      const chunk = reversed.slice(i, i + chunkSize);
+    for (let i = 0; i < positions.length; i += chunkSize) {
+      const chunk = positions.slice(i, i + chunkSize);
       if (chunk.length > 0) {
         const aggregatedPosition = this.aggregateChunk(chunk);
         aggregated.push(aggregatedPosition);
       }
     }
 
-    return aggregated.reverse();
+    return aggregated;
   }
 
   private aggregateChunk(chunk: PortfolioPosition[]): PortfolioPosition {
