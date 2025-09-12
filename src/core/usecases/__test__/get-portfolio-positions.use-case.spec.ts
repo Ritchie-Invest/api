@@ -17,7 +17,6 @@ describe('GetPortfolioPositionsUseCase', () => {
   beforeEach(() => {
     userPortfolioRepository = new InMemoryUserPortfolioRepository();
     portfolioPositionRepository = new InMemoryPortfolioPositionRepository();
-
     getPortfolioPositionsUseCase = new GetPortfolioPositionsUseCase(
       userPortfolioRepository,
       portfolioPositionRepository,
@@ -71,6 +70,7 @@ describe('GetPortfolioPositionsUseCase', () => {
         variationDirection: expect.any(String),
       });
     });
+
 
     it('should return all positions sorted by date descending', async () => {
       // Given

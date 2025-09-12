@@ -4,6 +4,8 @@ import {
 } from '../get-portfolio.use-case';
 import { InMemoryUserPortfolioRepository } from '../../../adapters/in-memory/in-memory-user-portfolio.repository';
 import { InMemoryPortfolioPositionRepository } from '../../../adapters/in-memory/in-memory-portfolio-position.repository';
+import { InMemoryTransactionRepository } from '../../../adapters/in-memory/in-memory-transaction.repository';
+import { InMemoryDailyBarRepository } from '../../../adapters/in-memory/in-memory-daily-bar.repository';
 import { UserPortfolio } from '../../domain/model/UserPortfolio';
 import { PortfolioPosition } from '../../domain/model/PortfolioPosition';
 import { Currency } from '../../domain/type/Currency';
@@ -12,6 +14,8 @@ describe('GetPortfolioUseCase', () => {
   let getPortfolioUseCase: GetPortfolioUseCase;
   let userPortfolioRepository: InMemoryUserPortfolioRepository;
   let PortfolioPositionRepository: InMemoryPortfolioPositionRepository;
+  let transactionRepository: InMemoryTransactionRepository;
+  let dailyBarRepository: InMemoryDailyBarRepository;
 
   const DEFAULT_USER_ID = 'user-1';
   const DEFAULT_PORTFOLIO_ID = 'portfolio-1';
@@ -19,10 +23,14 @@ describe('GetPortfolioUseCase', () => {
   beforeEach(() => {
     userPortfolioRepository = new InMemoryUserPortfolioRepository();
     PortfolioPositionRepository = new InMemoryPortfolioPositionRepository();
+    transactionRepository = new InMemoryTransactionRepository();
+    dailyBarRepository = new InMemoryDailyBarRepository();
 
     getPortfolioUseCase = new GetPortfolioUseCase(
       userPortfolioRepository,
       PortfolioPositionRepository,
+      transactionRepository,
+      dailyBarRepository,
     );
 
     userPortfolioRepository.removeAll();
@@ -146,6 +154,40 @@ describe('GetPortfolioUseCase', () => {
         cash: 0,
         investments: 0,
         totalValue: 0,
+      });
+    });
+
+    it("should create today's position from latest when current day missing", async () => {
+      // Given
+      const userPortfolio = new UserPortfolio({
+        id: DEFAULT_PORTFOLIO_ID,
+        userId: DEFAULT_USER_ID,
+        currency: Currency.GBP,
+      });
+      userPortfolioRepository.create(userPortfolio);
+
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const portfolioPosition1 = new PortfolioPosition({
+        id: 'value-1',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        cash: 1500,
+        investments: 2500,
+        date: yesterday,
+      });
+      PortfolioPositionRepository.create(portfolioPosition1);
+
+      const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
+
+      // When
+      const result = await getPortfolioUseCase.execute(command);
+
+      // Then
+      expect(result).toEqual({
+        currency: Currency.GBP,
+        cash: 1500,
+        investments: 2500,
+        totalValue: 4000,
       });
     });
 
