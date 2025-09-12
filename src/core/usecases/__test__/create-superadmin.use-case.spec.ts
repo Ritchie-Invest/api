@@ -36,6 +36,7 @@ describe('CreateSuperadminUseCase', () => {
       password: expect.any(String),
       type: UserType.SUPERADMIN,
       totalXp: 0,
+      isInvestmentUnlocked: false,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       createdAt: expect.any(Date),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

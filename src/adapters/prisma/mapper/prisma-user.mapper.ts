@@ -14,6 +14,7 @@ export class PrismaUserMapper implements EntityMapper<User, UserEntity> {
       password: model.password,
       type: model.type,
       xp: model.totalXp,
+      isInvestmentUnlocked: model.isInvestmentUnlocked,
       updatedAt: model.updatedAt,
       createdAt: model.createdAt,
     };
@@ -26,6 +27,7 @@ export class PrismaUserMapper implements EntityMapper<User, UserEntity> {
       entity.password,
       this.mapUserTypeToDomain(entity.type),
       entity.xp,
+      entity.isInvestmentUnlocked,
       entity.updatedAt,
       entity.createdAt,
     );
