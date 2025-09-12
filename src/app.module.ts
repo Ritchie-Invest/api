@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CreateUserUseCase } from './core/usecases/create-user.use-case';
@@ -69,6 +69,7 @@ import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cr
 import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-case';
 import { LevelingService } from './core/usecases/services/leveling.service';
 import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case';
+import { LoggerMiddleware } from './config/logger.midleware';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -397,4 +398,8 @@ import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
