@@ -44,17 +44,18 @@ export class GetPortfolioPositionsUseCase
       throw new PortfolioNotFoundError('Portfolio not found for this user');
     }
 
-    let positions =
+   
+    let positions = (
       await this.portfolioPositionRepository.findAllByPortfolioId(
         userPortfolio.id,
         command.limit,
-      );
+      )
+    ).slice().reverse();
 
-    positions = positions.reverse();
 
-    if (command.limit && command.limit > 90) {
+    if (positions.length > 90) {
       positions = this.aggregateMonthly(positions);
-    } else if (command.limit && command.limit > 30) {
+    } else if (positions.length > 30) {
       positions = this.aggregateWeekly(positions);
     }
 
@@ -67,19 +68,20 @@ export class GetPortfolioPositionsUseCase
     let variationDirection: VariationDirection = VariationDirection.FLAT;
 
     if (positions.length >= 2) {
-      const oldest = positions[0]!; 
-      const latest = positions[positions.length - 1]!;
+      const oldest = positions[0]!;
+      const newest = positions[positions.length - 1]!;
       const oldestValue = (oldest.investments ?? 0) + (oldest.cash ?? 0);
-      const latestValue = (latest.investments ?? 0) + (latest.cash ?? 0);
+      const latestValue = (newest.investments ?? 0) + (newest.cash ?? 0);
       const delta = latestValue - oldestValue;
       variation = roundTo(delta, 2);
-      variationPercent = oldestValue !== 0 ? roundTo((delta / oldestValue) * 100, 2) : 0;
+      variationPercent =
+        oldestValue !== 0 ? roundTo((delta / oldestValue) * 100, 2) : 0;
       variationDirection =
         delta > 0
           ? VariationDirection.UP
           : delta < 0
-          ? VariationDirection.DOWN
-          : VariationDirection.FLAT;
+            ? VariationDirection.DOWN
+            : VariationDirection.FLAT;
     }
 
     return {
@@ -95,11 +97,16 @@ export class GetPortfolioPositionsUseCase
     return this.aggregatePositions(positions, 7);
   }
 
-  private aggregateMonthly(positions: PortfolioPosition[]): PortfolioPosition[] {
+  private aggregateMonthly(
+    positions: PortfolioPosition[],
+  ): PortfolioPosition[] {
     return this.aggregatePositions(positions, 30);
   }
 
-  private aggregatePositions(positions: PortfolioPosition[], chunkSize: number): PortfolioPosition[] {
+  private aggregatePositions(
+    positions: PortfolioPosition[],
+    chunkSize: number,
+  ): PortfolioPosition[] {
     if (positions.length === 0) return [];
 
     const aggregated: PortfolioPosition[] = [];

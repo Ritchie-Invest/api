@@ -120,12 +120,12 @@ describe('GetPortfolioPositionsUseCase', () => {
       // When
       const result = await getPortfolioPositionsUseCase.execute(command);
 
-      // Then
-      expect(result.total).toBe(3);
-      expect(result.positions).toHaveLength(3);
-      expect(result.positions[0]?.id).toBe('position-1'); // Most recent first
-      expect(result.positions[1]?.id).toBe('position-2');
-      expect(result.positions[2]?.id).toBe('position-3');
+  // Then (oldest-first: index 0 is oldest)
+  expect(result.total).toBe(3);
+  expect(result.positions).toHaveLength(3);
+  expect(result.positions[0]?.id).toBe('position-3');
+  expect(result.positions[1]?.id).toBe('position-2');
+  expect(result.positions[2]?.id).toBe('position-1');
     });
 
     it('should handle pagination with limit', async () => {
@@ -137,7 +137,6 @@ describe('GetPortfolioPositionsUseCase', () => {
       });
       userPortfolioRepository.create(userPortfolio);
 
-      // Create 5 positions
       for (let i = 0; i < 5; i++) {
         const date = new Date();
         date.setDate(date.getDate() - i);
@@ -159,11 +158,11 @@ describe('GetPortfolioPositionsUseCase', () => {
       // When
       const result = await getPortfolioPositionsUseCase.execute(command);
 
-      // Then
-      expect(result.total).toBe(5);
-      expect(result.positions).toHaveLength(2);
-      expect(result.positions[0]?.id).toBe('position-0');
-      expect(result.positions[1]?.id).toBe('position-1');
+  // Then
+  expect(result.total).toBe(5);
+  expect(result.positions).toHaveLength(2);
+  expect(result.positions[0]?.id).toBe('position-1');
+  expect(result.positions[1]?.id).toBe('position-0');
     });
 
     it('should only return positions for the correct portfolio', async () => {
@@ -236,11 +235,11 @@ describe('GetPortfolioPositionsUseCase', () => {
       // When
       const result = await getPortfolioPositionsUseCase.execute(command);
 
-      // Then
-      expect(result.total).toBe(3);
-      expect(result.positions).toHaveLength(2);
-      expect(result.positions[0]?.id).toBe('position-0'); // Most recent
-      expect(result.positions[1]?.id).toBe('position-1');
+  // Then (oldest-first)
+  expect(result.total).toBe(3);
+  expect(result.positions).toHaveLength(2);
+  expect(result.positions[0]?.id).toBe('position-1');
+  expect(result.positions[1]?.id).toBe('position-0');
     });
   });
 });

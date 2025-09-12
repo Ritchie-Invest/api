@@ -44,11 +44,12 @@ export class GetTickerHistoryUseCase
       limit,
     );
 
-    let processedHistory = history.reverse();
-    if (limit > 90) {
-      processedHistory = this.aggregateMonthly(processedHistory);
-    } else if (limit > 30) {
-      processedHistory = this.aggregateWeekly(processedHistory);
+    let processedHistory = history;
+
+    if (history.length > 90) {
+      processedHistory = this.aggregateMonthly([...history].reverse()).reverse();
+    } else if (history.length > 30) {
+      processedHistory = this.aggregateWeekly([...history].reverse()).reverse();
     }
 
     let variation = 0;
@@ -56,8 +57,8 @@ export class GetTickerHistoryUseCase
     let variationDirection: VariationDirection = VariationDirection.FLAT;
 
     if (processedHistory.length >= 2) {
-      const newest = processedHistory[processedHistory.length - 1]!.close;
-      const oldest = processedHistory[0]!.close;
+      const newest = processedHistory[0]!.close;
+      const oldest = processedHistory[processedHistory.length - 1]!.close;
       const delta = newest - oldest;
 
       variation = roundTo(delta, 2);
@@ -106,8 +107,8 @@ export class GetTickerHistoryUseCase
 
     const open = first.open;
     const close = last.close;
-    const high = Math.max(...chunk.map(b => b.high));
-    const low = Math.min(...chunk.map(b => b.low));
+    const high = Math.max(...chunk.map((b) => b.high));
+    const low = Math.min(...chunk.map((b) => b.low));
     const volume = chunk.reduce((sum, b) => sum + b.volume, 0);
     const timestamp = last.timestamp;
     const tickerId = last.tickerId;

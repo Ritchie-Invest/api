@@ -12,5 +12,7 @@ export abstract class DailyBarRepository extends Repository<DailyBar> {
     limit: number,
   ): Promise<DailyBar[]> | DailyBar[];
 
-  abstract findLatestByTickerId(tickerId: string): Promise<DailyBar | null> | DailyBar | null;
+  abstract findLatestByTickerId(
+    tickerId: string,
+  ): Promise<DailyBar | null> | DailyBar | null;
 }

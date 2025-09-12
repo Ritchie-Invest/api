@@ -237,7 +237,6 @@ import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case
       useFactory: (userRepository: UserRepository) =>
         new LevelingService(userRepository),
       inject: [UserRepository],
-
     },
     {
       provide: CreateUserUseCase,

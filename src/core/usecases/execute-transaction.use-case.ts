@@ -63,7 +63,8 @@ export class ExecuteTransactionUseCase
     if (dailyBar) {
       sharePrice = dailyBar.close;
     } else {
-      const latestDailyBar = await this.dailyBarRepository.findLatestByTickerId(tickerId);
+      const latestDailyBar =
+        await this.dailyBarRepository.findLatestByTickerId(tickerId);
       if (!latestDailyBar) {
         throw new DailyBarNotFoundError(
           `No daily bar found for ticker ${tickerId}`,
