@@ -6,6 +6,7 @@ import { User } from '../../../../core/domain/model/User';
 import { PortfolioPosition } from '../../../../core/domain/model/PortfolioPosition';
 import { Currency } from '../../../../core/domain/type/Currency';
 import { UserType } from '../../../../core/domain/type/UserType';
+import { VariationDirection } from '../../../../core/domain/type/VariationDirection';
 import { InvalidUserError } from '../../../../core/domain/error/InvalidUserError';
 import { PortfolioNotFoundError } from '../../../../core/domain/error/PortfolioNotFoundError';
 
@@ -225,6 +226,9 @@ describe('PortfolioController', () => {
       const expectedResult = {
         positions: mockPositions,
         total: 2,
+        variation: 0,
+        variationPercent: 0,
+        variationDirection: VariationDirection.FLAT,
       };
       getPortfolioPositionsUseCase.execute.mockResolvedValue(expectedResult);
 
@@ -252,8 +256,11 @@ describe('PortfolioController', () => {
     it('should return portfolio positions with limit', async () => {
       // when
       const expectedResult = {
-        positions: [mockPositions[0]],
+        positions: mockPositions.slice(0, 1),
         total: 2,
+        variation: 500,
+        variationPercent: 25,
+        variationDirection: VariationDirection.UP,
       };
       getPortfolioPositionsUseCase.execute.mockResolvedValue(expectedResult);
 
@@ -275,6 +282,9 @@ describe('PortfolioController', () => {
       const expectedResult = {
         positions: [],
         total: 0,
+        variation: 0,
+        variationPercent: 0,
+        variationDirection: VariationDirection.FLAT,
       };
       getPortfolioPositionsUseCase.execute.mockResolvedValue(expectedResult);
 
@@ -333,6 +343,9 @@ describe('PortfolioController', () => {
       const expectedResult = {
         positions: largeDataset.slice(0, 10),
         total: 50,
+        variation: 1000,
+        variationPercent: 50,
+        variationDirection: VariationDirection.UP,
       };
       getPortfolioPositionsUseCase.execute.mockResolvedValue(expectedResult);
 

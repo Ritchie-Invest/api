@@ -28,8 +28,26 @@ export class GetPortfolioPositionsResponse {
   @ApiProperty()
   total: number;
 
-  constructor(positions: PortfolioPositionResponse[], total: number) {
+  @ApiProperty()
+  variation: number;
+
+  @ApiProperty()
+  variationPercent: number;
+
+  @ApiProperty()
+  variationDirection: string;
+
+  constructor(
+    positions: PortfolioPositionResponse[],
+    total: number,
+    variation: number,
+    variationPercent: number,
+    variationDirection: string,
+  ) {
     this.positions = positions;
     this.total = total;
+    this.variation = variation;
+    this.variationPercent = variationPercent;
+    this.variationDirection = variationDirection;
   }
 }

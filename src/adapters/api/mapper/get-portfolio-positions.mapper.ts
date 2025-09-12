@@ -13,7 +13,13 @@ export class GetPortfolioPositionsMapper {
       GetPortfolioPositionsMapper.toPortfolioPositionResponse(position),
     );
 
-    return new GetPortfolioPositionsResponse(positions, result.total);
+    return new GetPortfolioPositionsResponse(
+      positions,
+      result.total,
+      result.variation,
+      result.variationPercent,
+      result.variationDirection,
+    );
   }
 
   private static toPortfolioPositionResponse(

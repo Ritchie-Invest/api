@@ -5,6 +5,7 @@ import { PortfolioPositionRepository } from '../domain/repository/portfolio-posi
 import { InvalidUserError } from '../domain/error/InvalidUserError';
 import { PortfolioPosition } from '../domain/model/PortfolioPosition';
 import { PortfolioNotFoundError } from '../domain/error/PortfolioNotFoundError';
+import { VariationDirection } from '../domain/type/VariationDirection';
 
 export type GetPortfolioPositionsCommand = {
   userId: string;
@@ -13,6 +14,9 @@ export type GetPortfolioPositionsCommand = {
 
 export type GetPortfolioPositionsResult = {
   positions: PortfolioPosition[];
+  variation: number;
+  variationPercent: number;
+  variationDirection: VariationDirection;
   total: number;
 };
 
@@ -58,9 +62,32 @@ export class GetPortfolioPositionsUseCase
       userPortfolio.id,
     );
 
+    let variation = 0;
+    let variationPercent = 0;
+    let variationDirection: VariationDirection = VariationDirection.FLAT;
+
+    if (positions.length >= 2) {
+      const oldest = positions[0]!; 
+      const latest = positions[positions.length - 1]!;
+      const oldestValue = (oldest.investments ?? 0) + (oldest.cash ?? 0);
+      const latestValue = (latest.investments ?? 0) + (latest.cash ?? 0);
+      const delta = latestValue - oldestValue;
+      variation = roundTo(delta, 2);
+      variationPercent = oldestValue !== 0 ? roundTo((delta / oldestValue) * 100, 2) : 0;
+      variationDirection =
+        delta > 0
+          ? VariationDirection.UP
+          : delta < 0
+          ? VariationDirection.DOWN
+          : VariationDirection.FLAT;
+    }
+
     return {
       positions,
       total,
+      variation,
+      variationPercent,
+      variationDirection,
     };
   }
 
@@ -100,4 +127,8 @@ export class GetPortfolioPositionsUseCase
       date: last.date,
     });
   }
+}
+
+function roundTo(n: number, decimals = 2): number {
+  return Math.round(n * 10 ** decimals) / 10 ** decimals;
 }

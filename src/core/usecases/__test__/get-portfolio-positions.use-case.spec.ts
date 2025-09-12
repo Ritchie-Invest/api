@@ -66,6 +66,9 @@ describe('GetPortfolioPositionsUseCase', () => {
       expect(result).toEqual({
         positions: [],
         total: 0,
+        variation: 0,
+        variationPercent: 0,
+        variationDirection: expect.any(String),
       });
     });
 
