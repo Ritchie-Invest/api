@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class InMemoryUserRepository implements UserRepository {
   private users: Map<string, User> = new Map();
+  private lives: Map<string, Date[]> = new Map(); // userId -> array of lost life dates
 
   create(
     data: Pick<
@@ -67,5 +68,19 @@ export class InMemoryUserRepository implements UserRepository {
 
   removeAll(): void {
     this.users.clear();
+  }
+
+  async getLastLostLife(userId: string): Promise<Date | null> {
+    const userLives = this.lives.get(userId);
+    if (!userLives || userLives.length === 0) {
+      return null;
+    }
+    return userLives[userLives.length - 1];
+  }
+
+  async addLostLife(userId: string): Promise<void> {
+    const userLives = this.lives.get(userId) || [];
+    userLives.push(new Date());
+    this.lives.set(userId, userLives);
   }
 }

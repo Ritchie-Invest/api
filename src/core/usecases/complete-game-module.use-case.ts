@@ -12,6 +12,7 @@ import { ModuleAttemptRepository } from '../domain/repository/module-attempt.rep
 import { ModuleAttempt } from '../domain/model/ModuleAttempt';
 import { LessonAttempt } from '../domain/model/LessonAttempt';
 import { ModuleAlreadyAttemptedError } from '../domain/error/ModuleAlreadyAttemptedError';
+import { LifeService } from './services/life.service';
 
 export type CompleteGameModuleCommand = {
   userId: string;
@@ -33,6 +34,7 @@ export type CompleteGameModuleResult = {
   nextGameModuleId: string | null;
   currentGameModuleIndex: number;
   totalGameModules: number;
+  isLost?: boolean;
 };
 
 @Injectable()
@@ -45,6 +47,7 @@ export class CompleteGameModuleUseCase
     private readonly strategyFactory: CompleteGameModuleStrategyFactory,
     private readonly lessonAttemptRepository: LessonAttemptRepository,
     private readonly moduleAttemptRepository: ModuleAttemptRepository,
+    private readonly lifeService: LifeService,
   ) {}
 
   async execute(
@@ -102,6 +105,14 @@ export class CompleteGameModuleUseCase
     );
     await this.moduleAttemptRepository.create(moduleAttempt);
 
+    // Add lost life if answer is incorrect
+    let isLost = false;
+    if (!isCorrect) {
+      await this.lifeService.addLostLife(command.userId);
+      const lifeData = await this.lifeService.getUserLifeData(command.userId);
+      isLost = lifeData.has_lost;
+    }
+
     const currentIndex = lesson.modules.findIndex(
       (module: GameModule) => module.id === command.moduleId,
     );
@@ -117,6 +128,7 @@ export class CompleteGameModuleUseCase
       nextGameModuleId: nextModule?.id || null,
       currentGameModuleIndex: Math.max(0, currentIndex),
       totalGameModules: lesson.modules.length,
+      isLost,
     };
   }
 }

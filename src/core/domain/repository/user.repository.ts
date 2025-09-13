@@ -7,4 +7,6 @@ export abstract class UserRepository extends Repository<User> {
     userId: string,
     amount: number,
   ): Promise<User | null> | User | null;
+  abstract getLastLostLife(userId: string): Promise<Date | null>;
+  abstract addLostLife(userId: string): Promise<void>;
 }

@@ -38,6 +38,7 @@ model User {
   LessonAttempt    LessonAttempt[]
   ModuleAttempt    ModuleAttempt[]
   badges           UserBadge[]
+  lives            Life[]
 }
 
 model RefreshToken {
@@ -166,6 +167,14 @@ model UserBadge {
   user User @relation(fields: [userId], references: [id])
 
   @@unique([userId, type])
+}
+
+model Life {
+  id           String   @id @default(cuid())
+  userId       String
+  emissionDate DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Ticker {
