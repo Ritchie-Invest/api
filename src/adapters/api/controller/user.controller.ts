@@ -23,7 +23,8 @@ import { GetMeResponse } from '../response/get-me.response';
 import { GetUserProgressResponse } from '../response/get-user-progress.response';
 import { GetUserProgressMapper } from '../mapper/get-user-progress.mapper';
 import { GetUserProgressUseCase } from '../../../core/usecases/get-user-progress-use-case.service';
-import { UserBadgeRepository } from '../../../core/domain/repository/user-badge.repository';
+import { GetUserBadgesUseCase } from '../../../core/usecases/get-user-badges.use-case';
+import { GetUserBadgesMapper } from '../mapper/get-user-badges.mapper';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import { UserBadgeResponse } from '../response/user-badge.response';
 
@@ -33,7 +34,7 @@ export class UserController {
     private readonly updateUserTypeUseCase: UpdateUserTypeUseCase,
     private readonly getUserProfileUseCase: GetUserProfileUseCase,
     private readonly getUserProgressUseCase: GetUserProgressUseCase,
-    private readonly userBadgeRepository: UserBadgeRepository,
+    private readonly getUserBadgesUseCase: GetUserBadgesUseCase,
   ) {}
 
   @Get('/me')
@@ -117,9 +118,7 @@ export class UserController {
   async getMyBadges(
     @CurrentUser() currentUser: ProfileRequest,
   ): Promise<UserBadgeResponse[]> {
-    const badges = await this.userBadgeRepository.findAllByUser(currentUser.id);
-    return badges.map(
-      (b) => new UserBadgeResponse(b.type, b.awardedAt.toISOString()),
-    );
+    const badges = await this.getUserBadgesUseCase.execute(currentUser.id);
+    return GetUserBadgesMapper.fromDomain(badges);
   }
 }
