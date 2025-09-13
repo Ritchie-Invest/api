@@ -6,7 +6,6 @@ import {
   UpdateLessonCommand,
   UpdateLessonUseCase,
 } from '../update-lesson.use-case';
-import { LessonOrderConflictError } from '../../domain/error/LessonOrderConflictError';
 
 describe('UpdateLessonUseCase', () => {
   let lessonRepository: LessonRepository;
@@ -34,7 +33,6 @@ describe('UpdateLessonUseCase', () => {
       title: 'Une super leçon',
       description: 'Ceci est une super leçon',
       isPublished: true,
-      order: 2,
     };
 
     // When
@@ -49,7 +47,7 @@ describe('UpdateLessonUseCase', () => {
       description: 'Ceci est une super leçon',
       chapterId: 'chapter-1',
       isPublished: true,
-      order: 2,
+      order: 1,
       modules: [],
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,
@@ -61,7 +59,7 @@ describe('UpdateLessonUseCase', () => {
       description: 'Ceci est une super leçon',
       chapterId: 'chapter-1',
       isPublished: true,
-      order: 2,
+      order: 1,
       modules: [],
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,
@@ -76,7 +74,6 @@ describe('UpdateLessonUseCase', () => {
       title: '',
       description: 'Ceci est une super leçon',
       isPublished: true,
-      order: 3,
     };
 
     // When & Then
@@ -91,7 +88,6 @@ describe('UpdateLessonUseCase', () => {
       title: 'Une super leçon',
       description: '',
       isPublished: true,
-      order: 4,
     };
 
     // When & Then
@@ -108,7 +104,6 @@ describe('UpdateLessonUseCase', () => {
       lessonId: 'lesson-id',
       title: 'Une super leçon',
       description: 'Ceci est une super leçon',
-      order: 5,
       isPublished: true,
     };
 
@@ -125,7 +120,6 @@ describe('UpdateLessonUseCase', () => {
       lessonId: 'non-existing-lesson-id',
       title: 'Une super leçon',
       description: 'Ceci est une super leçon',
-      order: 6,
       isPublished: true,
     };
 
@@ -135,34 +129,6 @@ describe('UpdateLessonUseCase', () => {
     );
   });
 
-  it('should throw an error when trying to update a lesson with an order that already exists in the same chapter', async () => {
-    // Given
-    await lessonRepository.create({
-      id: 'lesson-id-2',
-      title: 'Une autre leçon',
-      description: 'Ceci est une autre leçon',
-      chapterId: 'chapter-1',
-      order: 2,
-    });
-
-    const command: UpdateLessonCommand = {
-      currentUser: getCurrentUser(),
-      lessonId: 'lesson-id',
-      title: 'Une super leçon modifiée',
-      description: 'Ceci est une super leçon modifiée',
-      order: 2,
-      isPublished: true,
-    };
-
-    // When & Then
-    await expect(updateLessonUseCase.execute(command)).rejects.toThrow(
-      LessonOrderConflictError,
-    );
-
-    const lesson = await lessonRepository.findById('lesson-id');
-    expect(lesson?.order).toBe(1);
-  });
-
   it('should allow updating a lesson with its own order value', async () => {
     // Given
     const command: UpdateLessonCommand = {
@@ -170,7 +136,6 @@ describe('UpdateLessonUseCase', () => {
       lessonId: 'lesson-id',
       title: 'Une super leçon modifiée',
       description: 'Ceci est une super leçon modifiée',
-      order: 1,
       isPublished: true,
     };
 
@@ -189,7 +154,6 @@ describe('UpdateLessonUseCase', () => {
       lessonId: 'lesson-id',
       title: 'Une super leçon modifiée',
       description: 'Ceci est une super leçon modifiée',
-      order: 3,
       isPublished: true,
     };
 
@@ -197,34 +161,7 @@ describe('UpdateLessonUseCase', () => {
     const result = await updateLessonUseCase.execute(command);
 
     // Then
-    expect(result.order).toBe(3);
-  });
-
-  it('should allow updating lessons with the same order in different chapters', async () => {
-    // Given
-    await lessonRepository.create({
-      id: 'lesson-id-3',
-      title: 'Une leçon dans un autre chapitre',
-      description: 'Ceci est une leçon dans un autre chapitre',
-      chapterId: 'chapter-2',
-      order: 5,
-    });
-
-    const command: UpdateLessonCommand = {
-      currentUser: getCurrentUser(),
-      lessonId: 'lesson-id',
-      title: 'Une super leçon modifiée',
-      description: 'Ceci est une super leçon modifiée',
-      order: 5,
-      isPublished: true,
-    };
-
-    // When
-    const result = await updateLessonUseCase.execute(command);
-
-    // Then
-    expect(result.order).toBe(5);
-    expect(result.chapterId).toBe('chapter-1');
+    expect(result.order).toBe(1);
   });
 
   function getCurrentUser(): Pick<User, 'id' | 'type'> {
