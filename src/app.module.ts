@@ -77,6 +77,7 @@ import { InMemoryDomainEventBus } from './adapters/events/in-memory-domain-event
 import { AwardBadgesOnLessonCompletedHandler } from './core/usecases/handlers/award-badges-on-lesson-completed.handler';
 import { BadgeAwardingService } from './core/domain/service/badge-awarding.service';
 import { DomainEventPublisher } from './core/base/domain-event';
+import { GetBadgeCatalogUseCase } from './core/usecases/get-badge-catalog.use-case';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -193,6 +194,12 @@ import { DomainEventPublisher } from './core/base/domain-event';
       provide: GetUserBadgesUseCase,
       useFactory: (userBadgeRepository: UserBadgeRepository) =>
         new GetUserBadgesUseCase(userBadgeRepository),
+      inject: [UserBadgeRepository],
+    },
+    {
+      provide: GetBadgeCatalogUseCase,
+      useFactory: (userBadgeRepository: UserBadgeRepository) =>
+        new GetBadgeCatalogUseCase(userBadgeRepository),
       inject: [UserBadgeRepository],
     },
     {
