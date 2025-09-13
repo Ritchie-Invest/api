@@ -6,7 +6,7 @@ import { TimeSeriesDailyResponse } from './response/TimeSeriesDailyResponse';
 @Injectable()
 export class AlphaVantageMarketServiceAdapter implements MarketService {
   private readonly baseUrl =
-    process.env.ALPHA_VANTAGE_BASE_URL || 'https://www.alphavantage.co/query';
+    process.env.ALPHA_VANTAGE_API_URL || 'https://www.alphavantage.co/query';
   private readonly apiKey = process.env.ALPHA_VANTAGE_API_KEY || 'demo';
 
   async getLatestDailyBars(symbol: string): Promise<DailyBar[]> {
