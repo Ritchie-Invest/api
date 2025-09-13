@@ -30,7 +30,9 @@ export class PrismaChapterRepository implements ChapterRepository {
   }
 
   async findAll(): Promise<Chapter[]> {
-    const entities = await this.prisma.chapter.findMany();
+    const entities = await this.prisma.chapter.findMany({
+      orderBy: { order: 'asc' },
+    });
     return entities.map((entity) => this.mapper.toDomain(entity));
   }
 

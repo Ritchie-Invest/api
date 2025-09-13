@@ -46,6 +46,7 @@ export class PrismaLessonRepository implements LessonRepository {
   async findByChapter(chapterId: string): Promise<Lesson[]> {
     const entities = await this.prisma.lesson.findMany({
       where: { chapterId },
+      orderBy: { order: 'asc' },
     });
     return entities.map((entity) => this.mapper.toDomain(entity));
   }
