@@ -9,10 +9,9 @@ import { LessonNotFoundError } from '../domain/error/LessonNotFoundError';
 export type UpdateLessonCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
   lessonId: string;
-  title: string;
-  description: string;
-  order?: number;
-  isPublished: boolean;
+  title?: string;
+  description?: string;
+  isPublished?: boolean;
 };
 
 export class UpdateLessonUseCase
@@ -27,19 +26,11 @@ export class UpdateLessonUseCase
       );
     }
 
-    const { lessonId, title, description, order } = command;
+    const { lessonId, title, description } = command;
 
     const currentLesson = await this.lessonRepository.findById(lessonId);
     if (!currentLesson) {
       throw new LessonNotFoundError(lessonId);
-    }
-
-    if (order !== undefined && order !== currentLesson.order) {
-      await this.lessonRepository.validateUniqueOrderInChapter(
-        currentLesson.chapterId,
-        order,
-        lessonId,
-      );
     }
 
     const lesson = new Lesson(
@@ -47,7 +38,7 @@ export class UpdateLessonUseCase
       title ?? currentLesson.title,
       description ?? currentLesson.description,
       currentLesson.chapterId,
-      order ?? currentLesson.order,
+      currentLesson.order,
       command.isPublished ?? currentLesson.isPublished,
       currentLesson.modules,
       currentLesson.updatedAt,
