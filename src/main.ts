@@ -24,8 +24,35 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.use(helmet());
   app.use(cookieParser());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+          'script-src': ["'self'", 'https://cdn.jsdelivr.net'],
+          'style-src': [
+            "'self'",
+            'https://cdn.jsdelivr.net',
+            "'unsafe-inline'",
+          ],
+          'connect-src': [
+            "'self'",
+            'https://cdn.jsdelivr.net',
+            'https://fonts.scalar.com',
+          ],
+          'img-src': ["'self'", 'data:'],
+          'font-src': [
+            "'self'",
+            'https://fonts.scalar.com',
+            'https://cdn.jsdelivr.net',
+            'data:',
+          ],
+        },
+      },
+    }),
+  );
 
   const reflector = app.get(Reflector);
   app.useGlobalGuards(
@@ -52,9 +79,7 @@ async function bootstrap() {
   app.use(
     '/reference',
     apiReference({
-      spec: {
-        content: document,
-      },
+      content: document,
     }),
   );
 
