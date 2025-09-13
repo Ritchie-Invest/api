@@ -41,4 +41,20 @@ export class PrismaLessonCompletionRepository
   async removeAll(): Promise<void> {
     await this.prisma.lessonCompletion.deleteMany();
   }
+
+  async findAllByUser(userId: string): Promise<LessonCompletion[]> {
+    const rows = await this.prisma.lessonCompletion.findMany({
+      where: { userId },
+    });
+    return rows.map(
+      (r) =>
+        new LessonCompletion(
+          r.id,
+          r.userId,
+          r.lessonId,
+          r.score,
+          r.completedAt,
+        ),
+    );
+  }
 }

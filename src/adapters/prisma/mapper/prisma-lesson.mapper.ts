@@ -27,7 +27,7 @@ export class PrismaLessonMapper implements EntityMapper<Lesson, LessonEntity> {
       isPublished: model.isPublished,
       updatedAt: model.updatedAt,
       createdAt: model.createdAt,
-    };
+    } as LessonEntity;
   }
 
   toDomain(

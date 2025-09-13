@@ -4,7 +4,6 @@ import { UpdateUserTypeUseCase } from '../../../core/usecases/update-user-type.u
 import { UpdateUserTypeMapper } from '../mapper/update-user-type.mapper';
 import { UserType } from '../../../core/domain/type/UserType';
 import { User } from '../../../core/domain/model/User';
-import { CurrentUser } from '../decorator/current-user.decorator';
 import { ProfileRequest } from '../request/profile.request';
 import { Roles } from '../decorator/roles.decorator';
 import {
@@ -24,6 +23,9 @@ import { GetMeResponse } from '../response/get-me.response';
 import { GetUserProgressResponse } from '../response/get-user-progress.response';
 import { GetUserProgressMapper } from '../mapper/get-user-progress.mapper';
 import { GetUserProgressUseCase } from '../../../core/usecases/get-user-progress-use-case.service';
+import { UserBadgeRepository } from '../../../core/domain/repository/user-badge.repository';
+import { CurrentUser } from '../decorator/current-user.decorator';
+import { UserBadgeResponse } from '../response/user-badge.response';
 
 @Controller('/users')
 export class UserController {
@@ -31,6 +33,7 @@ export class UserController {
     private readonly updateUserTypeUseCase: UpdateUserTypeUseCase,
     private readonly getUserProfileUseCase: GetUserProfileUseCase,
     private readonly getUserProgressUseCase: GetUserProgressUseCase,
+    private readonly userBadgeRepository: UserBadgeRepository,
   ) {}
 
   @Get('/me')
@@ -102,5 +105,21 @@ export class UserController {
     const command = GetUserProgressMapper.toDomain(currentUser);
     const result = await this.getUserProgressUseCase.execute(command);
     return GetUserProgressMapper.fromDomain(result);
+  }
+
+  @Get('me/badges')
+  @ApiOperation({ summary: 'List badges for current user' })
+  @ApiOkResponse({
+    description: 'List of user badges',
+    type: UserBadgeResponse,
+    isArray: true,
+  })
+  async getMyBadges(
+    @CurrentUser() currentUser: ProfileRequest,
+  ): Promise<UserBadgeResponse[]> {
+    const badges = await this.userBadgeRepository.findAllByUser(currentUser.id);
+    return badges.map(
+      (b) => new UserBadgeResponse(b.type, b.awardedAt.toISOString()),
+    );
   }
 }

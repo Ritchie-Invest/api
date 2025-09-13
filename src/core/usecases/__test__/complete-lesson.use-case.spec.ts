@@ -1,3 +1,4 @@
+import { CheckAndAwardBadgesUseCase } from '../check-and-award-badges.use-case';
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { CompleteLessonUseCase } from '../complete-lesson.use-case';
@@ -20,6 +21,7 @@ describe('CompleteLessonUseCase', () => {
 
   let levelingService: LevelingService;
   let useCase: CompleteLessonUseCase;
+  let checkAndAwardBadgesUseCaseMock: CheckAndAwardBadgesUseCase;
 
   beforeEach(() => {
     gameModuleRepository = new InMemoryGameModuleRepository();
@@ -30,12 +32,16 @@ describe('CompleteLessonUseCase', () => {
     userRepository = new InMemoryUserRepository();
 
     levelingService = new LevelingService(userRepository);
+    checkAndAwardBadgesUseCaseMock = {
+      execute: jest.fn().mockResolvedValue([]),
+    } as unknown as CheckAndAwardBadgesUseCase;
     useCase = new CompleteLessonUseCase(
       lessonRepository,
       lessonCompletionRepository,
       lessonAttemptRepository,
       moduleAttemptRepository,
       levelingService,
+      checkAndAwardBadgesUseCaseMock,
     );
 
     moduleAttemptRepository.removeAll();
@@ -167,6 +173,7 @@ describe('CompleteLessonUseCase', () => {
       totalGameModules: 3,
       isCompleted: false,
       xpWon: 0,
+      newlyAwardedBadges: [],
     });
   });
 
@@ -181,6 +188,7 @@ describe('CompleteLessonUseCase', () => {
       password: 'hashed',
       type: UserType.STUDENT,
       totalXp: 0,
+      isInvestmentUnlocked: false,
     });
 
     const gameModule1 = new McqModule({
@@ -271,6 +279,7 @@ describe('CompleteLessonUseCase', () => {
       totalGameModules: 2,
       isCompleted: true,
       xpWon: 25,
+      newlyAwardedBadges: [],
     });
   });
 
@@ -285,6 +294,7 @@ describe('CompleteLessonUseCase', () => {
       password: 'hashed',
       type: UserType.STUDENT,
       totalXp: 0,
+      isInvestmentUnlocked: false,
     });
 
     const gameModule1 = new McqModule({
@@ -375,6 +385,7 @@ describe('CompleteLessonUseCase', () => {
       totalGameModules: 2,
       isCompleted: false,
       xpWon: 0,
+      newlyAwardedBadges: [],
     });
   });
 

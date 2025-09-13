@@ -67,6 +67,7 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async removeAll(): Promise<void> {
+    await this.prisma.userBadge.deleteMany();
     await this.prisma.user.deleteMany();
   }
 }
