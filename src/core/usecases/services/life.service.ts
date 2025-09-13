@@ -21,7 +21,9 @@ export class LifeService {
   async getUserLifeData(userId: string): Promise<UserLifeData> {
     const now = new Date();
     // Fenêtre de régénération : une vie revient 1 heure après sa perte.
-    const oneHourAgo = new Date(now.getTime() - LifeService.LIFE_REGENERATION_TIME_MS);
+    const oneHourAgo = new Date(
+      now.getTime() - LifeService.LIFE_REGENERATION_TIME_MS,
+    );
 
     // Compter uniquement les vies perdues dans la dernière heure
     const livesLostInLastHour = await this.prisma.life.count({
@@ -33,7 +35,10 @@ export class LifeService {
       },
     });
 
-    const currentLives = Math.max(0, LifeService.MAX_LIVES - livesLostInLastHour);
+    const currentLives = Math.max(
+      0,
+      LifeService.MAX_LIVES - livesLostInLastHour,
+    );
     const hasLost = currentLives === 0;
 
     let nextLifeIn = 0;
@@ -50,9 +55,13 @@ export class LifeService {
       });
       if (oldestLifeLostInWindow) {
         const nextLifeTime = new Date(
-          oldestLifeLostInWindow.emissionDate.getTime() + LifeService.LIFE_REGENERATION_TIME_MS,
+          oldestLifeLostInWindow.emissionDate.getTime() +
+            LifeService.LIFE_REGENERATION_TIME_MS,
         );
-        const nextLifeInMs = Math.max(0, nextLifeTime.getTime() - now.getTime());
+        const nextLifeInMs = Math.max(
+          0,
+          nextLifeTime.getTime() - now.getTime(),
+        );
         nextLifeIn = Math.ceil(nextLifeInMs / 1000);
       }
     }

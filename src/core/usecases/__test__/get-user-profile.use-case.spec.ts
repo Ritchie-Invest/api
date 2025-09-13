@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { InMemoryUserRepository } from '../../../adapters/in-memory/in-memory-user.repository';
 import { UserRepository } from '../../domain/repository/user.repository';
 import {
@@ -19,7 +20,7 @@ describe('GetUserProfileUseCase', () => {
     mockLifeService = {
       getUserLifeData: jest.fn(),
       addLostLife: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<LifeService>;
 
     useCase = new GetUserProfileUseCase(userRepository, mockLifeService);
   });

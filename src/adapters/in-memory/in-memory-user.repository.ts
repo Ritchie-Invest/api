@@ -4,8 +4,8 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class InMemoryUserRepository implements UserRepository {
-  private users: Map<string, User> = new Map();
-  private lives: Map<string, Date[]> = new Map(); // userId -> array of lost life dates
+  private readonly users: Map<string, User> = new Map();
+  private readonly lives: Map<string, Date[]> = new Map(); // userId -> array of lost life dates
 
   create(
     data: Pick<
@@ -70,17 +70,21 @@ export class InMemoryUserRepository implements UserRepository {
     this.users.clear();
   }
 
-  async getLastLostLife(userId: string): Promise<Date | null> {
+  getLastLostLife(userId: string): Promise<Date | null> {
     const userLives = this.lives.get(userId);
+    let value: Date | null;
     if (!userLives || userLives.length === 0) {
-      return null;
+      value = null;
+    } else {
+      value = userLives[userLives.length - 1]!; // non-null because length > 0
     }
-    return userLives[userLives.length - 1];
+    return Promise.resolve(value);
   }
 
-  async addLostLife(userId: string): Promise<void> {
+  addLostLife(userId: string): Promise<void> {
     const userLives = this.lives.get(userId) || [];
     userLives.push(new Date());
     this.lives.set(userId, userLives);
+    return Promise.resolve();
   }
 }

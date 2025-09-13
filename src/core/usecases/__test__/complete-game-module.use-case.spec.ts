@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import {
   CompleteGameModuleUseCase,
   CompleteGameModuleCommand,
@@ -39,7 +40,7 @@ describe('CompleteGameModuleUseCase', () => {
     mockLifeService = {
       getUserLifeData: jest.fn(),
       addLostLife: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<LifeService>;
     // Valeur par défaut pour éviter les échecs des tests existants en cas de réponse incorrecte
     mockLifeService.getUserLifeData.mockResolvedValue({
       life_number: 5,
@@ -825,7 +826,8 @@ describe('CompleteGameModuleUseCase', () => {
         id: 'choice-2',
         text: 'Lyon',
         isCorrect: false,
-        correctionMessage: 'Incorrect. Lyon is a major city but not the capital.',
+        correctionMessage:
+          'Incorrect. Lyon is a major city but not the capital.',
       });
       const mcqModule = new McqModule({
         id: 'question-1',

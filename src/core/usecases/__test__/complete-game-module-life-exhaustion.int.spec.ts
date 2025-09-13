@@ -1,4 +1,8 @@
-import { CompleteGameModuleUseCase, CompleteGameModuleCommand } from '../complete-game-module.use-case';
+/* eslint-disable @typescript-eslint/unbound-method */
+import {
+  CompleteGameModuleUseCase,
+  CompleteGameModuleCommand,
+} from '../complete-game-module.use-case';
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { InMemoryLessonAttemptRepository } from '../../../adapters/in-memory/in-memory-lesson-attempt.repository';
@@ -11,7 +15,7 @@ import { GameType } from '../../domain/type/GameType';
 import { Lesson } from '../../domain/model/Lesson';
 import { McqModule } from '../../domain/model/McqModule';
 import { McqChoice } from '../../domain/model/McqChoice';
-import { LifeService } from '../services/life.service';
+import { LifeService, UserLifeData } from '../services/life.service';
 
 /**
  * Test d'intégration ciblé sur la mécanique d'épuisement des vies.
@@ -38,12 +42,18 @@ describe('CompleteGameModuleUseCase - Life exhaustion integration', () => {
     mockLifeService = {
       getUserLifeData: jest.fn(),
       addLostLife: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<LifeService>;
 
     const strategyFactory = new MapCompleteGameModuleStrategyFactory([
       { type: GameType.MCQ, strategy: new McqCompleteGameModuleStrategy() },
-      { type: GameType.FILL_IN_THE_BLANK, strategy: new FillInTheBlankCompleteGameModuleStrategy() },
-      { type: GameType.TRUE_OR_FALSE, strategy: new TrueOrFalseCompleteGameModuleStrategy() },
+      {
+        type: GameType.FILL_IN_THE_BLANK,
+        strategy: new FillInTheBlankCompleteGameModuleStrategy(),
+      },
+      {
+        type: GameType.TRUE_OR_FALSE,
+        strategy: new TrueOrFalseCompleteGameModuleStrategy(),
+      },
     ]);
 
     useCase = new CompleteGameModuleUseCase(
@@ -57,11 +67,28 @@ describe('CompleteGameModuleUseCase - Life exhaustion integration', () => {
   });
 
   const setupLessonWithFiveIncorrectModules = () => {
-    const lesson = new Lesson('lesson-life', 'Life Test', 'desc', 'chapter-1', 1, true);
+    const lesson = new Lesson(
+      'lesson-life',
+      'Life Test',
+      'desc',
+      'chapter-1',
+      1,
+      true,
+    );
     lessonRepository.create(lesson);
     for (let i = 1; i <= 5; i++) {
-      const correct = new McqChoice({ id: `c-${i}`, text: 'Correct', isCorrect: true, correctionMessage: 'OK' });
-      const wrong = new McqChoice({ id: `w-${i}`, text: 'Wrong', isCorrect: false, correctionMessage: 'No' });
+      const correct = new McqChoice({
+        id: `c-${i}`,
+        text: 'Correct',
+        isCorrect: true,
+        correctionMessage: 'OK',
+      });
+      const wrong = new McqChoice({
+        id: `w-${i}`,
+        text: 'Wrong',
+        isCorrect: false,
+        correctionMessage: 'No',
+      });
       const module = new McqModule({
         id: `module-${i}`,
         lessonId: lesson.id,
@@ -76,15 +103,15 @@ describe('CompleteGameModuleUseCase - Life exhaustion integration', () => {
     setupLessonWithFiveIncorrectModules();
 
     // Mock progression: life_number 4 -> 3 -> 2 -> 1 -> 0
-    const lifeProgression = [
+    const lifeProgression: UserLifeData[] = [
       { life_number: 4, next_life_in: 1000, has_lost: false },
       { life_number: 3, next_life_in: 2000, has_lost: false },
       { life_number: 2, next_life_in: 2500, has_lost: false },
       { life_number: 1, next_life_in: 3000, has_lost: false },
       { life_number: 0, next_life_in: 3600, has_lost: true },
     ];
-    lifeProgression.forEach((lp, idx) => {
-      mockLifeService.getUserLifeData.mockResolvedValueOnce(lp as any);
+    lifeProgression.forEach((lp) => {
+      mockLifeService.getUserLifeData.mockResolvedValueOnce(lp);
     });
 
     for (let i = 1; i <= 5; i++) {
