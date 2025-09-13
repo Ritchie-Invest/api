@@ -27,6 +27,7 @@ import { GetUserBadgesUseCase } from '../../../core/usecases/get-user-badges.use
 import { GetBadgeCatalogUseCase } from '../../../core/usecases/get-badge-catalog.use-case';
 import { GetBadgeCatalogMapper } from '../mapper/get-badge-catalog.mapper';
 import { CurrentUser } from '../decorator/current-user.decorator';
+import { BadgeCatalogItemResponse } from '../response/badge-catalog.response';
 
 @Controller('/users')
 export class UserController {
@@ -114,8 +115,9 @@ export class UserController {
     summary: 'List all badges with award status for current user',
   })
   @ApiOkResponse({
-    description: 'All badges with awardedAt for current user',
-    isArray: true,
+  description: 'All badges with awardedAt for current user',
+  type: BadgeCatalogItemResponse,
+  isArray: true,
   })
   async getMyBadges(@CurrentUser() currentUser: ProfileRequest) {
     const items = await this.getBadgeCatalogUseCase.execute(currentUser.id);
