@@ -1,105 +1,183 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 💸 Ritchie Invest API (NestJS) 💸
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+A backend service for Ritchie Invest — the "Duolingo of investing". It powers a mobile learning app (React Native /
+Expo) that helps beginners understand and practice financial investment in a fun, progressive, and personalized way.
 
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+The platform serves:
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+- Interactive lessons grouped into chapters
+- Gamified learning modules (MCQ, fill‑in‑the‑blank, true/false)
+- User progression & XP with investment feature unlocking
+- Secure authentication (JWT access + refresh tokens via httpOnly cookies)
+- Scheduled market data ingestion (Alpha Vantage)
 
-## Description
+> Goal: Empower young adults to build financial literacy and confidence—without needing a finance degree.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
+## 🧭 Table of Contents
 
-```bash
-$ pnpm install
-```
+- [Tech Stack](#-tech-stack)
+- [Prerequisites](#-prerequisites)
+- [Getting Started (Local)](#-getting-started-local)
+- [Environment Variables](#-environment-variables)
+- [Database & Migrations](#-database--migrations)
+- [Running Tests](#-running-tests)
+- [Troubleshooting](#-troubleshooting)
+- [Authors](#-authors)
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ pnpm run start
+## ⚙️ Tech Stack
 
-# watch mode
-$ pnpm run start:dev
+- Runtime: Node.js (>= 22.16.0)
+- Framework: NestJS 11
+- Language: TypeScript
+- ORM: Prisma (PostgreSQL)
+- Auth: @nestjs/jwt + bcryptjs
+- Validation: class-validator / class-transformer
+- Security: helmet, httpOnly cookies
+- Scheduling: @nestjs/schedule + cron
+- Documentation: @nestjs/swagger + @scalar/nestjs-api-reference
+- Testing: Jest + Supertest
+- Package Manager: pnpm (Corepack)
 
-# production mode
-$ pnpm run start:prod
-```
+---
 
-## Run tests
+## ✅ Prerequisites
 
-```bash
-# unit tests
-$ pnpm run test
+- Node.js >= 22.16.0
+- pnpm (enable via Corepack: `corepack enable`)
+- Docker + Docker Compose (for PostgreSQL)
 
-# test coverage
-$ pnpm run test:cov
-```
+Optional:
 
-## Deployment
+- pgAdmin (included in docker-compose)
+- Alpha Vantage API key (for real market data)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it
-runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more
-information.
+---
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check
-out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment
-straightforward and fast, requiring just a few simple steps:
+## 🚀 Getting Started (Local)
+
+1. Clone the repository:
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+git clone <repository-url>
+cd ritchie-invest-api
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than
-managing infrastructure.
+2. Install dependencies:
 
-## Resources
+```bash
+pnpm install
+```
 
-Check out a few resources that may come in handy When working with NestJS:
+3. Copy environment template:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time
-  using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our
-  official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework)
-  and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+cp .env.example .env
 
-## Support
+# Edit values as needed
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If
-you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+4. Start PostgreSQL (and pgAdmin UI at http://localhost:8080):
 
-## Stay in touch
+```bash
+docker compose up -d
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+5. Run database migrations & generate Prisma client:
 
-## License
+```bash
+pnpx prisma migrate dev
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+6. Start the API (watch mode):
+
+```bash
+pnpm start:dev
+```
+
+7. Create a superadmin user (optional):
+
+```bash
+SUPERADMIN_EMAIL=admin@example.com \
+SUPERADMIN_PASSWORD=changeMe123 \
+pnpm run cli:bootstrap-superadmin
+
+# Requires both env vars; exits with error if missing.
+```
+
+8. Access:
+
+- Health: http://localhost:3000/health
+- API Reference UI: http://localhost:3000/reference
+
+---
+
+## 🕵️‍♂️ Environment Variables
+
+Defined in `.env.example` (copy to `.env`).
+
+| Variable                            | Required           | Description                                                                                                   |
+|-------------------------------------|--------------------|---------------------------------------------------------------------------------------------------------------|
+| DATABASE_URL                        | Yes                | PostgreSQL connection string (includes schema).                                                               |
+| ADMIN_APP_BASE_URL                  | Yes                | Allowed CORS origin for admin web app.                                                                        |
+| MOBILE_APP_BASE_URL                 | Yes                | Allowed CORS origin for mobile (web preview/Expo).                                                            |
+| JWT_ACCESS_SECRET                   | Yes                | Secret for signing access tokens.                                                                             |
+| JWT_REFRESH_SECRET                  | Yes                | Secret for signing refresh tokens.                                                                            |
+| REFRESH_TOKEN_TTL_MS                | Yes                | Refresh token validity (ms). Default in code: 604800000 (7 days).                                             |
+| ALPHA_VANTAGE_API_URL               | Optional           | (Template) Base URL for Alpha Vantage API. NOTE: Code currently expects `ALPHA_VANTAGE_BASE_URL` (see below). |
+| ALPHA_VANTAGE_API_KEY               | Optional           | Alpha Vantage API key ("demo" fallback in code).                                                              |
+| CRON_UPDATE_TICKERS_HISTORY         | Optional           | Cron expression for ticker history job (default: `0 05 * * *`).                                               |
+| LEVEL_REQUIRED_TO_UNLOCK_INVESTMENT | Yes                | Threshold level to unlock investment features.                                                                |
+| SUPERADMIN_EMAIL                    | Optional (for CLI) | Email used by superadmin bootstrap script.                                                                    |
+| SUPERADMIN_PASSWORD                 | Optional (for CLI) | Password used by superadmin bootstrap script.                                                                 |
+
+Important: The runtime adapter (`AlphaVantageMarketServiceAdapter`) reads `ALPHA_VANTAGE_BASE_URL`, while `.env.example`
+defines `ALPHA_VANTAGE_API_URL`. Align these by either renaming the var in your `.env` to `ALPHA_VANTAGE_BASE_URL` or
+updating the code/template for consistency.
+
+---
+
+## 🗄️ Database & Migrations
+
+Prisma manages schema evolution.
+
+- Create new migration: `pnpx prisma migrate dev --name <migration_name>`
+- Apply existing migrations in CI/Prod: `pnpx prisma migrate deploy`
+- Regenerate client after schema changes: `pnpx prisma generate`
+
+---
+
+## 🧪 Running Tests
+
+```bash
+pnpm test          # Unit tests (runInBand)
+pnpm test:watch    # Watch mode
+pnpm test:cov      # Coverage (threshold: global lines >= 80%)
+```
+
+Coverage output: `coverage/` (lcov, HTML report, etc.).
+
+---
+
+## 🐛 Troubleshooting
+
+| Issue                               | Hint                                                                                     |
+|-------------------------------------|------------------------------------------------------------------------------------------|
+| CORS errors                         | Verify `ADMIN_APP_BASE_URL` & `MOBILE_APP_BASE_URL` match requesting origins.            |
+| Auth fails                          | Check JWT secrets & refresh token TTL. Clear cookies if mismatch.                        |
+| Alpha Vantage returns empty         | Provide a real `ALPHA_VANTAGE_API_KEY`. Confirm env var name (`ALPHA_VANTAGE_BASE_URL`). |
+| Migrations not applied in container | Ensure `SKIP_MIGRATIONS=0` (default) and valid `DATABASE_URL`.                           |
+| Prisma client errors                | Run `pnpx prisma generate` after schema changes.                                         |
+
+---
+
+## 👤️ Authors
+
+- Maxence BREUILLES ([@MisterAzix](https://github.com/MisterAzix))<br />
+- Benoît FAVRIE ([@benoitfvr](https://github.com/benoitfvr))<br />
+- Doriane FARAU ([@DFarau](https://github.com/DFarau))<br />
+- Charles LAMBRET ([@CharlesLambret](https://github.com/CharlesLambret))<br />
+- Antonin CHARPENTIER ([@toutouff](https://github.com/toutouff))
