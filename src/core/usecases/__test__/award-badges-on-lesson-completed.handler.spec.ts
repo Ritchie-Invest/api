@@ -1,24 +1,36 @@
-import { AwardBadgesOnLessonCompletedHandler } from '../handlers/award-badges-on-lesson-completed.handler';
+import { AwardBadgesOnLessonCompletedHandler } from '../../../adapters/events/award-badges-on-lesson-completed.handler';
 import {
   LESSON_COMPLETED_EVENT,
   LessonCompletedEvent,
 } from '../../domain/event/lesson-completed.event';
-import { BadgeAwardingService } from '../../domain/service/badge-awarding.service';
+import { CheckAndAwardBadgesUseCase } from '../check-and-award-badges.use-case';
 
 describe('AwardBadgesOnLessonCompletedHandler', () => {
-  it('calls BadgeAwardingService on lesson completed', async () => {
-    const badgeService = {
-      checkAndAward: jest.fn().mockResolvedValue([]),
+  it('calls CheckAndAwardBadgesUseCase on lesson completed', async () => {
+    const useCaseMock = {
+      execute: jest.fn().mockResolvedValue([]),
     };
     const handler = new AwardBadgesOnLessonCompletedHandler(
-      badgeService as unknown as BadgeAwardingService,
+      useCaseMock as unknown as CheckAndAwardBadgesUseCase,
     );
 
     expect(handler.eventName).toBe(LESSON_COMPLETED_EVENT);
 
-    const event = new LessonCompletedEvent('u1', 'l1', 3, 3, 100, new Date());
+    const event = new LessonCompletedEvent(
+      'user-1',
+      'lesson-1',
+      3,
+      3,
+      100,
+      new Date(),
+    );
     await handler.handle(event);
 
-    expect(badgeService.checkAndAward).toHaveBeenCalledWith('u1', 'l1', 3, 3);
+    expect(useCaseMock.execute).toHaveBeenCalledWith({
+      userId: 'user-1',
+      lessonId: 'lesson-1',
+      completedModules: 3,
+      totalModules: 3,
+    });
   });
 });

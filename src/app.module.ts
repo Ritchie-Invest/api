@@ -74,10 +74,10 @@ import { UserBadgeRepository } from './core/domain/repository/user-badge.reposit
 import { GetUserBadgesUseCase } from './core/usecases/get-user-badges.use-case';
 import { PrismaUserBadgeRepository } from './adapters/prisma/prisma-user-badge.repository';
 import { InMemoryDomainEventBus } from './adapters/events/in-memory-domain-event-bus';
-import { AwardBadgesOnLessonCompletedHandler } from './core/usecases/handlers/award-badges-on-lesson-completed.handler';
-import { BadgeAwardingService } from './core/domain/service/badge-awarding.service';
+import { AwardBadgesOnLessonCompletedHandler } from './adapters/events/award-badges-on-lesson-completed.handler';
 import { DomainEventPublisher } from './core/base/domain-event';
 import { GetBadgeCatalogUseCase } from './core/usecases/get-badge-catalog.use-case';
+import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badges.use-case';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -195,6 +195,24 @@ import { GetBadgeCatalogUseCase } from './core/usecases/get-badge-catalog.use-ca
       useFactory: (userBadgeRepository: UserBadgeRepository) =>
         new GetUserBadgesUseCase(userBadgeRepository),
       inject: [UserBadgeRepository],
+    },
+    {
+      provide: CheckAndAwardBadgesUseCase,
+      useFactory: (
+        userBadgeRepository: UserBadgeRepository,
+        lessonCompletionRepository: PrismaLessonCompletionRepository,
+        lessonRepository: LessonRepository,
+      ) =>
+        new CheckAndAwardBadgesUseCase(
+          userBadgeRepository,
+          lessonCompletionRepository,
+          lessonRepository,
+        ),
+      inject: [
+        UserBadgeRepository,
+        'LessonCompletionRepository',
+        LessonRepository,
+      ],
     },
     {
       provide: GetBadgeCatalogUseCase,
@@ -410,27 +428,9 @@ import { GetBadgeCatalogUseCase } from './core/usecases/get-badge-catalog.use-ca
     },
     {
       provide: AwardBadgesOnLessonCompletedHandler,
-      useFactory: (badgeService: BadgeAwardingService) =>
-        new AwardBadgesOnLessonCompletedHandler(badgeService),
-      inject: [BadgeAwardingService],
-    },
-    {
-      provide: BadgeAwardingService,
-      useFactory: (
-        userBadgeRepository: UserBadgeRepository,
-        lessonCompletionRepository: PrismaLessonCompletionRepository,
-        lessonRepository: LessonRepository,
-      ) =>
-        new BadgeAwardingService(
-          userBadgeRepository,
-          lessonCompletionRepository,
-          lessonRepository,
-        ),
-      inject: [
-        UserBadgeRepository,
-        'LessonCompletionRepository',
-        LessonRepository,
-      ],
+      useFactory: (useCase: CheckAndAwardBadgesUseCase) =>
+        new AwardBadgesOnLessonCompletedHandler(useCase),
+      inject: [CheckAndAwardBadgesUseCase],
     },
     {
       provide: GetTickersWithPriceUseCase,
