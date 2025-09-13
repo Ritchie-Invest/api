@@ -144,7 +144,7 @@ describe('TransactionControllerIT', () => {
     expect(response.status).toBe(HttpStatus.CREATED);
     expect(response.body).toEqual({
       cash: 4000,
-      investments: 3000,
+      investments: 1000,
       tickerHoldings: 1000,
     });
   });

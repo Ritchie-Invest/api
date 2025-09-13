@@ -124,7 +124,7 @@ describe('ExecuteTransactionUseCase', () => {
     // Then
     expect(result).toEqual({
       cash: 4000,
-      investments: 3000,
+      investments: 1000,
       tickerHoldings: 1000,
     });
 
@@ -171,7 +171,6 @@ describe('ExecuteTransactionUseCase', () => {
       DEFAULT_TICKER_ID,
       TransactionType.SELL,
     );
-
     PortfolioPositionRepository.create(
       new PortfolioPosition({
         id: 'PortfolioPosition-3',
@@ -188,7 +187,7 @@ describe('ExecuteTransactionUseCase', () => {
       tickerId: DEFAULT_TICKER_ID,
       type: TransactionType.BUY,
       amount: 2000,
-      volume: 20, // 2000 / 100 = 20 shares
+      volume: 20,
       currentTickerPrice: DEFAULT_SHARE_PRICE,
       timestamp: new Date(),
     });
@@ -199,7 +198,7 @@ describe('ExecuteTransactionUseCase', () => {
     // Then
     expect(result).toEqual({
       cash: 4000,
-      investments: 3000,
+      investments: 1000,
       tickerHoldings: 1000,
     });
   });
@@ -230,7 +229,7 @@ describe('ExecuteTransactionUseCase', () => {
       tickerId: DEFAULT_TICKER_ID,
       type: TransactionType.BUY,
       amount: 500,
-      volume: 5, // 500 / 100 = 5 shares
+      volume: 5,
       currentTickerPrice: DEFAULT_SHARE_PRICE,
       timestamp: new Date(),
     });

@@ -45,15 +45,24 @@ export class GetPortfolioUseCase
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const latestPortfolioPosition =
+
+    let portfolioPosition =
       await this.portfolioPositionRepository.findByPortfolioIdAndDate(
         userPortfolio.id,
         today,
       );
 
-    const cash = latestPortfolioPosition?.cash || 0;
+    if (!portfolioPosition) {
+      portfolioPosition =
+        await this.portfolioPositionRepository.findLatestByPortfolioId(
+          userPortfolio.id,
+        );
+    }
 
-    const investments = await this.calculateInvestments(userPortfolio.id);
+    const cash = portfolioPosition?.cash || 0;
+    const investments =
+      portfolioPosition?.investments ??
+      (await this.calculateInvestments(userPortfolio.id));
 
     const totalValue = cash + investments;
 
@@ -65,12 +74,9 @@ export class GetPortfolioUseCase
     };
   }
 
-  private async calculateInvestments(
-    portfolioId: string,
-  ): Promise<number> {
-    const transactions = await this.transactionRepository.findByPortfolioId(
-      portfolioId,
-    );
+  private async calculateInvestments(portfolioId: string): Promise<number> {
+    const transactions =
+      await this.transactionRepository.findByPortfolioId(portfolioId);
 
     if (!transactions || transactions.length === 0) {
       return 0;
@@ -79,7 +85,8 @@ export class GetPortfolioUseCase
     const volumesByTicker: Record<string, number> = {};
     for (const t of transactions) {
       const sign = t.type === TransactionType.BUY ? 1 : -1;
-      volumesByTicker[t.tickerId] = (volumesByTicker[t.tickerId] ?? 0) + sign * (t.volume ?? 0);
+      volumesByTicker[t.tickerId] =
+        (volumesByTicker[t.tickerId] ?? 0) + sign * (t.volume ?? 0);
     }
 
     let total = 0;
@@ -87,9 +94,8 @@ export class GetPortfolioUseCase
       const volume = volumesByTicker[tickerId] ?? 0;
       if (!volume) continue;
 
-      const dailyBar = await this.dailyBarRepository.findLatestByTickerId(
-        tickerId,
-      );
+      const dailyBar =
+        await this.dailyBarRepository.findLatestByTickerId(tickerId);
       total += volume * (dailyBar?.close ?? 0);
     }
 

@@ -74,34 +74,20 @@ export class ExecuteTransactionUseCase
     }
     const sharesToTrade = amount / sharePrice;
 
-    let PortfolioPosition =
-      await this.PortfolioPositionRepository.findByPortfolioIdAndDate(
+    const lastPosition =
+      await this.PortfolioPositionRepository.findLatestByPortfolioId(
         portfolioId,
-        today,
       );
-    if (!PortfolioPosition) {
-      const lastPosition =
-        await this.PortfolioPositionRepository.findLatestByPortfolioId(
-          portfolioId,
-        );
-
-      if (!lastPosition) {
-        throw new PortfolioPositionNotFoundError(
-          `No portfolio position found for portfolio ${portfolioId}`,
-        );
-      }
-
-      PortfolioPosition = await this.PortfolioPositionRepository.create({
-        portfolioId,
-        date: today,
-        cash: lastPosition.cash,
-        investments: lastPosition.investments,
-      });
+    if (!lastPosition) {
+      throw new PortfolioPositionNotFoundError(
+        `No portfolio position found for portfolio ${portfolioId}`,
+      );
     }
 
     const calculateCurrentHoldings = async (
       portfolioId: string,
       tickerId: string,
+      price: number,
     ): Promise<number> => {
       const transactions =
         await this.transactionRepository.findByPortfolioIdAndTickerId(
@@ -118,29 +104,50 @@ export class ExecuteTransactionUseCase
         }
       }
 
-      return totalShares * sharePrice;
+      return totalShares * price;
+    };
+
+    const calculateInvestments = async (
+      portfolioId: string,
+    ): Promise<number> => {
+      const transactions =
+        await this.transactionRepository.findByPortfolioId(portfolioId);
+
+      if (!transactions || transactions.length === 0) {
+        return 0;
+      }
+
+      const volumesByTicker: Record<string, number> = {};
+      for (const t of transactions) {
+        const sign = t.type === TransactionType.BUY ? 1 : -1;
+        volumesByTicker[t.tickerId] =
+          (volumesByTicker[t.tickerId] ?? 0) + sign * (t.volume ?? 0);
+      }
+
+      let total = 0;
+      for (const tickerId of Object.keys(volumesByTicker)) {
+        const volume = volumesByTicker[tickerId] ?? 0;
+        if (!volume) continue;
+
+        const dailyBar =
+          await this.dailyBarRepository.findLatestByTickerId(tickerId);
+        total += volume * (dailyBar?.close ?? 0);
+      }
+
+      return total;
     };
 
     const currentHoldings = await calculateCurrentHoldings(
       portfolioId,
       tickerId,
+      sharePrice,
     );
 
     if (type === TransactionType.BUY) {
-      if (PortfolioPosition.cash < amount) {
+      if (lastPosition.cash < amount) {
         throw new InsufficientCashError(
-          `Insufficient cash: required ${amount}, available ${PortfolioPosition.cash}`,
+          `Insufficient cash: required ${amount}, available ${lastPosition.cash}`,
         );
-      }
-
-      const updatedPortfolioPosition =
-        await this.PortfolioPositionRepository.update(PortfolioPosition.id, {
-          cash: PortfolioPosition.cash - amount,
-          investments: PortfolioPosition.investments + amount,
-        });
-
-      if (!updatedPortfolioPosition) {
-        throw new Error('Failed to update portfolio value');
       }
 
       await this.transactionRepository.create({
@@ -152,42 +159,64 @@ export class ExecuteTransactionUseCase
         currentTickerPrice: sharePrice,
       });
 
-      return {
-        cash: updatedPortfolioPosition.cash,
-        investments: updatedPortfolioPosition.investments,
-        tickerHoldings: currentHoldings + amount,
-      };
-    } else {
-      if (currentHoldings < amount) {
-        throw new InsufficientHoldingsError(
-          `Insufficient shares for ${ticker.symbol}: required ${amount}, available ${currentHoldings}`,
-        );
-      }
+      const newInvestments = await calculateInvestments(portfolioId);
+      const newCash = lastPosition.cash - amount;
 
-      const updatedPortfolioPosition =
-        await this.PortfolioPositionRepository.update(PortfolioPosition.id, {
-          cash: PortfolioPosition.cash + amount,
-          investments: PortfolioPosition.investments - amount,
-        });
-
-      if (!updatedPortfolioPosition) {
-        throw new Error('Failed to update portfolio value');
-      }
-
-      await this.transactionRepository.create({
+      const createdPosition = await this.PortfolioPositionRepository.create({
         portfolioId,
-        tickerId,
-        type,
-        amount,
-        volume: sharesToTrade,
-        currentTickerPrice: sharePrice,
+        date: today,
+        cash: newCash,
+        investments: newInvestments,
       });
 
+      const newTickerHoldings = await calculateCurrentHoldings(
+        portfolioId,
+        tickerId,
+        sharePrice,
+      );
+
       return {
-        cash: updatedPortfolioPosition.cash,
-        investments: updatedPortfolioPosition.investments,
-        tickerHoldings: currentHoldings - amount,
+        cash: createdPosition.cash,
+        investments: createdPosition.investments,
+        tickerHoldings: newTickerHoldings,
       };
     }
+
+    if (currentHoldings < amount) {
+      throw new InsufficientHoldingsError(
+        `Insufficient shares for ${ticker.symbol}: required ${amount}, available ${currentHoldings}`,
+      );
+    }
+
+    await this.transactionRepository.create({
+      portfolioId,
+      tickerId,
+      type,
+      amount,
+      volume: sharesToTrade,
+      currentTickerPrice: sharePrice,
+    });
+
+    const newInvestmentsSell = await calculateInvestments(portfolioId);
+    const newCashSell = lastPosition.cash + amount;
+
+    const createdPositionSell = await this.PortfolioPositionRepository.create({
+      portfolioId,
+      date: today,
+      cash: newCashSell,
+      investments: newInvestmentsSell,
+    });
+
+    const newTickerHoldingsSell = await calculateCurrentHoldings(
+      portfolioId,
+      tickerId,
+      sharePrice,
+    );
+
+    return {
+      cash: createdPositionSell.cash,
+      investments: createdPositionSell.investments,
+      tickerHoldings: newTickerHoldingsSell,
+    };
   }
 }

@@ -44,14 +44,36 @@ export class GetPortfolioPositionsUseCase
       throw new PortfolioNotFoundError('Portfolio not found for this user');
     }
 
-   
-    let positions = (
-      await this.portfolioPositionRepository.findAllByPortfolioId(
-        userPortfolio.id,
-        command.limit,
-      )
-    ).slice().reverse();
+    const fetched = await this.portfolioPositionRepository.findAllByPortfolioId(
+      userPortfolio.id,
+      command.limit,
+    );
 
+    const dayKey = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+        d.getDate(),
+      ).padStart(2, '0')}`;
+
+    let positions: PortfolioPosition[] = [];
+    if (!fetched || fetched.length === 0) {
+      positions = [];
+    } else {
+      const daySet = new Set(fetched.map((p) => dayKey(p.date)));
+      if (daySet.size === 1) {
+        positions = fetched.slice().reverse();
+      } else {
+        const seen = new Set<string>();
+        const latestPerDay: PortfolioPosition[] = [];
+        for (const p of fetched) {
+          const k = dayKey(p.date);
+          if (!seen.has(k)) {
+            latestPerDay.push(p);
+            seen.add(k);
+          }
+        }
+        positions = latestPerDay.slice().reverse();
+      }
+    }
 
     if (positions.length > 90) {
       positions = this.aggregateMonthly(positions);

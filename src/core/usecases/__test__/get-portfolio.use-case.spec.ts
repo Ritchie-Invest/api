@@ -9,6 +9,7 @@ import { InMemoryDailyBarRepository } from '../../../adapters/in-memory/in-memor
 import { UserPortfolio } from '../../domain/model/UserPortfolio';
 import { PortfolioPosition } from '../../domain/model/PortfolioPosition';
 import { Currency } from '../../domain/type/Currency';
+import { TransactionType } from '../../domain/type/TransactionType';
 
 describe('GetPortfolioUseCase', () => {
   let getPortfolioUseCase: GetPortfolioUseCase;
@@ -66,6 +67,7 @@ describe('GetPortfolioUseCase', () => {
       userPortfolioRepository.create(userPortfolio);
 
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
       const portfolioPosition = new PortfolioPosition({
         id: 'value-1',
         portfolioId: DEFAULT_PORTFOLIO_ID,
@@ -74,6 +76,27 @@ describe('GetPortfolioUseCase', () => {
         date: today,
       });
       PortfolioPositionRepository.create(portfolioPosition);
+
+      dailyBarRepository.create({
+        id: 'db-1',
+        tickerId: 'ticker-1',
+        timestamp: today,
+        open: 100,
+        high: 100,
+        low: 100,
+        close: 100,
+        volume: 100,
+      });
+      transactionRepository.create({
+        id: 'tx-1',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        tickerId: 'ticker-1',
+        type: TransactionType.BUY,
+        amount: 2000,
+        volume: 20,
+        currentTickerPrice: 100,
+        timestamp: new Date(),
+      });
 
       const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
 
@@ -121,6 +144,27 @@ describe('GetPortfolioUseCase', () => {
       PortfolioPositionRepository.create(olderPortfolioPosition);
 
       const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
+
+      dailyBarRepository.create({
+        id: 'db-2',
+        tickerId: 'ticker-1',
+        timestamp: yesterday,
+        open: 100,
+        high: 100,
+        low: 100,
+        close: 100,
+        volume: 100,
+      });
+      transactionRepository.create({
+        id: 'tx-2',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        tickerId: 'ticker-1',
+        type: TransactionType.BUY,
+        amount: 2500,
+        volume: 25,
+        currentTickerPrice: 100,
+        timestamp: new Date(),
+      });
 
       // When
       const result = await getPortfolioUseCase.execute(command);
@@ -179,6 +223,27 @@ describe('GetPortfolioUseCase', () => {
 
       const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
 
+      dailyBarRepository.create({
+        id: 'db-3',
+        tickerId: 'ticker-1',
+        timestamp: yesterday,
+        open: 100,
+        high: 100,
+        low: 100,
+        close: 100,
+        volume: 100,
+      });
+      transactionRepository.create({
+        id: 'tx-3',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        tickerId: 'ticker-1',
+        type: TransactionType.BUY,
+        amount: 2500,
+        volume: 25,
+        currentTickerPrice: 100,
+        timestamp: new Date(),
+      });
+
       // When
       const result = await getPortfolioUseCase.execute(command);
 
@@ -233,6 +298,7 @@ describe('GetPortfolioUseCase', () => {
       userPortfolioRepository.create(userPortfolio);
 
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
       const PortfolioPosition1 = new PortfolioPosition({
         id: 'value-1',
         portfolioId: DEFAULT_PORTFOLIO_ID,
@@ -251,6 +317,37 @@ describe('GetPortfolioUseCase', () => {
       PortfolioPositionRepository.create(PortfolioPosition2);
 
       const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
+
+      dailyBarRepository.create({
+        id: 'db-4',
+        tickerId: 'ticker-1',
+        timestamp: today,
+        open: 100,
+        high: 100,
+        low: 100,
+        close: 100,
+        volume: 100,
+      });
+      transactionRepository.create({
+        id: 'tx-4',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        tickerId: 'ticker-1',
+        type: TransactionType.BUY,
+        amount: 200,
+        volume: 2,
+        currentTickerPrice: 100,
+        timestamp: new Date(),
+      });
+      transactionRepository.create({
+        id: 'tx-5',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        tickerId: 'ticker-1',
+        type: TransactionType.BUY,
+        amount: 400,
+        volume: 4,
+        currentTickerPrice: 100,
+        timestamp: new Date(),
+      });
 
       // When
       const result = await getPortfolioUseCase.execute(command);
@@ -302,6 +399,7 @@ describe('GetPortfolioUseCase', () => {
       userPortfolioRepository.create(userPortfolio);
 
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
       const portfolioPosition = new PortfolioPosition({
         id: 'value-1',
         portfolioId: DEFAULT_PORTFOLIO_ID,
@@ -312,6 +410,27 @@ describe('GetPortfolioUseCase', () => {
       PortfolioPositionRepository.create(portfolioPosition);
 
       const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
+
+      dailyBarRepository.create({
+        id: 'db-5',
+        tickerId: 'ticker-1',
+        timestamp: today,
+        open: 100,
+        high: 100,
+        low: 100,
+        close: 100,
+        volume: 100,
+      });
+      transactionRepository.create({
+        id: 'tx-6',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        tickerId: 'ticker-1',
+        type: TransactionType.BUY,
+        amount: 1000,
+        volume: 10,
+        currentTickerPrice: 100,
+        timestamp: new Date(),
+      });
 
       // When
       const result = await getPortfolioUseCase.execute(command);
@@ -368,6 +487,27 @@ describe('GetPortfolioUseCase', () => {
       PortfolioPositionRepository.create(value3);
 
       const command: GetPortfolioCommand = { userId: DEFAULT_USER_ID };
+
+      dailyBarRepository.create({
+        id: 'db-6',
+        tickerId: 'ticker-1',
+        timestamp: yesterday,
+        open: 100,
+        high: 100,
+        low: 100,
+        close: 100,
+        volume: 100,
+      });
+      transactionRepository.create({
+        id: 'tx-7',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        tickerId: 'ticker-1',
+        type: TransactionType.BUY,
+        amount: 600,
+        volume: 6,
+        currentTickerPrice: 100,
+        timestamp: new Date(),
+      });
 
       // When
       const result = await getPortfolioUseCase.execute(command);

@@ -47,7 +47,9 @@ export class GetTickerHistoryUseCase
     let processedHistory = history;
 
     if (history.length > 90) {
-      processedHistory = this.aggregateMonthly([...history].reverse()).reverse();
+      processedHistory = this.aggregateMonthly(
+        [...history].reverse(),
+      ).reverse();
     } else if (history.length > 30) {
       processedHistory = this.aggregateWeekly([...history].reverse()).reverse();
     }

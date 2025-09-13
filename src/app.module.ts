@@ -591,7 +591,12 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
           transactionRepository,
           dailyBarRepository,
         ),
-      inject: ['UserPortfolioRepository', 'PortfolioPositionRepository', 'TransactionRepository', 'DailyBarRepository'],
+      inject: [
+        'UserPortfolioRepository',
+        'PortfolioPositionRepository',
+        'TransactionRepository',
+        'DailyBarRepository',
+      ],
     },
     {
       provide: GetPortfolioPositionsUseCase,

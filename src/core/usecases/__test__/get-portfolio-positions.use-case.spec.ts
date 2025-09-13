@@ -62,15 +62,12 @@ describe('GetPortfolioPositionsUseCase', () => {
       const result = await getPortfolioPositionsUseCase.execute(command);
 
       // Then
-      expect(result).toEqual({
-        positions: [],
-        total: 0,
-        variation: 0,
-        variationPercent: 0,
-        variationDirection: expect.any(String),
-      });
+      expect(result.positions).toEqual([]);
+      expect(result.total).toBe(0);
+      expect(result.variation).toBe(0);
+      expect(result.variationPercent).toBe(0);
+      expect(typeof result.variationDirection).toBe('string');
     });
-
 
     it('should return all positions sorted by date descending', async () => {
       // Given
@@ -120,12 +117,12 @@ describe('GetPortfolioPositionsUseCase', () => {
       // When
       const result = await getPortfolioPositionsUseCase.execute(command);
 
-  // Then (oldest-first: index 0 is oldest)
-  expect(result.total).toBe(3);
-  expect(result.positions).toHaveLength(3);
-  expect(result.positions[0]?.id).toBe('position-3');
-  expect(result.positions[1]?.id).toBe('position-2');
-  expect(result.positions[2]?.id).toBe('position-1');
+      // Then (oldest-first: index 0 is oldest)
+      expect(result.total).toBe(3);
+      expect(result.positions).toHaveLength(3);
+      expect(result.positions[0]?.id).toBe('position-3');
+      expect(result.positions[1]?.id).toBe('position-2');
+      expect(result.positions[2]?.id).toBe('position-1');
     });
 
     it('should handle pagination with limit', async () => {
@@ -158,11 +155,11 @@ describe('GetPortfolioPositionsUseCase', () => {
       // When
       const result = await getPortfolioPositionsUseCase.execute(command);
 
-  // Then
-  expect(result.total).toBe(5);
-  expect(result.positions).toHaveLength(2);
-  expect(result.positions[0]?.id).toBe('position-1');
-  expect(result.positions[1]?.id).toBe('position-0');
+      // Then
+      expect(result.total).toBe(5);
+      expect(result.positions).toHaveLength(2);
+      expect(result.positions[0]?.id).toBe('position-1');
+      expect(result.positions[1]?.id).toBe('position-0');
     });
 
     it('should only return positions for the correct portfolio', async () => {
@@ -235,11 +232,11 @@ describe('GetPortfolioPositionsUseCase', () => {
       // When
       const result = await getPortfolioPositionsUseCase.execute(command);
 
-  // Then (oldest-first)
-  expect(result.total).toBe(3);
-  expect(result.positions).toHaveLength(2);
-  expect(result.positions[0]?.id).toBe('position-1');
-  expect(result.positions[1]?.id).toBe('position-0');
+      // Then (oldest-first)
+      expect(result.total).toBe(3);
+      expect(result.positions).toHaveLength(2);
+      expect(result.positions[0]?.id).toBe('position-1');
+      expect(result.positions[1]?.id).toBe('position-0');
     });
   });
 });
