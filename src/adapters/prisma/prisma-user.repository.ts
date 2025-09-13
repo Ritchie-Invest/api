@@ -67,7 +67,26 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async removeAll(): Promise<void> {
+    // Delete dependent records before users to satisfy FK constraints
     await this.prisma.userBadge.deleteMany();
+    await this.prisma.life.deleteMany();
     await this.prisma.user.deleteMany();
+  }
+
+  async getLastLostLife(userId: string): Promise<Date | null> {
+    const lastLife = await this.prisma.life.findFirst({
+      where: { userId },
+      orderBy: { emissionDate: 'desc' },
+    });
+    return lastLife?.emissionDate || null;
+  }
+
+  async addLostLife(userId: string): Promise<void> {
+    await this.prisma.life.create({
+      data: {
+        userId,
+        emissionDate: new Date(),
+      },
+    });
   }
 }

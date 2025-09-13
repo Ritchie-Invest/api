@@ -78,6 +78,7 @@ import { AwardBadgesOnLessonCompletedHandler } from './adapters/events/award-bad
 import { DomainEventPublisher } from './core/base/domain-event';
 import { GetBadgeCatalogUseCase } from './core/usecases/get-badge-catalog.use-case';
 import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badges.use-case';
+import { LifeService } from './core/usecases/services/life.service';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -232,6 +233,12 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
       inject: [UserRepository],
     },
     {
+      provide: LifeService,
+      useFactory: (userRepository: UserRepository, prisma: PrismaService) =>
+        new LifeService(userRepository, prisma),
+      inject: [UserRepository, PrismaService],
+    },
+    {
       provide: CreateUserUseCase,
       useFactory: (userRepository: UserRepository) =>
         new CreateUserUseCase(userRepository),
@@ -350,6 +357,7 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
         strategyFactory: CompleteGameModuleStrategyFactory,
         lessonAttemptRepository: LessonAttemptRepository,
         moduleAttemptRepository: ModuleAttemptRepository,
+        lifeService: LifeService,
       ) =>
         new CompleteGameModuleUseCase(
           gameModuleRepository,
@@ -357,6 +365,7 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
           strategyFactory,
           lessonAttemptRepository,
           moduleAttemptRepository,
+          lifeService,
         ),
       inject: [
         GameModuleRepository,
@@ -364,6 +373,7 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
         'CompleteGameModuleStrategyFactory',
         'LessonAttemptRepository',
         'ModuleAttemptRepository',
+        LifeService,
       ],
     },
     {
@@ -454,9 +464,9 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
     },
     {
       provide: GetUserProfileUseCase,
-      useFactory: (userRepository: UserRepository) =>
-        new GetUserProfileUseCase(userRepository),
-      inject: [UserRepository],
+      useFactory: (userRepository: UserRepository, lifeService: LifeService) =>
+        new GetUserProfileUseCase(userRepository, lifeService),
+      inject: [UserRepository, LifeService],
     },
   ],
 })

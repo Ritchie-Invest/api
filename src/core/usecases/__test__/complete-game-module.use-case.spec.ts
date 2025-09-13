@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import {
   CompleteGameModuleUseCase,
   CompleteGameModuleCommand,
@@ -19,12 +20,14 @@ import { FillInTheBlankChoice } from '../../domain/model/FillInTheBlankChoice';
 import { TrueOrFalseModule } from '../../domain/model/TrueOrFalseModule';
 import { InMemoryModuleAttemptRepository } from '../../../adapters/in-memory/in-memory-module-attempt.repository';
 import { InMemoryLessonAttemptRepository } from '../../../adapters/in-memory/in-memory-lesson-attempt.repository';
+import { LifeService } from '../services/life.service';
 
 describe('CompleteGameModuleUseCase', () => {
   let gameModuleRepository: InMemoryGameModuleRepository;
   let lessonRepository: InMemoryLessonRepository;
   let lessonAttemptRepository: InMemoryLessonAttemptRepository;
   let moduleAttemptRepository: InMemoryModuleAttemptRepository;
+  let mockLifeService: jest.Mocked<LifeService>;
   let useCase: CompleteGameModuleUseCase;
 
   beforeEach(() => {
@@ -32,6 +35,18 @@ describe('CompleteGameModuleUseCase', () => {
     lessonRepository = new InMemoryLessonRepository();
     lessonAttemptRepository = new InMemoryLessonAttemptRepository();
     moduleAttemptRepository = new InMemoryModuleAttemptRepository();
+
+    // Mock LifeService
+    mockLifeService = {
+      getUserLifeData: jest.fn(),
+      addLostLife: jest.fn(),
+    } as unknown as jest.Mocked<LifeService>;
+    // Valeur par défaut pour éviter les échecs des tests existants en cas de réponse incorrecte
+    mockLifeService.getUserLifeData.mockResolvedValue({
+      life_number: 5,
+      next_life_in: 1200,
+      has_lost: false,
+    });
 
     const strategyFactory = new MapCompleteGameModuleStrategyFactory([
       {
@@ -54,6 +69,7 @@ describe('CompleteGameModuleUseCase', () => {
       strategyFactory,
       lessonAttemptRepository,
       moduleAttemptRepository,
+      mockLifeService,
     );
     moduleAttemptRepository.removeAll();
     lessonAttemptRepository.removeAll();
@@ -190,6 +206,10 @@ describe('CompleteGameModuleUseCase', () => {
     expect(moduleAttempts[0]?.isCorrect).toBe(false);
     expect(moduleAttempts[0]?.userId).toBe('user-1');
     expect(moduleAttempts[0]?.gameModuleId).toBe('question-1');
+    // Vérifie appel perte de vie
+    expect(mockLifeService.addLostLife).toHaveBeenCalledWith('user-1');
+    expect(mockLifeService.getUserLifeData).toHaveBeenCalledWith('user-1');
+    expect(result.isLost).toBe(false);
   });
 
   describe('Scenario 4: Fill in the Blank valid answer submission', () => {
@@ -287,6 +307,9 @@ describe('CompleteGameModuleUseCase', () => {
       expect(result.feedback).toBe(
         'Incorrect. Lyon is a major city but not the capital.',
       );
+      expect(mockLifeService.addLostLife).toHaveBeenCalledWith('user-1');
+      expect(mockLifeService.getUserLifeData).toHaveBeenCalledWith('user-1');
+      expect(result.isLost).toBe(false);
     });
   });
 
@@ -514,6 +537,9 @@ describe('CompleteGameModuleUseCase', () => {
       // Then
       expect(result.isCorrect).toBe(false);
       expect(result.feedback).toBe('Incorrect. The correct answer is: True');
+      expect(mockLifeService.addLostLife).toHaveBeenCalledWith('user-1');
+      expect(mockLifeService.getUserLifeData).toHaveBeenCalledWith('user-1');
+      expect(result.isLost).toBe(false);
     });
   });
 
@@ -785,5 +811,84 @@ describe('CompleteGameModuleUseCase', () => {
     await expect(useCase.execute(command)).rejects.toThrow(
       `Module with id question-1 has already been attempted in lesson attempt ${lessonAttempt?.id}`,
     );
+  });
+
+  describe('Life management logic', () => {
+    const prepareMcq = () => {
+      createTestLesson();
+      const correctChoice = new McqChoice({
+        id: 'choice-1',
+        text: 'Paris',
+        isCorrect: true,
+        correctionMessage: 'Correct! Paris is indeed the capital of France.',
+      });
+      const incorrectChoice = new McqChoice({
+        id: 'choice-2',
+        text: 'Lyon',
+        isCorrect: false,
+        correctionMessage:
+          'Incorrect. Lyon is a major city but not the capital.',
+      });
+      const mcqModule = new McqModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        question: 'What is the capital of France?',
+        choices: [correctChoice, incorrectChoice],
+      });
+      gameModuleRepository.create(mcqModule);
+    };
+
+    it('should call addLostLife and return isLost=false when life not exhausted', async () => {
+      prepareMcq();
+      mockLifeService.getUserLifeData.mockResolvedValueOnce({
+        life_number: 3,
+        next_life_in: 1800,
+        has_lost: false,
+      });
+      const command: CompleteGameModuleCommand = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: { choiceId: 'choice-2' },
+      };
+      const result = await useCase.execute(command);
+      expect(mockLifeService.addLostLife).toHaveBeenCalledTimes(1);
+      expect(mockLifeService.addLostLife).toHaveBeenCalledWith('user-1');
+      expect(mockLifeService.getUserLifeData).toHaveBeenCalledTimes(1);
+      expect(result.isLost).toBe(false);
+    });
+
+    it('should set isLost=true when life service indicates user has lost all lives', async () => {
+      prepareMcq();
+      mockLifeService.getUserLifeData.mockResolvedValueOnce({
+        life_number: 0,
+        next_life_in: 3600,
+        has_lost: true,
+      });
+      const command: CompleteGameModuleCommand = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: { choiceId: 'choice-2' },
+      };
+      const result = await useCase.execute(command);
+      expect(mockLifeService.addLostLife).toHaveBeenCalledTimes(1);
+      expect(mockLifeService.getUserLifeData).toHaveBeenCalledTimes(1);
+      expect(result.isLost).toBe(true);
+    });
+
+    it('should not call life service on correct answer', async () => {
+      prepareMcq();
+      const command: CompleteGameModuleCommand = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: { choiceId: 'choice-1' },
+      };
+      const result = await useCase.execute(command);
+      expect(mockLifeService.addLostLife).not.toHaveBeenCalled();
+      expect(mockLifeService.getUserLifeData).not.toHaveBeenCalled();
+      expect(result.isLost).toBe(false);
+    });
   });
 });
