@@ -11,7 +11,11 @@ import { LessonCompletion } from '../domain/model/LessonCompletion';
 import { LessonAttemptNotFoundError } from '../domain/error/LessonAttemptNotFoundError';
 import { LessonAttemptAlreadyFinishedError } from '../domain/error/LessonAttemptAlreadyFinishedError';
 import { LevelingService } from './services/leveling.service';
-import { CheckAndAwardBadgesUseCase } from './check-and-award-badges.use-case';
+import { DomainEventPublisher } from '../base/domain-event';
+import {
+  LESSON_COMPLETED_EVENT,
+  LessonCompletedEvent,
+} from '../domain/event/lesson-completed.event';
 
 export type CompleteLessonCommand = {
   userId: string;
@@ -23,7 +27,6 @@ export type CompleteLessonResult = {
   totalGameModules: number;
   isCompleted: boolean;
   xpWon?: number;
-  newlyAwardedBadges: { type: string }[];
 };
 
 @Injectable()
@@ -36,7 +39,7 @@ export class CompleteLessonUseCase
     private readonly lessonAttemptRepository: LessonAttemptRepository,
     private readonly moduleAttemptRepository: ModuleAttemptRepository,
     private readonly levelingService: LevelingService,
-    private readonly checkAndAwardBadgesUseCase: CheckAndAwardBadgesUseCase,
+    private readonly eventBus: DomainEventPublisher,
   ) {}
 
   async execute(command: CompleteLessonCommand): Promise<CompleteLessonResult> {
@@ -91,7 +94,6 @@ export class CompleteLessonUseCase
 
     let isCompleted = false;
     const xpToAdd = this.computeXpFromScore(score);
-    let newlyAwardedBadges: { type: string }[] = [];
     if (score >= 80) {
       isCompleted = true;
       const lessonCompletion = new LessonCompletion(
@@ -103,12 +105,17 @@ export class CompleteLessonUseCase
       );
       await this.lessonCompletionRepository.create(lessonCompletion);
       await this.levelingService.incrementXp(command.userId, xpToAdd);
-      newlyAwardedBadges = await this.checkAndAwardBadgesUseCase.execute({
-        userId: command.userId,
-        lessonId: command.lessonId,
-        completedModules,
-        totalModules,
-      });
+      await this.eventBus.publish(
+        LESSON_COMPLETED_EVENT,
+        new LessonCompletedEvent(
+          command.userId,
+          command.lessonId,
+          completedModules,
+          totalModules,
+          score,
+          new Date(),
+        ),
+      );
     }
 
     await this.lessonAttemptRepository.finishAttempt(
@@ -121,7 +128,6 @@ export class CompleteLessonUseCase
       totalGameModules: totalModules,
       isCompleted,
       xpWon: xpToAdd,
-      newlyAwardedBadges,
     };
   }
 

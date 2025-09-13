@@ -73,7 +73,10 @@ import { LoggerMiddleware } from './config/logger.midleware';
 import { UserBadgeRepository } from './core/domain/repository/user-badge.repository';
 import { GetUserBadgesUseCase } from './core/usecases/get-user-badges.use-case';
 import { PrismaUserBadgeRepository } from './adapters/prisma/prisma-user-badge.repository';
-import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badges.use-case';
+import { InMemoryDomainEventBus } from './adapters/events/in-memory-domain-event-bus';
+import { AwardBadgesOnLessonCompletedHandler } from './core/usecases/handlers/award-badges-on-lesson-completed.handler';
+import { BadgeAwardingService } from './core/domain/service/badge-awarding.service';
+import { DomainEventPublisher } from './core/base/domain-event';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -370,7 +373,7 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
         lessonAttemptRepository: LessonAttemptRepository,
         moduleAttemptRepository: ModuleAttemptRepository,
         levelingService: LevelingService,
-        checkAndAwardBadgesUseCase: CheckAndAwardBadgesUseCase,
+        eventBus: DomainEventPublisher,
       ) =>
         new CompleteLessonUseCase(
           lessonRepository,
@@ -378,7 +381,7 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
           lessonAttemptRepository,
           moduleAttemptRepository,
           levelingService,
-          checkAndAwardBadgesUseCase,
+          eventBus,
         ),
       inject: [
         LessonRepository,
@@ -386,17 +389,32 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
         'LessonAttemptRepository',
         'ModuleAttemptRepository',
         LevelingService,
-        CheckAndAwardBadgesUseCase,
+        'DomainEventPublisher',
       ],
     },
     {
-      provide: CheckAndAwardBadgesUseCase,
+      provide: 'DomainEventPublisher',
+      useFactory: (handler: AwardBadgesOnLessonCompletedHandler) => {
+        const bus = new InMemoryDomainEventBus();
+        bus.register(handler);
+        return bus;
+      },
+      inject: [AwardBadgesOnLessonCompletedHandler],
+    },
+    {
+      provide: AwardBadgesOnLessonCompletedHandler,
+      useFactory: (badgeService: BadgeAwardingService) =>
+        new AwardBadgesOnLessonCompletedHandler(badgeService),
+      inject: [BadgeAwardingService],
+    },
+    {
+      provide: BadgeAwardingService,
       useFactory: (
         userBadgeRepository: UserBadgeRepository,
         lessonCompletionRepository: PrismaLessonCompletionRepository,
         lessonRepository: LessonRepository,
       ) =>
-        new CheckAndAwardBadgesUseCase(
+        new BadgeAwardingService(
           userBadgeRepository,
           lessonCompletionRepository,
           lessonRepository,
