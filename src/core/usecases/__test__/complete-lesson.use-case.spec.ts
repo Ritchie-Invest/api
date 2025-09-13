@@ -17,8 +17,8 @@ import {
 } from '../../domain/event/lesson-completed.event';
 import { DomainEventHandler } from '../../base/domain-event';
 import { InMemoryUserBadgeRepository } from '../../../adapters/in-memory/in-memory-user-badge.repository';
-import { BadgeAwardingService } from '../../domain/service/badge-awarding.service';
-import { AwardBadgesOnLessonCompletedHandler } from '../handlers/award-badges-on-lesson-completed.handler';
+import { AwardBadgesOnLessonCompletedHandler } from '../../../adapters/events/award-badges-on-lesson-completed.handler';
+import { CheckAndAwardBadgesUseCase } from '../check-and-award-badges.use-case';
 import { BadgeType } from '../../domain/type/BadgeType';
 
 describe('CompleteLessonUseCase', () => {
@@ -788,12 +788,12 @@ describe('CompleteLessonUseCase', () => {
     );
 
     const userBadgeRepo = new InMemoryUserBadgeRepository();
-    const badgeService = new BadgeAwardingService(
+    const checkAndAward = new CheckAndAwardBadgesUseCase(
       userBadgeRepo,
       lessonCompletionRepository,
       lessonRepository,
     );
-    const badgeHandler = new AwardBadgesOnLessonCompletedHandler(badgeService);
+    const badgeHandler = new AwardBadgesOnLessonCompletedHandler(checkAndAward);
     eventBus.register(badgeHandler);
 
     lessonAttemptRepository.create({
