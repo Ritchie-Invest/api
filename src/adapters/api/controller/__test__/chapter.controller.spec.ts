@@ -285,7 +285,6 @@ describe('ChapterControllerIT', () => {
       const updateChapterRequest = new UpdateChapterRequest(
         'Updated Chapter 1',
         'Updated Description of Chapter 1',
-        1,
         false,
       );
 
@@ -301,7 +300,7 @@ describe('ChapterControllerIT', () => {
         id: chapter.id,
         title: 'Updated Chapter 1',
         description: 'Updated Description of Chapter 1',
-        order: 1,
+        order: 0,
         isPublished: false,
       });
     });
@@ -312,7 +311,6 @@ describe('ChapterControllerIT', () => {
       const updateChapterRequest = new UpdateChapterRequest(
         'Updated Chapter 1',
         'Updated Description of Chapter 1',
-        1,
         false,
       );
 
@@ -338,7 +336,6 @@ describe('ChapterControllerIT', () => {
       const updateChapterRequest = new UpdateChapterRequest(
         '',
         'Updated Description of Chapter 1',
-        1,
         false,
       );
 
@@ -361,7 +358,6 @@ describe('ChapterControllerIT', () => {
       const updateChapterRequest = new UpdateChapterRequest(
         'Updated Chapter 1',
         'Updated Description of Chapter 1',
-        1,
         false,
       );
 
