@@ -1,3 +1,4 @@
+// import removed; badges are now handled by domain events
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { CompleteLessonUseCase } from '../complete-lesson.use-case';
@@ -9,6 +10,16 @@ import { InMemoryLessonCompletionRepository } from '../../../adapters/in-memory/
 import { InMemoryUserRepository } from '../../../adapters/in-memory/in-memory-user.repository';
 import { UserType } from '../../domain/type/UserType';
 import { LevelingService } from '../services/leveling.service';
+import { InMemoryDomainEventBus } from '../../../adapters/events/in-memory-domain-event-bus';
+import {
+  LESSON_COMPLETED_EVENT,
+  LessonCompletedEvent,
+} from '../../domain/event/lesson-completed.event';
+import { DomainEventHandler } from '../../base/domain-event';
+import { InMemoryUserBadgeRepository } from '../../../adapters/in-memory/in-memory-user-badge.repository';
+import { AwardBadgesOnLessonCompletedHandler } from '../../../adapters/events/award-badges-on-lesson-completed.handler';
+import { CheckAndAwardBadgesUseCase } from '../check-and-award-badges.use-case';
+import { BadgeType } from '../../domain/type/BadgeType';
 
 describe('CompleteLessonUseCase', () => {
   let gameModuleRepository: InMemoryGameModuleRepository;
@@ -20,6 +31,7 @@ describe('CompleteLessonUseCase', () => {
 
   let levelingService: LevelingService;
   let useCase: CompleteLessonUseCase;
+  let eventBus: InMemoryDomainEventBus;
 
   beforeEach(() => {
     gameModuleRepository = new InMemoryGameModuleRepository();
@@ -30,12 +42,14 @@ describe('CompleteLessonUseCase', () => {
     userRepository = new InMemoryUserRepository();
 
     levelingService = new LevelingService(userRepository);
+    eventBus = new InMemoryDomainEventBus();
     useCase = new CompleteLessonUseCase(
       lessonRepository,
       lessonCompletionRepository,
       lessonAttemptRepository,
       moduleAttemptRepository,
       levelingService,
+      eventBus,
     );
 
     moduleAttemptRepository.removeAll();
@@ -181,6 +195,7 @@ describe('CompleteLessonUseCase', () => {
       password: 'hashed',
       type: UserType.STUDENT,
       totalXp: 0,
+      isInvestmentUnlocked: false,
     });
 
     const gameModule1 = new McqModule({
@@ -285,6 +300,7 @@ describe('CompleteLessonUseCase', () => {
       password: 'hashed',
       type: UserType.STUDENT,
       totalXp: 0,
+      isInvestmentUnlocked: false,
     });
 
     const gameModule1 = new McqModule({
@@ -604,5 +620,210 @@ describe('CompleteLessonUseCase', () => {
     ).rejects.toThrow(
       'All modules in lesson lesson-6 have not been fully attempted. Attempted: 1, Total: 2',
     );
+  });
+
+  it('publishes LessonCompletedEvent when score >= 80', async () => {
+    const userId = 'user-event-1';
+    const lessonId = 'lesson-event-1';
+
+    const gm1 = new McqModule({
+      id: 'm1',
+      lessonId,
+      question: 'Q1',
+      choices: [
+        { id: 'c1', text: 'A', isCorrect: true, correctionMessage: 'ok' },
+        { id: 'c2', text: 'B', isCorrect: false, correctionMessage: 'ko' },
+      ],
+    });
+    const gm2 = new McqModule({
+      id: 'm2',
+      lessonId,
+      question: 'Q2',
+      choices: [
+        { id: 'c3', text: 'A', isCorrect: true, correctionMessage: 'ok' },
+        { id: 'c4', text: 'B', isCorrect: false, correctionMessage: 'ko' },
+      ],
+    });
+    gameModuleRepository.create(gm1);
+    gameModuleRepository.create(gm2);
+    lessonRepository.create(
+      new Lesson(lessonId, 'L', 'D', 'chapter-x', 1, false, [gm1, gm2]),
+    );
+
+    lessonAttemptRepository.create({
+      id: 'att-ev-1',
+      userId,
+      lessonId,
+      startedAt: new Date(),
+      finishedAt: undefined,
+    });
+    moduleAttemptRepository.create({
+      id: 'ma1',
+      userId,
+      gameModuleId: gm1.id,
+      lessonAttemptId: 'att-ev-1',
+      isCorrect: true,
+      answeredAt: new Date(),
+    });
+    moduleAttemptRepository.create({
+      id: 'ma2',
+      userId,
+      gameModuleId: gm2.id,
+      lessonAttemptId: 'att-ev-1',
+      isCorrect: true,
+      answeredAt: new Date(),
+    });
+
+    const received: LessonCompletedEvent[] = [];
+    const handler: DomainEventHandler = {
+      eventName: LESSON_COMPLETED_EVENT,
+      handle(e) {
+        received.push(e as unknown as LessonCompletedEvent);
+      },
+    };
+    eventBus.register(handler);
+
+    const res = await useCase.execute({ userId, lessonId });
+    expect(res.isCompleted).toBe(true);
+    expect(received).toHaveLength(1);
+    const evt = received[0]!;
+    expect(evt.userId).toBe(userId);
+    expect(evt.lessonId).toBe(lessonId);
+    expect(evt.completedModules).toBe(2);
+    expect(evt.totalModules).toBe(2);
+  });
+
+  it('does not publish LessonCompletedEvent when score < 80', async () => {
+    const userId = 'user-event-2';
+    const lessonId = 'lesson-event-2';
+
+    const gm1 = new McqModule({
+      id: 'm1',
+      lessonId,
+      question: 'Q1',
+      choices: [
+        { id: 'c1', text: 'A', isCorrect: true, correctionMessage: 'ok' },
+        { id: 'c2', text: 'B', isCorrect: false, correctionMessage: 'ko' },
+      ],
+    });
+    const gm2 = new McqModule({
+      id: 'm2',
+      lessonId,
+      question: 'Q2',
+      choices: [
+        { id: 'c3', text: 'A', isCorrect: true, correctionMessage: 'ok' },
+        { id: 'c4', text: 'B', isCorrect: false, correctionMessage: 'ko' },
+      ],
+    });
+    gameModuleRepository.create(gm1);
+    gameModuleRepository.create(gm2);
+    lessonRepository.create(
+      new Lesson(lessonId, 'L', 'D', 'chapter-x', 1, false, [gm1, gm2]),
+    );
+
+    lessonAttemptRepository.create({
+      id: 'att-ev-2',
+      userId,
+      lessonId,
+      startedAt: new Date(),
+      finishedAt: undefined,
+    });
+    moduleAttemptRepository.create({
+      id: 'ma1',
+      userId,
+      gameModuleId: gm1.id,
+      lessonAttemptId: 'att-ev-2',
+      isCorrect: true,
+      answeredAt: new Date(),
+    });
+    moduleAttemptRepository.create({
+      id: 'ma2',
+      userId,
+      gameModuleId: gm2.id,
+      lessonAttemptId: 'att-ev-2',
+      isCorrect: false,
+      answeredAt: new Date(),
+    });
+
+    const received: LessonCompletedEvent[] = [];
+    const handler: DomainEventHandler = {
+      eventName: LESSON_COMPLETED_EVENT,
+      handle(e) {
+        received.push(e as unknown as LessonCompletedEvent);
+      },
+    };
+    eventBus.register(handler);
+
+    const res = await useCase.execute({ userId, lessonId });
+    expect(res.isCompleted).toBe(false);
+    expect(received).toHaveLength(0);
+  });
+
+  it('awards a badge via handler after perfect completion (integration)', async () => {
+    const userId = 'user-badge-1';
+    const lessonId = 'lesson-badge-1';
+
+    const gm1 = new McqModule({
+      id: 'm1',
+      lessonId,
+      question: 'Q1',
+      choices: [
+        { id: 'c1', text: 'A', isCorrect: true, correctionMessage: 'ok' },
+        { id: 'c2', text: 'B', isCorrect: false, correctionMessage: 'ko' },
+      ],
+    });
+    const gm2 = new McqModule({
+      id: 'm2',
+      lessonId,
+      question: 'Q2',
+      choices: [
+        { id: 'c3', text: 'A', isCorrect: true, correctionMessage: 'ok' },
+        { id: 'c4', text: 'B', isCorrect: false, correctionMessage: 'ko' },
+      ],
+    });
+    gameModuleRepository.create(gm1);
+    gameModuleRepository.create(gm2);
+    lessonRepository.create(
+      new Lesson(lessonId, 'L', 'D', 'chapter-x', 1, false, [gm1, gm2]),
+    );
+
+    const userBadgeRepo = new InMemoryUserBadgeRepository();
+    const checkAndAward = new CheckAndAwardBadgesUseCase(
+      userBadgeRepo,
+      lessonCompletionRepository,
+      lessonRepository,
+    );
+    const badgeHandler = new AwardBadgesOnLessonCompletedHandler(checkAndAward);
+    eventBus.register(badgeHandler);
+
+    lessonAttemptRepository.create({
+      id: 'att-badge-1',
+      userId,
+      lessonId,
+      startedAt: new Date(),
+      finishedAt: undefined,
+    });
+    moduleAttemptRepository.create({
+      id: 'ma1',
+      userId,
+      gameModuleId: gm1.id,
+      lessonAttemptId: 'att-badge-1',
+      isCorrect: true,
+      answeredAt: new Date(),
+    });
+    moduleAttemptRepository.create({
+      id: 'ma2',
+      userId,
+      gameModuleId: gm2.id,
+      lessonAttemptId: 'att-badge-1',
+      isCorrect: true,
+      answeredAt: new Date(),
+    });
+
+    const res = await useCase.execute({ userId, lessonId });
+    expect(res.isCompleted).toBe(true);
+    expect(
+      await userBadgeRepo.hasBadge(userId, BadgeType.LEARN_PERFECT_QUIZ),
+    ).toBe(true);
   });
 });

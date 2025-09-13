@@ -74,6 +74,7 @@ export class PrismaUserRepository implements UserRepository {
     await this.prisma.lessonCompletion.deleteMany();
     await this.prisma.lessonAttempt.deleteMany();
     await this.prisma.moduleAttempt.deleteMany();
+    await this.prisma.userBadge.deleteMany();
     await this.prisma.user.deleteMany();
   }
 }

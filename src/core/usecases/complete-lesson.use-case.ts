@@ -11,6 +11,11 @@ import { LessonCompletion } from '../domain/model/LessonCompletion';
 import { LessonAttemptNotFoundError } from '../domain/error/LessonAttemptNotFoundError';
 import { LessonAttemptAlreadyFinishedError } from '../domain/error/LessonAttemptAlreadyFinishedError';
 import { LevelingService } from './services/leveling.service';
+import { DomainEventPublisher } from '../base/domain-event';
+import {
+  LESSON_COMPLETED_EVENT,
+  LessonCompletedEvent,
+} from '../domain/event/lesson-completed.event';
 
 export type CompleteLessonCommand = {
   userId: string;
@@ -34,6 +39,7 @@ export class CompleteLessonUseCase
     private readonly lessonAttemptRepository: LessonAttemptRepository,
     private readonly moduleAttemptRepository: ModuleAttemptRepository,
     private readonly levelingService: LevelingService,
+    private readonly eventBus: DomainEventPublisher,
   ) {}
 
   async execute(command: CompleteLessonCommand): Promise<CompleteLessonResult> {
@@ -99,6 +105,17 @@ export class CompleteLessonUseCase
       );
       await this.lessonCompletionRepository.create(lessonCompletion);
       await this.levelingService.incrementXp(command.userId, xpToAdd);
+      await this.eventBus.publish(
+        LESSON_COMPLETED_EVENT,
+        new LessonCompletedEvent(
+          command.userId,
+          command.lessonId,
+          completedModules,
+          totalModules,
+          score,
+          new Date(),
+        ),
+      );
     }
 
     await this.lessonAttemptRepository.finishAttempt(

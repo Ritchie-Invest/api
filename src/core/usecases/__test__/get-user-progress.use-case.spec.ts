@@ -1,20 +1,19 @@
 import {
-  GetUserChaptersUseCase,
-  GetUserChaptersCommand,
-} from '../get-user-chapters.use-case';
+  GetUserProgressUseCase,
+  GetUserProgressCommand,
+} from '../get-user-progress-use-case.service';
 import { InMemoryChapterRepository } from '../../../adapters/in-memory/in-memory-chapter.repository';
 import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { InMemoryLessonCompletionRepository } from '../../../adapters/in-memory/in-memory-lesson-completion.repository';
-import { GameType } from '../../domain/type/GameType';
 import { McqModule } from '../../domain/model/McqModule';
 import { McqChoice } from '../../domain/model/McqChoice';
 import { LessonCompletion } from '../../domain/model/LessonCompletion';
 import { ChapterStatus } from '../../domain/type/ChapterStatus';
 import { LessonStatus } from '../../domain/type/LessonStatus';
 
-describe('GetUserChaptersUseCase', () => {
-  let useCase: GetUserChaptersUseCase;
+describe('GetUserProgressUseCase', () => {
+  let useCase: GetUserProgressUseCase;
   let chapterRepository: InMemoryChapterRepository;
   let lessonRepository: InMemoryLessonRepository;
   let gameModuleRepository: InMemoryGameModuleRepository;
@@ -69,7 +68,6 @@ describe('GetUserChaptersUseCase', () => {
       title,
       description,
       order,
-      gameType: GameType.MCQ,
       modules: [],
     });
     lesson.isPublished = true;
@@ -86,7 +84,7 @@ describe('GetUserChaptersUseCase', () => {
       lessonCompletionRepository,
     );
 
-    useCase = new GetUserChaptersUseCase(chapterRepository);
+    useCase = new GetUserProgressUseCase(chapterRepository);
   });
 
   afterEach(() => {
@@ -98,7 +96,7 @@ describe('GetUserChaptersUseCase', () => {
 
   it('should throw an error when userId is missing', async () => {
     // Given
-    const command: GetUserChaptersCommand = { userId: '' };
+    const command: GetUserProgressCommand = { userId: '' };
 
     // When & Then
     await expect(useCase.execute(command)).rejects.toThrow(
@@ -108,7 +106,7 @@ describe('GetUserChaptersUseCase', () => {
 
   it('should return an empty array when there are no chapters', async () => {
     // Given
-    const command: GetUserChaptersCommand = { userId };
+    const command: GetUserProgressCommand = { userId };
 
     // When
     const result = await useCase.execute(command);
@@ -121,7 +119,7 @@ describe('GetUserChaptersUseCase', () => {
     // Given
     createPublishedChapter('chapter-1', 'Chapter 1', 'First chapter', 1);
     createPublishedChapter('chapter-2', 'Chapter 2', 'Second chapter', 2);
-    const command: GetUserChaptersCommand = { userId };
+    const command: GetUserProgressCommand = { userId };
 
     // When
     const result = await useCase.execute(command);
@@ -160,7 +158,7 @@ describe('GetUserChaptersUseCase', () => {
       'First lesson',
       1,
     );
-    const command: GetUserChaptersCommand = { userId };
+    const command: GetUserProgressCommand = { userId };
 
     // When
     const result = await useCase.execute(command);
@@ -199,7 +197,7 @@ describe('GetUserChaptersUseCase', () => {
     lessonCompletionRepository.create(
       new LessonCompletion('completion-1', userId, lesson1.id, 100, new Date()),
     );
-    const command: GetUserChaptersCommand = { userId };
+    const command: GetUserProgressCommand = { userId };
 
     // When
     const result = await useCase.execute(command);
@@ -236,7 +234,7 @@ describe('GetUserChaptersUseCase', () => {
       'First lesson chapter 2',
       1,
     );
-    const command: GetUserChaptersCommand = { userId };
+    const command: GetUserProgressCommand = { userId };
 
     // When
     const result = await useCase.execute(command);
@@ -273,7 +271,7 @@ describe('GetUserChaptersUseCase', () => {
     lessonCompletionRepository.create(
       new LessonCompletion('completion-1', userId, lesson1.id, 80, new Date()),
     );
-    const command: GetUserChaptersCommand = { userId };
+    const command: GetUserProgressCommand = { userId };
 
     // When
     const result = await useCase.execute(command);
@@ -311,7 +309,7 @@ describe('GetUserChaptersUseCase', () => {
     lessonCompletionRepository.create(
       new LessonCompletion('completion-2', userId, lesson2.id, 95, new Date()),
     );
-    const command: GetUserChaptersCommand = { userId };
+    const command: GetUserProgressCommand = { userId };
 
     // When
     const result = await useCase.execute(command);
@@ -353,7 +351,7 @@ describe('GetUserChaptersUseCase', () => {
     lessonCompletionRepository.create(
       new LessonCompletion('completion-1', userId, lesson1.id, 100, new Date()),
     );
-    const command: GetUserChaptersCommand = { userId };
+    const command: GetUserProgressCommand = { userId };
 
     // When
     const result = await useCase.execute(command);

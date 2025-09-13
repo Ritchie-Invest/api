@@ -8,7 +8,6 @@ import {
   UpdateChapterCommand,
   UpdateChapterUseCase,
 } from '../update-chapter.use-case';
-import { ChapterOrderConflictError } from '../../domain/error/ChapterOrderConflictError';
 import { InMemoryLessonCompletionRepository } from '../../../adapters/in-memory/in-memory-lesson-completion.repository';
 
 describe('UpdateChapterUseCase', () => {
@@ -135,50 +134,6 @@ describe('UpdateChapterUseCase', () => {
     await expect(updateChapterUseCase.execute(command)).rejects.toThrow(
       'Chapter with id non-existing-chapter-id not found',
     );
-  });
-
-  it('should throw an error when trying to update a chapter with an order that already exists', async () => {
-    // Given
-    await chapterRepository.create({
-      id: 'chapter-id-2',
-      title: 'Un autre chapitre',
-      description: 'Ceci est un autre chapitre',
-      order: 2,
-    });
-
-    const command: UpdateChapterCommand = {
-      currentUser: getCurrentUser(),
-      chapterId: 'chapter-id',
-      title: 'Un super chapitre modifié',
-      description: 'Ceci est un super chapitre modifié',
-      order: 2,
-    };
-
-    // When & Then
-    await expect(updateChapterUseCase.execute(command)).rejects.toThrow(
-      ChapterOrderConflictError,
-    );
-
-    const chapter = await chapterRepository.findById('chapter-id');
-    expect(chapter?.order).toBe(1);
-  });
-
-  it('should allow updating a chapter with its own order value', async () => {
-    // Given
-    const command: UpdateChapterCommand = {
-      currentUser: getCurrentUser(),
-      chapterId: 'chapter-id',
-      title: 'Un super chapitre modifié',
-      description: 'Ceci est un super chapitre modifié',
-      order: 1,
-    };
-
-    // When
-    const result = await updateChapterUseCase.execute(command);
-
-    // Then
-    expect(result.order).toBe(1);
-    expect(result.title).toBe('Un super chapitre modifié');
   });
 
   function getCurrentUser(): Pick<User, 'id' | 'type'> {

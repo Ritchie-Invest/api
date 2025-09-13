@@ -24,14 +24,10 @@ export class PrismaLessonRepository implements LessonRepository {
       where: { id },
       include: {
         modules: {
-          select: {
-            id: true,
-            lessonId: true,
+          include: {
             mcq: true,
             fillBlank: true,
             trueOrFalse: true,
-            createdAt: true,
-            updatedAt: true,
           },
           orderBy: { createdAt: 'asc' },
         },
@@ -46,6 +42,7 @@ export class PrismaLessonRepository implements LessonRepository {
   async findByChapter(chapterId: string): Promise<Lesson[]> {
     const entities = await this.prisma.lesson.findMany({
       where: { chapterId },
+      orderBy: { order: 'asc' },
     });
     return entities.map((entity) => this.mapper.toDomain(entity));
   }
@@ -70,8 +67,9 @@ export class PrismaLessonRepository implements LessonRepository {
     await this.prisma.lesson.deleteMany();
   }
 
-  findAll(): Promise<Lesson[]> {
-    throw new Error('Method not implemented.');
+  async findAll(): Promise<Lesson[]> {
+    const entities = await this.prisma.lesson.findMany();
+    return entities.map((e) => this.mapper.toDomain(e));
   }
 
   async validateUniqueOrderInChapter(

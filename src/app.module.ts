@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CreateUserUseCase } from './core/usecases/create-user.use-case';
@@ -45,7 +45,7 @@ import {
   MapCompleteGameModuleStrategyFactory,
 } from './core/usecases/strategies/complete-game-module-strategy-factory';
 import { McqCompleteGameModuleStrategy } from './core/usecases/strategies/mcq-complete-game-module-strategy';
-import { GetUserChaptersUseCase } from './core/usecases/get-user-chapters.use-case';
+import { GetUserProgressUseCase } from './core/usecases/get-user-progress-use-case.service';
 import { GetGameModuleByIdUseCase } from './core/usecases/get-game-module-by-id.use-case';
 import { UpdateGameModuleUseCase } from './core/usecases/update-game-module.use-case';
 import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case';
@@ -86,6 +86,15 @@ import { GetUserTransactionsUseCase } from './core/usecases/get-user-transaction
 import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-case';
 import { LevelingService } from './core/usecases/services/leveling.service';
 import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case';
+import { LoggerMiddleware } from './config/logger.midleware';
+import { UserBadgeRepository } from './core/domain/repository/user-badge.repository';
+import { GetUserBadgesUseCase } from './core/usecases/get-user-badges.use-case';
+import { PrismaUserBadgeRepository } from './adapters/prisma/prisma-user-badge.repository';
+import { InMemoryDomainEventBus } from './adapters/events/in-memory-domain-event-bus';
+import { AwardBadgesOnLessonCompletedHandler } from './adapters/events/award-badges-on-lesson-completed.handler';
+import { DomainEventPublisher } from './core/base/domain-event';
+import { GetBadgeCatalogUseCase } from './core/usecases/get-badge-catalog.use-case';
+import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badges.use-case';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -202,6 +211,42 @@ import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case
       useFactory: (prisma: PrismaService) =>
         new PrismaLessonCompletionRepository(prisma),
       inject: [PrismaService],
+    },
+    {
+      provide: UserBadgeRepository,
+      useFactory: (prisma: PrismaService) =>
+        new PrismaUserBadgeRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: GetUserBadgesUseCase,
+      useFactory: (userBadgeRepository: UserBadgeRepository) =>
+        new GetUserBadgesUseCase(userBadgeRepository),
+      inject: [UserBadgeRepository],
+    },
+    {
+      provide: CheckAndAwardBadgesUseCase,
+      useFactory: (
+        userBadgeRepository: UserBadgeRepository,
+        lessonCompletionRepository: PrismaLessonCompletionRepository,
+        lessonRepository: LessonRepository,
+      ) =>
+        new CheckAndAwardBadgesUseCase(
+          userBadgeRepository,
+          lessonCompletionRepository,
+          lessonRepository,
+        ),
+      inject: [
+        UserBadgeRepository,
+        'LessonCompletionRepository',
+        LessonRepository,
+      ],
+    },
+    {
+      provide: GetBadgeCatalogUseCase,
+      useFactory: (userBadgeRepository: UserBadgeRepository) =>
+        new GetBadgeCatalogUseCase(userBadgeRepository),
+      inject: [UserBadgeRepository],
     },
     {
       provide: TickerRepository,
@@ -325,9 +370,9 @@ import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case
       inject: [ChapterRepository],
     },
     {
-      provide: GetUserChaptersUseCase,
+      provide: GetUserProgressUseCase,
       useFactory: (chapterRepository: ChapterRepository) =>
-        new GetUserChaptersUseCase(chapterRepository),
+        new GetUserProgressUseCase(chapterRepository),
       inject: [ChapterRepository],
     },
     {
@@ -428,6 +473,7 @@ import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case
         lessonAttemptRepository: LessonAttemptRepository,
         moduleAttemptRepository: ModuleAttemptRepository,
         levelingService: LevelingService,
+        eventBus: DomainEventPublisher,
       ) =>
         new CompleteLessonUseCase(
           lessonRepository,
@@ -435,6 +481,7 @@ import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case
           lessonAttemptRepository,
           moduleAttemptRepository,
           levelingService,
+          eventBus,
         ),
       inject: [
         LessonRepository,
@@ -442,7 +489,23 @@ import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case
         'LessonAttemptRepository',
         'ModuleAttemptRepository',
         LevelingService,
+        'DomainEventPublisher',
       ],
+    },
+    {
+      provide: 'DomainEventPublisher',
+      useFactory: (handler: AwardBadgesOnLessonCompletedHandler) => {
+        const bus = new InMemoryDomainEventBus();
+        bus.register(handler);
+        return bus;
+      },
+      inject: [AwardBadgesOnLessonCompletedHandler],
+    },
+    {
+      provide: AwardBadgesOnLessonCompletedHandler,
+      useFactory: (useCase: CheckAndAwardBadgesUseCase) =>
+        new AwardBadgesOnLessonCompletedHandler(useCase),
+      inject: [CheckAndAwardBadgesUseCase],
     },
     {
       provide: GetTickersWithPriceUseCase,
@@ -556,4 +619,8 @@ import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
