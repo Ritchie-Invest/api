@@ -103,11 +103,6 @@ export class CompleteLessonUseCase
       );
       await this.lessonCompletionRepository.create(lessonCompletion);
       await this.levelingService.incrementXp(command.userId, xpToAdd);
-      await this.lessonAttemptRepository.finishAttempt(
-        lessonAttempt.id,
-        new Date(),
-      );
-
       newlyAwardedBadges = await this.checkAndAwardBadgesUseCase.execute({
         userId: command.userId,
         lessonId: command.lessonId,

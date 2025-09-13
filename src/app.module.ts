@@ -71,6 +71,7 @@ import { LevelingService } from './core/usecases/services/leveling.service';
 import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case';
 import { LoggerMiddleware } from './config/logger.midleware';
 import { UserBadgeRepository } from './core/domain/repository/user-badge.repository';
+import { GetUserBadgesUseCase } from './core/usecases/get-user-badges.use-case';
 import { PrismaUserBadgeRepository } from './adapters/prisma/prisma-user-badge.repository';
 import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badges.use-case';
 
@@ -184,6 +185,12 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
       useFactory: (prisma: PrismaService) =>
         new PrismaUserBadgeRepository(prisma),
       inject: [PrismaService],
+    },
+    {
+      provide: GetUserBadgesUseCase,
+      useFactory: (userBadgeRepository: UserBadgeRepository) =>
+        new GetUserBadgesUseCase(userBadgeRepository),
+      inject: [UserBadgeRepository],
     },
     {
       provide: TickerRepository,
