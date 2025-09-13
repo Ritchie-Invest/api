@@ -25,15 +25,24 @@ export class CompleteLessonResponse {
   })
   xpWon: number;
 
+  @ApiProperty({
+    description: 'Newly awarded badges for this completion',
+    example: [{ type: 'LEARN_PERFECT_QUIZ' }],
+    isArray: true,
+  })
+  newlyAwardedBadges: { type: string }[];
+
   constructor(
     completedGameModules: number,
     totalGameModules: number,
     isCompleted: boolean = false,
     xpWon: number = 0,
+    newlyAwardedBadges: { type: string }[] = [],
   ) {
     this.completedGameModules = completedGameModules;
     this.totalGameModules = totalGameModules;
     this.isCompleted = isCompleted;
     this.xpWon = xpWon;
+    this.newlyAwardedBadges = newlyAwardedBadges;
   }
 }

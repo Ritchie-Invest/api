@@ -70,6 +70,9 @@ import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-c
 import { LevelingService } from './core/usecases/services/leveling.service';
 import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case';
 import { LoggerMiddleware } from './config/logger.midleware';
+import { UserBadgeRepository } from './core/domain/repository/user-badge.repository';
+import { PrismaUserBadgeRepository } from './adapters/prisma/prisma-user-badge.repository';
+import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badges.use-case';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -174,6 +177,12 @@ import { LoggerMiddleware } from './config/logger.midleware';
       provide: 'LessonCompletionRepository',
       useFactory: (prisma: PrismaService) =>
         new PrismaLessonCompletionRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: UserBadgeRepository,
+      useFactory: (prisma: PrismaService) =>
+        new PrismaUserBadgeRepository(prisma),
       inject: [PrismaService],
     },
     {
@@ -354,6 +363,7 @@ import { LoggerMiddleware } from './config/logger.midleware';
         lessonAttemptRepository: LessonAttemptRepository,
         moduleAttemptRepository: ModuleAttemptRepository,
         levelingService: LevelingService,
+        checkAndAwardBadgesUseCase: CheckAndAwardBadgesUseCase,
       ) =>
         new CompleteLessonUseCase(
           lessonRepository,
@@ -361,6 +371,7 @@ import { LoggerMiddleware } from './config/logger.midleware';
           lessonAttemptRepository,
           moduleAttemptRepository,
           levelingService,
+          checkAndAwardBadgesUseCase,
         ),
       inject: [
         LessonRepository,
@@ -368,6 +379,25 @@ import { LoggerMiddleware } from './config/logger.midleware';
         'LessonAttemptRepository',
         'ModuleAttemptRepository',
         LevelingService,
+        CheckAndAwardBadgesUseCase,
+      ],
+    },
+    {
+      provide: CheckAndAwardBadgesUseCase,
+      useFactory: (
+        userBadgeRepository: UserBadgeRepository,
+        lessonCompletionRepository: PrismaLessonCompletionRepository,
+        lessonRepository: LessonRepository,
+      ) =>
+        new CheckAndAwardBadgesUseCase(
+          userBadgeRepository,
+          lessonCompletionRepository,
+          lessonRepository,
+        ),
+      inject: [
+        UserBadgeRepository,
+        'LessonCompletionRepository',
+        LessonRepository,
       ],
     },
     {

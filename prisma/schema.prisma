@@ -37,6 +37,7 @@ model User {
   LessonCompletion LessonCompletion[]
   LessonAttempt    LessonAttempt[]
   ModuleAttempt    ModuleAttempt[]
+  badges           UserBadge[]
 }
 
 model RefreshToken {
@@ -147,6 +148,24 @@ model ModuleAttempt {
   user          User          @relation(fields: [userId], references: [id])
   gameModule    GameModule    @relation(fields: [gameModuleId], references: [id])
   lessonAttempt LessonAttempt @relation(fields: [lessonAttemptId], references: [id])
+}
+
+enum BadgeType {
+  PROG_FIRST_CHAPTER
+  PROG_5_LESSONS
+  PROG_50_PERCENT
+  LEARN_PERFECT_QUIZ
+}
+
+model UserBadge {
+  id        String    @id @default(cuid())
+  userId    String
+  type      BadgeType
+  awardedAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, type])
 }
 
 model Ticker {

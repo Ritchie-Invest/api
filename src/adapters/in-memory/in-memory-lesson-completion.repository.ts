@@ -23,6 +23,12 @@ export class InMemoryLessonCompletionRepository
     );
   }
 
+  findAllByUser(userId: string): LessonCompletion[] {
+    return Array.from(this.completions.values()).filter(
+      (c) => c.userId === userId,
+    );
+  }
+
   removeAll(): void {
     this.completions.clear();
   }
