@@ -22,21 +22,27 @@ export class LoggerMiddleware implements NestMiddleware {
     const ip = req?.ip || req?.socket?.remoteAddress;
     const userId = req?.user?.id || 'anonymous';
 
-    const statusCode = res?.statusCode;
-    const duration = Date.now() - now;
+    res.on('close', () => {
+      const { statusCode } = res;
+      const contentLength = res.get('content-length');
+      const userAgent = req.get('user-agent') || '';
+      const duration = Date.now() - now;
 
-    if (statusCode >= 500) {
-      this.logger.error(
-        `[${statusCode}] ${method} ${baseUrl} (${duration}ms) - user:${userId} - ip:${ip}`,
-      );
+      if (statusCode >= 500) {
+        this.logger.error(
+          `[${statusCode}] ${method} ${baseUrl} ${contentLength} (${duration}ms) - user:${userId} - ${userAgent} ${ip}`,
+        );
+      } else if (statusCode >= 400) {
+        this.logger.warn(
+          `[${statusCode}] ${method} ${baseUrl} ${contentLength} (${duration}ms) - user:${userId} - ${userAgent} ${ip}`,
+        );
+      } else {
+        this.logger.log(
+          `[${statusCode}] ${method} ${baseUrl} ${contentLength} (${duration}ms) - user:${userId} - ${userAgent} ${ip}`,
+        );
+      }
+    });
 
-      return next();
-    }
-
-    this.logger.log(
-      `[${statusCode}] ${method} ${baseUrl} (${duration}ms) - user:${userId} - ip:${ip}`,
-    );
-
-    return next();
+    next();
   }
 }
