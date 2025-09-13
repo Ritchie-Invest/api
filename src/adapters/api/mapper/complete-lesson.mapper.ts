@@ -18,7 +18,6 @@ export class CompleteLessonMapper {
       result.totalGameModules,
       result.isCompleted,
       result.xpWon,
-      result.newlyAwardedBadges,
     );
   }
 }
