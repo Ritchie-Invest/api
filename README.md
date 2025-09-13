@@ -134,10 +134,6 @@ Defined in `.env.example` (copy to `.env`).
 | SUPERADMIN_EMAIL                    | Optional (for CLI) | Email used by superadmin bootstrap script.                                                                    |
 | SUPERADMIN_PASSWORD                 | Optional (for CLI) | Password used by superadmin bootstrap script.                                                                 |
 
-Important: The runtime adapter (`AlphaVantageMarketServiceAdapter`) reads `ALPHA_VANTAGE_BASE_URL`, while `.env.example`
-defines `ALPHA_VANTAGE_API_URL`. Align these by either renaming the var in your `.env` to `ALPHA_VANTAGE_BASE_URL` or
-updating the code/template for consistency.
-
 ---
 
 ## 🗄️ Database & Migrations
@@ -164,13 +160,12 @@ Coverage output: `coverage/` (lcov, HTML report, etc.).
 
 ## 🐛 Troubleshooting
 
-| Issue                               | Hint                                                                                     |
-|-------------------------------------|------------------------------------------------------------------------------------------|
-| CORS errors                         | Verify `ADMIN_APP_BASE_URL` & `MOBILE_APP_BASE_URL` match requesting origins.            |
-| Auth fails                          | Check JWT secrets & refresh token TTL. Clear cookies if mismatch.                        |
-| Alpha Vantage returns empty         | Provide a real `ALPHA_VANTAGE_API_KEY`. Confirm env var name (`ALPHA_VANTAGE_BASE_URL`). |
-| Migrations not applied in container | Ensure `SKIP_MIGRATIONS=0` (default) and valid `DATABASE_URL`.                           |
-| Prisma client errors                | Run `pnpx prisma generate` after schema changes.                                         |
+| Issue                               | Hint                                                                          |
+|-------------------------------------|-------------------------------------------------------------------------------|
+| CORS errors                         | Verify `ADMIN_APP_BASE_URL` & `MOBILE_APP_BASE_URL` match requesting origins. |
+| Auth fails                          | Check JWT secrets & refresh token TTL. Clear cookies if mismatch.             |
+| Migrations not applied in container | Ensure `SKIP_MIGRATIONS=0` (default) and valid `DATABASE_URL`.                |
+| Prisma client errors                | Run `pnpx prisma generate` after schema changes.                              |
 
 ---
 
