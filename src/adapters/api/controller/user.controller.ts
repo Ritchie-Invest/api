@@ -24,9 +24,9 @@ import { GetUserProgressResponse } from '../response/get-user-progress.response'
 import { GetUserProgressMapper } from '../mapper/get-user-progress.mapper';
 import { GetUserProgressUseCase } from '../../../core/usecases/get-user-progress-use-case.service';
 import { GetUserBadgesUseCase } from '../../../core/usecases/get-user-badges.use-case';
-import { GetUserBadgesMapper } from '../mapper/get-user-badges.mapper';
+import { GetBadgeCatalogUseCase } from '../../../core/usecases/get-badge-catalog.use-case';
+import { GetBadgeCatalogMapper } from '../mapper/get-badge-catalog.mapper';
 import { CurrentUser } from '../decorator/current-user.decorator';
-import { UserBadgeResponse } from '../response/user-badge.response';
 
 @Controller('/users')
 export class UserController {
@@ -35,6 +35,7 @@ export class UserController {
     private readonly getUserProfileUseCase: GetUserProfileUseCase,
     private readonly getUserProgressUseCase: GetUserProgressUseCase,
     private readonly getUserBadgesUseCase: GetUserBadgesUseCase,
+    private readonly getBadgeCatalogUseCase: GetBadgeCatalogUseCase,
   ) {}
 
   @Get('/me')
@@ -109,16 +110,15 @@ export class UserController {
   }
 
   @Get('me/badges')
-  @ApiOperation({ summary: 'List badges for current user' })
+  @ApiOperation({
+    summary: 'List all badges with award status for current user',
+  })
   @ApiOkResponse({
-    description: 'List of user badges',
-    type: UserBadgeResponse,
+    description: 'All badges with awardedAt for current user',
     isArray: true,
   })
-  async getMyBadges(
-    @CurrentUser() currentUser: ProfileRequest,
-  ): Promise<UserBadgeResponse[]> {
-    const badges = await this.getUserBadgesUseCase.execute(currentUser.id);
-    return GetUserBadgesMapper.fromDomain(badges);
+  async getMyBadges(@CurrentUser() currentUser: ProfileRequest) {
+    const items = await this.getBadgeCatalogUseCase.execute(currentUser.id);
+    return GetBadgeCatalogMapper.fromDomain(items);
   }
 }
