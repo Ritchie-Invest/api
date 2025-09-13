@@ -9,6 +9,7 @@ import { RolesGuard } from './adapters/api/guards/roles.guard';
 import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './adapters/api/guards/jwt-auth.guard';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,12 +18,13 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      process.env.ADMIN_APP_BASE_URL || 'http://localhost:5173/',
-      process.env.MOBILE_APP_BASE_URL || 'http://localhost:8080/',
+      process.env.ADMIN_APP_BASE_URL || 'http://localhost:5173',
+      process.env.MOBILE_APP_BASE_URL || 'http://localhost:8080',
     ],
     credentials: true,
   });
 
+  app.use(helmet());
   app.use(cookieParser());
 
   const reflector = app.get(Reflector);
