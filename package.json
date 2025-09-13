@@ -16,6 +16,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "db:studio": "prisma studio",
+    "db:seed": "ts-node prisma/seed.ts",
     "lint": "eslint \"src/**/*.ts\" \"src/**/*.{spec,test}.ts\" --fix",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",

@@ -61,11 +61,28 @@ import { ModuleAttemptRepository } from './core/domain/repository/module-attempt
 import { TickerRepository } from './core/domain/repository/ticker.repository';
 import { PrismaTickerRepository } from './adapters/prisma/prisma-ticker.repository';
 import { GetTickersWithPriceUseCase } from './core/usecases/get-tickers-with-price.use-case';
+import { GetTickerPossessedValueUseCase } from './core/usecases/get-ticker-possessed-value.use-case';
+import { GetUserTickersUseCase } from './core/usecases/get-user-tickers.use-case';
+import { GetTickerHistoryUseCase } from './core/usecases/get-ticker-history.use-case';
 import { TickerController } from './adapters/api/controller/ticker.controller';
+import { TransactionController } from './adapters/api/controller/transaction.controller';
+import { ExecuteTransactionUseCase } from './core/usecases/execute-transaction.use-case';
+import { UserPortfolioRepository } from './core/domain/repository/user-portfolio.repository';
+import { PrismaUserPortfolioRepository } from './adapters/prisma/prisma-user-portfolio.repository';
+import { PortfolioPositionRepository } from './core/domain/repository/portfolio-position.repository';
+import { PrismaPortfolioPositionRepository } from './adapters/prisma/prisma-portfolio-position.repository';
+import { DailyBarRepository } from './core/domain/repository/daily-bar.repository';
+import { PrismaDailyBarRepository } from './adapters/prisma/prisma-daily-bar.repository';
+import { TransactionRepository } from './core/domain/repository/transaction.repository';
+import { PrismaTransactionRepository } from './adapters/prisma/prisma-transaction.repository';
 import { MarketService } from './core/domain/service/market.service';
 import { AlphaVantageMarketServiceAdapter } from './adapters/alpha-vantage/alpha-vantage-market-service-adapter.service';
 import { UpdateTickersHistoryUseCase } from './core/usecases/update-tickers-history-use.case';
 import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cron';
+import { GetPortfolioUseCase } from './core/usecases/get-portfolio.use-case';
+import { GetPortfolioPositionsUseCase } from './core/usecases/get-portfolio-positions.use-case';
+import { PortfolioController } from './adapters/api/controller/portfolio.controller';
+import { GetUserTransactionsUseCase } from './core/usecases/get-user-transactions.use-case';
 import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-case';
 import { LevelingService } from './core/usecases/services/leveling.service';
 import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case';
@@ -88,8 +105,19 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
     LessonController,
     GameModuleController,
     TickerController,
+    TransactionController,
+    PortfolioController,
   ],
   providers: [
+    {
+      provide: GetUserTransactionsUseCase,
+      useFactory: (
+        transactionRepository: TransactionRepository,
+        tickerRepository: TickerRepository,
+      ) =>
+        new GetUserTransactionsUseCase(transactionRepository, tickerRepository),
+      inject: ['TransactionRepository', TickerRepository],
+    },
     PrismaService,
     JwtService,
     TickerHistoryCronService,
@@ -226,6 +254,30 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
       inject: [PrismaService],
     },
     {
+      provide: 'UserPortfolioRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaUserPortfolioRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'PortfolioPositionRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaPortfolioPositionRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'DailyBarRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaDailyBarRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'TransactionRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaTransactionRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
       provide: LevelingService,
       useFactory: (userRepository: UserRepository) =>
         new LevelingService(userRepository),
@@ -233,9 +285,21 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
     },
     {
       provide: CreateUserUseCase,
-      useFactory: (userRepository: UserRepository) =>
-        new CreateUserUseCase(userRepository),
-      inject: [UserRepository],
+      useFactory: (
+        userRepository: UserRepository,
+        userPortfolioRepository: UserPortfolioRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
+      ) =>
+        new CreateUserUseCase(
+          userRepository,
+          userPortfolioRepository,
+          portfolioPositionRepository,
+        ),
+      inject: [
+        UserRepository,
+        'UserPortfolioRepository',
+        'PortfolioPositionRepository',
+      ],
     },
     {
       provide: UpdateUserTypeUseCase,
@@ -248,10 +312,21 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
       useFactory: (
         userRepository: UserRepository,
         refreshTokenRepository: RefreshTokenRepository,
+        userPortfolioRepository: UserPortfolioRepository,
         tokenService: TokenService,
       ) =>
-        new LoginUseCase(userRepository, refreshTokenRepository, tokenService),
-      inject: [UserRepository, RefreshTokenRepository, 'TokenService'],
+        new LoginUseCase(
+          userRepository,
+          refreshTokenRepository,
+          userPortfolioRepository,
+          tokenService,
+        ),
+      inject: [
+        UserRepository,
+        RefreshTokenRepository,
+        'UserPortfolioRepository',
+        'TokenService',
+      ],
     },
     {
       provide: LogoutUseCase,
@@ -439,12 +514,101 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
       inject: [TickerRepository],
     },
     {
+      provide: GetTickerPossessedValueUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        transactionRepository: TransactionRepository,
+        tickerRepository: TickerRepository,
+      ) =>
+        new GetTickerPossessedValueUseCase(
+          userPortfolioRepository,
+          transactionRepository,
+          tickerRepository,
+        ),
+      inject: [
+        'UserPortfolioRepository',
+        'TransactionRepository',
+        TickerRepository,
+      ],
+    },
+    {
+      provide: GetUserTickersUseCase,
+      useFactory: (
+        transactionRepository: TransactionRepository,
+        tickerRepository: TickerRepository,
+      ) => new GetUserTickersUseCase(transactionRepository, tickerRepository),
+      inject: ['TransactionRepository', TickerRepository],
+    },
+    {
+      provide: GetTickerHistoryUseCase,
+      useFactory: (dailyBarRepository: DailyBarRepository) =>
+        new GetTickerHistoryUseCase(dailyBarRepository),
+      inject: ['DailyBarRepository'],
+    },
+    {
+      provide: ExecuteTransactionUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        tickerRepository: TickerRepository,
+        dailyBarRepository: DailyBarRepository,
+        PortfolioPositionRepository: PortfolioPositionRepository,
+        transactionRepository: TransactionRepository,
+      ) =>
+        new ExecuteTransactionUseCase(
+          userPortfolioRepository,
+          tickerRepository,
+          dailyBarRepository,
+          PortfolioPositionRepository,
+          transactionRepository,
+        ),
+      inject: [
+        'UserPortfolioRepository',
+        TickerRepository,
+        'DailyBarRepository',
+        'PortfolioPositionRepository',
+        'TransactionRepository',
+      ],
+    },
+    {
       provide: UpdateTickersHistoryUseCase,
       useFactory: (
         tickerRepository: TickerRepository,
         marketService: MarketService,
       ) => new UpdateTickersHistoryUseCase(tickerRepository, marketService),
       inject: [TickerRepository, 'MarketService'],
+    },
+    {
+      provide: GetPortfolioUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
+        transactionRepository: TransactionRepository,
+        dailyBarRepository: DailyBarRepository,
+      ) =>
+        new GetPortfolioUseCase(
+          userPortfolioRepository,
+          portfolioPositionRepository,
+          transactionRepository,
+          dailyBarRepository,
+        ),
+      inject: [
+        'UserPortfolioRepository',
+        'PortfolioPositionRepository',
+        'TransactionRepository',
+        'DailyBarRepository',
+      ],
+    },
+    {
+      provide: GetPortfolioPositionsUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
+      ) =>
+        new GetPortfolioPositionsUseCase(
+          userPortfolioRepository,
+          portfolioPositionRepository,
+        ),
+      inject: ['UserPortfolioRepository', 'PortfolioPositionRepository'],
     },
     {
       provide: CreateSuperadminUseCase,

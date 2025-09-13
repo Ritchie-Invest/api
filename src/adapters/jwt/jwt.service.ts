@@ -7,6 +7,7 @@ export type TokenPayload = {
   id: string;
   email: string;
   type: UserType;
+  portfolioId: string;
 };
 
 @Injectable()
