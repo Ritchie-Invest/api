@@ -7,6 +7,7 @@ import { UserNotAllowedError } from '../domain/error/UserNotAllowedError';
 import { TickerAlreadyExistsError } from '../domain/error/TickerAlreadyExistsError';
 import { Currency } from '../domain/type/Currency';
 import { TickerType } from '../domain/type/TickerType';
+import { MarketService } from '../domain/service/market.service';
 
 export type CreateTickerCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
@@ -19,7 +20,10 @@ export type CreateTickerCommand = {
 export class CreateTickerUseCase
   implements UseCase<CreateTickerCommand, Ticker>
 {
-  constructor(private readonly tickerRepository: TickerRepository) {}
+  constructor(
+    private readonly tickerRepository: TickerRepository,
+    private readonly marketService: MarketService,
+  ) {}
 
   async execute(command: CreateTickerCommand): Promise<Ticker> {
     if (!this.canExecute(command.currentUser)) {
@@ -43,7 +47,20 @@ export class CreateTickerUseCase
       history: [],
     });
 
-    return this.tickerRepository.create(ticker);
+    await this.tickerRepository.create(ticker);
+
+    const barsFromMarket = await this.marketService.getLatestDailyBars(
+      ticker.symbol,
+    );
+
+    if (barsFromMarket && barsFromMarket.length > 0) {
+      const sortedBars = barsFromMarket.sort(
+        (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+      );
+      await this.tickerRepository.addDailyBars(ticker.id, sortedBars);
+    }
+
+    return ticker;
   }
 
   private canExecute(currentUser: Pick<User, 'id' | 'type'>): boolean {

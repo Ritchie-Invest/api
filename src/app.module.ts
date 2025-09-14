@@ -519,9 +519,11 @@ import { CreateTickerUseCase } from './core/usecases/create-ticker.use-case';
     },
     {
       provide: CreateTickerUseCase,
-      useFactory: (tickerRepository: TickerRepository) =>
-        new CreateTickerUseCase(tickerRepository),
-      inject: [TickerRepository],
+      useFactory: (
+        tickerRepository: TickerRepository,
+        marketService: MarketService,
+      ) => new CreateTickerUseCase(tickerRepository, marketService),
+      inject: [TickerRepository, 'MarketService'],
     },
     {
       provide: GetTickerPossessedValueUseCase,
