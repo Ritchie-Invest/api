@@ -8,7 +8,9 @@ import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { RolesGuard } from '../../guards/roles.guard';
 import { Reflector } from '@nestjs/core';
 import { UserType } from '../../../../core/domain/type/UserType';
+import { Currency } from '../../../../core/domain/type/Currency';
 import { UserRepository } from '../../../../core/domain/repository/user.repository';
+import { UserPortfolioRepository } from '../../../../core/domain/repository/user-portfolio.repository';
 import { RefreshTokenRepository } from '../../../../core/domain/repository/refresh-token.repository';
 import { RegisterRequest } from '../../request/register.request';
 import { RegisterResponse } from '../../response/register.response';
@@ -21,6 +23,7 @@ import { UserFactory } from './utils/user.factory';
 describe('AuthControllerIT', () => {
   let app: INestApplication<App>;
   let userRepository: UserRepository;
+  let userPortfolioRepository: UserPortfolioRepository;
   let refreshTokenRepository: RefreshTokenRepository;
   let tokenService: TokenService;
 
@@ -45,6 +48,7 @@ describe('AuthControllerIT', () => {
 
   beforeEach(async () => {
     userRepository = app.get(UserRepository);
+    userPortfolioRepository = app.get('UserPortfolioRepository');
     refreshTokenRepository = app.get(RefreshTokenRepository);
     tokenService = app.get('TokenService');
 
@@ -136,6 +140,13 @@ describe('AuthControllerIT', () => {
           '$2b$10$uKniZFGl/gr6.SWpifzq1ebJLN79UjKw0UcQjv.0oe6jyedaxTNqK',
       });
       await userRepository.create(user);
+
+      await userPortfolioRepository.create({
+        id: `portfolio-${user.id}`,
+        userId: user.id,
+        currency: Currency.USD,
+      });
+
       const loginRequest = new LoginRequest('test@example.com', 'password123');
 
       // When
