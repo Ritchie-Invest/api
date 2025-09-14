@@ -314,18 +314,21 @@ import { CreateTickerUseCase } from './core/usecases/create-ticker.use-case';
         userRepository: UserRepository,
         refreshTokenRepository: RefreshTokenRepository,
         userPortfolioRepository: UserPortfolioRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
         tokenService: TokenService,
       ) =>
         new LoginUseCase(
           userRepository,
           refreshTokenRepository,
           userPortfolioRepository,
+          portfolioPositionRepository,
           tokenService,
         ),
       inject: [
         UserRepository,
         RefreshTokenRepository,
         'UserPortfolioRepository',
+        'PortfolioPositionRepository',
         'TokenService',
       ],
     },

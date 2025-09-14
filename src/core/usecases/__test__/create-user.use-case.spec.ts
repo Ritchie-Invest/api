@@ -10,17 +10,17 @@ import { Currency } from '../../domain/type/Currency';
 describe('CreateUserUseCase', () => {
   let userRepository: UserRepository;
   let userPortfolioRepository: UserPortfolioRepository;
-  let PortfolioPositionRepository: PortfolioPositionRepository;
+  let portfolioPositionRepository: PortfolioPositionRepository;
   let createUserUseCase: CreateUserUseCase;
 
   beforeEach(() => {
     userRepository = new InMemoryUserRepository();
     userPortfolioRepository = new InMemoryUserPortfolioRepository();
-    PortfolioPositionRepository = new InMemoryPortfolioPositionRepository();
+    portfolioPositionRepository = new InMemoryPortfolioPositionRepository();
     createUserUseCase = new CreateUserUseCase(
       userRepository,
       userPortfolioRepository,
-      PortfolioPositionRepository,
+      portfolioPositionRepository,
     );
   });
 
@@ -137,7 +137,7 @@ describe('CreateUserUseCase', () => {
     const portfolio = portfolios[0];
     expect(portfolio).toBeDefined();
 
-    const PortfolioPositions = await PortfolioPositionRepository.findAll();
+    const PortfolioPositions = await portfolioPositionRepository.findAll();
     expect(PortfolioPositions).toHaveLength(1);
 
     const PortfolioPosition = PortfolioPositions[0];
@@ -172,7 +172,7 @@ describe('CreateUserUseCase', () => {
     expect(portfolios[0]!.userId).toEqual(user.id);
 
     // Verify portfolio value exists and is linked to portfolio
-    const PortfolioPositions = await PortfolioPositionRepository.findAll();
+    const PortfolioPositions = await portfolioPositionRepository.findAll();
     expect(PortfolioPositions).toHaveLength(1);
     expect(PortfolioPositions[0]).toBeDefined();
     expect(portfolios[0]).toBeDefined();

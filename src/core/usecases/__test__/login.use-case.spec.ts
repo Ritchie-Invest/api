@@ -10,6 +10,8 @@ import bcrypt from 'bcryptjs';
 import { InMemoryRefreshTokenRepository } from '../../../adapters/in-memory/in-memory-refresh-token.repository';
 import { Currency } from '../../domain/type/Currency';
 import { UserType } from '../../domain/type/UserType';
+import { PortfolioPositionRepository } from '../../domain/repository/portfolio-position.repository';
+import { InMemoryPortfolioPositionRepository } from '../../../adapters/in-memory/in-memory-portfolio-position.repository';
 
 describe('LoginUseCase', () => {
   let userRepository: UserRepository;
@@ -17,6 +19,7 @@ describe('LoginUseCase', () => {
   let tokenService: TokenService;
   let refreshTokenRepositoryMock: RefreshTokenRepository;
   let userPortfolioRepository: UserPortfolioRepository;
+  let portfolioPositionRepository: PortfolioPositionRepository;
   let mockGenerateAccessToken: jest.Mock;
   let mockGenerateRefreshToken: jest.Mock;
 
@@ -26,6 +29,7 @@ describe('LoginUseCase', () => {
   beforeEach(() => {
     userRepository = new InMemoryUserRepository();
     userPortfolioRepository = new InMemoryUserPortfolioRepository();
+    portfolioPositionRepository = new InMemoryPortfolioPositionRepository();
 
     mockGenerateAccessToken = jest.fn().mockReturnValue('mocked-access-token');
     mockGenerateRefreshToken = jest
@@ -47,6 +51,7 @@ describe('LoginUseCase', () => {
       userRepository,
       refreshTokenRepositoryMock,
       userPortfolioRepository,
+      portfolioPositionRepository,
       tokenService,
     );
   });
