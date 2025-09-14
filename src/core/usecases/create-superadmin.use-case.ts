@@ -6,11 +6,6 @@ import { User } from '../domain/model/User';
 import { UserRepository } from '../domain/repository/user.repository';
 import { UserType } from '../domain/type/UserType';
 import * as bcrypt from 'bcryptjs';
-import { UserPortfolio } from '../domain/model/UserPortfolio';
-import { Currency } from '../domain/type/Currency';
-import { PortfolioPosition } from '../domain/model/PortfolioPosition';
-import { UserPortfolioRepository } from '../domain/repository/user-portfolio.repository';
-import { PortfolioPositionRepository } from '../domain/repository/portfolio-position.repository';
 
 export type CreateSuperadminCommand = {
   email: string;
