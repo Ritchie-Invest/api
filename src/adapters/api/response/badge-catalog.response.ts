@@ -7,7 +7,7 @@ export class BadgeCatalogItemResponse {
   @ApiProperty({ example: 'Perfect Quiz', type: String })
   name: string;
 
-  @ApiProperty({ example: '/badges/learn_perfect_quiz.svg', type: String })
+  @ApiProperty({ example: '/badges/learn_perfect_quiz.webp', type: String })
   iconPath: string;
 
   @ApiProperty({ example: 'Score 100% on a lesson quiz.', required: false, type: String })
