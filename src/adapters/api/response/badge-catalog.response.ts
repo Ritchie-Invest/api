@@ -7,14 +7,7 @@ export class BadgeCatalogItemResponse {
   @ApiProperty({ example: 'Perfect Quiz', type: String })
   name: string;
 
-  @ApiProperty({ example: '/badges/learn_perfect_quiz.webp', type: String })
-  iconPath: string;
-
-  @ApiProperty({
-    example: 'Score 100% on a lesson quiz.',
-    required: false,
-    type: String,
-  })
+  @ApiProperty({ example: 'Score 100% on a lesson quiz.', required: false })
   description?: string;
 
   @ApiProperty({
@@ -24,17 +17,20 @@ export class BadgeCatalogItemResponse {
   })
   awardedAt?: string;
 
+  @ApiProperty({ example: true })
+  hasSeen: boolean;
+
   constructor(
     type: string,
     name: string,
-    iconPath: string,
-    description?: string,
-    awardedAt?: string,
+    description: string | undefined,
+    awardedAt: string | undefined,
+    hasSeen: boolean,
   ) {
     this.type = type;
     this.name = name;
-    this.iconPath = iconPath;
     this.description = description;
     this.awardedAt = awardedAt;
+    this.hasSeen = hasSeen;
   }
 }

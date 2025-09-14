@@ -11,4 +11,8 @@ export abstract class UserBadgeRepository {
     userId: string,
     type: BadgeType,
   ): Promise<UserBadge> | UserBadge;
+  abstract markSeen(
+    userId: string,
+    type: BadgeType,
+  ): Promise<UserBadge | void> | (UserBadge | void);
 }
