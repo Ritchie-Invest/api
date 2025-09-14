@@ -13,8 +13,20 @@ export class PrismaUserBadgeRepository implements UserBadgeRepository {
       where: { userId },
     });
     return rows.map(
-      (r: { id: string; userId: string; type: string; awardedAt: Date }) =>
-        new UserBadge(r.id, r.userId, r.type as BadgeType, r.awardedAt),
+      (r: {
+        id: string;
+        userId: string;
+        type: string;
+        awardedAt: Date;
+        hasSeenAt: Date | null;
+      }) =>
+        new UserBadge(
+          r.id,
+          r.userId,
+          r.type as BadgeType,
+          r.awardedAt,
+          r.hasSeenAt,
+        ),
     );
   }
 
@@ -34,7 +46,22 @@ export class PrismaUserBadgeRepository implements UserBadgeRepository {
       created.id,
       created.userId,
       created.type as BadgeType,
-      created.awardedAt,
+      created.awardedAt as unknown as Date,
+      (created.hasSeenAt as unknown as Date | null | undefined) ?? null,
+    );
+  }
+
+  async markSeen(userId: string, type: BadgeType): Promise<UserBadge> {
+    const updated = await this.prisma.userBadge.update({
+      where: { userId_type: { userId, type } },
+      data: { hasSeenAt: new Date() },
+    });
+    return new UserBadge(
+      updated.id,
+      updated.userId,
+      updated.type as BadgeType,
+      updated.awardedAt as unknown as Date,
+      (updated.hasSeenAt as unknown as Date | null | undefined) ?? null,
     );
   }
 }

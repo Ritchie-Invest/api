@@ -21,13 +21,25 @@ export class InMemoryUserBadgeRepository implements UserBadgeRepository {
 
   async award(userId: string, type: BadgeType): Promise<UserBadge> {
     await Promise.resolve();
-    const badge: UserBadge = {
-      id: `${userId}-${type}`,
+    const badge: UserBadge = new UserBadge(
+      `${userId}-${type}`,
       userId,
       type,
-      awardedAt: new Date(),
-    };
+      new Date(),
+      null,
+    );
     this.badges.push(badge);
     return badge;
+  }
+
+  async markSeen(userId: string, type: BadgeType): Promise<void> {
+    await Promise.resolve();
+    const badge = this.badges.find(
+      (b) => b.userId === userId && b.type === type,
+    );
+    if (badge) {
+      // mutate for in-memory only
+      (badge as unknown as { hasSeenAt: Date | null }).hasSeenAt = new Date();
+    }
   }
 }

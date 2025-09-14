@@ -26,6 +26,8 @@ import { GetUserProgressUseCase } from '../../../core/usecases/get-user-progress
 import { GetUserBadgesUseCase } from '../../../core/usecases/get-user-badges.use-case';
 import { GetBadgeCatalogUseCase } from '../../../core/usecases/get-badge-catalog.use-case';
 import { GetBadgeCatalogMapper } from '../mapper/get-badge-catalog.mapper';
+import { MarkBadgeSeenUseCase } from '../../../core/usecases/mark-badge-seen.use-case';
+import { MarkBadgeSeenRequest } from '../request/mark-badge-seen.request';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import { BadgeCatalogItemResponse } from '../response/badge-catalog.response';
 
@@ -37,6 +39,7 @@ export class UserController {
     private readonly getUserProgressUseCase: GetUserProgressUseCase,
     private readonly getUserBadgesUseCase: GetUserBadgesUseCase,
     private readonly getBadgeCatalogUseCase: GetBadgeCatalogUseCase,
+    private readonly markBadgeSeenUseCase: MarkBadgeSeenUseCase,
   ) {}
 
   @Get('/me')
@@ -122,5 +125,19 @@ export class UserController {
   async getMyBadges(@CurrentUser() currentUser: ProfileRequest) {
     const items = await this.getBadgeCatalogUseCase.execute(currentUser.id);
     return GetBadgeCatalogMapper.fromDomain(items);
+  }
+
+  @Patch('me/badges/seen')
+  @ApiOperation({ summary: 'Mark a badge as seen for current user' })
+  @ApiOkResponse({ description: 'Badge marked as seen' })
+  async markBadgeSeen(
+    @CurrentUser() currentUser: ProfileRequest,
+    @Body() body: MarkBadgeSeenRequest,
+  ) {
+    await this.markBadgeSeenUseCase.execute({
+      userId: currentUser.id,
+      type: body.type,
+    });
+    return { status: 'ok' };
   }
 }

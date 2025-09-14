@@ -96,6 +96,7 @@ import { DomainEventPublisher } from './core/base/domain-event';
 import { GetBadgeCatalogUseCase } from './core/usecases/get-badge-catalog.use-case';
 import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badges.use-case';
 import { CreateTickerUseCase } from './core/usecases/create-ticker.use-case';
+import { MarkBadgeSeenUseCase } from './core/usecases/mark-badge-seen.use-case';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -247,6 +248,12 @@ import { CreateTickerUseCase } from './core/usecases/create-ticker.use-case';
       provide: GetBadgeCatalogUseCase,
       useFactory: (userBadgeRepository: UserBadgeRepository) =>
         new GetBadgeCatalogUseCase(userBadgeRepository),
+      inject: [UserBadgeRepository],
+    },
+    {
+      provide: MarkBadgeSeenUseCase,
+      useFactory: (userBadgeRepository: UserBadgeRepository) =>
+        new MarkBadgeSeenUseCase(userBadgeRepository),
       inject: [UserBadgeRepository],
     },
     {

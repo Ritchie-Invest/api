@@ -168,6 +168,7 @@ model UserBadge {
   userId    String
   type      BadgeType
   awardedAt DateTime  @default(now())
+  hasSeenAt DateTime?
 
   user User @relation(fields: [userId], references: [id])
 
