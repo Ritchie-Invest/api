@@ -13,6 +13,8 @@ export default tseslint.config(
       'dist',
       'coverage',
       'prisma/migrations',
+      'prisma/*.sql',
+      '.env',
     ],
   },
   eslint.configs.recommended,
