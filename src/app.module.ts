@@ -95,6 +95,7 @@ import { AwardBadgesOnLessonCompletedHandler } from './adapters/events/award-bad
 import { DomainEventPublisher } from './core/base/domain-event';
 import { GetBadgeCatalogUseCase } from './core/usecases/get-badge-catalog.use-case';
 import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badges.use-case';
+import { CreateTickerUseCase } from './core/usecases/create-ticker.use-case';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -511,6 +512,12 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
       provide: GetTickersWithPriceUseCase,
       useFactory: (tickerRepository: TickerRepository) =>
         new GetTickersWithPriceUseCase(tickerRepository),
+      inject: [TickerRepository],
+    },
+    {
+      provide: CreateTickerUseCase,
+      useFactory: (tickerRepository: TickerRepository) =>
+        new CreateTickerUseCase(tickerRepository),
       inject: [TickerRepository],
     },
     {

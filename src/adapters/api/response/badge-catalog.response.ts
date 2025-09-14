@@ -10,10 +10,18 @@ export class BadgeCatalogItemResponse {
   @ApiProperty({ example: '/badges/learn_perfect_quiz.webp', type: String })
   iconPath: string;
 
-  @ApiProperty({ example: 'Score 100% on a lesson quiz.', required: false, type: String })
+  @ApiProperty({
+    example: 'Score 100% on a lesson quiz.',
+    required: false,
+    type: String,
+  })
   description?: string;
 
-  @ApiProperty({ example: '2024-01-01T12:00:00.000Z', required: false, type: String })
+  @ApiProperty({
+    example: '2024-01-01T12:00:00.000Z',
+    required: false,
+    type: String,
+  })
   awardedAt?: string;
 
   constructor(
