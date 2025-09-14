@@ -33,6 +33,7 @@ import { PortfolioNotFoundError } from '../core/domain/error/PortfolioNotFoundEr
 import { TickerNotFoundError } from '../core/domain/error/TickerNotFoundError';
 import { PortfolioPositionNotFoundError } from '../core/domain/error/PortfolioPositionNotFoundError';
 import { InvalidHistoryLimitError } from '../core/domain/error/InvalidHistoryLimitError';
+import { TickerAlreadyExistsError } from '../core/domain/error/TickerAlreadyExistsError';
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
@@ -86,7 +87,8 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof LessonOrderConflictError ||
       exception instanceof ModuleAlreadyAttemptedError ||
       exception instanceof LessonAlreadyCompletedError ||
-      exception instanceof LessonAttemptAlreadyFinishedError
+      exception instanceof LessonAttemptAlreadyFinishedError ||
+      exception instanceof TickerAlreadyExistsError
     ) {
       return HttpStatus.CONFLICT;
     }

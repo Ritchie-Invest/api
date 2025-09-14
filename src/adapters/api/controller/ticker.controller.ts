@@ -3,8 +3,10 @@ import {
   Get,
   Param,
   UseGuards,
-  Inject,
   Query,
+  Post,
+  Body,
+  Inject,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -32,6 +34,12 @@ import { TokenPayload } from '../../jwt/jwt.service';
 import { GetTickerHistoryUseCase } from '../../../core/usecases/get-ticker-history.use-case';
 import { GetTickerHistoryResponse } from '../response/get-ticker-history.response';
 import { GetTickerHistoryMapper } from '../mapper/get-ticker-history.mapper';
+import { CreateTickerUseCase } from '../../../core/usecases/create-ticker.use-case';
+import { CreateTickerRequest } from '../request/create-ticker.request';
+import { CreateTickerMapper } from '../mapper/create-ticker.mapper';
+import { CreateTickerResponse } from '../response/create-ticker.response';
+import { Roles } from '../decorator/roles.decorator';
+import { UserType } from '../../../core/domain/type/UserType';
 
 @Controller('/tickers')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -44,7 +52,24 @@ export class TickerController {
     private readonly getTickerHistoryUseCase: GetTickerHistoryUseCase,
     @Inject('UserPortfolioRepository')
     private readonly userPortfolioRepository: UserPortfolioRepository,
+    private readonly createTickerUseCase: CreateTickerUseCase,
   ) {}
+
+  @Post('/')
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
+  @ApiOperation({ summary: 'Create a new ticker' })
+  @ApiCreatedResponse({
+    description: 'Ticker successfully created',
+    type: CreateTickerResponse,
+  })
+  async createTicker(
+    @CurrentUser() currentUser: TokenPayload,
+    @Body() body: CreateTickerRequest,
+  ): Promise<CreateTickerResponse> {
+    const command = CreateTickerMapper.toDomain(currentUser, body);
+    const ticker = await this.createTickerUseCase.execute(command);
+    return CreateTickerMapper.fromDomain(ticker);
+  }
 
   @Get('/')
   @ApiOperation({ summary: 'Get all tickers with latest price and variation' })

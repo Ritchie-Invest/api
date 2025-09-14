@@ -115,9 +115,9 @@ export class UserController {
     summary: 'List all badges with award status for current user',
   })
   @ApiOkResponse({
-  description: 'All badges with awardedAt for current user',
-  type: BadgeCatalogItemResponse,
-  isArray: true,
+    description: 'All badges with awardedAt for current user',
+    type: BadgeCatalogItemResponse,
+    isArray: true,
   })
   async getMyBadges(@CurrentUser() currentUser: ProfileRequest) {
     const items = await this.getBadgeCatalogUseCase.execute(currentUser.id);
