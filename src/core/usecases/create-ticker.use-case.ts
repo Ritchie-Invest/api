@@ -47,11 +47,11 @@ export class CreateTickerUseCase
       history: [],
     });
 
-    await this.tickerRepository.create(ticker);
-
     const barsFromMarket = await this.marketService.getLatestDailyBars(
       ticker.symbol,
     );
+
+    await this.tickerRepository.create(ticker);
 
     if (barsFromMarket && barsFromMarket.length > 0) {
       const sortedBars = barsFromMarket.sort(
