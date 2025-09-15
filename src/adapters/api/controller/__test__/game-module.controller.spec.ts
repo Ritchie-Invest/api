@@ -270,10 +270,12 @@ describe('GameModuleControllerIT', () => {
               {
                 id: 'choice-1',
                 text: 'Choice 1',
+                isCorrect: true,
               },
               {
                 id: 'choice-2',
                 text: 'Choice 2',
+                isCorrect: false,
               },
             ],
           },
