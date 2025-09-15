@@ -5,6 +5,7 @@ import {
   IsOptional,
   ValidateNested,
   IsEnum,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { GameType } from '../../../core/domain/type/GameType';
@@ -20,6 +21,33 @@ export class McqAnswerRequest {
 
   constructor(choiceId: string) {
     this.choiceId = choiceId;
+  }
+}
+
+export class FillInTheBlankAnswerRequest {
+  @ApiProperty({
+    description: 'The ID of the selected blank option',
+    example: 'blank-1',
+  })
+  @IsNotEmpty()
+  @IsString()
+  blankId: string;
+
+  constructor(blankId: string) {
+    this.blankId = blankId;
+  }
+}
+
+export class TrueOrFalseAnswerRequest {
+  @ApiProperty({
+    description: 'The boolean answer for the true/false question',
+    example: true,
+  })
+  @IsBoolean()
+  answer: boolean;
+
+  constructor(answer: boolean) {
+    this.answer = answer;
   }
 }
 
@@ -42,8 +70,37 @@ export class CompleteGameModuleRequest {
   @Type(() => McqAnswerRequest)
   mcq?: McqAnswerRequest;
 
-  constructor(gameType: GameType, mcq?: McqAnswerRequest) {
+  @ApiProperty({
+    description:
+      'Fill in the blank answer details (required when gameType is FILL_IN_THE_BLANK)',
+    type: FillInTheBlankAnswerRequest,
+    required: false,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => FillInTheBlankAnswerRequest)
+  fillInTheBlank?: FillInTheBlankAnswerRequest;
+
+  @ApiProperty({
+    description:
+      'True or False answer details (required when gameType is TRUE_OR_FALSE)',
+    type: TrueOrFalseAnswerRequest,
+    required: false,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => TrueOrFalseAnswerRequest)
+  trueOrFalse?: TrueOrFalseAnswerRequest;
+
+  constructor(
+    gameType: GameType,
+    mcq?: McqAnswerRequest,
+    fillInTheBlank?: FillInTheBlankAnswerRequest,
+    trueOrFalse?: TrueOrFalseAnswerRequest,
+  ) {
     this.gameType = gameType;
     this.mcq = mcq;
+    this.fillInTheBlank = fillInTheBlank;
+    this.trueOrFalse = trueOrFalse;
   }
 }

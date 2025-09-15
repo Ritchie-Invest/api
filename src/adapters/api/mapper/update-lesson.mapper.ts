@@ -18,7 +18,6 @@ export class UpdateLessonMapper {
       lessonId: lessonId,
       title: request.title,
       description: request.description,
-      order: request.order,
       isPublished: request.isPublished,
     };
   }

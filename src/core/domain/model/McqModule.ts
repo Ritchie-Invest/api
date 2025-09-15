@@ -1,6 +1,7 @@
 import { GameModule } from './GameModule';
 import { McqChoice } from './McqChoice';
 import { McqModuleInvalidDataError } from '../error/McqModuleInvalidDataError';
+import { GameType } from '../type/GameType';
 
 export class McqModule extends GameModule {
   question: string;
@@ -14,7 +15,7 @@ export class McqModule extends GameModule {
     updatedAt?: Date;
     createdAt?: Date;
   }) {
-    super({ id: params.id, lessonId: params.lessonId });
+    super({ id: params.id, lessonId: params.lessonId, gameType: GameType.MCQ });
     if (!params.question || params.question.trim().length === 0) {
       throw new McqModuleInvalidDataError('Question is required');
     }

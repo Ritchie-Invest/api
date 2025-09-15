@@ -17,8 +17,6 @@ export class CreateLessonMapper {
       title: request.title,
       description: request.description,
       chapterId: request.chapterId,
-      order: request.order,
-      gameType: request.gameType,
     };
   }
 
@@ -30,7 +28,6 @@ export class CreateLessonMapper {
       chapterId: lesson.chapterId,
       order: lesson.order !== undefined ? lesson.order : 0,
       isPublished: lesson.isPublished,
-      gameType: lesson.gameType,
       modules: lesson.modules,
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,

@@ -9,6 +9,7 @@ import { RolesGuard } from './adapters/api/guards/roles.guard';
 import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './adapters/api/guards/jwt-auth.guard';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,13 +18,41 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      process.env.ADMIN_APP_BASE_URL || 'http://localhost:5173/',
-      process.env.MOBILE_APP_BASE_URL || 'http://localhost:8080/',
+      process.env.ADMIN_APP_BASE_URL || 'http://localhost:5173',
+      process.env.MOBILE_APP_BASE_URL || 'http://localhost:8080',
     ],
     credentials: true,
   });
 
   app.use(cookieParser());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+          'script-src': ["'self'", 'https://cdn.jsdelivr.net'],
+          'style-src': [
+            "'self'",
+            'https://cdn.jsdelivr.net',
+            "'unsafe-inline'",
+          ],
+          'connect-src': [
+            "'self'",
+            'https://cdn.jsdelivr.net',
+            'https://fonts.scalar.com',
+          ],
+          'img-src': ["'self'", 'data:'],
+          'font-src': [
+            "'self'",
+            'https://fonts.scalar.com',
+            'https://cdn.jsdelivr.net',
+            'data:',
+          ],
+        },
+      },
+    }),
+  );
 
   const reflector = app.get(Reflector);
   app.useGlobalGuards(
@@ -38,12 +67,19 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
 
+  app.use('/health', (_req: any, res: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    res.status(200).json({
+      status: 'ok',
+      message: 'Server is running',
+      timestamp: new Date().toISOString(),
+    });
+  });
+
   app.use(
     '/reference',
     apiReference({
-      spec: {
-        content: document,
-      },
+      content: document,
     }),
   );
 

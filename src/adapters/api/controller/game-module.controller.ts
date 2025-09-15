@@ -59,14 +59,17 @@ export class GameModuleController {
   ): Promise<GetGameModuleByIdResponse> {
     const command = GetGameModuleByIdMapper.toDomain(moduleId);
     const result = await this.getGameModuleByIdUseCase.execute(command);
-    if (currentUser.type === UserType.ADMIN) {
+    if (
+      currentUser.type === UserType.ADMIN ||
+      currentUser.type === UserType.SUPERADMIN
+    ) {
       return GetGameModuleByIdMapper.fromDomain(result);
     }
     return GetLightGameModuleByIdMapper.fromDomain(result);
   }
 
   @Post('/:moduleId')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Update a game module for a lesson' })
   @ApiCreatedResponse({
     description: 'Game module successfully updated',

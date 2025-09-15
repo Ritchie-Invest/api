@@ -13,20 +13,37 @@ enum UserType {
   STUDENT
 }
 
-enum GameType {
-  MCQ
+enum TickerType {
+  ETF
 }
 
+enum Currency {
+  USD
+  EUR
+  GBP
+}
+
+enum TransactionType {
+  BUY
+  SELL
+}
 
 model User {
-  id             String         @id @default(cuid())
-  email          String         @unique
-  password       String
-  type           UserType       @default(STUDENT)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  refresh_tokens RefreshToken[]
-  progressions   Progression[]
+  id                   String   @id @default(cuid())
+  email                String   @unique
+  password             String
+  type                 UserType @default(STUDENT)
+  xp                   Int      @default(0)
+  isInvestmentUnlocked Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  refresh_tokens   RefreshToken[]
+  LessonCompletion LessonCompletion[]
+  LessonAttempt    LessonAttempt[]
+  ModuleAttempt    ModuleAttempt[]
+  UserPortfolio    UserPortfolio[]
+  badges           UserBadge[]
 }
 
 model RefreshToken {
@@ -50,28 +67,30 @@ model Chapter {
 }
 
 model Lesson {
-  id          String       @id @default(cuid())
-  title       String
-  description String
-  chapterId   String
-  order       Int
-  isPublished Boolean
-  gameType    GameType     @default(MCQ)
-  updatedAt   DateTime     @updatedAt
-  createdAt   DateTime     @default(now())
-  chapter     Chapter      @relation(fields: [chapterId], references: [id])
-  modules     GameModule[]
+  id               String             @id @default(cuid())
+  title            String
+  description      String
+  chapterId        String
+  order            Int
+  isPublished      Boolean
+  updatedAt        DateTime           @updatedAt
+  createdAt        DateTime           @default(now())
+  chapter          Chapter            @relation(fields: [chapterId], references: [id])
+  modules          GameModule[]
+  lessonCompletion LessonCompletion[]
+  lessonAttempt    LessonAttempt[]
 }
 
 model GameModule {
-  id        String   @id @default(cuid())
-  lessonId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  lesson      Lesson        @relation(fields: [lessonId], references: [id])
-  mcq         McqModule?
-  Progression Progression[]
+  id            String                @id @default(cuid())
+  lessonId      String
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  lesson        Lesson                @relation(fields: [lessonId], references: [id])
+  mcq           McqModule?
+  fillBlank     FillInTheBlankModule?
+  trueOrFalse   TrueOrFalseModule?
+  moduleAttempt ModuleAttempt[]
 }
 
 model McqModule {
@@ -82,16 +101,132 @@ model McqModule {
   gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
 }
 
-model Progression {
-  id           String   @id @default(cuid())
-  userId       String
-  gameModuleId String
-  isCompleted  Boolean
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model FillInTheBlankModule {
+  id           String     @id @default(cuid())
+  firstText    String
+  secondText   String
+  blanks       Json
+  gameModuleId String     @unique
+  gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
+}
 
-  user       User       @relation(fields: [userId], references: [id])
-  gameModule GameModule @relation(fields: [gameModuleId], references: [id])
+model TrueOrFalseModule {
+  id           String     @id @default(cuid())
+  sentence     String
+  isTrue       Boolean
+  gameModuleId String     @unique
+  gameModule   GameModule @relation(fields: [gameModuleId], references: [id])
+}
 
-  @@unique([userId, gameModuleId])
+model LessonCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  score       Float
+  completedAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+
+  @@unique([userId, lessonId])
+}
+
+model LessonAttempt {
+  id         String    @id @default(cuid())
+  userId     String
+  lessonId   String
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  user           User            @relation(fields: [userId], references: [id])
+  lesson         Lesson          @relation(fields: [lessonId], references: [id])
+  moduleAttempts ModuleAttempt[]
+}
+
+model ModuleAttempt {
+  id              String   @id @default(cuid())
+  userId          String
+  gameModuleId    String
+  lessonAttemptId String
+  isCorrect       Boolean
+  answeredAt      DateTime @default(now())
+
+  user          User          @relation(fields: [userId], references: [id])
+  gameModule    GameModule    @relation(fields: [gameModuleId], references: [id])
+  lessonAttempt LessonAttempt @relation(fields: [lessonAttemptId], references: [id])
+}
+
+enum BadgeType {
+  PROG_FIRST_CHAPTER
+  PROG_5_LESSONS
+  PROG_50_PERCENT
+  LEARN_PERFECT_QUIZ
+}
+
+model UserBadge {
+  id        String    @id @default(cuid())
+  userId    String
+  type      BadgeType
+  awardedAt DateTime  @default(now())
+  hasSeenAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, type])
+}
+
+model Ticker {
+  id          String        @id @default(cuid())
+  name        String
+  symbol      String        @unique
+  type        TickerType
+  currency    Currency
+  history     DailyBar[]
+  Transaction Transaction[]
+}
+
+model DailyBar {
+  id       String   @id @default(cuid())
+  tickerId String
+  date     DateTime
+  open     Float
+  high     Float
+  low      Float
+  close    Float
+  volume   Int
+
+  ticker Ticker @relation(fields: [tickerId], references: [id])
+
+  @@unique([tickerId, date])
+}
+
+model UserPortfolio {
+  id          String           @id @default(cuid())
+  userId      String
+  currency    Currency
+  history     PortfolioPosition[]
+  user        User             @relation(fields: [userId], references: [id])
+  Transaction Transaction[]
+}
+
+model PortfolioPosition {
+  id          String        @id @default(cuid())
+  portfolioId String
+  cash        Int
+  investments Int
+  date        DateTime
+  portfolio   UserPortfolio @relation(fields: [portfolioId], references: [id])
+}
+
+model Transaction {
+  id                 String          @id @default(cuid())
+  portfolioId        String
+  tickerId           String
+  type               TransactionType
+  amount             Float
+  volume             Float
+  currentTickerPrice Float
+  timestamp          DateTime        @default(now())
+  portfolio          UserPortfolio   @relation(fields: [portfolioId], references: [id])
+  ticker             Ticker          @relation(fields: [tickerId], references: [id])
 }

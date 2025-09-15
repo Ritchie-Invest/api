@@ -34,9 +34,6 @@ import { GetChapterByIdMapper } from '../mapper/get-chapter-by-id.mapper';
 import { GetChaptersResponse } from '../response/get-chapters.response';
 import { GetChaptersUseCase } from '../../../core/usecases/get-chapters.use-case';
 import { GetChaptersMapper } from '../mapper/get-chapters.mapper';
-import { GetUserChaptersUseCase } from '../../../core/usecases/get-user-chapters.use-case';
-import { GetUserChaptersMapper } from '../mapper/get-user-chapters.mapper';
-import { GetUserChaptersResponse } from '../response/get-user-chapters.response';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 
@@ -46,14 +43,13 @@ import { RolesGuard } from '../guards/roles.guard';
 export class ChapterController {
   constructor(
     private readonly getChaptersUseCase: GetChaptersUseCase,
-    private readonly getUserChaptersUseCase: GetUserChaptersUseCase,
     private readonly createChapterUseCase: CreateChapterUseCase,
     private readonly getChapterByIdUseCase: GetChapterByIdUseCase,
     private readonly updateChapterUseCase: UpdateChapterUseCase,
   ) {}
 
   @Get('/')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Get all chapters' })
   @ApiCreatedResponse({
     description: 'Chapters successfully retrieved',
@@ -80,7 +76,7 @@ export class ChapterController {
   }
 
   @Post('/')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Create a new chapter' })
   @ApiCreatedResponse({
     description: 'Chapter successfully created',
@@ -108,7 +104,7 @@ export class ChapterController {
   }
 
   @Get('/:chapterId')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Get chapter by ID' })
   @ApiCreatedResponse({
     description: 'Chapter successfully retrieved',
@@ -136,7 +132,7 @@ export class ChapterController {
   }
 
   @Patch('/:chapterId')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Update an existing chapter' })
   @ApiCreatedResponse({
     description: 'Chapter successfully updated',
@@ -162,28 +158,5 @@ export class ChapterController {
     const command = UpdateChapterMapper.toDomain(currentUser, chapterId, body);
     const chapter = await this.updateChapterUseCase.execute(command);
     return UpdateChapterMapper.fromDomain(chapter);
-  }
-
-  @Get('/user/progress')
-  @ApiOperation({ summary: 'Get user chapters with progress' })
-  @ApiCreatedResponse({
-    description: 'User chapters with progress successfully retrieved',
-    type: GetUserChaptersResponse,
-  })
-  @ApiBadRequestResponse({
-    description: 'Invalid request or parameters',
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Unauthorized access',
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error',
-  })
-  async getUserChapters(
-    @CurrentUser() currentUser: ProfileRequest,
-  ): Promise<GetUserChaptersResponse> {
-    const command = GetUserChaptersMapper.toDomain(currentUser);
-    const result = await this.getUserChaptersUseCase.execute(command);
-    return GetUserChaptersMapper.fromDomain(result);
   }
 }

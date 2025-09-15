@@ -18,7 +18,6 @@ export class UpdateChapterMapper {
       chapterId: chapterId,
       title: request.title,
       description: request.description,
-      order: request.order,
       isPublished: request.isPublished,
     };
   }

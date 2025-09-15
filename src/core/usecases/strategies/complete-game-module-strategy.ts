@@ -8,5 +8,6 @@ export interface CompleteGameModuleStrategy {
   ): {
     isCorrect: boolean;
     feedback: string;
+    correctChoiceId: string;
   };
 }

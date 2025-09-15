@@ -5,6 +5,7 @@ import {
 } from '../get-game-module-by-id.use-case';
 import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
 import { McqModule } from '../../domain/model/McqModule';
+import { GameType } from '../../domain/type/GameType';
 
 describe('GetGameModuleByIdUseCase', () => {
   let gameModuleRepository: GameModuleRepository;
@@ -54,6 +55,7 @@ describe('GetGameModuleByIdUseCase', () => {
     expect(returnedMcqModule).toEqual({
       id: 'mcq-module-id',
       lessonId: 'lesson-id',
+      gameType: GameType.MCQ,
       question: 'Quelle est la capitale de la France ?',
       choices: [
         {

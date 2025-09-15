@@ -17,11 +17,23 @@ import { ChapterOrderConflictError } from '../core/domain/error/ChapterOrderConf
 import { LessonNotFoundError } from '../core/domain/error/LessonNotFoundError';
 import { LessonInvalidDataError } from '../core/domain/error/LessonInvalidDataError';
 import { LessonOrderConflictError } from '../core/domain/error/LessonOrderConflictError';
-import { GameModuleTypeMismatchError } from '../core/domain/error/GameModuleTypeMismatchError';
 import { GameModuleStrategyNotFoundError } from '../core/domain/error/GameModuleStrategyNotFoundError';
 import { GameModuleNotFoundError } from '../core/domain/error/GameModuleNotFoundError';
 import { InvalidAnswerError } from '../core/domain/error/InvalidAnswerError';
 import { McqModuleInvalidDataError } from '../core/domain/error/McqModuleInvalidDataError';
+import { ModuleAlreadyAttemptedError } from '../core/domain/error/ModuleAlreadyAttemptedError';
+import { LessonNotFullyAttemptedError } from '../core/domain/error/LessonNotFullyAttemptedError';
+import { LessonAlreadyCompletedError } from '../core/domain/error/LessonAlreadyCompletedError';
+import { LessonAttemptNotFoundError } from '../core/domain/error/LessonAttemptNotFoundError';
+import { LessonAttemptAlreadyFinishedError } from '../core/domain/error/LessonAttemptAlreadyFinishedError';
+import { InsufficientCashError } from '../core/domain/error/InsufficientCashError';
+import { InsufficientHoldingsError } from '../core/domain/error/InsufficientHoldingsError';
+import { DailyBarNotFoundError } from '../core/domain/error/DailyBarNotFoundError';
+import { PortfolioNotFoundError } from '../core/domain/error/PortfolioNotFoundError';
+import { TickerNotFoundError } from '../core/domain/error/TickerNotFoundError';
+import { PortfolioPositionNotFoundError } from '../core/domain/error/PortfolioPositionNotFoundError';
+import { InvalidHistoryLimitError } from '../core/domain/error/InvalidHistoryLimitError';
+import { TickerAlreadyExistsError } from '../core/domain/error/TickerAlreadyExistsError';
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
@@ -46,10 +58,13 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof WrongPasswordFormatError ||
       exception instanceof ChapterInvalidDataError ||
       exception instanceof LessonInvalidDataError ||
-      exception instanceof GameModuleTypeMismatchError ||
       exception instanceof GameModuleStrategyNotFoundError ||
       exception instanceof InvalidAnswerError ||
-      exception instanceof McqModuleInvalidDataError
+      exception instanceof McqModuleInvalidDataError ||
+      exception instanceof LessonNotFullyAttemptedError ||
+      exception instanceof InsufficientCashError ||
+      exception instanceof InsufficientHoldingsError ||
+      exception instanceof InvalidHistoryLimitError
     ) {
       return HttpStatus.BAD_REQUEST;
     }
@@ -57,14 +72,23 @@ export class DomainErrorFilter implements ExceptionFilter {
       exception instanceof UserNotFoundError ||
       exception instanceof ChapterNotFoundError ||
       exception instanceof LessonNotFoundError ||
-      exception instanceof GameModuleNotFoundError
+      exception instanceof GameModuleNotFoundError ||
+      exception instanceof LessonAttemptNotFoundError ||
+      exception instanceof DailyBarNotFoundError ||
+      exception instanceof PortfolioNotFoundError ||
+      exception instanceof TickerNotFoundError ||
+      exception instanceof PortfolioPositionNotFoundError
     ) {
       return HttpStatus.NOT_FOUND;
     }
     if (
       exception instanceof UserAlreadyExistsError ||
       exception instanceof ChapterOrderConflictError ||
-      exception instanceof LessonOrderConflictError
+      exception instanceof LessonOrderConflictError ||
+      exception instanceof ModuleAlreadyAttemptedError ||
+      exception instanceof LessonAlreadyCompletedError ||
+      exception instanceof LessonAttemptAlreadyFinishedError ||
+      exception instanceof TickerAlreadyExistsError
     ) {
       return HttpStatus.CONFLICT;
     }

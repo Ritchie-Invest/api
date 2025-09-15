@@ -42,6 +42,7 @@ describe('CompleteGameModuleMapper', () => {
       const result: CompleteGameModuleResult = {
         isCorrect: true,
         feedback: 'Correct! Well done.',
+        correctChoiceId: 'choice-1',
         nextGameModuleId: 'module-next',
         currentGameModuleIndex: 0,
         totalGameModules: 3,
@@ -53,6 +54,7 @@ describe('CompleteGameModuleMapper', () => {
       // Then
       expect(response.isCorrect).toBe(true);
       expect(response.feedback).toBe('Correct! Well done.');
+      expect(response.correctChoiceId).toBe('choice-1');
       expect(response.nextGameModuleId).toBe('module-next');
       expect(response.currentGameModuleIndex).toBe(0);
       expect(response.totalGameModules).toBe(3);
@@ -63,6 +65,7 @@ describe('CompleteGameModuleMapper', () => {
       const result: CompleteGameModuleResult = {
         isCorrect: false,
         feedback: 'Incorrect. Try again.',
+        correctChoiceId: 'choice-1',
         nextGameModuleId: null,
         currentGameModuleIndex: 1,
         totalGameModules: 3,
@@ -74,6 +77,7 @@ describe('CompleteGameModuleMapper', () => {
       // Then
       expect(response.isCorrect).toBe(false);
       expect(response.feedback).toBe('Incorrect. Try again.');
+      expect(response.correctChoiceId).toBe('choice-1');
       expect(response.nextGameModuleId).toBe(null);
       expect(response.currentGameModuleIndex).toBe(1);
       expect(response.totalGameModules).toBe(3);

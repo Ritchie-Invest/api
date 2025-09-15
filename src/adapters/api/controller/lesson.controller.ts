@@ -44,7 +44,7 @@ export class LessonController {
   ) {}
 
   @Get('/chapter/:chapterId')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Get all lessons by chapter ID' })
   @ApiCreatedResponse({
     description: 'Lessons successfully retrieved',
@@ -75,7 +75,7 @@ export class LessonController {
   }
 
   @Post('/')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Create a new lesson' })
   @ApiCreatedResponse({
     description: 'Lesson successfully created',
@@ -103,7 +103,7 @@ export class LessonController {
   }
 
   @Get('/:lessonId')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Get lesson by ID' })
   @ApiCreatedResponse({
     description: 'Lesson successfully retrieved',
@@ -131,7 +131,7 @@ export class LessonController {
   }
 
   @Patch('/:lessonId')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Update an existing lesson' })
   @ApiCreatedResponse({
     description: 'Lesson successfully updated',
@@ -160,7 +160,7 @@ export class LessonController {
   }
 
   @Post('/:lessonId/modules')
-  @Roles(UserType.ADMIN)
+  @Roles(UserType.ADMIN, UserType.SUPERADMIN)
   @ApiOperation({ summary: 'Create a game module for a lesson' })
   @ApiCreatedResponse({
     description: 'Game module successfully created',

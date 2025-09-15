@@ -13,20 +13,24 @@ export class PrismaUserMapper implements EntityMapper<User, UserEntity> {
       email: model.email,
       password: model.password,
       type: model.type,
+      xp: model.totalXp,
+      isInvestmentUnlocked: model.isInvestmentUnlocked,
       updatedAt: model.updatedAt,
       createdAt: model.createdAt,
     };
   }
 
   toDomain(entity: UserEntity): User {
-    return {
-      id: entity.id,
-      email: entity.email,
-      password: entity.password,
-      type: this.mapUserTypeToDomain(entity.type),
-      updatedAt: entity.updatedAt,
-      createdAt: entity.createdAt,
-    };
+    return new User(
+      entity.id,
+      entity.email,
+      entity.password,
+      this.mapUserTypeToDomain(entity.type),
+      entity.xp,
+      entity.isInvestmentUnlocked,
+      entity.updatedAt,
+      entity.createdAt,
+    );
   }
 
   private mapUserTypeToDomain(type: $Enums.UserType): UserType {

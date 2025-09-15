@@ -3,7 +3,6 @@ import { ProfileRequest } from '../../request/profile.request';
 import { UserType } from '../../../../core/domain/type/UserType';
 import { Lesson } from '../../../../core/domain/model/Lesson';
 import { GetLessonsByChapterIdResponse } from '../../response/get-lessons-by-chapter.response';
-import { GameType } from '../../../../core/domain/type/GameType';
 
 describe('getLessonsByChapterIdMapper', () => {
   describe('toDomain', () => {
@@ -45,7 +44,6 @@ describe('getLessonsByChapterIdMapper', () => {
           'chapter-1',
           1,
           true,
-          GameType.MCQ,
           [],
           now,
           now,
@@ -57,7 +55,6 @@ describe('getLessonsByChapterIdMapper', () => {
           'chapter-1',
           2,
           false,
-          GameType.MCQ,
           [],
           now,
           now,
@@ -77,7 +74,6 @@ describe('getLessonsByChapterIdMapper', () => {
           chapterId: 'chapter-1',
           order: 1,
           isPublished: true,
-          gameType: GameType.MCQ,
           modules: [],
           createdAt: now,
           updatedAt: now,
@@ -89,7 +85,6 @@ describe('getLessonsByChapterIdMapper', () => {
           chapterId: 'chapter-1',
           order: 2,
           isPublished: false,
-          gameType: GameType.MCQ,
           modules: [],
           createdAt: now,
           updatedAt: now,

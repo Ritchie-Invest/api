@@ -16,7 +16,6 @@ export class CreateChapterMapper {
       },
       title: request.title,
       description: request.description,
-      order: request.order,
     };
   }
 

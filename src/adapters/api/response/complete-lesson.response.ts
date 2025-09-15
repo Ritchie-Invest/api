@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CompleteLessonResponse {
   @ApiProperty({
-    description: 'Score achieved in the lesson',
-    example: 0,
+    description: 'Number of game modules completed in the lesson',
+    example: 3,
   })
-  score: number;
+  completedGameModules: number;
 
   @ApiProperty({
     description: 'Total number of game modules in the lesson',
@@ -13,8 +13,27 @@ export class CompleteLessonResponse {
   })
   totalGameModules: number;
 
-  constructor(score: number, totalGameModules: number) {
-    this.score = score;
+  @ApiProperty({
+    description: 'Indicates if the lesson is completed',
+    example: true,
+  })
+  isCompleted: boolean;
+
+  @ApiProperty({
+    description: 'Experience points won from completing the lesson',
+    example: 10,
+  })
+  xpWon: number;
+
+  constructor(
+    completedGameModules: number,
+    totalGameModules: number,
+    isCompleted: boolean = false,
+    xpWon: number = 0,
+  ) {
+    this.completedGameModules = completedGameModules;
     this.totalGameModules = totalGameModules;
+    this.isCompleted = isCompleted;
+    this.xpWon = xpWon;
   }
 }

@@ -4,7 +4,6 @@ import { Lesson } from '../domain/model/Lesson';
 import { GameType } from '../domain/type/GameType';
 import { GameModuleStrategyFactory } from './strategies/game-module-strategy-factory';
 import { LessonNotFoundError } from '../domain/error/LessonNotFoundError';
-import { GameModuleTypeMismatchError } from '../domain/error/GameModuleTypeMismatchError';
 import { GameModuleRepository } from '../domain/repository/game-module.repository';
 
 export type CreateGameModuleCommand = {
@@ -13,6 +12,15 @@ export type CreateGameModuleCommand = {
   mcq?: {
     question: string;
     choices: { text: string; isCorrect: boolean; correctionMessage: string }[];
+  };
+  fillInTheBlank?: {
+    firstText: string;
+    secondText: string;
+    blanks: { text: string; isCorrect: boolean; correctionMessage: string }[];
+  };
+  trueOrFalse?: {
+    sentence: string;
+    isTrue: boolean;
   };
 };
 
@@ -29,9 +37,6 @@ export class CreateGameModuleUseCase
     const lesson = await this.lessonRepository.findById(command.lessonId);
     if (!lesson) {
       throw new LessonNotFoundError(command.lessonId);
-    }
-    if (lesson.gameType !== command.gameType) {
-      throw new GameModuleTypeMismatchError();
     }
 
     const strategy = this.strategyFactory.getStrategy(command.gameType);

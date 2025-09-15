@@ -4,6 +4,8 @@ import { Lesson } from '../../../core/domain/model/Lesson';
 import {
   UpdateGameModuleRequest,
   UpdateMcqGameModuleContract,
+  UpdateFillInTheBlankGameModuleContract,
+  UpdateTrueOrFalseGameModuleContract,
 } from '../request/update-game-module.request';
 import { UpdateGameModuleCommand } from '../../../core/usecases/update-game-module.use-case';
 
@@ -23,6 +25,29 @@ export class UpdateGameModuleMapper {
           },
         };
       }
+      case GameType.FILL_IN_THE_BLANK: {
+        const contract =
+          request.contract as UpdateFillInTheBlankGameModuleContract;
+        return {
+          gameModuleId,
+          fillInTheBlank: {
+            firstText: contract?.firstText,
+            secondText: contract?.secondText,
+            blanks: contract?.blanks,
+          },
+        };
+      }
+      case GameType.TRUE_OR_FALSE: {
+        const contract =
+          request.contract as UpdateTrueOrFalseGameModuleContract;
+        return {
+          gameModuleId,
+          trueOrFalse: {
+            sentence: contract?.sentence,
+            isTrue: contract?.isTrue,
+          },
+        };
+      }
       default:
         throw new Error('Game type not supported');
     }
@@ -36,7 +61,6 @@ export class UpdateGameModuleMapper {
       chapterId: lesson.chapterId,
       order: lesson.order !== undefined ? lesson.order : 0,
       isPublished: lesson.isPublished,
-      gameType: lesson.gameType,
       modules: lesson.modules,
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,

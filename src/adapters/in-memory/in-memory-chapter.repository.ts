@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import {
-  ChapterRepository,
-  ChapterData,
-} from '../../core/domain/repository/chapter.repository';
+import { ChapterRepository } from '../../core/domain/repository/chapter.repository';
 import { Chapter } from '../../core/domain/model/Chapter';
 import { LessonRepository } from '../../core/domain/repository/lesson.repository';
 import { GameModuleRepository } from '../../core/domain/repository/game-module.repository';
-import { ProgressionRepository } from '../../core/domain/repository/progression.repository';
 import { ChapterOrderConflictError } from '../../core/domain/error/ChapterOrderConflictError';
+import { ChapterWithLessons } from '../../core/domain/model/ChapterWithLessons';
+import { LessonCompletionRepository } from '../../core/domain/repository/lesson-completion.repository';
+import { LessonWithFirstGameModule } from '../../core/domain/model/LessonWithFirstGameModule';
 
 @Injectable()
 export class InMemoryChapterRepository implements ChapterRepository {
@@ -16,7 +15,7 @@ export class InMemoryChapterRepository implements ChapterRepository {
   constructor(
     private readonly lessonsRepository: LessonRepository,
     private readonly gameModuleRepository: GameModuleRepository,
-    private readonly progressionRepository: ProgressionRepository,
+    private readonly lessonCompletionRepository: LessonCompletionRepository,
   ) {}
 
   validateUniqueOrder(order: number, excludeChapterId?: string): Promise<void> {
@@ -79,55 +78,48 @@ export class InMemoryChapterRepository implements ChapterRepository {
     this.chapters.clear();
   }
 
-  async findAllWithLessonsDetails(userId: string): Promise<ChapterData[]> {
-    const chapters = Array.from(this.chapters.values()).sort(
-      (a, b) => (a.order || 0) - (b.order || 0),
-    );
+  async findAllWithDetails(userId: string): Promise<ChapterWithLessons[]> {
+    const chapters = Array.from(this.chapters.values())
+      .filter((c) => c.isPublished)
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-    const result: ChapterData[] = [];
+    return Promise.all(
+      chapters.map(async (chapter) => {
+        const lessons = (await this.lessonsRepository.findByChapter(chapter.id))
+          .filter((l) => l.isPublished)
+          .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-    for (const chapter of chapters) {
-      const lessons = await this.lessonsRepository.findByChapter(chapter.id);
-
-      const lessonsWithModules = [];
-      for (const lesson of lessons) {
-        const modules = await this.gameModuleRepository.findByLessonId(
-          lesson.id,
-        );
-
-        const modulesWithProgress = [];
-        for (const module of modules) {
-          const progression =
-            await this.progressionRepository.findByUserIdAndGameModuleId(
+        const lessonSummaries: LessonWithFirstGameModule[] = [];
+        for (const lesson of lessons) {
+          const modules = await this.gameModuleRepository.findByLessonId(
+            lesson.id,
+          );
+          const firstModule = modules[0];
+          const completion =
+            this.lessonCompletionRepository.findByUserIdAndLessonId(
               userId,
-              module.id,
+              lesson.id,
             );
-          const progressions = progression ? [progression] : [];
-
-          modulesWithProgress.push({
-            id: module.id,
-            Progression: progressions,
-          });
+          lessonSummaries.push(
+            new LessonWithFirstGameModule({
+              id: lesson.id,
+              title: lesson.title,
+              description: lesson.description,
+              order: lesson.order || 0,
+              isCompleted: !!completion,
+              gameModuleId: firstModule ? firstModule.id : null,
+            }),
+          );
         }
 
-        lessonsWithModules.push({
-          id: lesson.id,
-          title: lesson.title,
-          description: lesson.description,
-          order: lesson.order || 0,
-          modules: modulesWithProgress,
+        return new ChapterWithLessons({
+          id: chapter.id,
+          title: chapter.title,
+          description: chapter.description,
+          order: chapter.order || 0,
+          lessons: lessonSummaries,
         });
-      }
-
-      result.push({
-        id: chapter.id,
-        title: chapter.title,
-        description: chapter.description,
-        order: chapter.order || 0,
-        lessons: lessonsWithModules,
-      });
-    }
-
-    return result;
+      }),
+    );
   }
 }

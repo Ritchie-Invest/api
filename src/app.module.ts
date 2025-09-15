@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { ScheduleModule } from '@nestjs/schedule';
 import { CreateUserUseCase } from './core/usecases/create-user.use-case';
 import { JwtServiceAdapter } from './adapters/jwt/jwt.service';
 import { LoginUseCase } from './core/usecases/login.use-case';
@@ -37,8 +38,6 @@ import {
 } from './core/usecases/strategies/game-module-strategy-factory';
 import { GameType } from './core/domain/type/GameType';
 import { McqModuleStrategy } from './core/usecases/strategies/mcq-module-strategy';
-import { ProgressionRepository } from './core/domain/repository/progression.repository';
-import { PrismaProgressionRepository } from './adapters/prisma/prisma-progression.repository';
 import { CompleteGameModuleUseCase } from './core/usecases/complete-game-module.use-case';
 import { GameModuleController } from './adapters/api/controller/game-module.controller';
 import {
@@ -46,27 +45,92 @@ import {
   MapCompleteGameModuleStrategyFactory,
 } from './core/usecases/strategies/complete-game-module-strategy-factory';
 import { McqCompleteGameModuleStrategy } from './core/usecases/strategies/mcq-complete-game-module-strategy';
-import { GetUserChaptersUseCase } from './core/usecases/get-user-chapters.use-case';
+import { GetUserProgressUseCase } from './core/usecases/get-user-progress-use-case.service';
 import { GetGameModuleByIdUseCase } from './core/usecases/get-game-module-by-id.use-case';
 import { UpdateGameModuleUseCase } from './core/usecases/update-game-module.use-case';
 import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case';
+import { FillInTheBlankModuleStrategy } from './core/usecases/strategies/fill-in-the-blanks-module-strategy';
+import { FillInTheBlankCompleteGameModuleStrategy } from './core/usecases/strategies/fill-in-the-blanks-complete-game-module-strategy';
+import { TrueOrFalseModuleStrategy } from './core/usecases/strategies/true-or-false-module-strategy';
+import { TrueOrFalseCompleteGameModuleStrategy } from './core/usecases/strategies/true-or-false-complete-game-module-strategy';
+import { PrismaLessonAttemptRepository } from './adapters/prisma/prisma-lesson-attempt.repository';
+import { LessonAttemptRepository } from './core/domain/repository/lesson-attempt.repository';
+import { PrismaModuleAttemptRepository } from './adapters/prisma/prisma-module-attempt.repository';
+import { PrismaLessonCompletionRepository } from './adapters/prisma/prisma-lesson-completion.repository';
+import { ModuleAttemptRepository } from './core/domain/repository/module-attempt.repository';
+import { TickerRepository } from './core/domain/repository/ticker.repository';
+import { PrismaTickerRepository } from './adapters/prisma/prisma-ticker.repository';
+import { GetTickersWithPriceUseCase } from './core/usecases/get-tickers-with-price.use-case';
+import { GetTickerPossessedValueUseCase } from './core/usecases/get-ticker-possessed-value.use-case';
+import { GetUserTickersUseCase } from './core/usecases/get-user-tickers.use-case';
+import { GetTickerHistoryUseCase } from './core/usecases/get-ticker-history.use-case';
+import { TickerController } from './adapters/api/controller/ticker.controller';
+import { TransactionController } from './adapters/api/controller/transaction.controller';
+import { ExecuteTransactionUseCase } from './core/usecases/execute-transaction.use-case';
+import { UserPortfolioRepository } from './core/domain/repository/user-portfolio.repository';
+import { PrismaUserPortfolioRepository } from './adapters/prisma/prisma-user-portfolio.repository';
+import { PortfolioPositionRepository } from './core/domain/repository/portfolio-position.repository';
+import { PrismaPortfolioPositionRepository } from './adapters/prisma/prisma-portfolio-position.repository';
+import { DailyBarRepository } from './core/domain/repository/daily-bar.repository';
+import { PrismaDailyBarRepository } from './adapters/prisma/prisma-daily-bar.repository';
+import { TransactionRepository } from './core/domain/repository/transaction.repository';
+import { PrismaTransactionRepository } from './adapters/prisma/prisma-transaction.repository';
+import { MarketService } from './core/domain/service/market.service';
+import { AlphaVantageMarketServiceAdapter } from './adapters/alpha-vantage/alpha-vantage-market-service-adapter.service';
+import { UpdateTickersHistoryUseCase } from './core/usecases/update-tickers-history-use.case';
+import { TickerHistoryCronService } from './adapters/scheduler/ticker-history.cron';
+import { GetPortfolioUseCase } from './core/usecases/get-portfolio.use-case';
+import { GetPortfolioPositionsUseCase } from './core/usecases/get-portfolio-positions.use-case';
+import { PortfolioController } from './adapters/api/controller/portfolio.controller';
+import { GetUserTransactionsUseCase } from './core/usecases/get-user-transactions.use-case';
+import { CreateSuperadminUseCase } from './core/usecases/create-superadmin.use-case';
+import { LevelingService } from './core/usecases/services/leveling.service';
+import { GetUserProfileUseCase } from './core/usecases/get-user-profile.use-case';
+import { LoggerMiddleware } from './config/logger.midleware';
+import { UserBadgeRepository } from './core/domain/repository/user-badge.repository';
+import { GetUserBadgesUseCase } from './core/usecases/get-user-badges.use-case';
+import { PrismaUserBadgeRepository } from './adapters/prisma/prisma-user-badge.repository';
+import { InMemoryDomainEventBus } from './adapters/events/in-memory-domain-event-bus';
+import { AwardBadgesOnLessonCompletedHandler } from './adapters/events/award-badges-on-lesson-completed.handler';
+import { DomainEventPublisher } from './core/base/domain-event';
+import { GetBadgeCatalogUseCase } from './core/usecases/get-badge-catalog.use-case';
+import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badges.use-case';
+import { CreateTickerUseCase } from './core/usecases/create-ticker.use-case';
+import { MarkBadgeSeenUseCase } from './core/usecases/mark-badge-seen.use-case';
 
 @Module({
-  imports: [JwtModule.register({})],
+  imports: [JwtModule.register({}), ScheduleModule.forRoot()],
   controllers: [
     AuthController,
     UserController,
     ChapterController,
     LessonController,
     GameModuleController,
+    TickerController,
+    TransactionController,
+    PortfolioController,
   ],
   providers: [
+    {
+      provide: GetUserTransactionsUseCase,
+      useFactory: (
+        transactionRepository: TransactionRepository,
+        tickerRepository: TickerRepository,
+      ) =>
+        new GetUserTransactionsUseCase(transactionRepository, tickerRepository),
+      inject: ['TransactionRepository', TickerRepository],
+    },
     PrismaService,
     JwtService,
+    TickerHistoryCronService,
     {
       provide: 'TokenService',
       useFactory: (jwtService: JwtService) => new JwtServiceAdapter(jwtService),
       inject: [JwtService],
+    },
+    {
+      provide: 'MarketService',
+      useFactory: () => new AlphaVantageMarketServiceAdapter(),
     },
     {
       provide: 'GameModuleStrategyFactory',
@@ -75,6 +139,14 @@ import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case'
           {
             type: GameType.MCQ,
             strategy: new McqModuleStrategy(),
+          },
+          {
+            type: GameType.FILL_IN_THE_BLANK,
+            strategy: new FillInTheBlankModuleStrategy(),
+          },
+          {
+            type: GameType.TRUE_OR_FALSE,
+            strategy: new TrueOrFalseModuleStrategy(),
           },
         ]),
     },
@@ -85,6 +157,14 @@ import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case'
           {
             type: GameType.MCQ,
             strategy: new McqCompleteGameModuleStrategy(),
+          },
+          {
+            type: GameType.FILL_IN_THE_BLANK,
+            strategy: new FillInTheBlankCompleteGameModuleStrategy(),
+          },
+          {
+            type: GameType.TRUE_OR_FALSE,
+            strategy: new TrueOrFalseCompleteGameModuleStrategy(),
           },
         ]),
     },
@@ -117,16 +197,117 @@ import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case'
       inject: [PrismaService],
     },
     {
-      provide: ProgressionRepository,
+      provide: 'LessonAttemptRepository',
       useFactory: (prisma: PrismaService) =>
-        new PrismaProgressionRepository(prisma),
+        new PrismaLessonAttemptRepository(prisma),
       inject: [PrismaService],
     },
     {
-      provide: CreateUserUseCase,
+      provide: 'ModuleAttemptRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaModuleAttemptRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'LessonCompletionRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaLessonCompletionRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: UserBadgeRepository,
+      useFactory: (prisma: PrismaService) =>
+        new PrismaUserBadgeRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: GetUserBadgesUseCase,
+      useFactory: (userBadgeRepository: UserBadgeRepository) =>
+        new GetUserBadgesUseCase(userBadgeRepository),
+      inject: [UserBadgeRepository],
+    },
+    {
+      provide: CheckAndAwardBadgesUseCase,
+      useFactory: (
+        userBadgeRepository: UserBadgeRepository,
+        lessonCompletionRepository: PrismaLessonCompletionRepository,
+        lessonRepository: LessonRepository,
+      ) =>
+        new CheckAndAwardBadgesUseCase(
+          userBadgeRepository,
+          lessonCompletionRepository,
+          lessonRepository,
+        ),
+      inject: [
+        UserBadgeRepository,
+        'LessonCompletionRepository',
+        LessonRepository,
+      ],
+    },
+    {
+      provide: GetBadgeCatalogUseCase,
+      useFactory: (userBadgeRepository: UserBadgeRepository) =>
+        new GetBadgeCatalogUseCase(userBadgeRepository),
+      inject: [UserBadgeRepository],
+    },
+    {
+      provide: MarkBadgeSeenUseCase,
+      useFactory: (userBadgeRepository: UserBadgeRepository) =>
+        new MarkBadgeSeenUseCase(userBadgeRepository),
+      inject: [UserBadgeRepository],
+    },
+    {
+      provide: TickerRepository,
+      useFactory: (prisma: PrismaService) => new PrismaTickerRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'UserPortfolioRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaUserPortfolioRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'PortfolioPositionRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaPortfolioPositionRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'DailyBarRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaDailyBarRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: 'TransactionRepository',
+      useFactory: (prisma: PrismaService) =>
+        new PrismaTransactionRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
+      provide: LevelingService,
       useFactory: (userRepository: UserRepository) =>
-        new CreateUserUseCase(userRepository),
+        new LevelingService(userRepository),
       inject: [UserRepository],
+    },
+    {
+      provide: CreateUserUseCase,
+      useFactory: (
+        userRepository: UserRepository,
+        userPortfolioRepository: UserPortfolioRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
+      ) =>
+        new CreateUserUseCase(
+          userRepository,
+          userPortfolioRepository,
+          portfolioPositionRepository,
+        ),
+      inject: [
+        UserRepository,
+        'UserPortfolioRepository',
+        'PortfolioPositionRepository',
+      ],
     },
     {
       provide: UpdateUserTypeUseCase,
@@ -139,10 +320,24 @@ import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case'
       useFactory: (
         userRepository: UserRepository,
         refreshTokenRepository: RefreshTokenRepository,
+        userPortfolioRepository: UserPortfolioRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
         tokenService: TokenService,
       ) =>
-        new LoginUseCase(userRepository, refreshTokenRepository, tokenService),
-      inject: [UserRepository, RefreshTokenRepository, 'TokenService'],
+        new LoginUseCase(
+          userRepository,
+          refreshTokenRepository,
+          userPortfolioRepository,
+          portfolioPositionRepository,
+          tokenService,
+        ),
+      inject: [
+        UserRepository,
+        RefreshTokenRepository,
+        'UserPortfolioRepository',
+        'PortfolioPositionRepository',
+        'TokenService',
+      ],
     },
     {
       provide: LogoutUseCase,
@@ -186,9 +381,9 @@ import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case'
       inject: [ChapterRepository],
     },
     {
-      provide: GetUserChaptersUseCase,
+      provide: GetUserProgressUseCase,
       useFactory: (chapterRepository: ChapterRepository) =>
-        new GetUserChaptersUseCase(chapterRepository),
+        new GetUserProgressUseCase(chapterRepository),
       inject: [ChapterRepository],
     },
     {
@@ -237,21 +432,24 @@ import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case'
       provide: CompleteGameModuleUseCase,
       useFactory: (
         gameModuleRepository: GameModuleRepository,
-        progressionRepository: ProgressionRepository,
         lessonRepository: LessonRepository,
         strategyFactory: CompleteGameModuleStrategyFactory,
+        lessonAttemptRepository: LessonAttemptRepository,
+        moduleAttemptRepository: ModuleAttemptRepository,
       ) =>
         new CompleteGameModuleUseCase(
           gameModuleRepository,
-          progressionRepository,
           lessonRepository,
           strategyFactory,
+          lessonAttemptRepository,
+          moduleAttemptRepository,
         ),
       inject: [
         GameModuleRepository,
-        ProgressionRepository,
         LessonRepository,
         'CompleteGameModuleStrategyFactory',
+        'LessonAttemptRepository',
+        'ModuleAttemptRepository',
       ],
     },
     {
@@ -281,11 +479,172 @@ import { CompleteLessonUseCase } from './core/usecases/complete-lesson.use-case'
     {
       provide: CompleteLessonUseCase,
       useFactory: (
-        progressionRepository: ProgressionRepository,
         lessonRepository: LessonRepository,
-      ) => new CompleteLessonUseCase(progressionRepository, lessonRepository),
-      inject: [ProgressionRepository, LessonRepository],
+        lessonCompletionRepository: PrismaLessonCompletionRepository,
+        lessonAttemptRepository: LessonAttemptRepository,
+        moduleAttemptRepository: ModuleAttemptRepository,
+        levelingService: LevelingService,
+        eventBus: DomainEventPublisher,
+      ) =>
+        new CompleteLessonUseCase(
+          lessonRepository,
+          lessonCompletionRepository,
+          lessonAttemptRepository,
+          moduleAttemptRepository,
+          levelingService,
+          eventBus,
+        ),
+      inject: [
+        LessonRepository,
+        'LessonCompletionRepository',
+        'LessonAttemptRepository',
+        'ModuleAttemptRepository',
+        LevelingService,
+        'DomainEventPublisher',
+      ],
+    },
+    {
+      provide: 'DomainEventPublisher',
+      useFactory: (handler: AwardBadgesOnLessonCompletedHandler) => {
+        const bus = new InMemoryDomainEventBus();
+        bus.register(handler);
+        return bus;
+      },
+      inject: [AwardBadgesOnLessonCompletedHandler],
+    },
+    {
+      provide: AwardBadgesOnLessonCompletedHandler,
+      useFactory: (useCase: CheckAndAwardBadgesUseCase) =>
+        new AwardBadgesOnLessonCompletedHandler(useCase),
+      inject: [CheckAndAwardBadgesUseCase],
+    },
+    {
+      provide: GetTickersWithPriceUseCase,
+      useFactory: (tickerRepository: TickerRepository) =>
+        new GetTickersWithPriceUseCase(tickerRepository),
+      inject: [TickerRepository],
+    },
+    {
+      provide: CreateTickerUseCase,
+      useFactory: (
+        tickerRepository: TickerRepository,
+        marketService: MarketService,
+      ) => new CreateTickerUseCase(tickerRepository, marketService),
+      inject: [TickerRepository, 'MarketService'],
+    },
+    {
+      provide: GetTickerPossessedValueUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        transactionRepository: TransactionRepository,
+        tickerRepository: TickerRepository,
+      ) =>
+        new GetTickerPossessedValueUseCase(
+          userPortfolioRepository,
+          transactionRepository,
+          tickerRepository,
+        ),
+      inject: [
+        'UserPortfolioRepository',
+        'TransactionRepository',
+        TickerRepository,
+      ],
+    },
+    {
+      provide: GetUserTickersUseCase,
+      useFactory: (
+        transactionRepository: TransactionRepository,
+        tickerRepository: TickerRepository,
+      ) => new GetUserTickersUseCase(transactionRepository, tickerRepository),
+      inject: ['TransactionRepository', TickerRepository],
+    },
+    {
+      provide: GetTickerHistoryUseCase,
+      useFactory: (dailyBarRepository: DailyBarRepository) =>
+        new GetTickerHistoryUseCase(dailyBarRepository),
+      inject: ['DailyBarRepository'],
+    },
+    {
+      provide: ExecuteTransactionUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        tickerRepository: TickerRepository,
+        dailyBarRepository: DailyBarRepository,
+        PortfolioPositionRepository: PortfolioPositionRepository,
+        transactionRepository: TransactionRepository,
+      ) =>
+        new ExecuteTransactionUseCase(
+          userPortfolioRepository,
+          tickerRepository,
+          dailyBarRepository,
+          PortfolioPositionRepository,
+          transactionRepository,
+        ),
+      inject: [
+        'UserPortfolioRepository',
+        TickerRepository,
+        'DailyBarRepository',
+        'PortfolioPositionRepository',
+        'TransactionRepository',
+      ],
+    },
+    {
+      provide: UpdateTickersHistoryUseCase,
+      useFactory: (
+        tickerRepository: TickerRepository,
+        marketService: MarketService,
+      ) => new UpdateTickersHistoryUseCase(tickerRepository, marketService),
+      inject: [TickerRepository, 'MarketService'],
+    },
+    {
+      provide: GetPortfolioUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
+        transactionRepository: TransactionRepository,
+        dailyBarRepository: DailyBarRepository,
+      ) =>
+        new GetPortfolioUseCase(
+          userPortfolioRepository,
+          portfolioPositionRepository,
+          transactionRepository,
+          dailyBarRepository,
+        ),
+      inject: [
+        'UserPortfolioRepository',
+        'PortfolioPositionRepository',
+        'TransactionRepository',
+        'DailyBarRepository',
+      ],
+    },
+    {
+      provide: GetPortfolioPositionsUseCase,
+      useFactory: (
+        userPortfolioRepository: UserPortfolioRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
+      ) =>
+        new GetPortfolioPositionsUseCase(
+          userPortfolioRepository,
+          portfolioPositionRepository,
+        ),
+      inject: ['UserPortfolioRepository', 'PortfolioPositionRepository'],
+    },
+    {
+      provide: CreateSuperadminUseCase,
+      useFactory: (userRepository: UserRepository) =>
+        new CreateSuperadminUseCase(userRepository),
+      inject: [UserRepository],
+    },
+    {
+      provide: GetUserProfileUseCase,
+      useFactory: (userRepository: UserRepository) =>
+        new GetUserProfileUseCase(userRepository),
+      inject: [UserRepository],
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

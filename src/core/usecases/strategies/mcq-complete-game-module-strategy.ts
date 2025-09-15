@@ -12,6 +12,7 @@ export class McqCompleteGameModuleStrategy
   ): {
     isCorrect: boolean;
     feedback: string;
+    correctChoiceId: string;
   } {
     if (!command.mcq?.choiceId) {
       throw new InvalidAnswerError('MCQ choice is required');
@@ -25,9 +26,12 @@ export class McqCompleteGameModuleStrategy
       throw new InvalidAnswerError('Invalid answer: choice not found');
     }
 
+    const correctChoice = mcqModule.choices.find((c) => c.isCorrect);
+
     return {
       isCorrect: selectedChoice.isCorrect,
       feedback: selectedChoice.correctionMessage,
+      correctChoiceId: correctChoice?.id || selectedChoice.id, // fallback si pas trouvé
     };
   }
 }

@@ -2,7 +2,6 @@ import { GetLessonByIdMapper } from '../get-lesson-by-id.mapper';
 import { ProfileRequest } from '../../request/profile.request';
 import { UserType } from '../../../../core/domain/type/UserType';
 import { Lesson } from '../../../../core/domain/model/Lesson';
-import { GameType } from '../../../../core/domain/type/GameType';
 
 describe('GetLessonByIdMapper', () => {
   describe('toDomain', () => {
@@ -55,7 +54,6 @@ describe('GetLessonByIdMapper', () => {
         chapterId: 'chapter-1',
         order: 1,
         isPublished: true,
-        gameType: GameType.MCQ,
         modules: [],
         createdAt: now,
         updatedAt: now,

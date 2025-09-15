@@ -1,0 +1,48 @@
+# Réduction du contexte envoyé au démon Docker
+.git
+.gitignore
+.github/
+.husky/
+.vscode/
+.idea/
+
+# Dépendances locales (ré-installées dans l'image)
+node_modules
+.pnpm-store
+
+# Builds/artefacts locaux
+.dist
+./dist
+coverage
+
+# Logs & runtime
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Tests & rapports
+report.json
+.jest-cache
+.jest-test-sequencer
+
+# Systèmes
+.DS_Store
+Thumbs.db
+
+# Docker / compose
+Dockerfile
+docker-compose.yml
+
+# Env (monter via secrets / compose, ne pas copier)
+.env
+.env.*
+!.env.example
+
+# Prisma généré (sera regénéré dans l'image)
+prisma/node_modules
+
+# Cache TypeScript
+*.tsbuildinfo
+
