@@ -67,6 +67,37 @@ export class CompleteGameModuleUseCase
         command.userId,
         lesson.id,
       );
+
+    // Nouvelle logique: si on veut recommencer la leçon depuis le début (module 0)
+    // et qu'une tentative non terminée existe déjà avec au moins une tentative sur ce premier module,
+    // on clôt l'ancienne tentative et on en recrée une nouvelle.
+    const firstModuleId = lesson.modules[0]?.id;
+    if (
+      lessonAttempt &&
+      !lessonAttempt.finishedAt &&
+      firstModuleId &&
+      command.moduleId === firstModuleId
+    ) {
+      const firstModuleAlreadyAttempted =
+        await this.moduleAttemptRepository.findByLessonAttemptIdAndModuleId(
+          lessonAttempt.id,
+          firstModuleId,
+        );
+      if (firstModuleAlreadyAttempted) {
+        await this.lessonAttemptRepository.finishAttempt(
+          lessonAttempt.id,
+          new Date(),
+        );
+        lessonAttempt = new LessonAttempt(
+          crypto.randomUUID(),
+          command.userId,
+          lesson.id,
+          new Date(),
+        );
+        await this.lessonAttemptRepository.create(lessonAttempt);
+      }
+    }
+
     if (!lessonAttempt || lessonAttempt.finishedAt) {
       lessonAttempt = new LessonAttempt(
         crypto.randomUUID(),
