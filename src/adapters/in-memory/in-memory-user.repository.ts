@@ -5,7 +5,7 @@ import { Email } from '../../core/domain/value-object/Email';
 
 @Injectable()
 export class InMemoryUserRepository implements UserRepository {
-  private users: Map<string, User> = new Map();
+  private readonly users: Map<string, User> = new Map();
 
   create(
     data: Pick<

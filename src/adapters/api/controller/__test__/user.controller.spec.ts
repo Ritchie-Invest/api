@@ -216,6 +216,9 @@ describe('UserControllerIT', () => {
         xpForThisLevel: 17,
         isInvestmentUnlocked: false,
         levelRequiredToUnlockInvestment: 5,
+        life: 5,
+        nextLifeIn: 0,
+        hasLost: false,
       });
     });
 

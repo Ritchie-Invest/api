@@ -97,6 +97,9 @@ import { GetBadgeCatalogUseCase } from './core/usecases/get-badge-catalog.use-ca
 import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badges.use-case';
 import { CreateTickerUseCase } from './core/usecases/create-ticker.use-case';
 import { MarkBadgeSeenUseCase } from './core/usecases/mark-badge-seen.use-case';
+import { LifeRepository } from './core/domain/repository/life.repository';
+import { PrismaLifeRepository } from './adapters/prisma/prisma-life.repository';
+import { LifeService } from './core/usecases/services/life.service';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -292,6 +295,17 @@ import { MarkBadgeSeenUseCase } from './core/usecases/mark-badge-seen.use-case';
       inject: [UserRepository],
     },
     {
+      provide: LifeService,
+      useFactory: (lifeRepository: LifeRepository) =>
+        new LifeService(lifeRepository),
+      inject: [LifeRepository],
+    },
+    {
+      provide: LifeRepository,
+      useFactory: (prisma: PrismaService) => new PrismaLifeRepository(prisma),
+      inject: [PrismaService],
+    },
+    {
       provide: CreateUserUseCase,
       useFactory: (
         userRepository: UserRepository,
@@ -436,6 +450,7 @@ import { MarkBadgeSeenUseCase } from './core/usecases/mark-badge-seen.use-case';
         strategyFactory: CompleteGameModuleStrategyFactory,
         lessonAttemptRepository: LessonAttemptRepository,
         moduleAttemptRepository: ModuleAttemptRepository,
+        lifeService: LifeService,
       ) =>
         new CompleteGameModuleUseCase(
           gameModuleRepository,
@@ -443,6 +458,7 @@ import { MarkBadgeSeenUseCase } from './core/usecases/mark-badge-seen.use-case';
           strategyFactory,
           lessonAttemptRepository,
           moduleAttemptRepository,
+          lifeService,
         ),
       inject: [
         GameModuleRepository,
@@ -450,6 +466,7 @@ import { MarkBadgeSeenUseCase } from './core/usecases/mark-badge-seen.use-case';
         'CompleteGameModuleStrategyFactory',
         'LessonAttemptRepository',
         'ModuleAttemptRepository',
+        LifeService,
       ],
     },
     {
@@ -637,9 +654,9 @@ import { MarkBadgeSeenUseCase } from './core/usecases/mark-badge-seen.use-case';
     },
     {
       provide: GetUserProfileUseCase,
-      useFactory: (userRepository: UserRepository) =>
-        new GetUserProfileUseCase(userRepository),
-      inject: [UserRepository],
+      useFactory: (userRepository: UserRepository, lifeService: LifeService) =>
+        new GetUserProfileUseCase(userRepository, lifeService),
+      inject: [UserRepository, LifeService],
     },
   ],
 })

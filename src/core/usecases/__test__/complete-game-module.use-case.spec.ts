@@ -19,12 +19,15 @@ import { FillInTheBlankChoice } from '../../domain/model/FillInTheBlankChoice';
 import { TrueOrFalseModule } from '../../domain/model/TrueOrFalseModule';
 import { InMemoryModuleAttemptRepository } from '../../../adapters/in-memory/in-memory-module-attempt.repository';
 import { InMemoryLessonAttemptRepository } from '../../../adapters/in-memory/in-memory-lesson-attempt.repository';
+import { LifeService } from '../services/life.service';
+import { InMemoryLifeRepository } from '../../../adapters/in-memory/in-memory-life.repository';
 
 describe('CompleteGameModuleUseCase', () => {
   let gameModuleRepository: InMemoryGameModuleRepository;
   let lessonRepository: InMemoryLessonRepository;
   let lessonAttemptRepository: InMemoryLessonAttemptRepository;
   let moduleAttemptRepository: InMemoryModuleAttemptRepository;
+  let lifeRepository: InMemoryLifeRepository;
   let useCase: CompleteGameModuleUseCase;
 
   beforeEach(() => {
@@ -32,6 +35,9 @@ describe('CompleteGameModuleUseCase', () => {
     lessonRepository = new InMemoryLessonRepository();
     lessonAttemptRepository = new InMemoryLessonAttemptRepository();
     moduleAttemptRepository = new InMemoryModuleAttemptRepository();
+    lifeRepository = new InMemoryLifeRepository();
+
+    const lifeService = new LifeService(lifeRepository);
 
     const strategyFactory = new MapCompleteGameModuleStrategyFactory([
       {
@@ -54,11 +60,13 @@ describe('CompleteGameModuleUseCase', () => {
       strategyFactory,
       lessonAttemptRepository,
       moduleAttemptRepository,
+      lifeService,
     );
     moduleAttemptRepository.removeAll();
     lessonAttemptRepository.removeAll();
     gameModuleRepository.removeAll();
     lessonRepository.removeAll();
+    lifeRepository.removeAll();
   });
 
   const createTestLesson = () => {
@@ -454,6 +462,7 @@ describe('CompleteGameModuleUseCase', () => {
       expect(result.feedback).toBe(
         'Incorrect. Lyon is a major city but not the capital.',
       );
+      expect(result.isLost).toBe(false);
     });
 
     it('should throw InvalidAnswerError when blankId is empty', async () => {
@@ -679,6 +688,7 @@ describe('CompleteGameModuleUseCase', () => {
       // Then
       expect(result.isCorrect).toBe(false);
       expect(result.feedback).toBe('Incorrect. The correct answer is: True');
+      expect(result.isLost).toBe(false);
     });
 
     it('should throw InvalidAnswerError when trueOrFalse answer is undefined', async () => {
@@ -775,6 +785,7 @@ describe('CompleteGameModuleUseCase', () => {
       isCorrect: true,
       nextGameModuleId: null,
       totalGameModules: 1,
+      isLost: false,
     });
   });
 
@@ -835,5 +846,54 @@ describe('CompleteGameModuleUseCase', () => {
     await expect(useCase.execute(command)).rejects.toThrow(
       `Module with id question-2 has already been attempted in lesson attempt ${lessonAttempt?.id}`,
     );
+  });
+
+  it('should set isLost=true when life service indicates user has lost all lives', async () => {
+    // Given
+    const correctChoice = new McqChoice({
+      id: 'choice-1',
+      text: 'Paris',
+      isCorrect: true,
+      correctionMessage: 'Correct! Paris is indeed the capital of France.',
+    });
+    const incorrectChoice = new McqChoice({
+      id: 'choice-2',
+      text: 'Lyon',
+      isCorrect: false,
+      correctionMessage: 'Incorrect. Lyon is a major city but not the capital.',
+    });
+    const mcqModule = new McqModule({
+      id: 'question-1',
+      lessonId: 'lesson-1',
+      question: 'What is the capital of France?',
+      choices: [correctChoice, incorrectChoice],
+    });
+    const lesson = new Lesson(
+      'lesson-1',
+      'Test Lesson',
+      'A test lesson',
+      'chapter-1',
+      1,
+      true,
+      [mcqModule],
+    );
+    lessonRepository.create(lesson);
+    gameModuleRepository.create(mcqModule);
+
+    for (let i = 0; i < 3; i++) {
+      await lifeRepository.loseLife('user-1');
+    }
+
+    const command: CompleteGameModuleCommand = {
+      userId: 'user-1',
+      moduleId: 'question-1',
+      gameType: GameType.MCQ,
+      mcq: { choiceId: 'choice-2' },
+    };
+
+    // When
+    await useCase.execute(command);
+    const result = await useCase.execute(command);
+    expect(result.isLost).toBe(true);
   });
 });

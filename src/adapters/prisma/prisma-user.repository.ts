@@ -70,6 +70,7 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async removeAll(): Promise<void> {
+    // TODO: Verify if this is the correct way to delete all data
     await this.prisma.transaction.deleteMany();
     await this.prisma.portfolioPosition.deleteMany();
     await this.prisma.userPortfolio.deleteMany();
@@ -78,6 +79,7 @@ export class PrismaUserRepository implements UserRepository {
     await this.prisma.lessonAttempt.deleteMany();
     await this.prisma.moduleAttempt.deleteMany();
     await this.prisma.userBadge.deleteMany();
+    await this.prisma.life.deleteMany();
     await this.prisma.user.deleteMany();
   }
 }
