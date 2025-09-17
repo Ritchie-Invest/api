@@ -2,11 +2,11 @@ import { DomainModel } from '../../base/domain-model';
 
 export class Life extends DomainModel {
   userId: string;
-  emissionDate: Date;
+  lostAt: Date;
 
-  constructor(id: string, userId: string, emissionDate?: Date) {
-    super(id);
-    this.userId = userId;
-    this.emissionDate = emissionDate || new Date();
+  constructor(params: { id: string; userId: string; lostAt?: Date }) {
+    super(params.id);
+    this.userId = params.userId;
+    this.lostAt = params.lostAt || new Date();
   }
 }

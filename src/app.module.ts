@@ -99,6 +99,7 @@ import { CreateTickerUseCase } from './core/usecases/create-ticker.use-case';
 import { MarkBadgeSeenUseCase } from './core/usecases/mark-badge-seen.use-case';
 import { LifeRepository } from './core/domain/repository/life.repository';
 import { PrismaLifeRepository } from './adapters/prisma/prisma-life.repository';
+import { LifeService } from './core/usecases/services/life.service';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -294,6 +295,12 @@ import { PrismaLifeRepository } from './adapters/prisma/prisma-life.repository';
       inject: [UserRepository],
     },
     {
+      provide: LifeService,
+      useFactory: (lifeRepository: LifeRepository) =>
+        new LifeService(lifeRepository),
+      inject: [LifeRepository],
+    },
+    {
       provide: LifeRepository,
       useFactory: (prisma: PrismaService) => new PrismaLifeRepository(prisma),
       inject: [PrismaService],
@@ -443,7 +450,7 @@ import { PrismaLifeRepository } from './adapters/prisma/prisma-life.repository';
         strategyFactory: CompleteGameModuleStrategyFactory,
         lessonAttemptRepository: LessonAttemptRepository,
         moduleAttemptRepository: ModuleAttemptRepository,
-        lifeRepository: LifeRepository,
+        lifeService: LifeService,
       ) =>
         new CompleteGameModuleUseCase(
           gameModuleRepository,
@@ -451,7 +458,7 @@ import { PrismaLifeRepository } from './adapters/prisma/prisma-life.repository';
           strategyFactory,
           lessonAttemptRepository,
           moduleAttemptRepository,
-          lifeRepository,
+          lifeService,
         ),
       inject: [
         GameModuleRepository,
@@ -459,7 +466,7 @@ import { PrismaLifeRepository } from './adapters/prisma/prisma-life.repository';
         'CompleteGameModuleStrategyFactory',
         'LessonAttemptRepository',
         'ModuleAttemptRepository',
-        LifeRepository,
+        LifeService,
       ],
     },
     {
@@ -647,11 +654,9 @@ import { PrismaLifeRepository } from './adapters/prisma/prisma-life.repository';
     },
     {
       provide: GetUserProfileUseCase,
-      useFactory: (
-        userRepository: UserRepository,
-        lifeRepository: LifeRepository,
-      ) => new GetUserProfileUseCase(userRepository, lifeRepository),
-      inject: [UserRepository, LifeRepository],
+      useFactory: (userRepository: UserRepository, lifeService: LifeService) =>
+        new GetUserProfileUseCase(userRepository, lifeService),
+      inject: [UserRepository, LifeService],
     },
   ],
 })

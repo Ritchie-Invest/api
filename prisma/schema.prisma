@@ -177,9 +177,9 @@ model UserBadge {
 }
 
 model Life {
-  id           String   @id @default(cuid())
-  userId       String
-  emissionDate DateTime @default(now())
+  id     String   @id @default(cuid())
+  userId String
+  lostAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 }
@@ -210,11 +210,11 @@ model DailyBar {
 }
 
 model UserPortfolio {
-  id          String           @id @default(cuid())
+  id          String              @id @default(cuid())
   userId      String
   currency    Currency
   history     PortfolioPosition[]
-  user        User             @relation(fields: [userId], references: [id])
+  user        User                @relation(fields: [userId], references: [id])
   Transaction Transaction[]
 }
 

@@ -32,17 +32,17 @@ export class GetMeResponse {
   @ApiProperty({
     description: 'Current number of lives (0-5)',
   })
-  life_number: number;
+  life: number;
 
   @ApiProperty({
     description: 'Time in seconds until next life regeneration',
   })
-  next_life_in: number;
+  nextLifeIn: number;
 
   @ApiProperty({
     description: 'Whether the user has lost all lives',
   })
-  has_lost: boolean;
+  hasLost: boolean;
 
   constructor(
     id: string,
@@ -53,9 +53,9 @@ export class GetMeResponse {
     xpForThisLevel: number,
     isInvestmentUnlocked: boolean,
     levelRequiredToUnlockInvestment: number,
-    life_number: number,
-    next_life_in: number,
-    has_lost: boolean,
+    life: number,
+    nextLifeIn: number,
+    hasLost: boolean,
   ) {
     this.id = id;
     this.email = email;
@@ -65,8 +65,8 @@ export class GetMeResponse {
     this.xpForThisLevel = xpForThisLevel;
     this.isInvestmentUnlocked = isInvestmentUnlocked;
     this.levelRequiredToUnlockInvestment = levelRequiredToUnlockInvestment;
-    this.life_number = life_number;
-    this.next_life_in = next_life_in;
-    this.has_lost = has_lost;
+    this.life = life;
+    this.nextLifeIn = nextLifeIn;
+    this.hasLost = hasLost;
   }
 }

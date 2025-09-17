@@ -2,7 +2,7 @@ import { UseCase } from '../base/use-case';
 import { UserRepository } from '../domain/repository/user.repository';
 import { UserNotFoundError } from '../domain/error/UserNotFoundError';
 import { Email } from '../domain/value-object/Email';
-import { LifeRepository } from '../domain/repository/life.repository';
+import { LifeService } from './services/life.service';
 
 export type GetUserProfileCommand = {
   userId: string;
@@ -17,9 +17,9 @@ export type GetUserProfileResult = {
   xpForThisLevel: number;
   isInvestmentUnlocked: boolean;
   levelRequiredToUnlockInvestment: number;
-  life_number: number;
-  next_life_in: number;
-  has_lost: boolean;
+  life: number;
+  nextLifeIn: number;
+  hasLost: boolean;
 };
 
 export class GetUserProfileUseCase
@@ -32,7 +32,7 @@ export class GetUserProfileUseCase
 
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly lifeRepository: LifeRepository,
+    private readonly lifeService: LifeService,
   ) {}
 
   async execute(command: GetUserProfileCommand): Promise<GetUserProfileResult> {
@@ -41,7 +41,9 @@ export class GetUserProfileUseCase
       throw new UserNotFoundError(command.userId);
     }
 
-    const lifeData = await this.lifeRepository.getUserLifeData(command.userId);
+    const life = await this.lifeService.getUserLifeNumber(command.userId);
+    const nextLifeIn = await this.lifeService.getNextLifeIn(command.userId);
+    const hasLost = await this.lifeService.isUserOutOfLives(command.userId);
 
     return {
       id: user.id,
@@ -52,9 +54,9 @@ export class GetUserProfileUseCase
       xpForThisLevel: user.xpForThisLevel,
       isInvestmentUnlocked: user.isInvestmentUnlocked,
       levelRequiredToUnlockInvestment: this.LEVEL_REQUIRED_TO_UNLOCK_INVESTMENT,
-      life_number: lifeData.life_number,
-      next_life_in: lifeData.next_life_in,
-      has_lost: lifeData.has_lost,
+      life,
+      nextLifeIn,
+      hasLost,
     };
   }
 }

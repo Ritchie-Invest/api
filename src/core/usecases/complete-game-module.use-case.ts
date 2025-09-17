@@ -12,7 +12,7 @@ import { ModuleAttemptRepository } from '../domain/repository/module-attempt.rep
 import { ModuleAttempt } from '../domain/model/ModuleAttempt';
 import { LessonAttempt } from '../domain/model/LessonAttempt';
 import { ModuleAlreadyAttemptedError } from '../domain/error/ModuleAlreadyAttemptedError';
-import { LifeRepository } from '../domain/repository/life.repository';
+import { LifeService } from './services/life.service';
 
 export type CompleteGameModuleCommand = {
   userId: string;
@@ -47,7 +47,7 @@ export class CompleteGameModuleUseCase
     private readonly strategyFactory: CompleteGameModuleStrategyFactory,
     private readonly lessonAttemptRepository: LessonAttemptRepository,
     private readonly moduleAttemptRepository: ModuleAttemptRepository,
-    private readonly lifeRepository: LifeRepository,
+    private readonly lifeService: LifeService,
   ) {}
 
   async execute(
@@ -138,11 +138,8 @@ export class CompleteGameModuleUseCase
 
     let isLost = false;
     if (!isCorrect) {
-      await this.lifeRepository.addLostLife(command.userId);
-      const lifeData = await this.lifeRepository.getUserLifeData(
-        command.userId,
-      );
-      isLost = lifeData.has_lost;
+      await this.lifeService.loseLife(command.userId);
+      isLost = await this.lifeService.isUserOutOfLives(command.userId);
     }
 
     const currentIndex = lesson.modules.findIndex(

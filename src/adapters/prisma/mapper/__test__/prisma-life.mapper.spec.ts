@@ -8,8 +8,12 @@ describe('PrismaLifeMapper', () => {
   describe('fromDomain', () => {
     it('should map Life to LifeEntity', () => {
       // Given
-      const emissionDate = new Date('2023-10-01T10:00:00Z');
-      const life = new Life('life-1', 'user-1', emissionDate);
+      const lostAt = new Date('2023-10-01T10:00:00Z');
+      const life = new Life({
+        id: 'life-1',
+        userId: 'user-1',
+        lostAt,
+      });
 
       // When
       const entity = mapper.fromDomain(life);
@@ -18,7 +22,7 @@ describe('PrismaLifeMapper', () => {
       expect(entity).toEqual({
         id: 'life-1',
         userId: 'user-1',
-        emissionDate: emissionDate,
+        lostAt,
       });
     });
   });
@@ -26,11 +30,11 @@ describe('PrismaLifeMapper', () => {
   describe('toDomain', () => {
     it('should map LifeEntity to Life', () => {
       // Given
-      const emissionDate = new Date('2023-10-01T10:00:00Z');
+      const lostAt = new Date('2023-10-01T10:00:00Z');
       const entity: LifeEntity = {
         id: 'life-1',
         userId: 'user-1',
-        emissionDate: emissionDate,
+        lostAt,
       };
 
       // When
@@ -40,7 +44,7 @@ describe('PrismaLifeMapper', () => {
       expect(life).toEqual({
         id: 'life-1',
         userId: 'user-1',
-        emissionDate: emissionDate,
+        lostAt,
       });
     });
   });

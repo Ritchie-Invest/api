@@ -9,11 +9,15 @@ export class PrismaLifeMapper implements EntityMapper<Life, LifeEntity> {
     return {
       id: model.id,
       userId: model.userId,
-      emissionDate: model.emissionDate,
+      lostAt: model.lostAt,
     };
   }
 
   toDomain(entity: LifeEntity): Life {
-    return new Life(entity.id, entity.userId, entity.emissionDate);
+    return new Life({
+      id: entity.id,
+      userId: entity.userId,
+      lostAt: entity.lostAt,
+    });
   }
 }

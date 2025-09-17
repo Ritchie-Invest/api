@@ -20,6 +20,7 @@ import { InMemoryUserBadgeRepository } from '../../../adapters/in-memory/in-memo
 import { AwardBadgesOnLessonCompletedHandler } from '../../../adapters/events/award-badges-on-lesson-completed.handler';
 import { CheckAndAwardBadgesUseCase } from '../check-and-award-badges.use-case';
 import { BadgeType } from '../../domain/type/BadgeType';
+import { Email } from '../../domain/value-object/Email';
 
 describe('CompleteLessonUseCase', () => {
   let gameModuleRepository: InMemoryGameModuleRepository;
@@ -191,7 +192,7 @@ describe('CompleteLessonUseCase', () => {
 
     userRepository.create({
       id: userId,
-      email: 'user2@example.com',
+      email: new Email('user2@example.com'),
       password: 'hashed',
       type: UserType.STUDENT,
       totalXp: 0,
@@ -296,7 +297,7 @@ describe('CompleteLessonUseCase', () => {
 
     userRepository.create({
       id: userId,
-      email: 'user2@example.com',
+      email: new Email('user2@example.com'),
       password: 'hashed',
       type: UserType.STUDENT,
       totalXp: 0,
