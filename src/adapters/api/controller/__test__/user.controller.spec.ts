@@ -28,6 +28,7 @@ import { LessonCompletion } from '../../../../core/domain/model/LessonCompletion
 import { GetUserProgressResponse } from '../../response/get-user-progress.response';
 import { LessonStatus } from '../../../../core/domain/type/LessonStatus';
 import { ChapterStatus } from '../../../../core/domain/type/ChapterStatus';
+import { Email } from '../../../../core/domain/value-object/Email';
 
 describe('UserControllerIT', () => {
   let app: INestApplication<App>;
@@ -111,7 +112,7 @@ describe('UserControllerIT', () => {
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toEqual({
         id: existingUser.id,
-        email: existingUser.email,
+        email: existingUser.email.value(),
         type: UserType.ADMIN,
         createdAt: existingUser.createdAt.toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -183,7 +184,7 @@ describe('UserControllerIT', () => {
       expect(response.status).toBe(HttpStatus.NOT_FOUND);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBe(
-        'User with email non-existent-user-id not found',
+        'User with id non-existent-user-id not found',
       );
     });
   });
@@ -194,7 +195,7 @@ describe('UserControllerIT', () => {
       const accessToken = generateAccessToken(UserType.STUDENT);
       const existingUser = UserFactory.make({
         id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-        email: 'test@ritchie-invest.com',
+        email: new Email('test@ritchie-invest.com'),
         totalXp: 42,
       });
       await userRepository.create(existingUser);
@@ -208,13 +209,16 @@ describe('UserControllerIT', () => {
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toEqual({
         id: existingUser.id,
-        email: existingUser.email,
+        email: existingUser.email.value(),
         totalXp: 42,
         level: 3,
         xpRequiredForNextLevel: 25,
         xpForThisLevel: 17,
         isInvestmentUnlocked: false,
         levelRequiredToUnlockInvestment: 5,
+        life: 5,
+        nextLifeIn: 0,
+        hasLost: false,
       });
     });
 
@@ -241,21 +245,19 @@ describe('UserControllerIT', () => {
       expect(response.status).toBe(HttpStatus.NOT_FOUND);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.message).toBe(
-        'User with email be7cbc6d-782b-4939-8cff-e577dfe3e79a not found',
+        'User with id be7cbc6d-782b-4939-8cff-e577dfe3e79a not found',
       );
     });
   });
 
   describe('getUserProgress', () => {
     beforeEach(async () => {
-      await userRepository.create({
+      const existingUser = UserFactory.make({
         id: 'be7cbc6d-782b-4939-8cff-e577dfe3e79a',
-        email: 'test@ritchie-invest.com',
-        password: 'hashedPassword123',
-        type: UserType.ADMIN,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        email: new Email('test@ritchie-invest.com'),
+        totalXp: 42,
       });
+      await userRepository.create(existingUser);
     });
 
     it('should return user chapters with progress', async () => {

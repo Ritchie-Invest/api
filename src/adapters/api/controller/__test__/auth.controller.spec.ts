@@ -19,6 +19,7 @@ import { LoginRequest } from '../../request/login.request';
 import { TokenService } from '../../../../core/domain/service/token.service';
 import { AppModule } from '../../../../app.module';
 import { UserFactory } from './utils/user.factory';
+import { Email } from '../../../../core/domain/value-object/Email';
 
 describe('AuthControllerIT', () => {
   let app: INestApplication<App>;
@@ -85,7 +86,7 @@ describe('AuthControllerIT', () => {
 
       const user = await userRepository.findById(responseBody.id);
       expect(user).toBeDefined();
-      expect(user?.email).toBe(registerRequest.email);
+      expect(user?.email.value()).toBe(registerRequest.email);
       expect(user?.type).toBe(UserType.STUDENT);
       expect(user?.createdAt).toBeDefined();
       expect(user?.updatedAt).toBeDefined();
@@ -111,7 +112,7 @@ describe('AuthControllerIT', () => {
     it('should return 409 for existing user', async () => {
       // Given
       const user = UserFactory.make({
-        email: 'test@example.com',
+        email: new Email('test@example.com'),
       });
       await userRepository.create(user);
       const registerRequest = new RegisterRequest(
@@ -135,7 +136,7 @@ describe('AuthControllerIT', () => {
     it('should login an existing user', async () => {
       // Given
       const user = UserFactory.make({
-        email: 'test@example.com',
+        email: new Email('test@example.com'),
         password:
           '$2b$10$uKniZFGl/gr6.SWpifzq1ebJLN79UjKw0UcQjv.0oe6jyedaxTNqK',
       });
@@ -190,7 +191,7 @@ describe('AuthControllerIT', () => {
       // Given
       const accessToken = generateAccessToken(UserType.STUDENT);
       const user = UserFactory.make({
-        email: 'test@ritchie-invest.com',
+        email: new Email('test@ritchie-invest.com'),
       });
       await userRepository.create(user);
       const refreshToken = await refreshTokenRepository.create({

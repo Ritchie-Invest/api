@@ -5,7 +5,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { DomainError } from '../core/base/domain-error';
-import { UserNotFoundError } from '../core/domain/error/UserNotFoundError';
+import { UserEmailNotFoundError } from '../core/domain/error/UserEmailNotFoundError';
 import { UserAlreadyExistsError } from '../core/domain/error/UserAlreadyExistsError';
 import { WrongEmailFormatError } from '../core/domain/error/WrongEmailFormatError';
 import { WrongPasswordFormatError } from '../core/domain/error/WrongPasswordFormatError';
@@ -34,6 +34,7 @@ import { TickerNotFoundError } from '../core/domain/error/TickerNotFoundError';
 import { PortfolioPositionNotFoundError } from '../core/domain/error/PortfolioPositionNotFoundError';
 import { InvalidHistoryLimitError } from '../core/domain/error/InvalidHistoryLimitError';
 import { TickerAlreadyExistsError } from '../core/domain/error/TickerAlreadyExistsError';
+import { UserNotFoundError } from '../core/domain/error/UserNotFoundError';
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
@@ -69,6 +70,7 @@ export class DomainErrorFilter implements ExceptionFilter {
       return HttpStatus.BAD_REQUEST;
     }
     if (
+      exception instanceof UserEmailNotFoundError ||
       exception instanceof UserNotFoundError ||
       exception instanceof ChapterNotFoundError ||
       exception instanceof LessonNotFoundError ||

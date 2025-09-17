@@ -2,6 +2,7 @@ import { PrismaUserMapper } from '../prisma-user.mapper';
 import { User } from '../../../../core/domain/model/User';
 import { User as UserEntity, $Enums } from '@prisma/client';
 import { UserType } from '../../../../core/domain/type/UserType';
+import { Email } from '../../../../core/domain/value-object/Email';
 
 describe('PrismaUserMapper', () => {
   const mapper = new PrismaUserMapper();
@@ -19,7 +20,7 @@ describe('PrismaUserMapper', () => {
         // Given
         const user = new User(
           'user-1',
-          'user@example.com',
+          new Email('user@example.com'),
           'securepassword123',
           domain,
           0,
@@ -68,7 +69,7 @@ describe('PrismaUserMapper', () => {
         // Then
         expect(user).toEqual({
           id: 'user-1',
-          email: 'user@example.com',
+          email: new Email('user@example.com'),
           password: 'securepassword123',
           type: domain,
           totalXp: 0,

@@ -254,7 +254,6 @@ describe('LessonControllerIT', () => {
         'New Lesson',
         'Description of New Lesson',
         chapter.id,
-        GameType.MCQ,
       );
 
       // When
@@ -280,7 +279,6 @@ describe('LessonControllerIT', () => {
         '',
         'Description of New Lesson',
         'chapter-id',
-        GameType.MCQ,
       );
 
       // When
@@ -301,7 +299,6 @@ describe('LessonControllerIT', () => {
         'New Lesson',
         'Description of New Lesson',
         'chapter-id',
-        GameType.MCQ,
       );
 
       // When
@@ -322,7 +319,6 @@ describe('LessonControllerIT', () => {
         'New Lesson',
         'Description of New Lesson',
         'chapter-id',
-        GameType.MCQ,
       );
 
       // When

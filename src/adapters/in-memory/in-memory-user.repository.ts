@@ -1,10 +1,11 @@
 import { UserRepository } from '../../core/domain/repository/user.repository';
 import { User } from '../../core/domain/model/User';
 import { Injectable } from '@nestjs/common';
+import { Email } from '../../core/domain/value-object/Email';
 
 @Injectable()
 export class InMemoryUserRepository implements UserRepository {
-  private users: Map<string, User> = new Map();
+  private readonly users: Map<string, User> = new Map();
 
   create(
     data: Pick<
@@ -30,9 +31,9 @@ export class InMemoryUserRepository implements UserRepository {
     return this.users.get(id) || null;
   }
 
-  findByEmail(email: string): User | null {
+  findByEmail(email: Email): User | null {
     for (const user of this.users.values()) {
-      if (user.email === email) {
+      if (user.email.value() === email.value()) {
         return user;
       }
     }

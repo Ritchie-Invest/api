@@ -1,6 +1,6 @@
 import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 
-export class GameModuleDetails {}
+export class LightGameModuleDetails {}
 
 export class LightMcqChoice {
   @ApiProperty()
@@ -9,13 +9,18 @@ export class LightMcqChoice {
   @ApiProperty()
   text: string;
 
-  constructor(id: string, text: string) {
+  // TODO: Remove isCorrect for security reasons
+  @ApiProperty()
+  isCorrect: boolean;
+
+  constructor(id: string, text: string, isCorrect: boolean) {
     this.id = id;
     this.text = text;
+    this.isCorrect = isCorrect;
   }
 }
 
-export class McqModuleDetails extends GameModuleDetails {
+export class LightMcqModuleDetails extends LightGameModuleDetails {
   @ApiProperty()
   question: string;
 
@@ -29,7 +34,62 @@ export class McqModuleDetails extends GameModuleDetails {
   }
 }
 
-@ApiExtraModels(McqModuleDetails)
+export class LightFillInTheBlankChoice {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  text: string;
+
+  // TODO: Remove isCorrect for security reasons
+  @ApiProperty()
+  isCorrect: boolean;
+
+  constructor(id: string, text: string, isCorrect: boolean) {
+    this.id = id;
+    this.text = text;
+    this.isCorrect = isCorrect;
+  }
+}
+
+export class LightFillInTheBlankModuleDetails extends LightGameModuleDetails {
+  @ApiProperty()
+  firstText: string;
+
+  @ApiProperty()
+  secondText: string;
+
+  @ApiProperty()
+  blanks: LightFillInTheBlankChoice[];
+
+  constructor(
+    firstText: string,
+    secondText: string,
+    blanks: LightFillInTheBlankChoice[],
+  ) {
+    super();
+    this.firstText = firstText;
+    this.secondText = secondText;
+    this.blanks = blanks;
+  }
+}
+
+export class LightTrueOrFalseModuleDetails extends LightGameModuleDetails {
+  @ApiProperty()
+  sentence: string;
+
+  // TODO: Remove isTrue for security reasons
+  @ApiProperty()
+  isTrue: boolean;
+
+  constructor(sentence: string, isTrue: boolean) {
+    super();
+    this.sentence = sentence;
+    this.isTrue = isTrue;
+  }
+}
+
+@ApiExtraModels(LightMcqModuleDetails, LightTrueOrFalseModuleDetails)
 export class GetLightGameModuleByIdResponse {
   @ApiProperty()
   id: string;
@@ -37,8 +97,13 @@ export class GetLightGameModuleByIdResponse {
   @ApiProperty()
   lessonId: string;
 
-  @ApiProperty({ oneOf: [{ $ref: getSchemaPath(McqModuleDetails) }] })
-  details: GameModuleDetails;
+  @ApiProperty({
+    oneOf: [
+      { $ref: getSchemaPath(LightMcqModuleDetails) },
+      { $ref: getSchemaPath(LightTrueOrFalseModuleDetails) },
+    ],
+  })
+  details: LightGameModuleDetails;
 
   @ApiProperty()
   updatedAt: Date;
@@ -49,7 +114,7 @@ export class GetLightGameModuleByIdResponse {
   constructor(
     id: string,
     lessonId: string,
-    details: GameModuleDetails,
+    details: LightGameModuleDetails,
     updatedAt: Date,
     createdAt: Date,
   ) {

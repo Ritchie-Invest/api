@@ -2,6 +2,9 @@ import { ProfileRequest } from '../../request/profile.request';
 import { UserType } from '../../../../core/domain/type/UserType';
 import { UpdateUserTypeMapper } from '../update-user-type.mapper';
 import { User } from '../../../../core/domain/model/User';
+import { Email } from '../../../../core/domain/value-object/Email';
+import { UpdateUserTypeResponse } from '../../response/update-user-type.response';
+import { UpdateUserTypeCommand } from '../../../../core/usecases/update-user-type.use-case';
 
 describe('UpdateUserTypeMapper', () => {
   describe('toDomain', () => {
@@ -25,7 +28,7 @@ describe('UpdateUserTypeMapper', () => {
       );
 
       // Then
-      expect(command).toEqual({
+      expect(command).toEqual<UpdateUserTypeCommand>({
         currentUser: {
           id: 'user-1',
           type: UserType.ADMIN,
@@ -39,20 +42,22 @@ describe('UpdateUserTypeMapper', () => {
   describe('fromDomain', () => {
     it('should map User to UpdateUserTypeResponse', () => {
       // Given
-      const user: User = {
-        id: 'user-123',
-        email: 'user@example.com',
-        password: 'hashOfPassword',
-        type: UserType.STUDENT,
-        createdAt: new Date('2023-01-01T00:00:00Z'),
-        updatedAt: new Date('2023-01-02T00:00:00Z'),
-      };
+      const user = new User(
+        'user-123',
+        new Email('user@example.com'),
+        'hashOfPassword',
+        UserType.STUDENT,
+        0,
+        false,
+        new Date('2023-01-02T00:00:00Z'),
+        new Date('2023-01-01T00:00:00Z'),
+      );
 
       // When
       const response = UpdateUserTypeMapper.fromDomain(user);
 
       // Then
-      expect(response).toEqual({
+      expect(response).toEqual<UpdateUserTypeResponse>({
         id: 'user-123',
         email: 'user@example.com',
         type: UserType.STUDENT,

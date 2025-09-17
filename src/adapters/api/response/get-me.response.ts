@@ -29,6 +29,21 @@ export class GetMeResponse {
   })
   levelRequiredToUnlockInvestment: number;
 
+  @ApiProperty({
+    description: 'Current number of lives (0-5)',
+  })
+  life: number;
+
+  @ApiProperty({
+    description: 'Time in seconds until next life regeneration',
+  })
+  nextLifeIn: number;
+
+  @ApiProperty({
+    description: 'Whether the user has lost all lives',
+  })
+  hasLost: boolean;
+
   constructor(
     id: string,
     email: string,
@@ -38,6 +53,9 @@ export class GetMeResponse {
     xpForThisLevel: number,
     isInvestmentUnlocked: boolean,
     levelRequiredToUnlockInvestment: number,
+    life: number,
+    nextLifeIn: number,
+    hasLost: boolean,
   ) {
     this.id = id;
     this.email = email;
@@ -47,5 +65,8 @@ export class GetMeResponse {
     this.xpForThisLevel = xpForThisLevel;
     this.isInvestmentUnlocked = isInvestmentUnlocked;
     this.levelRequiredToUnlockInvestment = levelRequiredToUnlockInvestment;
+    this.life = life;
+    this.nextLifeIn = nextLifeIn;
+    this.hasLost = hasLost;
   }
 }

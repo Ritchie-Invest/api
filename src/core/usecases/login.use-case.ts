@@ -1,5 +1,5 @@
 import { UseCase } from '../base/use-case';
-import { UserNotFoundError } from '../domain/error/UserNotFoundError';
+import { UserEmailNotFoundError } from '../domain/error/UserEmailNotFoundError';
 import { RefreshTokenRepository } from '../domain/repository/refresh-token.repository';
 import { UserRepository } from '../domain/repository/user.repository';
 import { UserPortfolioRepository } from '../domain/repository/user-portfolio.repository';
@@ -9,9 +9,10 @@ import { PortfolioPositionRepository } from '../domain/repository/portfolio-posi
 import { UserPortfolio } from '../domain/model/UserPortfolio';
 import { Currency } from '../domain/type/Currency';
 import { PortfolioPosition } from '../domain/model/PortfolioPosition';
+import { Email } from '../domain/value-object/Email';
 
 export type LoginCommand = {
-  email: string;
+  email: Email;
   password: string;
 };
 
@@ -36,12 +37,12 @@ export class LoginUseCase implements UseCase<LoginCommand, LoginResult> {
     const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
-      throw new UserNotFoundError(email);
+      throw new UserEmailNotFoundError(email);
     }
 
     const isPasswordValid = await this.verifyPassword(password, user.password);
     if (!isPasswordValid) {
-      throw new UserNotFoundError(email);
+      throw new UserEmailNotFoundError(email);
     }
 
     let portfolio = await this.userPortfolioRepository.findByUserId(user.id);
@@ -65,14 +66,14 @@ export class LoginUseCase implements UseCase<LoginCommand, LoginResult> {
 
     const accessToken = this.tokenService.generateAccessToken({
       id: user.id,
-      email: user.email,
+      email: user.email.value(),
       type: user.type,
       portfolioId: portfolio.id,
     });
 
     const refreshToken = this.tokenService.generateRefreshToken({
       id: user.id,
-      email: user.email,
+      email: user.email.value(),
       type: user.type,
       portfolioId: portfolio.id,
     });

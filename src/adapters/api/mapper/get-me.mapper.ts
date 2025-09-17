@@ -13,13 +13,16 @@ export class GetMeMapper {
   static fromDomain(result: GetUserProfileResult): GetMeResponse {
     return new GetMeResponse(
       result.id,
-      result.email,
+      result.email.value(),
       result.totalXp,
       result.level,
       result.xpRequiredForNextLevel,
       result.xpForThisLevel,
       result.isInvestmentUnlocked,
       result.levelRequiredToUnlockInvestment,
+      result.life,
+      result.nextLifeIn,
+      result.hasLost,
     );
   }
 }

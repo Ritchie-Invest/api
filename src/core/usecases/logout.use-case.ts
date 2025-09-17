@@ -1,5 +1,5 @@
 import { UseCase } from '../base/use-case';
-import { UserNotFoundError } from '../domain/error/UserNotFoundError';
+import { UserEmailNotFoundError } from '../domain/error/UserEmailNotFoundError';
 import { User } from '../domain/model/User';
 import { RefreshTokenRepository } from '../domain/repository/refresh-token.repository';
 import { UserRepository } from '../domain/repository/user.repository';
@@ -20,7 +20,7 @@ export class LogoutUseCase implements UseCase<LogoutCommand, void> {
 
     const user = await this.userRepository.findByEmail(currentUser.email);
     if (!user) {
-      throw new UserNotFoundError(currentUser.email);
+      throw new UserEmailNotFoundError(currentUser.email);
     }
 
     await this.refreshTokenRepository.expireNow(refreshToken);

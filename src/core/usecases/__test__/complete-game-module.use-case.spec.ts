@@ -19,12 +19,15 @@ import { FillInTheBlankChoice } from '../../domain/model/FillInTheBlankChoice';
 import { TrueOrFalseModule } from '../../domain/model/TrueOrFalseModule';
 import { InMemoryModuleAttemptRepository } from '../../../adapters/in-memory/in-memory-module-attempt.repository';
 import { InMemoryLessonAttemptRepository } from '../../../adapters/in-memory/in-memory-lesson-attempt.repository';
+import { LifeService } from '../services/life.service';
+import { InMemoryLifeRepository } from '../../../adapters/in-memory/in-memory-life.repository';
 
 describe('CompleteGameModuleUseCase', () => {
   let gameModuleRepository: InMemoryGameModuleRepository;
   let lessonRepository: InMemoryLessonRepository;
   let lessonAttemptRepository: InMemoryLessonAttemptRepository;
   let moduleAttemptRepository: InMemoryModuleAttemptRepository;
+  let lifeRepository: InMemoryLifeRepository;
   let useCase: CompleteGameModuleUseCase;
 
   beforeEach(() => {
@@ -32,6 +35,9 @@ describe('CompleteGameModuleUseCase', () => {
     lessonRepository = new InMemoryLessonRepository();
     lessonAttemptRepository = new InMemoryLessonAttemptRepository();
     moduleAttemptRepository = new InMemoryModuleAttemptRepository();
+    lifeRepository = new InMemoryLifeRepository();
+
+    const lifeService = new LifeService(lifeRepository);
 
     const strategyFactory = new MapCompleteGameModuleStrategyFactory([
       {
@@ -54,11 +60,13 @@ describe('CompleteGameModuleUseCase', () => {
       strategyFactory,
       lessonAttemptRepository,
       moduleAttemptRepository,
+      lifeService,
     );
     moduleAttemptRepository.removeAll();
     lessonAttemptRepository.removeAll();
     gameModuleRepository.removeAll();
     lessonRepository.removeAll();
+    lifeRepository.removeAll();
   });
 
   const createTestLesson = () => {
@@ -73,126 +81,293 @@ describe('CompleteGameModuleUseCase', () => {
     lessonRepository.create(lesson);
   };
 
-  it('should return correct answer and feedback when answer is correct', async () => {
-    // Given
-    createTestLesson();
+  describe('McqModule', () => {
+    it('should return correct answer and feedback when answer is correct', async () => {
+      // Given
+      createTestLesson();
 
-    const correctChoice = new McqChoice({
-      id: 'choice-1',
-      text: 'Paris',
-      isCorrect: true,
-      correctionMessage: 'Correct! Paris is indeed the capital of France.',
+      const correctChoice = new McqChoice({
+        id: 'choice-1',
+        text: 'Paris',
+        isCorrect: true,
+        correctionMessage: 'Correct! Paris is indeed the capital of France.',
+      });
+
+      const incorrectChoice = new McqChoice({
+        id: 'choice-2',
+        text: 'Lyon',
+        isCorrect: false,
+        correctionMessage:
+          'Incorrect. Lyon is a major city but not the capital.',
+      });
+
+      const mcqModule = new McqModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        question: 'What is the capital of France?',
+        choices: [correctChoice, incorrectChoice],
+      });
+
+      gameModuleRepository.create(mcqModule);
+
+      const command: CompleteGameModuleCommand = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: {
+          choiceId: 'choice-1',
+        },
+      };
+
+      // When
+      const result = await useCase.execute(command);
+
+      // Then
+      expect(result.isCorrect).toBe(true);
+      expect(result.feedback).toBe(
+        'Correct! Paris is indeed the capital of France.',
+      );
+      expect(result.correctChoiceId).toBe('choice-1');
+
+      const lessonAttempt = lessonAttemptRepository.findLastByUserIdAndLessonId(
+        'user-1',
+        'lesson-1',
+      );
+      expect(lessonAttempt).toBeDefined();
+      const moduleAttempts = moduleAttemptRepository.findAllByLessonAttemptId(
+        lessonAttempt!.id,
+      );
+      expect(moduleAttempts.length).toBe(1);
+      expect(moduleAttempts[0]?.isCorrect).toBe(true);
+      expect(moduleAttempts[0]?.userId).toBe('user-1');
+      expect(moduleAttempts[0]?.gameModuleId).toBe('question-1');
     });
 
-    const incorrectChoice = new McqChoice({
-      id: 'choice-2',
-      text: 'Lyon',
-      isCorrect: false,
-      correctionMessage: 'Incorrect. Lyon is a major city but not the capital.',
+    it('should return incorrect answer and feedback when answer is wrong', async () => {
+      // Given
+      createTestLesson();
+
+      const correctChoice = new McqChoice({
+        id: 'choice-1',
+        text: 'Paris',
+        isCorrect: true,
+        correctionMessage: 'Correct! Paris is indeed the capital of France.',
+      });
+
+      const incorrectChoice = new McqChoice({
+        id: 'choice-2',
+        text: 'Lyon',
+        isCorrect: false,
+        correctionMessage:
+          'Incorrect. Lyon is a major city but not the capital.',
+      });
+
+      const mcqModule = new McqModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        question: 'What is the capital of France?',
+        choices: [correctChoice, incorrectChoice],
+      });
+
+      gameModuleRepository.create(mcqModule);
+
+      const command: CompleteGameModuleCommand = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: {
+          choiceId: 'choice-2',
+        },
+      };
+
+      // When
+      const result = await useCase.execute(command);
+
+      // Then
+      expect(result.isCorrect).toBe(false);
+      expect(result.feedback).toBe(
+        'Incorrect. Lyon is a major city but not the capital.',
+      );
+      expect(result.correctChoiceId).toBe('choice-1');
+      const lessonAttempt = lessonAttemptRepository.findLastByUserIdAndLessonId(
+        'user-1',
+        'lesson-1',
+      );
+      expect(lessonAttempt).toBeDefined();
+      const moduleAttempts = moduleAttemptRepository.findAllByLessonAttemptId(
+        lessonAttempt!.id,
+      );
+      expect(moduleAttempts.length).toBe(1);
+      expect(moduleAttempts[0]?.isCorrect).toBe(false);
+      expect(moduleAttempts[0]?.userId).toBe('user-1');
+      expect(moduleAttempts[0]?.gameModuleId).toBe('question-1');
     });
 
-    const mcqModule = new McqModule({
-      id: 'question-1',
-      lessonId: 'lesson-1',
-      question: 'What is the capital of France?',
-      choices: [correctChoice, incorrectChoice],
+    it('should throw InvalidAnswerError when choiceId is empty', async () => {
+      // Given
+      createTestLesson();
+
+      const correctChoice = new McqChoice({
+        id: 'choice-1',
+        text: 'Paris',
+        isCorrect: true,
+        correctionMessage: 'Correct!',
+      });
+
+      const incorrectChoice = new McqChoice({
+        id: 'choice-2',
+        text: 'Lyon',
+        isCorrect: false,
+        correctionMessage: 'Incorrect.',
+      });
+
+      const mcqModule = new McqModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        question: 'What is the capital of France?',
+        choices: [correctChoice, incorrectChoice],
+      });
+
+      gameModuleRepository.create(mcqModule);
+
+      const command: CompleteGameModuleCommand = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: {
+          choiceId: '',
+        },
+      };
+
+      // When & Then
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
     });
 
-    gameModuleRepository.create(mcqModule);
+    it('should throw InvalidAnswerError when choiceId is missing', async () => {
+      // Given
+      createTestLesson();
 
-    const command: CompleteGameModuleCommand = {
-      userId: 'user-1',
-      moduleId: 'question-1',
-      gameType: GameType.MCQ,
-      mcq: {
-        choiceId: 'choice-1',
-      },
-    };
+      const correctChoice = new McqChoice({
+        id: 'choice-1',
+        text: 'Paris',
+        isCorrect: true,
+        correctionMessage: 'Correct!',
+      });
 
-    // When
-    const result = await useCase.execute(command);
+      const incorrectChoice = new McqChoice({
+        id: 'choice-2',
+        text: 'Lyon',
+        isCorrect: false,
+        correctionMessage: 'Incorrect.',
+      });
 
-    // Then
-    expect(result.isCorrect).toBe(true);
-    expect(result.feedback).toBe(
-      'Correct! Paris is indeed the capital of France.',
-    );
-    expect(result.correctChoiceId).toBe('choice-1');
+      const mcqModule = new McqModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        question: 'What is the capital of France?',
+        choices: [correctChoice, incorrectChoice],
+      });
 
-    const lessonAttempt = lessonAttemptRepository.findLastByUserIdAndLessonId(
-      'user-1',
-      'lesson-1',
-    );
-    expect(lessonAttempt).toBeDefined();
-    const moduleAttempts = moduleAttemptRepository.findAllByLessonAttemptId(
-      lessonAttempt!.id,
-    );
-    expect(moduleAttempts.length).toBe(1);
-    expect(moduleAttempts[0]?.isCorrect).toBe(true);
-    expect(moduleAttempts[0]?.userId).toBe('user-1');
-    expect(moduleAttempts[0]?.gameModuleId).toBe('question-1');
+      gameModuleRepository.create(mcqModule);
+
+      const command = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: {},
+      } as CompleteGameModuleCommand;
+
+      // When & Then
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
+    });
+
+    it('should throw InvalidAnswerError when mcq is missing', async () => {
+      // Given
+      createTestLesson();
+
+      const correctChoice = new McqChoice({
+        id: 'choice-1',
+        text: 'Paris',
+        isCorrect: true,
+        correctionMessage: 'Correct!',
+      });
+
+      const incorrectChoice = new McqChoice({
+        id: 'choice-2',
+        text: 'Lyon',
+        isCorrect: false,
+        correctionMessage: 'Incorrect.',
+      });
+
+      const mcqModule = new McqModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        question: 'What is the capital of France?',
+        choices: [correctChoice, incorrectChoice],
+      });
+
+      gameModuleRepository.create(mcqModule);
+
+      const command = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+      } as CompleteGameModuleCommand;
+
+      // When & Then
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
+    });
+
+    it('should throw InvalidAnswerError when choiceId does not exist in question', async () => {
+      // Given
+      createTestLesson();
+
+      const correctChoice = new McqChoice({
+        id: 'choice-1',
+        text: 'Paris',
+        isCorrect: true,
+        correctionMessage: 'Correct!',
+      });
+
+      const otherChoice = new McqChoice({
+        id: 'choice-2',
+        text: 'Lyon',
+        isCorrect: false,
+        correctionMessage: 'Incorrect.',
+      });
+
+      const mcqModule = new McqModule({
+        id: 'question-1',
+        lessonId: 'lesson-1',
+        question: 'What is the capital of France?',
+        choices: [correctChoice, otherChoice],
+      });
+
+      gameModuleRepository.create(mcqModule);
+
+      const command: CompleteGameModuleCommand = {
+        userId: 'user-1',
+        moduleId: 'question-1',
+        gameType: GameType.MCQ,
+        mcq: {
+          choiceId: 'non-existent-choice',
+        },
+      };
+
+      // When & Then
+      await expect(useCase.execute(command)).rejects.toThrow(
+        InvalidAnswerError,
+      );
+    });
   });
 
-  it('should return incorrect answer and feedback when answer is wrong', async () => {
-    // Given
-    createTestLesson();
-
-    const correctChoice = new McqChoice({
-      id: 'choice-1',
-      text: 'Paris',
-      isCorrect: true,
-      correctionMessage: 'Correct! Paris is indeed the capital of France.',
-    });
-
-    const incorrectChoice = new McqChoice({
-      id: 'choice-2',
-      text: 'Lyon',
-      isCorrect: false,
-      correctionMessage: 'Incorrect. Lyon is a major city but not the capital.',
-    });
-
-    const mcqModule = new McqModule({
-      id: 'question-1',
-      lessonId: 'lesson-1',
-      question: 'What is the capital of France?',
-      choices: [correctChoice, incorrectChoice],
-    });
-
-    gameModuleRepository.create(mcqModule);
-
-    const command: CompleteGameModuleCommand = {
-      userId: 'user-1',
-      moduleId: 'question-1',
-      gameType: GameType.MCQ,
-      mcq: {
-        choiceId: 'choice-2',
-      },
-    };
-
-    // When
-    const result = await useCase.execute(command);
-
-    // Then
-    expect(result.isCorrect).toBe(false);
-    expect(result.feedback).toBe(
-      'Incorrect. Lyon is a major city but not the capital.',
-    );
-    expect(result.correctChoiceId).toBe('choice-1');
-    const lessonAttempt = lessonAttemptRepository.findLastByUserIdAndLessonId(
-      'user-1',
-      'lesson-1',
-    );
-    expect(lessonAttempt).toBeDefined();
-    const moduleAttempts = moduleAttemptRepository.findAllByLessonAttemptId(
-      lessonAttempt!.id,
-    );
-    expect(moduleAttempts.length).toBe(1);
-    expect(moduleAttempts[0]?.isCorrect).toBe(false);
-    expect(moduleAttempts[0]?.userId).toBe('user-1');
-    expect(moduleAttempts[0]?.gameModuleId).toBe('question-1');
-  });
-
-  describe('Scenario 4: Fill in the Blank valid answer submission', () => {
+  describe('FillInTheBlankModule', () => {
     it('should return correct answer and feedback when answer is correct', async () => {
       // Given
       createTestLesson();
@@ -287,10 +462,9 @@ describe('CompleteGameModuleUseCase', () => {
       expect(result.feedback).toBe(
         'Incorrect. Lyon is a major city but not the capital.',
       );
+      expect(result.isLost).toBe(false);
     });
-  });
 
-  describe('Scenario 5: Fill in the Blank invalid or empty answer', () => {
     it('should throw InvalidAnswerError when blankId is empty', async () => {
       // Given
       createTestLesson();
@@ -459,7 +633,7 @@ describe('CompleteGameModuleUseCase', () => {
     });
   });
 
-  describe('Scenario 6: True or False valid answer submission', () => {
+  describe('TrueOrFalseModule', () => {
     it('should return correct answer and feedback when answer is correct', async () => {
       // Given
       createTestLesson();
@@ -514,10 +688,9 @@ describe('CompleteGameModuleUseCase', () => {
       // Then
       expect(result.isCorrect).toBe(false);
       expect(result.feedback).toBe('Incorrect. The correct answer is: True');
+      expect(result.isLost).toBe(false);
     });
-  });
 
-  describe('Scenario 7: True or False invalid or empty answer', () => {
     it('should throw InvalidAnswerError when trueOrFalse answer is undefined', async () => {
       // Given
       createTestLesson();
@@ -544,210 +717,25 @@ describe('CompleteGameModuleUseCase', () => {
     });
   });
 
-  describe('Scenario 3: Non-existing question', () => {
-    it('should throw GameModuleNotFoundError when moduleId does not exist', async () => {
-      // Given
-      const command: CompleteGameModuleCommand = {
-        userId: 'user-1',
-        moduleId: 'non-existent-question',
-        gameType: GameType.MCQ,
-        mcq: {
-          choiceId: 'choice-1',
-        },
-      };
-
-      // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(
-        GameModuleNotFoundError,
-      );
-    });
-  });
-
-  describe('Scenario 6: MCQ invalid or empty answer', () => {
-    it('should throw InvalidAnswerError when choiceId is empty', async () => {
-      // Given
-      createTestLesson();
-
-      const correctChoice = new McqChoice({
-        id: 'choice-1',
-        text: 'Paris',
-        isCorrect: true,
-        correctionMessage: 'Correct!',
-      });
-
-      const incorrectChoice = new McqChoice({
-        id: 'choice-2',
-        text: 'Lyon',
-        isCorrect: false,
-        correctionMessage: 'Incorrect.',
-      });
-
-      const mcqModule = new McqModule({
-        id: 'question-1',
-        lessonId: 'lesson-1',
-        question: 'What is the capital of France?',
-        choices: [correctChoice, incorrectChoice],
-      });
-
-      gameModuleRepository.create(mcqModule);
-
-      const command: CompleteGameModuleCommand = {
-        userId: 'user-1',
-        moduleId: 'question-1',
-        gameType: GameType.MCQ,
-        mcq: {
-          choiceId: '',
-        },
-      };
-
-      // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(
-        InvalidAnswerError,
-      );
-    });
-
-    it('should throw InvalidAnswerError when choiceId is missing', async () => {
-      // Given
-      createTestLesson();
-
-      const correctChoice = new McqChoice({
-        id: 'choice-1',
-        text: 'Paris',
-        isCorrect: true,
-        correctionMessage: 'Correct!',
-      });
-
-      const incorrectChoice = new McqChoice({
-        id: 'choice-2',
-        text: 'Lyon',
-        isCorrect: false,
-        correctionMessage: 'Incorrect.',
-      });
-
-      const mcqModule = new McqModule({
-        id: 'question-1',
-        lessonId: 'lesson-1',
-        question: 'What is the capital of France?',
-        choices: [correctChoice, incorrectChoice],
-      });
-
-      gameModuleRepository.create(mcqModule);
-
-      const command = {
-        userId: 'user-1',
-        moduleId: 'question-1',
-        gameType: GameType.MCQ,
-        mcq: {},
-      } as CompleteGameModuleCommand;
-
-      // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(
-        InvalidAnswerError,
-      );
-    });
-
-    it('should throw InvalidAnswerError when mcq is missing', async () => {
-      // Given
-      createTestLesson();
-
-      const correctChoice = new McqChoice({
-        id: 'choice-1',
-        text: 'Paris',
-        isCorrect: true,
-        correctionMessage: 'Correct!',
-      });
-
-      const incorrectChoice = new McqChoice({
-        id: 'choice-2',
-        text: 'Lyon',
-        isCorrect: false,
-        correctionMessage: 'Incorrect.',
-      });
-
-      const mcqModule = new McqModule({
-        id: 'question-1',
-        lessonId: 'lesson-1',
-        question: 'What is the capital of France?',
-        choices: [correctChoice, incorrectChoice],
-      });
-
-      gameModuleRepository.create(mcqModule);
-
-      const command = {
-        userId: 'user-1',
-        moduleId: 'question-1',
-        gameType: GameType.MCQ,
-      } as CompleteGameModuleCommand;
-
-      // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(
-        InvalidAnswerError,
-      );
-    });
-
-    it('should throw InvalidAnswerError when choiceId does not exist in question', async () => {
-      // Given
-      createTestLesson();
-
-      const correctChoice = new McqChoice({
-        id: 'choice-1',
-        text: 'Paris',
-        isCorrect: true,
-        correctionMessage: 'Correct!',
-      });
-
-      const otherChoice = new McqChoice({
-        id: 'choice-2',
-        text: 'Lyon',
-        isCorrect: false,
-        correctionMessage: 'Incorrect.',
-      });
-
-      const mcqModule = new McqModule({
-        id: 'question-1',
-        lessonId: 'lesson-1',
-        question: 'What is the capital of France?',
-        choices: [correctChoice, otherChoice],
-      });
-
-      gameModuleRepository.create(mcqModule);
-
-      const command: CompleteGameModuleCommand = {
-        userId: 'user-1',
-        moduleId: 'question-1',
-        gameType: GameType.MCQ,
-        mcq: {
-          choiceId: 'non-existent-choice',
-        },
-      };
-
-      // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(
-        InvalidAnswerError,
-      );
-    });
-
-    it('should throw GameModuleNotFoundError when moduleId does not exist', async () => {
-      // Given
-      const command: CompleteGameModuleCommand = {
-        userId: 'user-1',
-        moduleId: 'non-existent-question',
-        gameType: GameType.MCQ,
-        mcq: {
-          choiceId: 'choice-1',
-        },
-      };
-
-      // When & Then
-      await expect(useCase.execute(command)).rejects.toThrow(
-        GameModuleNotFoundError,
-      );
-    });
-  });
-
-  it('should not allow retrying a module for the same lesson attempt', async () => {
+  it('should throw GameModuleNotFoundError when moduleId does not exist', async () => {
     // Given
-    createTestLesson();
+    const command: CompleteGameModuleCommand = {
+      userId: 'user-1',
+      moduleId: 'non-existent-question',
+      gameType: GameType.MCQ,
+      mcq: {
+        choiceId: 'choice-1',
+      },
+    };
+
+    // When & Then
+    await expect(useCase.execute(command)).rejects.toThrow(
+      GameModuleNotFoundError,
+    );
+  });
+
+  it('should allow restarting a lesson when retrying first game module', async () => {
+    // Given
     const correctChoice = new McqChoice({
       id: 'choice-1',
       text: 'Paris',
@@ -766,10 +754,83 @@ describe('CompleteGameModuleUseCase', () => {
       question: 'What is the capital of France?',
       choices: [correctChoice, incorrectChoice],
     });
+    const lesson = new Lesson(
+      'lesson-1',
+      'Test Lesson',
+      'A test lesson',
+      'chapter-1',
+      1,
+      true,
+      [mcqModule],
+    );
+    lessonRepository.create(lesson);
     gameModuleRepository.create(mcqModule);
+
     const command: CompleteGameModuleCommand = {
       userId: 'user-1',
       moduleId: 'question-1',
+      gameType: GameType.MCQ,
+      mcq: { choiceId: 'choice-1' },
+    };
+
+    // When
+    await useCase.execute(command);
+
+    // Then
+    const result = await useCase.execute(command);
+    expect(result).toStrictEqual({
+      correctChoiceId: 'choice-1',
+      currentGameModuleIndex: 0,
+      feedback: 'Correct! Paris is indeed the capital of France.',
+      isCorrect: true,
+      nextGameModuleId: null,
+      totalGameModules: 1,
+      isLost: false,
+    });
+  });
+
+  it('should not allow retrying a module for the same lesson attempt when it is not first module', async () => {
+    // Given
+    const correctChoice = new McqChoice({
+      id: 'choice-1',
+      text: 'Paris',
+      isCorrect: true,
+      correctionMessage: 'Correct! Paris is indeed the capital of France.',
+    });
+    const incorrectChoice = new McqChoice({
+      id: 'choice-2',
+      text: 'Lyon',
+      isCorrect: false,
+      correctionMessage: 'Incorrect. Lyon is a major city but not the capital.',
+    });
+    const mcqModule1 = new McqModule({
+      id: 'question-1',
+      lessonId: 'lesson-1',
+      question: 'What is the capital of France?',
+      choices: [correctChoice, incorrectChoice],
+    });
+    const mcqModule2 = new McqModule({
+      id: 'question-2',
+      lessonId: 'lesson-1',
+      question: 'What is the capital of France?',
+      choices: [correctChoice, incorrectChoice],
+    });
+    const lesson = new Lesson(
+      'lesson-1',
+      'Test Lesson',
+      'A test lesson',
+      'chapter-1',
+      1,
+      true,
+      [mcqModule1, mcqModule2],
+    );
+    lessonRepository.create(lesson);
+    gameModuleRepository.create(mcqModule1);
+    gameModuleRepository.create(mcqModule2);
+
+    const command: CompleteGameModuleCommand = {
+      userId: 'user-1',
+      moduleId: 'question-2',
       gameType: GameType.MCQ,
       mcq: { choiceId: 'choice-1' },
     };
@@ -783,7 +844,56 @@ describe('CompleteGameModuleUseCase', () => {
       'lesson-1',
     );
     await expect(useCase.execute(command)).rejects.toThrow(
-      `Module with id question-1 has already been attempted in lesson attempt ${lessonAttempt?.id}`,
+      `Module with id question-2 has already been attempted in lesson attempt ${lessonAttempt?.id}`,
     );
+  });
+
+  it('should set isLost=true when life service indicates user has lost all lives', async () => {
+    // Given
+    const correctChoice = new McqChoice({
+      id: 'choice-1',
+      text: 'Paris',
+      isCorrect: true,
+      correctionMessage: 'Correct! Paris is indeed the capital of France.',
+    });
+    const incorrectChoice = new McqChoice({
+      id: 'choice-2',
+      text: 'Lyon',
+      isCorrect: false,
+      correctionMessage: 'Incorrect. Lyon is a major city but not the capital.',
+    });
+    const mcqModule = new McqModule({
+      id: 'question-1',
+      lessonId: 'lesson-1',
+      question: 'What is the capital of France?',
+      choices: [correctChoice, incorrectChoice],
+    });
+    const lesson = new Lesson(
+      'lesson-1',
+      'Test Lesson',
+      'A test lesson',
+      'chapter-1',
+      1,
+      true,
+      [mcqModule],
+    );
+    lessonRepository.create(lesson);
+    gameModuleRepository.create(mcqModule);
+
+    for (let i = 0; i < 3; i++) {
+      await lifeRepository.loseLife('user-1');
+    }
+
+    const command: CompleteGameModuleCommand = {
+      userId: 'user-1',
+      moduleId: 'question-1',
+      gameType: GameType.MCQ,
+      mcq: { choiceId: 'choice-2' },
+    };
+
+    // When
+    await useCase.execute(command);
+    const result = await useCase.execute(command);
+    expect(result.isLost).toBe(true);
   });
 });

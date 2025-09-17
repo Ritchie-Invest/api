@@ -1,9 +1,9 @@
 import { UseCase } from '../base/use-case';
 import { User } from '../domain/model/User';
 import { UserRepository } from '../domain/repository/user.repository';
-import { UserNotFoundError } from '../domain/error/UserNotFoundError';
 import { UserNotAllowedError } from '../domain/error/UserNotAllowedError';
 import { UserType } from '../domain/type/UserType';
+import { UserNotFoundError } from '../domain/error/UserNotFoundError';
 
 export type UpdateUserTypeCommand = {
   currentUser: Pick<User, 'id' | 'type'>;
