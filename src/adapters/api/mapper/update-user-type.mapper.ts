@@ -8,7 +8,7 @@ export class UpdateUserTypeMapper {
   static fromDomain(model: User): UpdateUserTypeResponse {
     return new UpdateUserTypeResponse(
       model.id,
-      model.email,
+      model.email.value(),
       model.type,
       model.updatedAt,
       model.createdAt,

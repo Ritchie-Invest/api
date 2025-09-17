@@ -1,14 +1,14 @@
 import { UseCase } from '../base/use-case';
 import { UserAlreadyExistsError } from '../domain/error/UserAlreadyExistsError';
-import { WrongEmailFormatError } from '../domain/error/WrongEmailFormatError';
 import { WrongPasswordFormatError } from '../domain/error/WrongPasswordFormatError';
 import { User } from '../domain/model/User';
 import { UserRepository } from '../domain/repository/user.repository';
 import { UserType } from '../domain/type/UserType';
 import * as bcrypt from 'bcryptjs';
+import { Email } from '../domain/value-object/Email';
 
 export type CreateSuperadminCommand = {
-  email: string;
+  email: Email;
   password: string;
 };
 
@@ -22,10 +22,6 @@ export class CreateSuperadminUseCase
 
   async execute(command: CreateSuperadminCommand): Promise<User> {
     const { email, password } = command;
-
-    if (!this.EMAIL_REGEX.test(email)) {
-      throw new WrongEmailFormatError(email);
-    }
 
     if (password.length < this.PASSWORD_LENGTH) {
       throw new WrongPasswordFormatError(

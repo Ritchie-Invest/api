@@ -1,9 +1,16 @@
 import { User } from '../User';
 import { UserType } from '../../type/UserType';
+import { Email } from '../../value-object/Email';
 
 describe('User model - progression', () => {
   function makeUser(xp: number): User {
-    return new User('u1', 'u@example.com', 'pwd', UserType.STUDENT, xp);
+    return new User(
+      'u1',
+      new Email('u@example.com'),
+      'pwd',
+      UserType.STUDENT,
+      xp,
+    );
   }
 
   it('xp=0 → level=1, width=10, xpFor=0, toNext=10', () => {

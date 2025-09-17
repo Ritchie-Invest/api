@@ -1,12 +1,13 @@
 import { DomainModel } from '../../base/domain-model';
 import { UserType } from '../type/UserType';
+import { Email } from '../value-object/Email';
 
 export class User extends DomainModel {
   private static readonly INITIAL_XP = 0;
   private static readonly INITIAL_XP_THRESHOLD = 10;
   private static readonly PROGRESSION_STEP = 5;
 
-  email: string;
+  email: Email;
   password: string;
   type: UserType;
   totalXp: number;
@@ -16,7 +17,7 @@ export class User extends DomainModel {
 
   constructor(
     id: string,
-    email: string,
+    email: Email,
     password: string,
     type: UserType,
     totalXp?: number,

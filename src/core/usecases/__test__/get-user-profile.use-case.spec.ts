@@ -5,6 +5,7 @@ import {
   GetUserProfileCommand,
 } from '../get-user-profile.use-case';
 import { UserFactory } from '../../../adapters/api/controller/__test__/utils/user.factory';
+import { Email } from '../../domain/value-object/Email';
 
 describe('GetUserProfileUseCase', () => {
   let userRepository: UserRepository;
@@ -19,7 +20,7 @@ describe('GetUserProfileUseCase', () => {
     // Given
     const existing = UserFactory.make({
       id: 'user-1',
-      email: 'user@example.com',
+      email: new Email('user@example.com'),
       totalXp: 42,
     });
     await userRepository.create(existing);
@@ -47,7 +48,7 @@ describe('GetUserProfileUseCase', () => {
 
     // When & Then
     await expect(useCase.execute(command)).rejects.toThrow(
-      'User with email missing-id not found',
+      'User with id missing-id not found',
     );
   });
 });

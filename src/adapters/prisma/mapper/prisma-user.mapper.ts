@@ -4,13 +4,14 @@ import { User as UserEntity, $Enums } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
 import { UserType } from '../../../core/domain/type/UserType';
+import { Email } from '../../../core/domain/value-object/Email';
 
 @Injectable()
 export class PrismaUserMapper implements EntityMapper<User, UserEntity> {
   fromDomain(model: User): UserEntity {
     return {
       id: model.id,
-      email: model.email,
+      email: model.email.normalize(),
       password: model.password,
       type: model.type,
       xp: model.totalXp,
@@ -23,7 +24,7 @@ export class PrismaUserMapper implements EntityMapper<User, UserEntity> {
   toDomain(entity: UserEntity): User {
     return new User(
       entity.id,
-      entity.email,
+      new Email(entity.email),
       entity.password,
       this.mapUserTypeToDomain(entity.type),
       entity.xp,

@@ -3,6 +3,7 @@ import { User } from '../../core/domain/model/User';
 import { PrismaService } from './prisma.service';
 import { PrismaUserMapper } from './mapper/prisma-user.mapper';
 import { Injectable } from '@nestjs/common';
+import { Email } from '../../core/domain/value-object/Email';
 
 @Injectable()
 export class PrismaUserRepository implements UserRepository {
@@ -26,8 +27,10 @@ export class PrismaUserRepository implements UserRepository {
     return this.mapper.toDomain(entity);
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    const entity = await this.prisma.user.findUnique({ where: { email } });
+  async findByEmail(email: Email): Promise<User | null> {
+    const entity = await this.prisma.user.findUnique({
+      where: { email: email.normalize() },
+    });
     if (!entity) {
       return null;
     }

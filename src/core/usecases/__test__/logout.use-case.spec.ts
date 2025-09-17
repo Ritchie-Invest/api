@@ -2,13 +2,14 @@ import { LogoutUseCase, LogoutCommand } from '../logout.use-case';
 import { UserRepository } from '../../domain/repository/user.repository';
 import { InMemoryUserRepository } from '../../../adapters/in-memory/in-memory-user.repository';
 import { RefreshTokenRepository } from '../../domain/repository/refresh-token.repository';
+import { Email } from '../../domain/value-object/Email';
 
 describe('LogoutUseCase', () => {
   let userRepository: UserRepository;
   let refreshTokenRepository: RefreshTokenRepository;
   let logoutUseCase: LogoutUseCase;
 
-  const DEFAULT_EMAIL = 'john.doe@example.com';
+  const DEFAULT_EMAIL = new Email('john.doe@example.com');
 
   beforeEach(() => {
     userRepository = new InMemoryUserRepository();
@@ -44,7 +45,7 @@ describe('LogoutUseCase', () => {
 
   it('should throw when user is not found', async () => {
     const command: LogoutCommand = {
-      currentUser: { email: 'missing@example.com' },
+      currentUser: { email: new Email('missing@example.com') },
       refreshToken: 'irrelevant-token',
     };
 

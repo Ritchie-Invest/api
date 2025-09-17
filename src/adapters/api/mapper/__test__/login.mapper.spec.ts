@@ -1,4 +1,5 @@
 import { LoginMapper } from '../login.mapper';
+import { Email } from '../../../../core/domain/value-object/Email';
 
 describe('LoginMapper', () => {
   describe('fromDomain', () => {
@@ -33,7 +34,7 @@ describe('LoginMapper', () => {
 
       // Then
       expect(command).toEqual({
-        email: 'user@example.com',
+        email: new Email('user@example.com'),
         password: 'securepassword123',
       });
     });
