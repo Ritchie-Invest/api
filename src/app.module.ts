@@ -95,6 +95,8 @@ import { AwardBadgesOnLessonCompletedHandler } from './adapters/events/award-bad
 import { DomainEventPublisher } from './core/base/domain-event';
 import { GetBadgeCatalogUseCase } from './core/usecases/get-badge-catalog.use-case';
 import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badges.use-case';
+import { CreateTickerUseCase } from './core/usecases/create-ticker.use-case';
+import { MarkBadgeSeenUseCase } from './core/usecases/mark-badge-seen.use-case';
 
 @Module({
   imports: [JwtModule.register({}), ScheduleModule.forRoot()],
@@ -249,6 +251,12 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
       inject: [UserBadgeRepository],
     },
     {
+      provide: MarkBadgeSeenUseCase,
+      useFactory: (userBadgeRepository: UserBadgeRepository) =>
+        new MarkBadgeSeenUseCase(userBadgeRepository),
+      inject: [UserBadgeRepository],
+    },
+    {
       provide: TickerRepository,
       useFactory: (prisma: PrismaService) => new PrismaTickerRepository(prisma),
       inject: [PrismaService],
@@ -313,18 +321,21 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
         userRepository: UserRepository,
         refreshTokenRepository: RefreshTokenRepository,
         userPortfolioRepository: UserPortfolioRepository,
+        portfolioPositionRepository: PortfolioPositionRepository,
         tokenService: TokenService,
       ) =>
         new LoginUseCase(
           userRepository,
           refreshTokenRepository,
           userPortfolioRepository,
+          portfolioPositionRepository,
           tokenService,
         ),
       inject: [
         UserRepository,
         RefreshTokenRepository,
         'UserPortfolioRepository',
+        'PortfolioPositionRepository',
         'TokenService',
       ],
     },
@@ -512,6 +523,14 @@ import { CheckAndAwardBadgesUseCase } from './core/usecases/check-and-award-badg
       useFactory: (tickerRepository: TickerRepository) =>
         new GetTickersWithPriceUseCase(tickerRepository),
       inject: [TickerRepository],
+    },
+    {
+      provide: CreateTickerUseCase,
+      useFactory: (
+        tickerRepository: TickerRepository,
+        marketService: MarketService,
+      ) => new CreateTickerUseCase(tickerRepository, marketService),
+      inject: [TickerRepository, 'MarketService'],
     },
     {
       provide: GetTickerPossessedValueUseCase,

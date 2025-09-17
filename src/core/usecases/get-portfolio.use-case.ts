@@ -44,7 +44,6 @@ export class GetPortfolioUseCase
     }
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
     let portfolioPosition =
       await this.portfolioPositionRepository.findByPortfolioIdAndDate(

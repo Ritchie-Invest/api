@@ -5,6 +5,10 @@ import { UserRepository } from '../domain/repository/user.repository';
 import { UserPortfolioRepository } from '../domain/repository/user-portfolio.repository';
 import { TokenService } from '../domain/service/token.service';
 import * as bcrypt from 'bcryptjs';
+import { PortfolioPositionRepository } from '../domain/repository/portfolio-position.repository';
+import { UserPortfolio } from '../domain/model/UserPortfolio';
+import { Currency } from '../domain/type/Currency';
+import { PortfolioPosition } from '../domain/model/PortfolioPosition';
 
 export type LoginCommand = {
   email: string;
@@ -17,10 +21,13 @@ export type LoginResult = {
 };
 
 export class LoginUseCase implements UseCase<LoginCommand, LoginResult> {
+  private readonly INITIAL_CASH = 10000;
+
   constructor(
     private readonly userRepository: UserRepository,
     private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly userPortfolioRepository: UserPortfolioRepository,
+    private readonly portfolioPositionRepository: PortfolioPositionRepository,
     private readonly tokenService: TokenService,
   ) {}
 
@@ -37,9 +44,23 @@ export class LoginUseCase implements UseCase<LoginCommand, LoginResult> {
       throw new UserNotFoundError(email);
     }
 
-    const portfolio = await this.userPortfolioRepository.findByUserId(user.id);
+    let portfolio = await this.userPortfolioRepository.findByUserId(user.id);
     if (!portfolio) {
-      throw new UserNotFoundError(`Portfolio not found for user ${user.id}`);
+      portfolio = new UserPortfolio({
+        id: this.generateId(),
+        userId: user.id,
+        currency: Currency.USD,
+      });
+      await this.userPortfolioRepository.create(portfolio);
+
+      const portfolioPosition = new PortfolioPosition({
+        id: this.generateId(),
+        portfolioId: portfolio.id,
+        cash: this.INITIAL_CASH,
+        investments: 0,
+        date: new Date(),
+      });
+      await this.portfolioPositionRepository.create(portfolioPosition);
     }
 
     const accessToken = this.tokenService.generateAccessToken({
@@ -73,5 +94,9 @@ export class LoginUseCase implements UseCase<LoginCommand, LoginResult> {
     hashedPassword: string,
   ): Promise<boolean> {
     return bcrypt.compare(plainPassword, hashedPassword);
+  }
+
+  private generateId(): string {
+    return crypto.randomUUID();
   }
 }

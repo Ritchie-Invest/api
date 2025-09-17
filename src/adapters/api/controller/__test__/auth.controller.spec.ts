@@ -251,8 +251,6 @@ describe('AuthControllerIT', () => {
       expect(refreshCookie).toBeDefined();
       expect(refreshCookie).not.toEqual('');
 
-      console.log('Test is sending refresh cookie:', refreshCookie);
-
       // When
       const response = await request(app.getHttpServer())
         .post('/auth/refresh')

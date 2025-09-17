@@ -8,9 +8,9 @@ export class GetBadgeCatalogMapper {
         new BadgeCatalogItemResponse(
           i.type,
           i.name,
-          i.iconPath,
           i.description,
           i.awardedAt,
+          i.hasSeen,
         ),
     );
   }

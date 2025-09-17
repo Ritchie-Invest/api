@@ -22,6 +22,7 @@ import { TransactionType } from '../../../../core/domain/type/TransactionType';
 import { DailyBar } from '../../../../core/domain/model/DailyBar';
 import { VariationDirection } from '../../../../core/domain/type/VariationDirection';
 import { UserType } from '../../../../core/domain/type/UserType';
+import { CreateTickerRequest } from '../../request/create-ticker.request';
 
 describe('TickerControllerIT', () => {
   let app: INestApplication<App>;
@@ -55,17 +56,18 @@ describe('TickerControllerIT', () => {
     tickerRepository = app.get(TickerRepository);
     userPortfolioRepository = app.get('UserPortfolioRepository');
     transactionRepository = app.get('TransactionRepository');
-    await userRepository.removeAll();
-    await tickerRepository.removeAll();
-    await userPortfolioRepository.removeAll();
+
     await transactionRepository.removeAll();
+    await userPortfolioRepository.removeAll();
+    await tickerRepository.removeAll();
+    await userRepository.removeAll();
   });
 
   afterEach(async () => {
-    await userRepository.removeAll();
-    await tickerRepository.removeAll();
-    await userPortfolioRepository.removeAll();
     await transactionRepository.removeAll();
+    await userPortfolioRepository.removeAll();
+    await tickerRepository.removeAll();
+    await userRepository.removeAll();
   });
 
   afterAll(async () => {
@@ -567,5 +569,100 @@ describe('TickerControllerIT', () => {
       .set('Authorization', `Bearer ${accessToken}`);
 
     expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+  });
+
+  it('POST /tickers should create a ticker when user is ADMIN', async () => {
+    const accessToken = tokenService.generateAccessToken({
+      id: 'admin-1',
+      email: 'admin@ritchie-invest.com',
+      type: UserType.ADMIN,
+    });
+
+    const requestBody = new CreateTickerRequest(
+      'New ETF',
+      'NEW1',
+      TickerType.ETF,
+      Currency.USD,
+    );
+
+    const response = await request(app.getHttpServer())
+      .post('/tickers')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(requestBody);
+
+    expect(response.status).toBe(HttpStatus.CREATED);
+    expect(response.body).toMatchObject({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      id: expect.any(String),
+      name: 'New ETF',
+      symbol: 'NEW1',
+      type: 'ETF',
+      currency: 'USD',
+    });
+  });
+
+  it('POST /tickers should return 409 when symbol already exists (case-insensitive)', async () => {
+    // Seed existing ticker
+    await tickerRepository.create(
+      new Ticker({
+        id: 'ticker-existing',
+        name: 'Existing ETF',
+        symbol: 'DUPL',
+        type: TickerType.ETF,
+        currency: Currency.USD,
+      }),
+    );
+
+    const accessToken = tokenService.generateAccessToken({
+      id: 'admin-1',
+      email: 'admin@ritchie-invest.com',
+      type: UserType.ADMIN,
+    });
+
+    const response = await request(app.getHttpServer())
+      .post('/tickers')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        name: 'Duplicate ETF',
+        symbol: 'dupl',
+        type: 'ETF',
+        currency: 'USD',
+      });
+
+    expect(response.status).toBe(HttpStatus.CONFLICT);
+    expect((response.body as { message: string }).message).toBe(
+      'Ticker already exists',
+    );
+  });
+
+  it('POST /tickers should return 403 when user is STUDENT', async () => {
+    const accessToken = tokenService.generateAccessToken({
+      id: 'student-1',
+      email: 'student@ritchie-invest.com',
+      type: UserType.STUDENT,
+    });
+
+    const response = await request(app.getHttpServer())
+      .post('/tickers')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        name: 'Should Fail',
+        symbol: 'FAIL',
+        type: 'ETF',
+        currency: 'USD',
+      });
+
+    expect(response.status).toBe(HttpStatus.FORBIDDEN);
+  });
+
+  it('POST /tickers should return 401 when no token provided', async () => {
+    const response = await request(app.getHttpServer()).post('/tickers').send({
+      name: 'No Auth',
+      symbol: 'NOAUTH',
+      type: 'ETF',
+      currency: 'USD',
+    });
+
+    expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
   });
 });
