@@ -1,6 +1,9 @@
 import { GetMeMapper } from '../get-me.mapper';
 import { ProfileRequest } from '../../request/profile.request';
 import { UserType } from '../../../../core/domain/type/UserType';
+import { GetMeResponse } from '../../response/get-me.response';
+import { GetUserProfileCommand } from '../../../../core/usecases/get-user-profile.use-case';
+import { Email } from '../../../../core/domain/value-object/Email';
 
 describe('GetMeMapper', () => {
   describe('toDomain', () => {
@@ -16,7 +19,7 @@ describe('GetMeMapper', () => {
       const command = GetMeMapper.toDomain(profileRequest);
 
       // Then
-      expect(command).toStrictEqual({ userId: 'user-123' });
+      expect(command).toEqual<GetUserProfileCommand>({ userId: 'user-123' });
     });
   });
 
@@ -25,7 +28,7 @@ describe('GetMeMapper', () => {
       // Given
       const domainResult = {
         id: 'user-123',
-        email: 'test@example.com',
+        email: new Email('test@example.com'),
         totalXp: 42,
         level: 3,
         xpRequiredForNextLevel: 0,
@@ -38,7 +41,7 @@ describe('GetMeMapper', () => {
       const response = GetMeMapper.fromDomain(domainResult);
 
       // Then
-      expect(response).toEqual({
+      expect(response).toEqual<GetMeResponse>({
         id: 'user-123',
         email: 'test@example.com',
         totalXp: 42,

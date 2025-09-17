@@ -1,6 +1,5 @@
 import { UseCase } from '../base/use-case';
 import { UserAlreadyExistsError } from '../domain/error/UserAlreadyExistsError';
-import { WrongEmailFormatError } from '../domain/error/WrongEmailFormatError';
 import { WrongPasswordFormatError } from '../domain/error/WrongPasswordFormatError';
 import { User } from '../domain/model/User';
 import { UserPortfolio } from '../domain/model/UserPortfolio';
@@ -11,14 +10,14 @@ import { PortfolioPositionRepository } from '../domain/repository/portfolio-posi
 import { UserType } from '../domain/type/UserType';
 import { Currency } from '../domain/type/Currency';
 import * as bcrypt from 'bcryptjs';
+import { Email } from '../domain/value-object/Email';
 
 export type CreateUserCommand = {
-  email: string;
+  email: Email;
   password: string;
 };
 
 export class CreateUserUseCase implements UseCase<CreateUserCommand, User> {
-  private readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   private readonly PASSWORD_LENGTH = 8;
   private readonly INITIAL_CASH = 10000;
 
@@ -30,10 +29,6 @@ export class CreateUserUseCase implements UseCase<CreateUserCommand, User> {
 
   async execute(command: CreateUserCommand): Promise<User> {
     const { email, password } = command;
-
-    if (!this.EMAIL_REGEX.test(email)) {
-      throw new WrongEmailFormatError(email);
-    }
 
     if (password.length < this.PASSWORD_LENGTH) {
       throw new WrongPasswordFormatError(

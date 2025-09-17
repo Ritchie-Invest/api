@@ -6,13 +6,23 @@ import {
   GetChapterByIdCommand,
   GetChapterByIdUseCase,
 } from '../get-chapter-by-id.use-case';
+import { InMemoryLessonRepository } from '../../../adapters/in-memory/in-memory-lesson.repository';
+import { InMemoryGameModuleRepository } from '../../../adapters/in-memory/in-memory-game-module.repository';
+import { InMemoryLessonCompletionRepository } from '../../../adapters/in-memory/in-memory-lesson-completion.repository';
 
 describe('GetChapterByIdUseCase', () => {
   let chapterRepository: ChapterRepository;
   let getChapterByIdUseCase: GetChapterByIdUseCase;
 
   beforeEach(async () => {
-    chapterRepository = new InMemoryChapterRepository();
+    const lessonRepository = new InMemoryLessonRepository();
+    const gameModuleRepository = new InMemoryGameModuleRepository();
+    const lessonCompletionRepository = new InMemoryLessonCompletionRepository();
+    chapterRepository = new InMemoryChapterRepository(
+      lessonRepository,
+      gameModuleRepository,
+      lessonCompletionRepository,
+    );
     getChapterByIdUseCase = new GetChapterByIdUseCase(chapterRepository);
 
     await chapterRepository.removeAll();

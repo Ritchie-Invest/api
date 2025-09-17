@@ -6,6 +6,7 @@ import { InMemoryUserRepository } from '../../../adapters/in-memory/in-memory-us
 import { InMemoryUserPortfolioRepository } from '../../../adapters/in-memory/in-memory-user-portfolio.repository';
 import { InMemoryPortfolioPositionRepository } from '../../../adapters/in-memory/in-memory-portfolio-position.repository';
 import { Currency } from '../../domain/type/Currency';
+import { Email } from '../../domain/value-object/Email';
 
 describe('CreateUserUseCase', () => {
   let userRepository: UserRepository;
@@ -31,7 +32,7 @@ describe('CreateUserUseCase', () => {
   it('should return created user', async () => {
     // Given
     const command: CreateUserCommand = {
-      email: 'john.doe@example.com',
+      email: new Email('john.doe@example.com'),
       password: 'password123',
     };
 
@@ -44,7 +45,7 @@ describe('CreateUserUseCase', () => {
     expect(user).toEqual({
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       id: expect.any(String),
-      email: 'john.doe@example.com',
+      email: new Email('john.doe@example.com'),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       password: expect.any(String),
       type: 'STUDENT',
@@ -61,12 +62,12 @@ describe('CreateUserUseCase', () => {
   it('should throw UserAlreadyExistsError if user already exists', async () => {
     // Given
     const command: CreateUserCommand = {
-      email: 'john.doe@example.com',
+      email: new Email('john.doe@example.com'),
       password: 'password123',
     };
     await createUserUseCase.execute(command);
     const command2: CreateUserCommand = {
-      email: 'john.doe@example.com',
+      email: new Email('john.doe@example.com'),
       password: 'password123',
     };
 
@@ -76,23 +77,10 @@ describe('CreateUserUseCase', () => {
     );
   });
 
-  it('should throw WrongEmailFormatError if email format is invalid', async () => {
-    // Given
-    const command: CreateUserCommand = {
-      email: 'invalid-email',
-      password: 'password123',
-    };
-
-    // When & Then
-    await expect(createUserUseCase.execute(command)).rejects.toThrow(
-      'Email invalid-email is not in a valid format',
-    );
-  });
-
   it('should throw WrongPasswordFormatError if password is too short', async () => {
     // Given
     const command: CreateUserCommand = {
-      email: 'john.doe@example.com',
+      email: new Email('john.doe@example.com'),
       password: 'short',
     };
 
@@ -105,7 +93,7 @@ describe('CreateUserUseCase', () => {
   it('should create a portfolio for the user with USD currency', async () => {
     // Given
     const command: CreateUserCommand = {
-      email: 'john.doe@example.com',
+      email: new Email('john.doe@example.com'),
       password: 'password123',
     };
 
@@ -125,7 +113,7 @@ describe('CreateUserUseCase', () => {
   it('should create initial portfolio value with $10,000 cash and $0 investments', async () => {
     // Given
     const command: CreateUserCommand = {
-      email: 'john.doe@example.com',
+      email: new Email('john.doe@example.com'),
       password: 'password123',
     };
 
@@ -151,7 +139,7 @@ describe('CreateUserUseCase', () => {
   it('should create user, portfolio, and portfolio value in sequence', async () => {
     // Given
     const command: CreateUserCommand = {
-      email: 'john.doe@example.com',
+      email: new Email('john.doe@example.com'),
       password: 'password123',
     };
 

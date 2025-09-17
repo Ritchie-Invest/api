@@ -1,6 +1,7 @@
 import { UseCase } from '../base/use-case';
 import { UserRepository } from '../domain/repository/user.repository';
 import { UserNotFoundError } from '../domain/error/UserNotFoundError';
+import { Email } from '../domain/value-object/Email';
 
 export type GetUserProfileCommand = {
   userId: string;
@@ -8,7 +9,7 @@ export type GetUserProfileCommand = {
 
 export type GetUserProfileResult = {
   id: string;
-  email: string;
+  email: Email;
   totalXp: number;
   level: number;
   xpRequiredForNextLevel: number;

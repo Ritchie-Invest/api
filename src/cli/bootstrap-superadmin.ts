@@ -2,6 +2,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppCliModule } from './app-cli.module';
 import { CreateSuperadminUseCase } from '../core/usecases/create-superadmin.use-case';
+import { Email } from '../core/domain/value-object/Email';
 
 async function bootstrap() {
   const email = process.env.SUPERADMIN_EMAIL;
@@ -20,9 +21,9 @@ async function bootstrap() {
   });
   try {
     const useCase = appContext.get(CreateSuperadminUseCase);
-    const user = await useCase.execute({ email, password });
+    const user = await useCase.execute({ email: new Email(email), password });
     console.log(
-      `Superadmin ensured for email ${user.email} (id=${user.id}, type=${user.type})`,
+      `Superadmin ensured for email ${user.email.value()} (id=${user.id}, type=${user.type})`,
     );
   } catch (err) {
     console.error(

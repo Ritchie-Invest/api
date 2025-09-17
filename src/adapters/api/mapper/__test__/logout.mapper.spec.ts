@@ -1,12 +1,13 @@
 import { LogoutCommand } from '../../../../core/usecases/logout.use-case';
 import { ProfileRequest } from '../../request/profile.request';
 import { LogoutMapper } from '../logout.mapper';
+import { Email } from '../../../../core/domain/value-object/Email';
 
 describe('LogoutMapper', () => {
   describe('toDomain', () => {
     it('should map ProfileRequest and refreshToken to LogoutCommand', () => {
       // Given
-      const userRequest = {} as ProfileRequest;
+      const userRequest = { email: 'test@example.com' } as ProfileRequest;
       const mockRefreshToken = 'dummy-refresh-token';
 
       // When
@@ -17,7 +18,9 @@ describe('LogoutMapper', () => {
 
       // Then
       expect(result).toEqual({
-        currentUser: userRequest,
+        currentUser: {
+          email: new Email('test@example.com'),
+        },
         refreshToken: mockRefreshToken,
       });
     });

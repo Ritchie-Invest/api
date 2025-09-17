@@ -5,20 +5,28 @@ import {
   CreateSuperadminCommand,
 } from '../create-superadmin.use-case';
 import { UserType } from '../../domain/type/UserType';
+import { Email } from '../../domain/value-object/Email';
+import { afterEach } from 'node:test';
 
 describe('CreateSuperadminUseCase', () => {
   let userRepository: UserRepository;
   let useCase: CreateSuperadminUseCase;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     userRepository = new InMemoryUserRepository();
     useCase = new CreateSuperadminUseCase(userRepository);
+
+    await userRepository.removeAll();
+  });
+
+  afterEach(async () => {
+    await userRepository.removeAll();
   });
 
   it('creates a SUPERADMIN when user does not exist', async () => {
     // Given
     const command: CreateSuperadminCommand = {
-      email: 'admin@example.com',
+      email: new Email('admin@example.com'),
       password: 'password123',
     };
 
@@ -31,7 +39,7 @@ describe('CreateSuperadminUseCase', () => {
     expect(user).toEqual({
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       id: expect.any(String),
-      email: 'admin@example.com',
+      email: new Email('admin@example.com'),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       password: expect.any(String),
       type: UserType.SUPERADMIN,
@@ -48,13 +56,13 @@ describe('CreateSuperadminUseCase', () => {
   it('is idempotent if user already SUPERADMIN (returns existing)', async () => {
     // Given
     const existing = await useCase.execute({
-      email: 'admin@example.com',
+      email: new Email('admin@example.com'),
       password: 'password123',
     });
 
     // When
     const again = await useCase.execute({
-      email: 'admin@example.com',
+      email: new Email('admin@example.com'),
       password: 'anotherPassword',
     });
 
@@ -67,14 +75,14 @@ describe('CreateSuperadminUseCase', () => {
     // Given
     const created = await userRepository.create({
       id: 'user-1',
-      email: 'john.doe@example.com',
+      email: new Email('john.doe@example.com'),
       password: 'hashed-password',
       type: UserType.STUDENT,
     });
 
     // When
     const promoted = await useCase.execute({
-      email: 'john.doe@example.com',
+      email: new Email('john.doe@example.com'),
       password: 'ignored-here',
     });
 
@@ -84,13 +92,13 @@ describe('CreateSuperadminUseCase', () => {
     expect(promoted.password).toBe('hashed-password');
   });
 
-  it('validates email format and password length', async () => {
-    await expect(
-      useCase.execute({ email: 'bad', password: 'password123' }),
-    ).rejects.toThrow('Email bad is not in a valid format');
-
-    await expect(
-      useCase.execute({ email: 'admin@example.com', password: 'short' }),
-    ).rejects.toThrow('Password must be at least 8 characters long');
+  it('validates password length', async () => {
+    const command2: CreateSuperadminCommand = {
+      email: new Email('admin@example.com'),
+      password: 'short',
+    };
+    await expect(useCase.execute(command2)).rejects.toThrow(
+      'Password must be at least 8 characters long',
+    );
   });
 });

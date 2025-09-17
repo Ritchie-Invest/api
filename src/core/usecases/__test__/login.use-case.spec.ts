@@ -12,6 +12,7 @@ import { Currency } from '../../domain/type/Currency';
 import { UserType } from '../../domain/type/UserType';
 import { PortfolioPositionRepository } from '../../domain/repository/portfolio-position.repository';
 import { InMemoryPortfolioPositionRepository } from '../../../adapters/in-memory/in-memory-portfolio-position.repository';
+import { Email } from '../../domain/value-object/Email';
 
 describe('LoginUseCase', () => {
   let userRepository: UserRepository;
@@ -23,7 +24,7 @@ describe('LoginUseCase', () => {
   let mockGenerateAccessToken: jest.Mock;
   let mockGenerateRefreshToken: jest.Mock;
 
-  const DEFAULT_EMAIL = 'john.doe@example.com';
+  const DEFAULT_EMAIL = new Email('john.doe@example.com');
   const DEFAULT_PASSWORD = 'password123';
 
   beforeEach(() => {
@@ -65,7 +66,7 @@ describe('LoginUseCase', () => {
   });
 
   const createUserInRepo = async (
-    email: string,
+    email: Email,
     rawPassword: string,
   ): Promise<User> => {
     const hashedPassword: string = await bcrypt.hash(rawPassword, 10);
@@ -101,14 +102,14 @@ describe('LoginUseCase', () => {
 
     expect(mockGenerateAccessToken).toHaveBeenCalledWith({
       id: user.id,
-      email: user.email,
+      email: user.email.value(),
       type: user.type,
       portfolioId: `portfolio-${user.id}`,
     });
 
     expect(mockGenerateRefreshToken).toHaveBeenCalledWith({
       id: user.id,
-      email: user.email,
+      email: user.email.value(),
       type: user.type,
       portfolioId: `portfolio-${user.id}`,
     });
