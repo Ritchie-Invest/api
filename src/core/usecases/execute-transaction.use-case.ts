@@ -41,7 +41,6 @@ export class ExecuteTransactionUseCase
   ): Promise<ExecuteTransactionResult> {
     const { portfolioId, tickerId, type, amount } = command;
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
     const portfolio = await this.userPortfolioRepository.findById(portfolioId);
     if (!portfolio) {
