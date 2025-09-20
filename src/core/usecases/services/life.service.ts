@@ -1,6 +1,8 @@
 import { LifeRepository } from '../../domain/repository/life.repository';
 
 export class LifeService {
+  private static readonly ENABLE_LIFE_LOSS =
+    process.env.ENABLE_LIFE_LOSS === 'true' || true;
   private static readonly MAX_LIVES = process.env.MAX_LIVES
     ? parseInt(process.env.MAX_LIVES)
     : 5;
@@ -12,10 +14,16 @@ export class LifeService {
   constructor(private readonly lifeRepository: LifeRepository) {}
 
   async loseLife(userId: string): Promise<void> {
+    if (!LifeService.ENABLE_LIFE_LOSS) {
+      return;
+    }
     await this.lifeRepository.loseLife(userId);
   }
 
   async getUserLifeNumber(userId: string): Promise<number> {
+    if (!LifeService.ENABLE_LIFE_LOSS) {
+      return LifeService.MAX_LIVES;
+    }
     const until = new Date(
       Date.now() -
         LifeService.LIFE_REGENERATION_TIME_MS * LifeService.MAX_LIVES,
@@ -28,6 +36,9 @@ export class LifeService {
   }
 
   async getNextLifeIn(userId: string): Promise<number> {
+    if (!LifeService.ENABLE_LIFE_LOSS) {
+      return 0;
+    }
     const lastLostLife = await this.lifeRepository.getLastLostLife(userId);
     if (!lastLostLife) {
       return 0;
@@ -39,6 +50,9 @@ export class LifeService {
   }
 
   async isUserOutOfLives(userId: string): Promise<boolean> {
+    if (!LifeService.ENABLE_LIFE_LOSS) {
+      return false;
+    }
     const lifeNumber = await this.getUserLifeNumber(userId);
     return lifeNumber <= 0;
   }
