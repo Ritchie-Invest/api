@@ -43,20 +43,10 @@ export class GetPortfolioUseCase
       throw new InvalidUserError('Portfolio not found for this user');
     }
 
-    const today = new Date();
-
-    let portfolioPosition =
-      await this.portfolioPositionRepository.findByPortfolioIdAndDate(
+    const portfolioPosition =
+      await this.portfolioPositionRepository.findLatestByPortfolioId(
         userPortfolio.id,
-        today,
       );
-
-    if (!portfolioPosition) {
-      portfolioPosition =
-        await this.portfolioPositionRepository.findLatestByPortfolioId(
-          userPortfolio.id,
-        );
-    }
 
     const cash = portfolioPosition?.cash || 0;
     const investments =

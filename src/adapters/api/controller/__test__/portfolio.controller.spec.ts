@@ -361,5 +361,53 @@ describe('PortfolioController', () => {
       expect(result.positions).toHaveLength(10);
       expect(result.total).toBe(50);
     });
+
+    it('should return the last created position when two positions exist for the same calendar day (different times)', async () => {
+      const dateOld = new Date('2024-02-01T09:30:00Z');
+      const dateNew = new Date('2024-02-01T15:45:00Z');
+      const positionOld = new PortfolioPosition({
+        id: 'position-old',
+        portfolioId: 'portfolio-1',
+        cash: 1000,
+        investments: 2000,
+        date: dateOld,
+      });
+      const positionNew = new PortfolioPosition({
+        id: 'position-new',
+        portfolioId: 'portfolio-1',
+        cash: 1100,
+        investments: 2100,
+        date: dateNew,
+      });
+
+      const expectedResult = {
+        positions: [positionOld, positionNew],
+        total: 2,
+        variation: 100,
+        variationPercent: 5,
+        variationDirection: VariationDirection.UP,
+      };
+
+      getPortfolioPositionsUseCase.execute.mockResolvedValue(expectedResult);
+
+      const result = await controller.getPortfolioPositions(mockUser);
+
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(getPortfolioPositionsUseCase.execute).toHaveBeenCalledWith({
+        userId: mockUser.id,
+        limit: undefined,
+      });
+
+      expect(result.positions).toHaveLength(2);
+      const last = result.positions[result.positions.length - 1];
+      expect(last).toEqual(
+        expect.objectContaining({
+          id: 'position-new',
+          cash: 1100,
+          investments: 2100,
+          date: dateNew,
+        }),
+      );
+    });
   });
 });
