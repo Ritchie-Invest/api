@@ -81,6 +81,7 @@ describe('TransactionControllerIT', () => {
 
     const user = await userRepository.create({
       id: 'user-1',
+      // @ts-expect-error - test email fixture
       email: 'test@example.com',
       password: 'hashedpassword',
       type: UserType.STUDENT,
@@ -156,6 +157,7 @@ describe('TransactionControllerIT', () => {
 
     const user = await userRepository.create({
       id: 'user-1',
+      // @ts-expect-error - test email fixture
       email: 'test@example.com',
       password: 'hashedpassword',
       type: UserType.STUDENT,
@@ -206,6 +208,162 @@ describe('TransactionControllerIT', () => {
     const requestBody = {
       tickerId: 'ticker-1',
       type: TransactionType.BUY,
+      amount: 1000,
+    };
+
+    // When
+    const response = await request(app.getHttpServer())
+      .post('/transaction/execute')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(requestBody);
+
+    // Then
+    expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+  });
+
+  it('POST /transaction/execute should execute a sell transaction successfully when holdings are sufficient', async () => {
+    // Given
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const user = await userRepository.create({
+      id: 'user-1',
+      // @ts-expect-error - test email fixture
+      email: 'test@example.com',
+      password: 'hashedpassword',
+      type: UserType.STUDENT,
+    });
+
+    await userPortfolioRepository.create({
+      id: 'portfolio-1',
+      userId: user.id,
+      currency: Currency.USD,
+    });
+
+    await tickerRepository.create(
+      new Ticker({
+        id: 'ticker-1',
+        name: 'Test ETF',
+        symbol: 'TEST',
+        type: TickerType.ETF,
+        currency: Currency.USD,
+      }),
+    );
+
+    await dailyBarRepository.create({
+      id: 'dailybar-1',
+      tickerId: 'ticker-1',
+      timestamp: today,
+      open: 100,
+      high: 105,
+      low: 95,
+      close: 100,
+      volume: 1000,
+    });
+
+    await PortfolioPositionRepository.create({
+      id: 'PortfolioPosition-1',
+      portfolioId: 'portfolio-1',
+      cash: 5000,
+      investments: 0,
+      date: today,
+    });
+
+    await transactionRepository.create({
+      portfolioId: 'portfolio-1',
+      tickerId: 'ticker-1',
+      type: TransactionType.BUY,
+      amount: 2000,
+      volume: 20,
+      currentTickerPrice: 100,
+    });
+
+    const accessToken = tokenService.generateAccessToken({
+      id: 'user-1',
+      email: 'test@example.com',
+      type: UserType.STUDENT,
+      portfolioId: 'portfolio-1',
+    });
+
+    const requestBody = {
+      tickerId: 'ticker-1',
+      type: TransactionType.SELL,
+      amount: 1000,
+    };
+
+    // When
+    const response = await request(app.getHttpServer())
+      .post('/transaction/execute')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(requestBody);
+
+    // Then
+    expect(response.status).toBe(HttpStatus.CREATED);
+    expect(response.body).toEqual({
+      cash: 6000,
+      investments: 1000,
+      tickerHoldings: 1000,
+    });
+  });
+
+  it('POST /transaction/execute should return 400 for insufficient holdings when selling', async () => {
+    // Given
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const user = await userRepository.create({
+      id: 'user-1',
+      // @ts-expect-error - test email fixture
+      email: 'test@example.com',
+      password: 'hashedpassword',
+      type: UserType.STUDENT,
+    });
+
+    await userPortfolioRepository.create({
+      id: 'portfolio-1',
+      userId: user.id,
+      currency: Currency.USD,
+    });
+
+    await tickerRepository.create(
+      new Ticker({
+        id: 'ticker-1',
+        name: 'Test ETF',
+        symbol: 'TEST',
+        type: TickerType.ETF,
+        currency: Currency.USD,
+      }),
+    );
+
+    await dailyBarRepository.create({
+      id: 'dailybar-1',
+      tickerId: 'ticker-1',
+      timestamp: today,
+      open: 100,
+      high: 105,
+      low: 95,
+      close: 100,
+      volume: 1000,
+    });
+
+    await PortfolioPositionRepository.create({
+      id: 'PortfolioPosition-1',
+      portfolioId: 'portfolio-1',
+      cash: 5000,
+      investments: 0,
+      date: today,
+    });
+
+    const accessToken = tokenService.generateAccessToken({
+      id: 'user-1',
+      email: 'test@example.com',
+      type: UserType.STUDENT,
+      portfolioId: 'portfolio-1',
+    });
+
+    const requestBody = {
+      tickerId: 'ticker-1',
+      type: TransactionType.SELL,
       amount: 1000,
     };
 
