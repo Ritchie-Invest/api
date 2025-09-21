@@ -62,20 +62,29 @@ describe('GetPortfolioUseCase', () => {
       const userPortfolio = new UserPortfolio({
         id: DEFAULT_PORTFOLIO_ID,
         userId: DEFAULT_USER_ID,
-        currency: Currency.USD,
+        currency: Currency.EUR,
       });
       userPortfolioRepository.create(userPortfolio);
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const portfolioPosition = new PortfolioPosition({
+
+      const olderPosition = new PortfolioPosition({
         id: 'value-1',
+        portfolioId: DEFAULT_PORTFOLIO_ID,
+        cash: 500,
+        investments: 1500,
+        date: today,
+      });
+      const latestPosition = new PortfolioPosition({
+        id: 'value-2',
         portfolioId: DEFAULT_PORTFOLIO_ID,
         cash: 1000,
         investments: 2000,
         date: today,
       });
-      PortfolioPositionRepository.create(portfolioPosition);
+      PortfolioPositionRepository.create(olderPosition);
+      PortfolioPositionRepository.create(latestPosition);
 
       dailyBarRepository.create({
         id: 'db-1',
@@ -105,7 +114,7 @@ describe('GetPortfolioUseCase', () => {
 
       // Then
       expect(result).toEqual({
-        currency: Currency.USD,
+        currency: Currency.EUR,
         cash: 1000,
         investments: 2000,
         totalValue: 3000,
@@ -261,7 +270,7 @@ describe('GetPortfolioUseCase', () => {
       const userPortfolio = new UserPortfolio({
         id: DEFAULT_PORTFOLIO_ID,
         userId: DEFAULT_USER_ID,
-        currency: Currency.USD,
+        currency: Currency.EUR,
       });
       userPortfolioRepository.create(userPortfolio);
 
@@ -281,7 +290,7 @@ describe('GetPortfolioUseCase', () => {
 
       // Then
       expect(result).toEqual({
-        currency: Currency.USD,
+        currency: Currency.EUR,
         cash: 0,
         investments: 0,
         totalValue: 0,
@@ -352,20 +361,13 @@ describe('GetPortfolioUseCase', () => {
       // When
       const result = await getPortfolioUseCase.execute(command);
 
-      expect([
-        {
-          currency: Currency.EUR,
-          cash: 100,
-          investments: 200,
-          totalValue: 300,
-        },
-        {
-          currency: Currency.EUR,
-          cash: 300,
-          investments: 400,
-          totalValue: 700,
-        },
-      ]).toContainEqual(result);
+      // The last-created position for the same day should be used (PortfolioPosition2)
+      expect(result).toEqual({
+        currency: Currency.EUR,
+        cash: 300,
+        investments: 400,
+        totalValue: 700,
+      });
     });
 
     it('should return portfolio with correct currency even if values are missing', async () => {
@@ -394,7 +396,7 @@ describe('GetPortfolioUseCase', () => {
       const userPortfolio = new UserPortfolio({
         id: DEFAULT_PORTFOLIO_ID,
         userId: DEFAULT_USER_ID,
-        currency: Currency.USD,
+        currency: Currency.EUR,
       });
       userPortfolioRepository.create(userPortfolio);
 
@@ -437,7 +439,7 @@ describe('GetPortfolioUseCase', () => {
 
       // Then
       expect(result).toEqual({
-        currency: Currency.USD,
+        currency: Currency.EUR,
         cash: -500,
         investments: 1000,
         totalValue: 500,

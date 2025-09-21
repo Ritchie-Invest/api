@@ -34,23 +34,6 @@ export class PrismaPortfolioPositionRepository
     return this.mapper.toDomain(entity);
   }
 
-  async findByPortfolioIdAndDate(
-    portfolioId: string,
-    date: Date,
-  ): Promise<PortfolioPosition | null> {
-    const entity = await this.prisma.portfolioPosition.findFirst({
-      where: {
-        portfolioId,
-        date: {
-          gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-          lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1),
-        },
-      },
-    });
-    if (!entity) return null;
-    return this.mapper.toDomain(entity);
-  }
-
   async findLatestByPortfolioId(
     portfolioId: string,
   ): Promise<PortfolioPosition | null> {
