@@ -32,7 +32,7 @@ export class ExecuteTransactionUseCase
     private readonly userPortfolioRepository: UserPortfolioRepository,
     private readonly tickerRepository: TickerRepository,
     private readonly dailyBarRepository: DailyBarRepository,
-    private readonly PortfolioPositionRepository: PortfolioPositionRepository,
+    private readonly portfolioPositionRepository: PortfolioPositionRepository,
     private readonly transactionRepository: TransactionRepository,
   ) {}
 
@@ -53,14 +53,11 @@ export class ExecuteTransactionUseCase
       throw new TickerNotFoundError(`Ticker with id ${tickerId} not found`);
     }
 
-    const sharePrice = await ExecuteTransactionUseCase.findSharePrice(
-      this.dailyBarRepository,
-      tickerId,
-    );
+    const sharePrice = await this.findSharePrice(tickerId);
 
     const sharesToTrade = amount / sharePrice;
     const lastPosition =
-      await this.PortfolioPositionRepository.findLatestByPortfolioId(
+      await this.portfolioPositionRepository.findLatestByPortfolioId(
         portfolioId,
       );
     if (!lastPosition) {
@@ -69,31 +66,26 @@ export class ExecuteTransactionUseCase
       );
     }
 
-    const result =
-      await ExecuteTransactionUseCase.executeTransactionAndSavePosition(
-        this.transactionRepository,
-        this.dailyBarRepository,
-        this.PortfolioPositionRepository,
-        portfolioId,
-        tickerId,
-        type,
-        amount,
-        sharesToTrade,
-        sharePrice,
-        lastPosition,
-        ticker,
-      );
+    const result = await this.executeTransactionAndSavePosition(
+      portfolioId,
+      tickerId,
+      type,
+      amount,
+      sharesToTrade,
+      sharePrice,
+      lastPosition,
+      ticker,
+    );
     return result;
   }
 
-  private static async calculateCurrentHoldings(
-    transactionRepository: TransactionRepository,
+  private async calculateCurrentHoldings(
     portfolioId: string,
     tickerId: string,
     price: number,
   ): Promise<number> {
     const transactions =
-      await transactionRepository.findByPortfolioIdAndTickerId(
+      await this.transactionRepository.findByPortfolioIdAndTickerId(
         portfolioId,
         tickerId,
       );
@@ -110,13 +102,9 @@ export class ExecuteTransactionUseCase
     return totalShares * price;
   }
 
-  private static async calculateInvestments(
-    transactionRepository: TransactionRepository,
-    dailyBarRepository: DailyBarRepository,
-    portfolioId: string,
-  ): Promise<number> {
+  private async calculateInvestments(portfolioId: string): Promise<number> {
     const transactions =
-      await transactionRepository.findByPortfolioId(portfolioId);
+      await this.transactionRepository.findByPortfolioId(portfolioId);
 
     if (!transactions || transactions.length === 0) {
       return 0;
@@ -134,21 +122,15 @@ export class ExecuteTransactionUseCase
       const volume = volumesByTicker[tickerId] ?? 0;
       if (!volume) continue;
 
-      const price = await ExecuteTransactionUseCase.findSharePrice(
-        dailyBarRepository,
-        tickerId,
-      );
+      const price = await this.findSharePrice(tickerId);
       total += volume * price;
     }
 
     return total;
   }
 
-  private static async findSharePrice(
-    dailyBarRepository: DailyBarRepository,
-    tickerId: string,
-  ): Promise<number> {
-    const dailyBar = await dailyBarRepository.findByTickerIdAndDate(
+  private async findSharePrice(tickerId: string): Promise<number> {
+    const dailyBar = await this.dailyBarRepository.findByTickerIdAndDate(
       tickerId,
       new Date(),
     );
@@ -158,7 +140,7 @@ export class ExecuteTransactionUseCase
     }
 
     const latestDailyBar =
-      await dailyBarRepository.findLatestByTickerId(tickerId);
+      await this.dailyBarRepository.findLatestByTickerId(tickerId);
     if (!latestDailyBar) {
       throw new DailyBarNotFoundError(
         `No daily bar found for ticker ${tickerId}`,
@@ -167,10 +149,7 @@ export class ExecuteTransactionUseCase
     return latestDailyBar.close;
   }
 
-  private static async executeTransactionAndSavePosition(
-    transactionRepository: TransactionRepository,
-    dailyBarRepository: DailyBarRepository,
-    portfolioPositionRepository: PortfolioPositionRepository,
+  private async executeTransactionAndSavePosition(
     portfolioId: string,
     tickerId: string,
     type: TransactionType,
@@ -188,13 +167,11 @@ export class ExecuteTransactionUseCase
       }
     }
 
-    const currentHoldings =
-      await ExecuteTransactionUseCase.calculateCurrentHoldings(
-        transactionRepository,
-        portfolioId,
-        tickerId,
-        sharePrice,
-      );
+    const currentHoldings = await this.calculateCurrentHoldings(
+      portfolioId,
+      tickerId,
+      sharePrice,
+    );
 
     if (type === TransactionType.SELL) {
       if (currentHoldings < amount) {
@@ -204,7 +181,7 @@ export class ExecuteTransactionUseCase
       }
     }
 
-    await transactionRepository.create({
+    await this.transactionRepository.create({
       portfolioId,
       tickerId,
       type,
@@ -213,18 +190,14 @@ export class ExecuteTransactionUseCase
       currentTickerPrice: sharePrice,
     });
 
-    const newInvestments = await ExecuteTransactionUseCase.calculateInvestments(
-      transactionRepository,
-      dailyBarRepository,
-      portfolioId,
-    );
+    const newInvestments = await this.calculateInvestments(portfolioId);
 
     const newCash =
       type === TransactionType.BUY
         ? lastPosition.cash - amount
         : lastPosition.cash + amount;
 
-    const newPosition = await portfolioPositionRepository.create({
+    const newPosition = await this.portfolioPositionRepository.create({
       portfolioId,
       date: new Date(),
       cash: newCash,
@@ -236,13 +209,11 @@ export class ExecuteTransactionUseCase
       investments: number;
     };
 
-    const newTickerHoldings =
-      await ExecuteTransactionUseCase.calculateCurrentHoldings(
-        transactionRepository,
-        portfolioId,
-        tickerId,
-        sharePrice,
-      );
+    const newTickerHoldings = await this.calculateCurrentHoldings(
+      portfolioId,
+      tickerId,
+      sharePrice,
+    );
 
     return {
       cash: NewPositionValues.cash,
