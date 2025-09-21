@@ -69,19 +69,20 @@ export class ExecuteTransactionUseCase
       );
     }
 
-    const result = await ExecuteTransactionUseCase.executeTransactionAndSavePosition(
-      this.transactionRepository,
-      this.dailyBarRepository,
-      this.PortfolioPositionRepository,
-      portfolioId,
-      tickerId,
-      type,
-      amount,
-      sharesToTrade,
-      sharePrice,
-      lastPosition,
-      ticker,
-    );
+    const result =
+      await ExecuteTransactionUseCase.executeTransactionAndSavePosition(
+        this.transactionRepository,
+        this.dailyBarRepository,
+        this.PortfolioPositionRepository,
+        portfolioId,
+        tickerId,
+        type,
+        amount,
+        sharesToTrade,
+        sharePrice,
+        lastPosition,
+        ticker,
+      );
     return result;
   }
 
@@ -156,9 +157,8 @@ export class ExecuteTransactionUseCase
       return dailyBar.close;
     }
 
-    const latestDailyBar = await dailyBarRepository.findLatestByTickerId(
-      tickerId,
-    );
+    const latestDailyBar =
+      await dailyBarRepository.findLatestByTickerId(tickerId);
     if (!latestDailyBar) {
       throw new DailyBarNotFoundError(
         `No daily bar found for ticker ${tickerId}`,
@@ -177,10 +177,9 @@ export class ExecuteTransactionUseCase
     amount: number,
     sharesToTrade: number,
     sharePrice: number,
-    lastPosition: any,
-    ticker: any,
+    lastPosition: { cash: number },
+    ticker: { symbol: string },
   ): Promise<ExecuteTransactionResult> {
-    
     if (type === TransactionType.BUY) {
       if (lastPosition.cash < amount) {
         throw new InsufficientCashError(
@@ -189,12 +188,13 @@ export class ExecuteTransactionUseCase
       }
     }
 
-    const currentHoldings = await ExecuteTransactionUseCase.calculateCurrentHoldings(
-      transactionRepository,
-      portfolioId,
-      tickerId,
-      sharePrice,
-    );
+    const currentHoldings =
+      await ExecuteTransactionUseCase.calculateCurrentHoldings(
+        transactionRepository,
+        portfolioId,
+        tickerId,
+        sharePrice,
+      );
 
     if (type === TransactionType.SELL) {
       if (currentHoldings < amount) {
@@ -219,7 +219,10 @@ export class ExecuteTransactionUseCase
       portfolioId,
     );
 
-    const newCash = type === TransactionType.BUY ? lastPosition.cash - amount : lastPosition.cash + amount;
+    const newCash =
+      type === TransactionType.BUY
+        ? lastPosition.cash - amount
+        : lastPosition.cash + amount;
 
     const newPosition = await portfolioPositionRepository.create({
       portfolioId,
@@ -228,16 +231,22 @@ export class ExecuteTransactionUseCase
       investments: newInvestments,
     });
 
-    const newTickerHoldings = await ExecuteTransactionUseCase.calculateCurrentHoldings(
-      transactionRepository,
-      portfolioId,
-      tickerId,
-      sharePrice,
-    );
-    
+    const NewPositionValues = newPosition as {
+      cash: number;
+      investments: number;
+    };
+
+    const newTickerHoldings =
+      await ExecuteTransactionUseCase.calculateCurrentHoldings(
+        transactionRepository,
+        portfolioId,
+        tickerId,
+        sharePrice,
+      );
+
     return {
-      cash: newPosition.cash,
-      investments: newPosition.investments,
+      cash: NewPositionValues.cash,
+      investments: NewPositionValues.investments,
       tickerHoldings: newTickerHoldings,
     };
   }
