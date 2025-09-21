@@ -24,26 +24,11 @@ export class InMemoryPortfolioPositionRepository
     return this.portfolioPositions.get(id) || null;
   }
 
-  findByPortfolioIdAndDate(
-    portfolioId: string,
-    date: Date,
-  ): PortfolioPosition | null {
-    for (const portfolioPosition of this.portfolioPositions.values()) {
-      if (
-        portfolioPosition.portfolioId === portfolioId &&
-        portfolioPosition.date.getTime() === date.getTime()
-      ) {
-        return portfolioPosition;
-      }
-    }
-    return null;
-  }
-
   findLatestByPortfolioId(portfolioId: string): PortfolioPosition | null {
     let latest: PortfolioPosition | null = null;
     for (const portfolioPosition of this.portfolioPositions.values()) {
       if (portfolioPosition.portfolioId === portfolioId) {
-        if (!latest || portfolioPosition.date > latest.date) {
+        if (!latest || portfolioPosition.date >= latest.date) {
           latest = portfolioPosition;
         }
       }
@@ -57,7 +42,7 @@ export class InMemoryPortfolioPositionRepository
   ): PortfolioPosition[] {
     let result = Array.from(this.portfolioPositions.values())
       .filter((position) => position.portfolioId === portfolioId)
-      .sort((a, b) => b.date.getTime() - a.date.getTime()); // Tri par date descendante
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
 
     if (limit) {
       result = result.slice(0, limit);
