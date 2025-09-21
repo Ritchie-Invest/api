@@ -363,7 +363,6 @@ describe('PortfolioController', () => {
     });
 
     it('should return the last created position when two positions exist for the same calendar day (different times)', async () => {
-      // two positions on the same calendar day but with different times
       const dateOld = new Date('2024-02-01T09:30:00Z');
       const dateNew = new Date('2024-02-01T15:45:00Z');
       const positionOld = new PortfolioPosition({
