@@ -12,13 +12,9 @@ export type CheckAndAwardBadgesCommand = {
   totalModules: number;
 };
 
-export type AwardedBadge = {
-  type: BadgeType;
-};
-
 @Injectable()
 export class CheckAndAwardBadgesUseCase
-  implements UseCase<CheckAndAwardBadgesCommand, AwardedBadge[]>
+  implements UseCase<CheckAndAwardBadgesCommand, void>
 {
   constructor(
     private readonly userBadgeRepository: UserBadgeRepository,
@@ -65,10 +61,8 @@ export class CheckAndAwardBadgesUseCase
     );
   }
 
-  async execute(command: CheckAndAwardBadgesCommand): Promise<AwardedBadge[]> {
+  async execute(command: CheckAndAwardBadgesCommand): Promise<void> {
     const { userId, lessonId, completedModules, totalModules } = command;
-
-    const newlyAwarded: AwardedBadge[] = [];
 
     if (this.isPerfectQuiz(completedModules, totalModules)) {
       if (
@@ -77,11 +71,10 @@ export class CheckAndAwardBadgesUseCase
           BadgeType.LEARN_PERFECT_QUIZ,
         ))
       ) {
-        const b = await this.userBadgeRepository.award(
+        await this.userBadgeRepository.award(
           userId,
           BadgeType.LEARN_PERFECT_QUIZ,
         );
-        newlyAwarded.push({ type: b.type });
       }
     }
 
@@ -92,11 +85,7 @@ export class CheckAndAwardBadgesUseCase
           BadgeType.PROG_5_LESSONS,
         ))
       ) {
-        const b = await this.userBadgeRepository.award(
-          userId,
-          BadgeType.PROG_5_LESSONS,
-        );
-        newlyAwarded.push({ type: b.type });
+        await this.userBadgeRepository.award(userId, BadgeType.PROG_5_LESSONS);
       }
     }
 
@@ -107,11 +96,10 @@ export class CheckAndAwardBadgesUseCase
           BadgeType.PROG_FIRST_CHAPTER,
         ))
       ) {
-        const b = await this.userBadgeRepository.award(
+        await this.userBadgeRepository.award(
           userId,
           BadgeType.PROG_FIRST_CHAPTER,
         );
-        newlyAwarded.push({ type: b.type });
       }
     }
 
@@ -122,14 +110,8 @@ export class CheckAndAwardBadgesUseCase
           BadgeType.PROG_50_PERCENT,
         ))
       ) {
-        const b = await this.userBadgeRepository.award(
-          userId,
-          BadgeType.PROG_50_PERCENT,
-        );
-        newlyAwarded.push({ type: b.type });
+        await this.userBadgeRepository.award(userId, BadgeType.PROG_50_PERCENT);
       }
     }
-
-    return newlyAwarded;
   }
 }

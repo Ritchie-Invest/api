@@ -63,7 +63,7 @@ describe('CheckAndAwardBadgesUseCase', () => {
     );
 
     // When
-    const result = await useCase.execute({
+    await useCase.execute({
       userId,
       lessonId: 'lesson-1',
       completedModules: 3,
@@ -71,7 +71,8 @@ describe('CheckAndAwardBadgesUseCase', () => {
     });
 
     // Then
-    expect(result.map((b) => b.type)).toContain(BadgeType.LEARN_PERFECT_QUIZ);
+    const badges = await userBadgeRepo.findAllByUser(userId);
+    expect(badges.map((b) => b.type)).toContain(BadgeType.LEARN_PERFECT_QUIZ);
   });
 
   it('awards PROG_5_LESSONS after 5 lessons completed', async () => {
@@ -99,7 +100,7 @@ describe('CheckAndAwardBadgesUseCase', () => {
     }
 
     // When
-    const result = await useCase.execute({
+    await useCase.execute({
       userId,
       lessonId: 'lesson-5',
       completedModules: 1,
@@ -107,6 +108,7 @@ describe('CheckAndAwardBadgesUseCase', () => {
     });
 
     // Then
-    expect(result.map((b) => b.type)).toContain(BadgeType.PROG_5_LESSONS);
+    const badges = await userBadgeRepo.findAllByUser(userId);
+    expect(badges.map((b) => b.type)).toContain(BadgeType.PROG_5_LESSONS);
   });
 });
