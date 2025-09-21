@@ -18,6 +18,7 @@ import { TransactionRepository } from '../../../../core/domain/repository/transa
 import { Currency } from '../../../../core/domain/type/Currency';
 import { Ticker } from '../../../../core/domain/model/Ticker';
 import { TickerType } from '../../../../core/domain/type/TickerType';
+import { Email } from '../../../../core/domain/value-object/Email';
 
 describe('TransactionControllerIT', () => {
   let app: INestApplication<App>;
@@ -81,8 +82,7 @@ describe('TransactionControllerIT', () => {
 
     const user = await userRepository.create({
       id: 'user-1',
-      // @ts-expect-error - test email fixture
-      email: 'test@example.com',
+      email: new Email('test@example.com'),
       password: 'hashedpassword',
       type: UserType.STUDENT,
     });
@@ -157,8 +157,7 @@ describe('TransactionControllerIT', () => {
 
     const user = await userRepository.create({
       id: 'user-1',
-      // @ts-expect-error - test email fixture
-      email: 'test@example.com',
+      email: new Email('test@example.com'),
       password: 'hashedpassword',
       type: UserType.STUDENT,
     });
@@ -228,8 +227,7 @@ describe('TransactionControllerIT', () => {
 
     const user = await userRepository.create({
       id: 'user-1',
-      // @ts-expect-error - test email fixture
-      email: 'test@example.com',
+      email: new Email('test@example.com'),
       password: 'hashedpassword',
       type: UserType.STUDENT,
     });
@@ -313,8 +311,7 @@ describe('TransactionControllerIT', () => {
 
     const user = await userRepository.create({
       id: 'user-1',
-      // @ts-expect-error - test email fixture
-      email: 'test@example.com',
+      email: new Email('test@example.com'),
       password: 'hashedpassword',
       type: UserType.STUDENT,
     });
